@@ -1,0 +1,6 @@
+.DS_Store
+shallowthought-env/
+*.pyc
+.sass-cache/
+node_modules/
+fontcustom/*
