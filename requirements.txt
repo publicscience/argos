@@ -3,6 +3,7 @@ Jinja2==2.7
 MarkupSafe==0.18
 Werkzeug==0.9.1
 chardet==2.1.1
+feedparser==5.1.3
 itsdangerous==0.22
 lxml==3.2.1
 readability-lxml==0.2.6.1
