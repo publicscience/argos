@@ -10,16 +10,16 @@ Can resume downloads if the server supports it
 '''
 
 import urllib2
-import math
 import os
 
 CHUNK = 16 * 1024
 
-url = 'http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-stub-articles5.xml.gz'
-filename = url.split('/').pop()
-file = '/Users/ftseng/Desktop/%s' % (filename)
+def download(url, save_path):
+    # Strip trailing slash, if there is one.
+    save_path = save_path.rstrip('\/')
+    filename = url.split('/').pop()
+    file = '%s/%s' % (save_path, filename)
 
-def main():
     existing_size = 0
 
     # If file already exists...
@@ -61,7 +61,7 @@ def main():
         # And we have to start all over again.
         if existing_size > 0 and not resp.info().getheader('Accept-Ranges'):
             print 'Server does not allow resuming of downloads.'
-            print 'We have to start from the beginning...'
+            print 'Starting from the beginning! :D'
             outfile = open(file, 'wb')
 
         # Pull out the chunks!
@@ -70,13 +70,22 @@ def main():
             outfile.write(chunk)
 
             # Show progress.
-            downloaded_size += len(chunk)
-            print (downloaded_size/total_size) * 100
+            # downloaded_size += len(chunk)
+            # print (downloaded_size/total_size) * 100
 
     except urllib2.HTTPError, e:
         print 'HTTP Error:', e.code, url
     except urllib2.URLError, e:
         print 'URL Error:', e.reason, url
+
+def main():
+    import sys
+    if len(sys.argv) < 2:
+        sys.exit('Please pass a URL to download from.')
+    url = sys.argv[1]
+    save_path = os.getcwd()
+    download(url, save_path)
+    return 0
 
 if __name__ == '__main__':
     main()
