@@ -51,6 +51,10 @@ class Digester:
             | tag (str)                 -- the tag/element to operate on
             | process_element (func)    -- function to call on each element
 
+        If you need to process multiple tags, it's suggested that you specify
+        a parent tag, and then `find` the other tags in your `process_element`
+        function (see example below).
+
         Example `process_element`::
 
             def process_element(elem):

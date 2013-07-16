@@ -101,6 +101,10 @@
 <span class="sd">            | tag (str)                 -- the tag/element to operate on</span>
 <span class="sd">            | process_element (func)    -- function to call on each element</span>
 
+<span class="sd">        If you need to process multiple tags, it&#39;s suggested that you specify</span>
+<span class="sd">        a parent tag, and then `find` the other tags in your `process_element`</span>
+<span class="sd">        function (see example below).</span>
+
 <span class="sd">        Example `process_element`::</span>
 
 <span class="sd">            def process_element(elem):</span>
