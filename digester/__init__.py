@@ -16,15 +16,23 @@ DATA_PATH = '../data/wiki/'
 def main():
     #gullet.download(DUMP_URL,DATA_PATH)
 
-    # Credit: Liza Daly (http://ibm.co/17rvZ)
     namespace = '{http://www.mediawiki.org/xml/export-0.8/}'
     infile = '%swiki.xml' % DATA_PATH
-
-    # Create element context for a specified tag.
     context = etree.iterparse(infile, events=('end',), tag='%spage' % namespace)
+    iterate(context, process_element)
 
+
+    return 0
+
+def process_element(elem):
+    namespace = '{http://www.mediawiki.org/xml/export-0.8/}'
+    print elem.find('%stitle' % namespace).text.encode('utf-8')
+
+def iterate(context, process_element):
+    # Credit: Liza Daly (http://ibm.co/17rvZ)
+    # Create element context for a specified tag.
     for event, elem in context:
-        print elem.find('%stitle' % namespace).text.encode('utf-8')
+        process_element(elem)
 
         # Clear the elem, since we're done with it
         elem.clear()
@@ -36,8 +44,6 @@ def main():
 
     # Clean up the context
     del context
-
-    return 0
 
 if __name__ == '__main__':
     main()
