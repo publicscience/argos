@@ -1,70 +1,61 @@
-#!../shallowthought-env/bin/python
-
 """
 Digester
 ==============
 
-Processes Wikipedia (XML) dumps.
+Processes XML dumps.
 """
 
 from lxml import etree
 from adipose import Adipose
 import gullet
 
-DUMP_URL = 'http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-stub-articles10.xml.gz'
-DATA_PATH = '../data/wiki/'
-NAMESPACE = '{http://www.mediawiki.org/xml/export-0.8/}'
-
-
-def main():
-    #gullet.download(DUMP_URL,DATA_PATH)
-
-    infile = '%swiki.xml' % DATA_PATH
-    # Create element context for a specified tag.
-    context = etree.iterparse(infile, events=('end',), tag='%spage' % NAMESPACE)
-    iterate(context, process_element)
-    return 0
-
 class Digester:
     """
-    Processes ("digests") Wikipedia XML dumps.
+    Processes ("digests") XML dumps.
+    A Digester works with a single XML file.
+
+    Example::
+
+        # Digest the 'page' elements in wiki.xml.
+        # Assume we have defined some func 'process_element()'
+        d = Digester('../data/wiki/wiki.xml', 'http://www.mediawiki.org/xml/export-0.8/')
+        d.iterate('page', process_element)
     """
 
-    def __init__(self, data, namespace):
+    def __init__(self, file, namespace):
         """
-        Initialize the Digester with a namespace.
-        """
-
-
-    def process_element(elem):
-        print elem.find('%stitle' % NAMESPACE).text.encode('utf-8')
-
-    def create_context(infile, tag):
-        """
-        Creates an iterparse context for a tag.
+        Initialize the Digester with a file and a namespace.
 
         Args:
-            | infile (str)  -- path to the XML file to read.
-            | tag (str)     -- the tag name to search for.
+            | file (str)        -- path to XML file to digest.
+            | namespace (str)   -- namespace of the file.
         """
-        return etree.iterparse(infile, events=('end',), tag='%s%s' % (NAMESPACE, tag))
+        self.file = file
+        self.namespace = '{%s}' % namespace
 
-    def iterate(context, process_element):
+    def download(url):
         """
-        Iterates over an XML context. (http://ibm.co/17rvZ)
+        Downloads a file from the specified URL to replace
+        this Digester's current file.
 
         Args:
-            | context (obj)             -- the lxml iterparse object to iterate over
+            | url (str) -- the url to download.
+        """
+        gullet.download(file, self.file)
+
+    def iterate(tag, process_element):
+        """
+        Iterates over an XML context for a specific tag. (http://ibm.co/17rvZ)
+
+        Args:
+            | tag (str)                 -- the tag/element to operate on
             | process_element (func)    -- function to call on each element
-
-        Example::
-
-            # assuming we have defined a func 'process_element()'
-            infile = '/path/to/some/file'
-            context = create_context(infile, 'page')
-            iterate(context, process_element)
         """
 
+        # Create the iterparse context
+        context = etree.iterparse(self.file, events=('end',), tag='%s%s' % (self.namespace, tag))
+
+        # Iterate
         for event, elem in context:
             process_element(elem)
 
@@ -78,6 +69,3 @@ class Digester:
 
         # Clean up the context
         del context
-
-if __name__ == '__main__':
-    main()
