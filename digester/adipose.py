@@ -86,8 +86,8 @@ class Adipose:
         """
         return self.collection.find_one(query)
 
-    """
-        Note: will want to keep track of metadata too, such as
-        when the database was last updated.
-    """
-
+    def empty(self):
+        """
+        Empties the database collection/table.
+        """
+        self.collection.remove()

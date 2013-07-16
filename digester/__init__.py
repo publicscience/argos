@@ -62,6 +62,7 @@ class Digester:
 
         # Iterate
         for event, elem in context:
+            # Run process_element on the element.
             process_element(elem)
 
             # Clear the elem, since we're done with it
