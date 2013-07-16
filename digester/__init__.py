@@ -17,7 +17,7 @@ class Digester:
     Example::
 
         # Digest the 'page' elements in wiki.xml.
-        # Assume we have defined some func 'process_element()'
+        # Assume we have defined some func 'process_element(elem)'
         d = Digester('../data/wiki/wiki.xml', 'http://www.mediawiki.org/xml/export-0.8/')
         d.iterate('page', process_element)
     """
@@ -33,7 +33,7 @@ class Digester:
         self.file = file
         self.namespace = '{%s}' % namespace
 
-    def download(url):
+    def download(self, url):
         """
         Downloads a file from the specified URL to replace
         this Digester's current file.
@@ -43,13 +43,18 @@ class Digester:
         """
         gullet.download(file, self.file)
 
-    def iterate(tag, process_element):
+    def iterate(self, tag, process_element):
         """
         Iterates over an XML context for a specific tag. (http://ibm.co/17rvZ)
 
         Args:
             | tag (str)                 -- the tag/element to operate on
             | process_element (func)    -- function to call on each element
+
+        Example `process_element`::
+
+            def process_element(elem):
+                print elem.find('{%s}title' % namespace).text.encode('utf-8')
         """
 
         # Create the iterparse context
