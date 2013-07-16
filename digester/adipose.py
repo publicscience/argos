@@ -66,7 +66,7 @@ class Adipose:
 
     def index(self, key):
         """
-        Indexes the data by title.
+        Indexes the data by the specified key.
 
         Args:
             | key (str) -- key to index on
@@ -82,7 +82,7 @@ class Adipose:
             | query (dict) -- the query to be searched.
 
         Returns:
-            | Result
+            | dict -- the result of the query.
         """
         return self.collection.find_one(query)
 
@@ -91,3 +91,13 @@ class Adipose:
         Empties the database collection/table.
         """
         self.collection.remove()
+
+    def count(self):
+        """
+        Returns number of docs/records in collection/table.
+
+        Returns:
+            | int -- number of docs/records in the collection/table.
+        """
+        return self.collection.count()
+
