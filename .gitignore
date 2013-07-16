@@ -5,3 +5,4 @@ shallowthought-env/
 node_modules/
 fontcustom/*
 data/
+mongo/
