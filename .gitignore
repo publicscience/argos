@@ -4,3 +4,4 @@ shallowthought-env/
 .sass-cache/
 node_modules/
 fontcustom/*
+data/
