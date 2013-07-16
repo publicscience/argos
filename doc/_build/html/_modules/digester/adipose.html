@@ -117,7 +117,7 @@
 </div>
 <div class="viewcode-block" id="Adipose.index"><a class="viewcode-back" href="../../code.html#digester.adipose.Adipose.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Indexes the data by title.</span>
+<span class="sd">        Indexes the data by the specified key.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            | key (str) -- key to index on</span>
@@ -133,15 +133,25 @@
 <span class="sd">            | query (dict) -- the query to be searched.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            | Result</span>
+<span class="sd">            | dict -- the result of the query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 </div>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Note: will want to keep track of metadata too, such as</span>
-<span class="sd">        when the database was last updated.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-</pre></div></div>
+<div class="viewcode-block" id="Adipose.empty"><a class="viewcode-back" href="../../code.html#digester.adipose.Adipose.empty">[docs]</a>    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Empties the database collection/table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Adipose.count"><a class="viewcode-back" href="../../code.html#digester.adipose.Adipose.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns number of docs/records in collection/table.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            | int -- number of docs/records in the collection/table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</pre></div></div></div>
 
           </div>
         </div>
