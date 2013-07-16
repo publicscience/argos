@@ -13,23 +13,18 @@ import gullet
 DUMP_URL = 'http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-stub-articles10.xml.gz'
 DATA_PATH = '../data/wiki/'
 
-
-
-
-
 def main():
     #gullet.download(DUMP_URL,DATA_PATH)
 
+    # Credit: Liza Daly (http://ibm.co/17rvZ)
     namespace = '{http://www.mediawiki.org/xml/export-0.8/}'
-    infile = '../data/wiki/wiki.xml'
+    infile = '%swiki.xml' % DATA_PATH
 
     # Create element context for a specified tag.
     context = etree.iterparse(infile, events=('end',), tag='%spage' % namespace)
-    out = open('titles.txt', 'w')
 
     for event, elem in context:
-        print elem.find('{0}title'.format(namespace))
-        #out.write('%s\n' % elem.text.encode('utf-8'))
+        print elem.find('%stitle' % namespace).text.encode('utf-8')
 
         # Clear the elem, since we're done with it
         elem.clear()
@@ -42,7 +37,6 @@ def main():
     # Clean up the context
     del context
 
-    out.close()
     return 0
 
 if __name__ == '__main__':
