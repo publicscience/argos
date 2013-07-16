@@ -1,19 +1,32 @@
-'''
+"""
 Adipose
 ==============
 
-Stores data to db.
+Provides an interface to a database.
 Uses MongoDB, but can be modified.
-'''
+"""
 
 import pymongo
 
 class Adipose:
+    """
+    Provides an interface to a database (MongoDB).
+    """
     def __init__(self, database, collection, host='localhost', port=27017):
-        '''
-        Example:
+        """
+        Create a new interface.
+
+        Args:
+            | database (str)    -- The name of the database to connect to.
+            | collection (str)  -- The name of the collection or table to use.
+            | host (str)        -- The database host.
+            | port (int)        -- The port number of the host.
+
+        Example::
+
             adipose = Adipose('wikipedia', 'vectors')
-        '''
+        """
+
         # Connect to Mongo
         self.client = pymongo.MongoClient(host, port)
 
@@ -24,44 +37,57 @@ class Adipose:
         self.collection = self.db[collection]
 
     def add(self, data):
-        '''
+        """
         Add data to the db.
-        data (dict) -- the data to be saved.
-        data (list) -- list of dicts to be saved.
 
-        Example:
+        Args:
+            | data (dict) -- the data to be saved.
+            | data (list) -- list of dicts to be saved.
+
+        Example::
+
             adipose.add({'title': 'foo', 'category': 'fum'})
-        '''
+        """
         self.collection.insert(data)
 
     def update(self, query, data):
-        '''
+        """
         Updates or creates a new record.
-        query (dict) -- query to locate record to update
-        data (dict)  -- updated data
 
-        Example:
+        Args:
+            | query (dict) -- query to locate record to update.
+            | data (dict)  -- updated data.
+
+        Example::
+
             adipose.update({'title': 'foo'}, {'category': 'bar'})
-        '''
+        """
         self.collection.update(query, data, upsert=True)
 
     def index(self, key):
-        '''
+        """
         Indexes the data by title.
-        key (str) -- key to index on
-        '''
+
+        Args:
+            | key (str) -- key to index on
+        """
         self.collection.ensure_index('title', unique=True)
 
     def find(self, query):
-        '''
+        """
         Searches db for a record matching
         the query.
-        query (dict) -- the query to be searched.
-        '''
+
+        Args:
+            | query (dict) -- the query to be searched.
+
+        Returns:
+            | Result
+        """
         return self.collection.find_one(query)
 
-    '''
+    """
         Note: will want to keep track of metadata too, such as
         when the database was last updated.
-    '''
+    """
 

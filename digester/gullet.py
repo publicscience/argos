@@ -1,13 +1,13 @@
 #!../shallowthought-env/bin/python
 
-'''
+"""
 Gullet
 ==============
 
 An HTTP downloader.
 Can resume downloads if the server supports it
 (that is, it responds with an Accepts-Range header).
-'''
+"""
 
 import urllib2
 import os
@@ -15,6 +15,16 @@ import os
 CHUNK = 16 * 1024
 
 def download(url, save_path):
+    """
+    Downloads a file from the specified URL.
+    Will resume an existing download if the target
+    server supports it (responds with the "Accepts-Range" header).
+
+    Args:
+        | url (str)       -- url of the file to download
+        | save_path (str) -- path to the directory to save the file
+    """
+
     # Strip trailing slash, if there is one.
     save_path = save_path.rstrip('\/')
     filename = url.split('/').pop()
