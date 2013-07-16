@@ -8,25 +8,23 @@ Processes Wikipedia dumps.
 '''
 
 from lxml import etree
+import simplejson as json
 import gullet
 
 DUMP_URL = 'http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-stub-articles10.xml.gz'
 DATA_PATH = '../data/wiki/'
+NAMESPACE = '{http://www.mediawiki.org/xml/export-0.8/}'
 
 def main():
     #gullet.download(DUMP_URL,DATA_PATH)
 
-    namespace = '{http://www.mediawiki.org/xml/export-0.8/}'
     infile = '%swiki.xml' % DATA_PATH
-    context = etree.iterparse(infile, events=('end',), tag='%spage' % namespace)
+    context = etree.iterparse(infile, events=('end',), tag='%spage' % NAMESPACE)
     iterate(context, process_element)
-
-
     return 0
 
 def process_element(elem):
-    namespace = '{http://www.mediawiki.org/xml/export-0.8/}'
-    print elem.find('%stitle' % namespace).text.encode('utf-8')
+    print elem.find('%stitle' % NAMESPACE).text.encode('utf-8')
 
 def iterate(context, process_element):
     # Credit: Liza Daly (http://ibm.co/17rvZ)
