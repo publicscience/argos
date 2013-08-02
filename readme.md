@@ -58,7 +58,7 @@ The `Digester` includes a couple of other submodules:
 
 #### Gullet
 The `Gullet` provides a general means of downloading remote files. In
-the case of the digester, it downloads the latest Wikipedia dumps. It is
+the case of the Digester, it downloads the latest Wikipedia dumps. It is
 capable of resuming downloads if the server supports it.
 
 #### Adipose
@@ -66,6 +66,7 @@ The `Adipose` provides an common interface to a data-persistence store, i.e. a
 database. In its current implementation, this database is MongoDB. It's
 purpose is to provide some flexibility with the database. That is, a
 different database could be swapped in while keeping the Adipose
-interface the same.
+interface the same. In the case of the Digester, it will provide a means
+of storing the parsed and processed information into MongoDB.
 
 
