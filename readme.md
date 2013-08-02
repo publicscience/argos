@@ -13,6 +13,12 @@ Then you can install the dependencies:
 $ pip install -r requirements.txt
 ```
 
+Note that the `mwlib` package requires `libevent` on your computer.
+On OSX, this can be installed with [Homebrew](http://brew.sh/):
+```bash
+$ brew install libevent
+```
+
 ## Testing
 To run the tests:
 ```bash
