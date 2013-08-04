@@ -16,6 +16,14 @@ class Feed:
     """
     Provides an interface for
     accessing RSS feeds.
+
+    Example::
+
+        # Print entries from a feed.
+        site = 'http://www.polygon.com/'
+        f = Feed()
+        feed_url = f.find_feed(site)
+        print f.entries(feed_url)
     """
 
     def __init__(self):
@@ -23,7 +31,7 @@ class Feed:
         Create a new interface.
         """
 
-    def parse(self, url):
+    def entries(self, url):
         """
         Parse a feed from the specified url,
         gathering the latest entries.
