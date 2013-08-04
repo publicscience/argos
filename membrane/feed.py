@@ -34,8 +34,10 @@ class Feed:
         Returns:
             | list -- list of processed latest entries (as dicts).
         """
+        # Fetch the feed data.
         data = feedparser.parse(url)
 
+        # Build the entry dicts.
         entries = []
         for entry in data.entries:
 
