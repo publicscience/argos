@@ -260,6 +260,61 @@ server supports it (responds with the &#8220;Accepts-Range&#8221; header).</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-membrane"></span><span class="target" id="module-membrane.feed"></span><div class="section" id="feed">
+<h2>Feed<a class="headerlink" href="#feed" title="Permalink to this headline">¶</a></h2>
+<p>Provides an interface for
+accessing RSS feeds.</p>
+<dl class="class">
+<dt id="membrane.feed.Feed">
+<em class="property">class </em><tt class="descclassname">membrane.feed.</tt><tt class="descname">Feed</tt><a class="reference internal" href="_modules/membrane/feed.html#Feed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides an interface for
+accessing RSS feeds.</p>
+<dl class="method">
+<dt id="membrane.feed.Feed.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/membrane/feed.html#Feed.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="membrane.feed.Feed.find_feed">
+<tt class="descname">find_feed</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="_modules/membrane/feed.html#Feed.find_feed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed.find_feed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the RSS feed url for a site.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><div class="first last line-block">
+<div class="line">url (str)    &#8211; the url of the site to search.</div>
+</div>
+</dd>
+<dt>Returns:</dt>
+<dd><div class="first last line-block">
+<div class="line">str &#8211; the discovered feed url.</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="membrane.feed.Feed.parse">
+<tt class="descname">parse</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="_modules/membrane/feed.html#Feed.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a feed from the specified url,
+gathering the latest entries.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><div class="first last line-block">
+<div class="line">url (str)    &#8211; the url of the feed.</div>
+</div>
+</dd>
+<dt>Returns:</dt>
+<dd><div class="first last line-block">
+<div class="line">list &#8211; list of processed latest entries (as dicts).</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -274,6 +329,7 @@ server supports it (responds with the &#8220;Accepts-Range&#8221; header).</p>
 <li><a class="reference internal" href="#digester">Digester</a></li>
 <li><a class="reference internal" href="#adipose">Adipose</a></li>
 <li><a class="reference internal" href="#gullet">Gullet</a></li>
+<li><a class="reference internal" href="#feed">Feed</a></li>
 </ul>
 </li>
 </ul>
