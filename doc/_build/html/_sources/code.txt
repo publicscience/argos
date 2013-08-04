@@ -11,3 +11,9 @@ The code...
 
 .. automodule:: digester.gullet
    :members:
+
+.. automodule:: membrane
+   :members:
+
+.. automodule:: membrane.feed
+   :members:

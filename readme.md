@@ -19,12 +19,6 @@ On OSX, this can be installed with [Homebrew](http://brew.sh/):
 $ brew install libevent
 ```
 
-## Testing
-To run the tests:
-```bash
-$ nosetests
-```
-
 ## MongoDB
 To setup and run MongoDB ([download](http://www.mongodb.org/downloads)):
 ```bash
@@ -32,6 +26,21 @@ $ cd /path/to/mongodb/download
 $ ./bin/mongod
 ```
 That will run MongoDB locally at port `27107`.
+
+## NLTK
+Usage of the NLTK library requires a few additional downloads. NLTK's
+download interface can be accessed like so:
+
+```bash
+$ python
+>>> import nltk
+>>> nltk.download()
+```
+
+The necessary packages are:
+* Punkt
+* WordNet
+
 
 ## Documentation
 Documentation is located at `doc/_build/html/index.html`.
@@ -41,6 +50,16 @@ To generate documentation, do:
 $ cd doc
 $ make clean && make html
 ```
+
+## Testing
+To run the tests:
+```bash
+$ nosetests
+```
+
+## The Future (To Do)
+* Perhaps the main area of future refinement will be all parts relating
+to text processing and analysis.
 
 ## Modules
 ### Membrane (in progress)
