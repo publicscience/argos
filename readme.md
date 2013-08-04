@@ -39,6 +39,7 @@ $ python
 
 The necessary packages are:
 * Punkt
+* WordNet
 
 
 ## Documentation
