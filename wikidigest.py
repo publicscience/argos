@@ -25,6 +25,9 @@ def main():
 
         Args:
             | text (str)    -- the MediaWiki text to cleanup. Must be utf-8 encoded.
+
+        Returns:
+            | str -- the replaced text.
         """
         replace_punctuation = string.maketrans(string.punctuation, ' '*len(string.punctuation))
         return text.translate(replace_punctuation)
