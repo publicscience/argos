@@ -9,7 +9,7 @@ accessing RSS feeds.
 import feedparser
 import feedfinder
 import urllib
-from sanitizer import sanitize
+from text import trim, sanitize
 from readability.readability import Document
 
 class Feed:
@@ -30,6 +30,7 @@ class Feed:
         """
         Create a new interface.
         """
+        pass
 
     def entries(self, url):
         """
@@ -58,7 +59,7 @@ class Feed:
             entries.append({
                 'url': eurl,
                 'html': html,
-                'text': ' '.join(sanitize(html).split()),
+                'text': trim(sanitize(html)),
                 'author': entry.author,
                 'published': entry.published
             })
