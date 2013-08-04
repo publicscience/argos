@@ -25,23 +25,37 @@ class Feed:
 
     def parse(self, url):
         """
-        Parse a feed from the specified url.
+        Parse a feed from the specified url,
+        gathering the latest entries.
 
         Args:
             | url (str)    -- the url of the feed.
 
         Returns:
-            | dict -- the feed XML response parsed to a dict.
+            | list -- list of processed latest entries (as dicts).
         """
         data = feedparser.parse(url)
 
+        entries = []
         for entry in data.entries:
-            entry_url = entry.links[0].href
-            full_text = self._fetch_full_text(entry_url)
-            clean_text = ' '.join(sanitize(full_text).split())
-            print clean_text
 
-    def get_feed(self, url):
+            # URL for this entry.
+            eurl = entry.links[0].href
+
+            # Complete HTML content for this entry.
+            html = self._fetch_full_text(eurl)
+
+            entries.append({
+                'url': eurl,
+                'html': html,
+                'text': ' '.join(sanitize(html).split()),
+                'author': entry.author,
+                'published': entry.published
+            })
+
+        return entries
+
+    def find_feed(self, url):
         """
         Find the RSS feed url for a site.
 
@@ -61,7 +75,7 @@ class Feed:
             | url (str)    -- the url of the entry.
 
         Returns:
-            | str -- the full text.
+            | str -- the full text, including html.
         """
         html = urllib.urlopen(url).read()
         return Document(html).summary()

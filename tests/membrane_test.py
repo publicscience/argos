@@ -13,6 +13,6 @@ class FeedTest(unittest.TestCase):
     def test_instance(self):
         self.assertIsInstance(self.f, Feed)
 
-    def test_get_feed(self):
-        feed_url = self.f.get_feed('http://www.polygon.com/')
+    def test_find_feed(self):
+        feed_url = self.f.find_feed('http://www.polygon.com/')
         self.assertEqual(feed_url, 'http://www.polygon.com/rss/index.xml')
