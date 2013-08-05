@@ -15,7 +15,7 @@ import sys
 
 CHUNK = 16 * 1024
 
-def download(url, save_path, callback=None, progress=False):
+def download(url, save_path, progress=False):
     """
     Downloads a file from the specified URL.
     Will resume an existing download if the target
@@ -24,7 +24,6 @@ def download(url, save_path, callback=None, progress=False):
     Args:
         | url (str)       -- url of the file to download
         | save_path (str) -- path to the directory to save the file
-        | callback (func) -- a callback to execute after download, default=None
         | progress (bool) -- output progress bar to stdout
     """
 
@@ -91,14 +90,11 @@ def download(url, save_path, callback=None, progress=False):
         if progress:
             sys.stdout.write('\n')
 
-        # Execute callback, if it's callable.
-        if hasattr(callback, '__call__'):
-            callback()
-
     except urllib2.HTTPError, e:
         print 'HTTP Error:', e.code, url
     except urllib2.URLError, e:
         print 'URL Error:', e.reason, url
+
 
 def _progress(percent):
     """
@@ -109,8 +105,7 @@ def _progress(percent):
     sys.stdout.flush()
     sys.stdout.write('\b' * (width+10))
 
-    p = int(round(percent))
-    for i in xrange(p):
+    for i in xrange(int(percent)):
         sys.stdout.write('=')
         sys.stdout.flush()
     sys.stdout.write('\b' * (width+10))
