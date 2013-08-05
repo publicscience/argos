@@ -17,3 +17,6 @@ The code...
 
 .. automodule:: membrane.feed
    :members:
+
+.. automodule:: brain
+   :members:

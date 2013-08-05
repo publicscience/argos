@@ -62,10 +62,11 @@
 
 <span class="kn">import</span> <span class="nn">urllib2</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="n">CHUNK</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">1024</span>
 
-<div class="viewcode-block" id="download"><a class="viewcode-back" href="../../code.html#digester.gullet.download">[docs]</a><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
+<div class="viewcode-block" id="download"><a class="viewcode-back" href="../../code.html#digester.gullet.download">[docs]</a><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Downloads a file from the specified URL.</span>
 <span class="sd">    Will resume an existing download if the target</span>
@@ -74,6 +75,9 @@
 <span class="sd">    Args:</span>
 <span class="sd">        | url (str)       -- url of the file to download</span>
 <span class="sd">        | save_path (str) -- path to the directory to save the file</span>
+<span class="sd">        | callback (func) -- a callback to execute after download, default=None.</span>
+<span class="sd">                             Downloaded filename is passed as param.</span>
+<span class="sd">        | progress (bool) -- output progress bar to stdout</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c"># Strip trailing slash, if there is one.</span>
@@ -104,8 +108,6 @@
         <span class="n">req</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">downloaded_size</span> <span class="o">=</span> <span class="mi">0</span>
-
         <span class="c"># Get response.</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
 
@@ -125,20 +127,46 @@
             <span class="k">print</span> <span class="s">&#39;Starting from the beginning! :D&#39;</span>
             <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="n">_progress</span><span class="p">(</span> <span class="p">(</span><span class="n">existing_size</span><span class="o">/</span><span class="n">total_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="p">)</span>
+
         <span class="c"># Pull out the chunks!</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">resp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">CHUNK</span><span class="p">),</span> <span class="s">&#39;&#39;</span><span class="p">):</span>
             <span class="c"># Write the chunk to the file.</span>
             <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
             <span class="c"># Show progress.</span>
-            <span class="c"># downloaded_size += len(chunk)</span>
-            <span class="c"># print (downloaded_size/total_size) * 100</span>
+            <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+                <span class="n">existing_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                <span class="n">_progress</span><span class="p">(</span> <span class="p">(</span><span class="n">existing_size</span><span class="o">/</span><span class="n">total_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="c"># Execute callback, if it&#39;s callable.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">):</span>
+            <span class="n">callback</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
 
     <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">&#39;HTTP Error:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">url</span>
     <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">&#39;URL Error:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span> <span class="n">url</span>
 </div>
+<span class="k">def</span> <span class="nf">_progress</span><span class="p">(</span><span class="n">percent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show a progress bar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">] </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="s">&#39;{:8.4f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">percent</span><span class="p">)))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\b</span><span class="s">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span><span class="o">+</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">percent</span><span class="p">)):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\b</span><span class="s">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span><span class="o">+</span><span class="mi">10</span><span class="p">))</span>
+
+
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">sys</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -147,6 +175,7 @@
     <span class="n">save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
     <span class="n">download</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
     <span class="k">return</span> <span class="mi">0</span>
+
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>

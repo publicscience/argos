@@ -83,13 +83,13 @@ A Digester works with a single XML file.</p>
 
 <dl class="method">
 <dt id="digester.Digester.download">
-<tt class="descname">download</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="_modules/digester.html#Digester.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.Digester.download" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">download</tt><big>(</big><em>dump</em><big>)</big><a class="reference internal" href="_modules/digester.html#Digester.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.Digester.download" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a file from the specified URL to replace
 this Digester&#8217;s current file.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><div class="first last line-block">
-<div class="line">url (str) &#8211; the url to download.</div>
+<div class="line">dump (str) &#8211; the name of the dump (&#8216;abstract&#8217;, &#8216;pagelinks&#8217;, &#8216;pages-articles&#8217;)</div>
 </div>
 </dd>
 </dl>
@@ -126,11 +126,11 @@ function (see example below).</p>
 Uses MongoDB, but can be modified.</p>
 <dl class="class">
 <dt id="digester.adipose.Adipose">
-<em class="property">class </em><tt class="descclassname">digester.adipose.</tt><tt class="descname">Adipose</tt><big>(</big><em>database</em>, <em>collection</em>, <em>host='localhost'</em>, <em>port=27017</em><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">digester.adipose.</tt><tt class="descname">Adipose</tt><big>(</big><em>database</em>, <em>collection</em>, <em>host='localhost'</em>, <em>port=27017</em><big>)</big><a class="headerlink" href="#digester.adipose.Adipose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides an interface to a database (MongoDB).</p>
 <dl class="method">
 <dt id="digester.adipose.Adipose.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>database</em>, <em>collection</em>, <em>host='localhost'</em>, <em>port=27017</em><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>database</em>, <em>collection</em>, <em>host='localhost'</em>, <em>port=27017</em><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new interface.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -150,7 +150,7 @@ Uses MongoDB, but can be modified.</p>
 
 <dl class="method">
 <dt id="digester.adipose.Adipose.add">
-<tt class="descname">add</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.add" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data to the db.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -168,7 +168,7 @@ Uses MongoDB, but can be modified.</p>
 
 <dl class="method">
 <dt id="digester.adipose.Adipose.count">
-<tt class="descname">count</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.count" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">count</tt><big>(</big><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns number of docs/records in collection/table.</p>
 <dl class="docutils">
 <dt>Returns:</dt>
@@ -181,13 +181,13 @@ Uses MongoDB, but can be modified.</p>
 
 <dl class="method">
 <dt id="digester.adipose.Adipose.empty">
-<tt class="descname">empty</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.empty" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">empty</tt><big>(</big><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Empties the database collection/table.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="digester.adipose.Adipose.find">
-<tt class="descname">find</tt><big>(</big><em>query</em><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.find" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">find</tt><big>(</big><em>query</em><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.find" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches db for a record matching
 the query.</p>
 <dl class="docutils">
@@ -206,7 +206,7 @@ the query.</p>
 
 <dl class="method">
 <dt id="digester.adipose.Adipose.index">
-<tt class="descname">index</tt><big>(</big><em>key</em><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.index" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">index</tt><big>(</big><em>key</em><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indexes the data by the specified key.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -219,7 +219,7 @@ the query.</p>
 
 <dl class="method">
 <dt id="digester.adipose.Adipose.update">
-<tt class="descname">update</tt><big>(</big><em>query</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/digester/adipose.html#Adipose.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.adipose.Adipose.update" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update</tt><big>(</big><em>query</em>, <em>data</em><big>)</big><a class="headerlink" href="#digester.adipose.Adipose.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates or creates a new record.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -245,7 +245,7 @@ Can resume downloads if the server supports it
 (that is, it responds with an Accepts-Range header).</p>
 <dl class="function">
 <dt id="digester.gullet.download">
-<tt class="descclassname">digester.gullet.</tt><tt class="descname">download</tt><big>(</big><em>url</em>, <em>save_path</em><big>)</big><a class="reference internal" href="_modules/digester/gullet.html#download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.gullet.download" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">digester.gullet.</tt><tt class="descname">download</tt><big>(</big><em>url</em>, <em>save_path</em>, <em>callback=None</em>, <em>progress=False</em><big>)</big><a class="reference internal" href="_modules/digester/gullet.html#download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#digester.gullet.download" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a file from the specified URL.
 Will resume an existing download if the target
 server supports it (responds with the &#8220;Accepts-Range&#8221; header).</p>
@@ -254,6 +254,9 @@ server supports it (responds with the &#8220;Accepts-Range&#8221; header).</p>
 <dd><div class="first last line-block">
 <div class="line">url (str)       &#8211; url of the file to download</div>
 <div class="line">save_path (str) &#8211; path to the directory to save the file</div>
+<div class="line">callback (func) &#8211; a callback to execute after download, default=None.
+Downloaded filename is passed as param.</div>
+<div class="line">progress (bool) &#8211; output progress bar to stdout</div>
 </div>
 </dd>
 </dl>
@@ -269,10 +272,37 @@ accessing RSS feeds.</p>
 <em class="property">class </em><tt class="descclassname">membrane.feed.</tt><tt class="descname">Feed</tt><a class="reference internal" href="_modules/membrane/feed.html#Feed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides an interface for
 accessing RSS feeds.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Print entries from a feed.</span>
+<span class="n">site</span> <span class="o">=</span> <span class="s">&#39;http://www.polygon.com/&#39;</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">Feed</span><span class="p">()</span>
+<span class="n">feed_url</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">find_feed</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">entries</span><span class="p">(</span><span class="n">feed_url</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="membrane.feed.Feed.__init__">
 <tt class="descname">__init__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/membrane/feed.html#Feed.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="membrane.feed.Feed.entries">
+<tt class="descname">entries</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="_modules/membrane/feed.html#Feed.entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed.entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a feed from the specified url,
+gathering the latest entries.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><div class="first last line-block">
+<div class="line">url (str)    &#8211; the url of the feed.</div>
+</div>
+</dd>
+<dt>Returns:</dt>
+<dd><div class="first last line-block">
+<div class="line">list &#8211; list of processed latest entries (as dicts).</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -293,20 +323,42 @@ accessing RSS feeds.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<span class="target" id="module-brain"></span><div class="section" id="brain">
+<h2>Brain<a class="headerlink" href="#brain" title="Permalink to this headline">¶</a></h2>
+<p>Provides text processing
+and &#8220;intelligence&#8221; faculties.</p>
+<dl class="class">
+<dt id="brain.Brain">
+<em class="property">class </em><tt class="descclassname">brain.</tt><tt class="descname">Brain</tt><a class="reference internal" href="_modules/brain.html#Brain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brain.Brain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides text processing
+and &#8220;intelligence&#8221; faculties.</p>
 <dl class="method">
-<dt id="membrane.feed.Feed.parse">
-<tt class="descname">parse</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="_modules/membrane/feed.html#Feed.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#membrane.feed.Feed.parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse a feed from the specified url,
-gathering the latest entries.</p>
+<dt id="brain.Brain.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/brain.html#Brain.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brain.Brain.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new brain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.Brain.count">
+<tt class="descname">count</tt><big>(</big><em>text</em><big>)</big><a class="reference internal" href="_modules/brain.html#Brain.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brain.Brain.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tokenize, stem, and then
+count the word frequency
+distribution of a document.</p>
+<p>Lemmatizing may be too slow, perhaps
+Porter Stemming should be used as a faster,
+albeit less accurate, alternative?</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><div class="first last line-block">
-<div class="line">url (str)    &#8211; the url of the feed.</div>
+<div class="line">text (str)    &#8211; the text to process.</div>
 </div>
 </dd>
 <dt>Returns:</dt>
 <dd><div class="first last line-block">
-<div class="line">list &#8211; list of processed latest entries (as dicts).</div>
+<div class="line">FreqDist      &#8211; NLTK FreqDist object.</div>
 </div>
 </dd>
 </dl>
@@ -330,6 +382,7 @@ gathering the latest entries.</p>
 <li><a class="reference internal" href="#adipose">Adipose</a></li>
 <li><a class="reference internal" href="#gullet">Gullet</a></li>
 <li><a class="reference internal" href="#feed">Feed</a></li>
+<li><a class="reference internal" href="#brain">Brain</a></li>
 </ul>
 </li>
 </ul>

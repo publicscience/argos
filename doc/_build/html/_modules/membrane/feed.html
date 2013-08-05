@@ -59,21 +59,30 @@
 <span class="kn">import</span> <span class="nn">feedparser</span>
 <span class="kn">import</span> <span class="nn">feedfinder</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
-<span class="kn">from</span> <span class="nn">sanitizer</span> <span class="kn">import</span> <span class="n">sanitize</span>
+<span class="kn">from</span> <span class="nn">text</span> <span class="kn">import</span> <span class="n">trim</span><span class="p">,</span> <span class="n">sanitize</span>
 <span class="kn">from</span> <span class="nn">readability.readability</span> <span class="kn">import</span> <span class="n">Document</span>
 
 <div class="viewcode-block" id="Feed"><a class="viewcode-back" href="../../code.html#membrane.feed.Feed">[docs]</a><span class="k">class</span> <span class="nc">Feed</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides an interface for</span>
 <span class="sd">    accessing RSS feeds.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        # Print entries from a feed.</span>
+<span class="sd">        site = &#39;http://www.polygon.com/&#39;</span>
+<span class="sd">        f = Feed()</span>
+<span class="sd">        feed_url = f.find_feed(site)</span>
+<span class="sd">        print f.entries(feed_url)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Feed.__init__"><a class="viewcode-back" href="../../code.html#membrane.feed.Feed.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new interface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
 </div>
-<div class="viewcode-block" id="Feed.parse"><a class="viewcode-back" href="../../code.html#membrane.feed.Feed.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="Feed.entries"><a class="viewcode-back" href="../../code.html#membrane.feed.Feed.entries">[docs]</a>    <span class="k">def</span> <span class="nf">entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse a feed from the specified url,</span>
 <span class="sd">        gathering the latest entries.</span>
@@ -84,8 +93,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            | list -- list of processed latest entries (as dicts).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Fetch the feed data.</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">feedparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
+        <span class="c"># Build the entry dicts.</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">entries</span><span class="p">:</span>
 
@@ -98,7 +109,7 @@
             <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
                 <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">eurl</span><span class="p">,</span>
                 <span class="s">&#39;html&#39;</span><span class="p">:</span> <span class="n">html</span><span class="p">,</span>
-                <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sanitize</span><span class="p">(</span><span class="n">html</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span>
+                <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="n">trim</span><span class="p">(</span><span class="n">sanitize</span><span class="p">(</span><span class="n">html</span><span class="p">)),</span>
                 <span class="s">&#39;author&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="o">.</span><span class="n">author</span><span class="p">,</span>
                 <span class="s">&#39;published&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="o">.</span><span class="n">published</span>
             <span class="p">})</span>
