@@ -6,10 +6,10 @@ The code...
 .. automodule:: digester
    :members:
 
-.. automodule:: digester.adipose
+.. automodule:: digester.gullet
    :members:
 
-.. automodule:: digester.gullet
+.. automodule:: adipose
    :members:
 
 .. automodule:: membrane
@@ -19,4 +19,7 @@ The code...
    :members:
 
 .. automodule:: brain
+   :members:
+
+.. automodule:: wikidigester
    :members:
