@@ -5,5 +5,5 @@ shallowthought-env/
 node_modules/
 fontcustom/*
 data/
-mongo/
+mongodb/
 *.swp
