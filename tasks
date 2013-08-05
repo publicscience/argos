@@ -1,0 +1,42 @@
+#!/bin/bash
+
+if [[ $1 == "doc" ]]
+then
+    # Build documentation.
+    cd doc
+    make clean
+    make html
+
+elif [[ $1 == 'mongo' ]]
+then
+    # Start MongoDB server.
+    ./mongodb/bin/mongod --dbpath mongodb/data
+
+elif [[ $1 == 'test' ]]
+then
+    # Run tests
+    source shallowthought-env/bin/activate
+    nosetests
+
+elif [[ $1 == "setup" ]]
+then
+    # Setup Virtualenv.
+    virtualenv shallowthought-env --no-site-packages
+    source shallowthought-env/bin/activate
+
+    # Install dependencies.
+    brew install libevent
+    pip install -r requirements.txt
+
+    # Install NLTK data.
+    python -m nltk.downloader punkt
+    python -m nltk.downloader wordnet
+
+    # Setup MongoDB.
+    curl -o mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
+    mkdir mongodb
+    tar --extract --file=mongodb.tgz --strip-components=1 --directory=mongodb
+    rm mongodb.tgz
+    mkdir mongodb/data
+fi
+
