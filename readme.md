@@ -79,19 +79,28 @@ will handle the parsing of the Wikipedia XML dump, with the help of
 NLP processing, including tokenization, lemmatization, and frequency
 distribution.
 
-The `Digester` includes a couple of other submodules:
+The `Digester` also includes:
 
 #### Gullet
 The `Gullet` provides a general means of downloading remote files. In
 the case of the Digester, it downloads the latest Wikipedia dumps. It is
 capable of resuming downloads if the server supports it.
 
-#### Adipose
+### Adipose
 The `Adipose` provides an common interface to a data-persistence store, i.e. a
 database. In its current implementation, this database is MongoDB. It's
 purpose is to provide some flexibility with the database. That is, a
 different database could be swapped in while keeping the Adipose
-interface the same. In the case of the Digester, it will provide a means
+interface the same. In the present use case, it will provide a means
 of storing the parsed and processed information into MongoDB.
+
+### Brain (in progress)
+The `Brain` provides the text processing functionality, so it functions
+mostly as a wrapper for NLTK.
+
+### WikiDigester (in progress)
+The `WikiDigester` is a subclass of the `Digester` and is essentially a
+Digester designed to specifically handle Wikipedia dumps. As such, it
+has some special functionality tailored to this.
 
 
