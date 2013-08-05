@@ -6,7 +6,7 @@ Processes XML dumps.
 """
 
 from lxml import etree
-import gullet
+from . import gullet
 import os
 import bz2
 
@@ -52,7 +52,7 @@ class Digester:
         Example `process_element`::
 
             def process_element(elem):
-                print elem.find('{%s}title' % namespace).text.encode('utf-8')
+                print(elem.find('{%s}title' % namespace).text.encode('utf-8'))
         """
 
         # If bzip (bz2)...

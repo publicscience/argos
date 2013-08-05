@@ -5,7 +5,7 @@ Text
 Text processing utilities.
 """
 
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 import string
 
 def trim(text):
@@ -19,7 +19,7 @@ def depunctuate(text):
     Removes all punctuation from text,
     replacing them with spaces.
     """
-    replace_punctuation = string.maketrans(string.punctuation, ' '*len(string.punctuation))
+    replace_punctuation = str.maketrans(string.punctuation, ' '*len(string.punctuation))
     return text.translate(replace_punctuation)
 
 def sanitize(html):
@@ -32,6 +32,7 @@ def sanitize(html):
 
 class Sanitizer(HTMLParser):
     def __init__(self):
+        super().__init__(strict=False)
         self.reset()
         self.fed = []
     def handle_data(self, d):

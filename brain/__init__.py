@@ -20,7 +20,6 @@ class Brain:
         """
         Create a new brain.
         """
-        pass
 
     def count(self, text):
         """

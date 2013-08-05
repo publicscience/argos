@@ -9,7 +9,7 @@ Can resume downloads if the server supports it
 (that is, it responds with an Accepts-Range header).
 """
 
-import urllib2
+import urllib
 import os
 import sys
 
@@ -44,7 +44,7 @@ def download(url, save_path, progress=False):
 
         # Setup request for only the remaining bytes.
         headers = {'Range': 'bytes=%s-' % (existing_size)}
-        req = urllib2.Request(url, headers=headers)
+        req = urllib.Request(url, headers=headers)
 
     # Otherwise, create a new file.
     else:
@@ -52,26 +52,26 @@ def download(url, save_path, progress=False):
         outfile = open(file, 'wb')
 
         # Vanilla request.
-        req = urllib2.Request(url)
+        req = urllib.Request(url)
 
     try:
         # Get response.
-        resp = urllib2.urlopen(req)
+        resp = urllib.urlopen(req)
 
         # Get total size of content.
         total_size = float(resp.info().getheader('Content-Length').strip())
 
         # Check if the file has already been downloaded_size.
         if total_size == existing_size:
-            print 'File already downloaded.'
+            print('File already downloaded.')
             return
 
         # Check that the server accepts ranges.
         # If it does not, the server will ignore the Range header,
         # And we have to start all over again.
         if existing_size > 0 and not resp.info().getheader('Accept-Ranges'):
-            print 'Server does not allow resuming of downloads.'
-            print 'Starting from the beginning! :D'
+            print('Server does not allow resuming of downloads.')
+            print('Starting from the beginning! :D')
             outfile = open(file, 'wb')
 
         if progress:
@@ -90,10 +90,10 @@ def download(url, save_path, progress=False):
         if progress:
             sys.stdout.write('\n')
 
-    except urllib2.HTTPError, e:
-        print 'HTTP Error:', e.code, url
-    except urllib2.URLError, e:
-        print 'URL Error:', e.reason, url
+    except urllib.HTTPError as e:
+        print('HTTP Error:', e.code, url)
+    except urllib.URLError as e:
+        print('URL Error:', e.reason, url)
 
 
 def _progress(percent):

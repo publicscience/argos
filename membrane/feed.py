@@ -7,9 +7,9 @@ accessing RSS feeds.
 """
 
 import feedparser
-import feedfinder
 import urllib
-from text import trim, sanitize
+from . import feedfinder
+from textutils import trim, sanitize
 from readability.readability import Document
 
 class Feed:

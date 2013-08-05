@@ -5,12 +5,14 @@ WikiDigester
 Handles Wikipedia dump processing.
 """
 
-import string
 from digester import Digester
 from adipose import Adipose
+from textutils import depunctuate
 from brain import Brain
-from mwlib import parser
-from mwlib.refine.compat import parse_txt
+
+# mwlib does not support python 3. need to look for alternatives...
+#from mwlib import parser
+#from mwlib.refine.compat import parse_txt
 
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
 
@@ -29,7 +31,7 @@ class WikiDigester(Digester):
             | dump (str)        -- the name of the dump ('abstract', 'pagelinks', 'pages-articles')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
         """
-        super().__init__()
+        super().__init__(file, namespace)
         self.dump = dump
 
 
@@ -83,10 +85,7 @@ class WikiDigester(Digester):
         Returns:
             | str -- the replaced text.
         """
-
-        # Strip all punctuation.
-        replace_punctuation = string.maketrans(string.punctuation, ' '*len(string.punctuation))
-        return text.translate(replace_punctuation)
+        return depunctuate(text)
 
 
     def _process_pages(self, elem):
