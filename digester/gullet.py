@@ -11,10 +11,11 @@ Can resume downloads if the server supports it
 
 import urllib2
 import os
+import sys
 
 CHUNK = 16 * 1024
 
-def download(url, save_path):
+def download(url, save_path, callback=None, progress=False):
     """
     Downloads a file from the specified URL.
     Will resume an existing download if the target
@@ -23,6 +24,8 @@ def download(url, save_path):
     Args:
         | url (str)       -- url of the file to download
         | save_path (str) -- path to the directory to save the file
+        | callback (func) -- a callback to execute after download, default=None
+        | progress (bool) -- output progress bar to stdout
     """
 
     # Strip trailing slash, if there is one.
@@ -53,8 +56,6 @@ def download(url, save_path):
         req = urllib2.Request(url)
 
     try:
-        downloaded_size = 0
-
         # Get response.
         resp = urllib2.urlopen(req)
 
@@ -74,19 +75,46 @@ def download(url, save_path):
             print 'Starting from the beginning! :D'
             outfile = open(file, 'wb')
 
+        if progress:
+            _progress( (existing_size/total_size) * 100 )
+
         # Pull out the chunks!
         for chunk in iter(lambda: resp.read(CHUNK), ''):
             # Write the chunk to the file.
             outfile.write(chunk)
 
             # Show progress.
-            # downloaded_size += len(chunk)
-            # print (downloaded_size/total_size) * 100
+            if progress:
+                existing_size += len(chunk)
+                _progress( (existing_size/total_size) * 100 )
+
+        if progress:
+            sys.stdout.write('\n')
+
+        # Execute callback, if it's callable.
+        if hasattr(callback, '__call__'):
+            callback()
 
     except urllib2.HTTPError, e:
         print 'HTTP Error:', e.code, url
     except urllib2.URLError, e:
         print 'URL Error:', e.reason, url
+
+def _progress(percent):
+    """
+    Show a progress bar.
+    """
+    width = 100
+    sys.stdout.write('[%s] %s' % (' ' * width, '{:8.4f}'.format(percent)))
+    sys.stdout.flush()
+    sys.stdout.write('\b' * (width+10))
+
+    p = int(round(percent))
+    for i in xrange(p):
+        sys.stdout.write('=')
+        sys.stdout.flush()
+    sys.stdout.write('\b' * (width+10))
+
 
 def main():
     import sys
@@ -96,6 +124,7 @@ def main():
     save_path = os.getcwd()
     download(url, save_path)
     return 0
+
 
 if __name__ == '__main__':
     main()
