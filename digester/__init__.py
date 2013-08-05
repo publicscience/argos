@@ -6,7 +6,6 @@ Processes XML dumps.
 """
 
 from lxml import etree
-from adipose import Adipose
 import gullet
 import os
 import bz2
@@ -15,6 +14,7 @@ class Digester:
     """
     Processes ("digests") XML dumps.
     A Digester works with a single XML file.
+    It also supports bzipped XML files.
 
     Example::
 
@@ -84,24 +84,14 @@ class Digester:
         del context
 
 
-    def download(self, dump):
+    def download(self, url):
         """
         Downloads a file from the specified URL to replace
         this Digester's current file.
 
         Args:
-            | dump (str) -- the name of the dump ('abstract', 'pagelinks', 'pages-articles')
+            | url (str) -- the url of the file to download
         """
-
-        dumps = {
-                    'base': 'http://dumps.wikimedia.org/enwiki/latest/',
-                    'abstract': 'enwiki-latest-abstract.xml',
-                    'pagelinks': 'enwiki-latest-pagelinks.sql.gz',
-                    'pages-articles': 'enwiki-latest-pages-articles.xml.bz2'
-                }
-
-        # Build full url.
-        url = '%s%s' % (dumps['base'], dumps[dump])
 
         # Get save directory for download.
         save_path = os.path.dirname(self.file)
