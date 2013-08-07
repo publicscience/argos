@@ -17,6 +17,8 @@ Note that the `mwlib` package requires `libevent` on your computer.
 On OSX, this can be installed with [Homebrew](http://brew.sh/):
 ```bash
 $ brew install libevent
+
+Note: `mwlib` is not currently being used. It does not support Python 3.
 ```
 
 ## MongoDB
