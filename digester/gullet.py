@@ -9,7 +9,7 @@ Can resume downloads if the server supports it
 (that is, it responds with an Accepts-Range header).
 """
 
-import urllib
+from urllib import request
 import os
 import sys
 
@@ -44,7 +44,7 @@ def download(url, save_path, progress=False):
 
         # Setup request for only the remaining bytes.
         headers = {'Range': 'bytes=%s-' % (existing_size)}
-        req = urllib.Request(url, headers=headers)
+        req = request.Request(url, headers=headers)
 
     # Otherwise, create a new file.
     else:
@@ -52,11 +52,11 @@ def download(url, save_path, progress=False):
         outfile = open(file, 'wb')
 
         # Vanilla request.
-        req = urllib.Request(url)
+        req = request.Request(url)
 
     try:
         # Get response.
-        resp = urllib.urlopen(req)
+        resp = request.urlopen(req)
 
         # Get total size of content.
         total_size = float(resp.info().getheader('Content-Length').strip())
@@ -90,9 +90,9 @@ def download(url, save_path, progress=False):
         if progress:
             sys.stdout.write('\n')
 
-    except urllib.HTTPError as e:
+    except request.HTTPError as e:
         print('HTTP Error:', e.code, url)
-    except urllib.URLError as e:
+    except request.URLError as e:
         print('URL Error:', e.reason, url)
 
 
