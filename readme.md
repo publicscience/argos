@@ -44,13 +44,13 @@ The necessary packages are:
 
 
 ## Documentation
-Documentation is located at `doc/_build/html/index.html`.
-
 To generate documentation, do:
 ```bash
 $ cd doc
 $ make clean && make html
 ```
+
+The documation will be located at `doc/_build/html/index.html`.
 
 ## Testing
 To run the tests:
