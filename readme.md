@@ -8,6 +8,11 @@ $ virtualenv shallowthought-env --no-site-packages
 $ source shallowthought-env/bin/activate
 ```
 
+You may need to specify a Python 3 `virtualenv`, like so:
+```bash
+$ virtualenv-3.3 shallowthought-env --no-site-packages
+```
+
 Then you can install the dependencies:
 ```bash
 $ pip install -r requirements.txt
