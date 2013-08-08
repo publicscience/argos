@@ -33,6 +33,7 @@ class WikiDigester(Digester):
         """
         super().__init__(file, namespace)
         self.dump = dump
+        self.brain = Brain()
 
 
     def fetch_dump(self):
@@ -62,7 +63,7 @@ class WikiDigester(Digester):
         """
 
         if self.dump == 'pages-articles':
-            d.iterate('page', self._process_pages)
+            self.iterate('page', self._process_pages)
         elif self.dump == 'pagelinks':
             pass
         elif self.dump == 'abstract':
@@ -80,7 +81,7 @@ class WikiDigester(Digester):
         "Category".
 
         Args:
-            | text (str)    -- the MediaWiki text to cleanup. Must be utf-8 encoded.
+            | text (str)    -- the MediaWiki text to cleanup.
 
         Returns:
             | str -- the replaced text.
@@ -90,7 +91,8 @@ class WikiDigester(Digester):
 
     def _process_pages(self, elem):
         #a = Adipose('test', 'pages')
-        text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text.encode('utf-8')
+        text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
+        print(self.brain.count(text).plot())
 
         #a.empty() #for testing
         #a.add(data)
