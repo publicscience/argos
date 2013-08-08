@@ -17,7 +17,13 @@ $ source shallowthought-env/bin/activate
 
 Then you can install the dependencies:
 ```bash
-$ pip install -r requirements.txt
+(shallowthought-env) $ pip install -r requirements.txt
+```
+
+Since NLTK3.0 (which has Python 3 support) is still in development,
+you will likely need to install that separately:
+```bash
+(shallowthought-env) $ pip install git+git://github.com/nltk/nltk.git
 ```
 
 Note that the `mwlib` package requires `libevent` on your computer.
