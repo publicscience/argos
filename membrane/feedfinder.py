@@ -21,10 +21,10 @@ How it works:
     3. <A> links to feeds on the same server ending in ".rss", ".rdf", ".xml", or
        ".atom"
     4. <A> links to feeds on the same server containing "rss", "rdf", "xml", or "atom"
-    5. <A> links to feeds on external servers ending in ".rss", ".rdf", ".xml", or
+    5. Try some guesses about common places for feeds (index.xml, atom.xml, etc.).
+    6. <A> links to feeds on external servers ending in ".rss", ".rdf", ".xml", or
        ".atom"
-    6. <A> links to feeds on external servers containing "rss", "rdf", "xml", or "atom"
-    7. Try some guesses about common places for feeds (index.xml, atom.xml, etc.).
+    7. <A> links to feeds on external servers containing "rss", "rdf", "xml", or "atom"
 
 Copyright:
     2002-2004: Mark Pilgrim
