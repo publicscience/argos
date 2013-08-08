@@ -20,14 +20,6 @@ then
 
 elif [[ $1 == "setup" ]]
 then
-    # Setup Virtualenv.
-    virtualenv shallowthought-env --no-site-packages
-    source shallowthought-env/bin/activate
-
-    # Install dependencies.
-    brew install libevent
-    pip install -r requirements.txt
-
     # Install NLTK data.
     python -m nltk.downloader punkt
     python -m nltk.downloader wordnet
