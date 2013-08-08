@@ -45,7 +45,7 @@ def feeds(url):
     data = _get(url)
 
     # Check if the url is a feed.
-    if _is_feed(data):
+    if _is_feed(url):
         return [url]
 
     # Try to get feed links from markup.
@@ -58,13 +58,13 @@ def feeds(url):
 
     # Try 'a' links.
     try:
-        links = [link for link in _get_a_links(data) if _is_feed(link)]
+        links = _get_a_links(data)
     except:
         links = []
 
     if links:
         # Filter to only local links.
-        local_links = [link for link in links if link.beginswith(url)]
+        local_links = [link for link in links if link.startswith(url)]
 
         # Try to find feed links.
         feed_links.extend(_filter_feed_links(local_links))
@@ -74,17 +74,7 @@ def feeds(url):
             # Try to find feed-looking links.
             feed_links.extend(_filter_feedish_links(local_links))
 
-        # If still nothing has been found...
-        if not feed_links:
-            # Try all links, not just local.
-            feed_links.extend(_filter_feed_links(links))
-
-        # If still nothing has been found...
-        if not feed_links:
-            # Try all feed-looking links, not just local.
-            feed_links.extend(_filter_feedish_links(links))
-
-    # If *still* nothing has been found...
+    # If still nothing has been found...
     if not feed_links:
         # BRUTE FORCE IT!
         guesses = [
@@ -98,6 +88,12 @@ def feeds(url):
         ]
         tries = [parse.urljoin(url, g) for g in guesses]
         feed_links.extend([link for link in tries if _is_feed(link)])
+
+    # If *still* nothing has been found,
+    # just try all the links.
+    if links and not feed_links:
+            feed_links.extend(_filter_feed_links(links))
+            feed_links.extend(_filter_feedish_links(links))
 
     return feed_links
 
@@ -176,7 +172,7 @@ def _is_feed(url):
     if scheme not in ('http', 'https'):
         return 0
 
-    data = _get(url).lower()
+    data = _get(url)
 
     # If an html tag is present,
     # assume it's not a feed.
@@ -191,7 +187,7 @@ def _is_feed_link(url):
     Check if a link is
     a feed link.
     """
-    return link[-4:] in ('.rss', '.rdf', '.xml', '.atom')
+    return url[-4:] in ('.rss', '.rdf', '.xml', '.atom')
 
 
 def _filter_feed_links(links):
@@ -227,10 +223,12 @@ def _get(url):
 
     try:
         resp = request.urlopen(req)
-        data = resp.read()
+        data = resp.read().decode('utf-8').lower()
         return data
 
     except request.HTTPError as e:
         print('HTTP Error:', e.code, url)
+        return ''
     except request.URLError as e:
         print('URL Error:', e.reason, url)
+        return ''
