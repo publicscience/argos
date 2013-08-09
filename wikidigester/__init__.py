@@ -113,6 +113,7 @@ class WikiDigester(Digester):
         """
 
         # Get the text we need.
+        id = elem.find('{%s}id' % NAMESPACE).text
         title = elem.find('{%s}title' % NAMESPACE).text
         datetime = elem.find('{%s}timestamp' % NAMESPACE).text
         text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
@@ -123,10 +124,11 @@ class WikiDigester(Digester):
 
         # Assemble the doc.
         doc = {
+                '_id': id,
                 'title': title,
                 'datetime': datetime,
                 'freqs': data
               }
 
         # Save the doc
-        self.db.update({'title': title}, doc)
+        self.db.update({'_id': id}, doc)
