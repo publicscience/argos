@@ -109,6 +109,7 @@ class WikiDigester(Digester):
 
         # Get the text we need.
         title = elem.find('{%s}title' % NAMESPACE).text
+        datetime = elem.find('{%s}timestamp' % NAMESPACE).text
         text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
         text = self._clean(text)
 
@@ -118,8 +119,9 @@ class WikiDigester(Digester):
         # Assemble the doc.
         doc = {
                 'title': title,
+                'datetime': datetime,
                 'freqs': data
               }
 
-        a.empty() #for testing
-        #a.add(doc)
+        # Save the doc
+        a.update({'title': title}, doc)
