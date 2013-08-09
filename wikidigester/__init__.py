@@ -15,6 +15,7 @@ from brain import Brain
 #from mwlib.refine.compat import parse_txt
 
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
+DATABASE = 'shallowthought'
 
 class WikiDigester(Digester):
     """
@@ -75,7 +76,7 @@ class WikiDigester(Digester):
         Empties out the database for
         for this dump.
         """
-        a = Adipose('test', 'pages')
+        a = Adipose(DATABASE, 'pages')
         a.empty()
 
 
@@ -105,7 +106,7 @@ class WikiDigester(Digester):
         """
 
         # Create db interface.
-        a = Adipose('test', 'pages')
+        a = Adipose(DATABASE, 'pages')
 
         # Get the text we need.
         title = elem.find('{%s}title' % NAMESPACE).text
