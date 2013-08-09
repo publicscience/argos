@@ -26,15 +26,22 @@ class WikiDigester(Digester):
     def __init__(self, file, dump, namespace=NAMESPACE):
         """
         Initialize the WikiDigester with a file and a namespace.
+        The dumps can be:
+            * abstract => abstracts
+            * pagelinks => links between pages
+            * pages => i.e. pages-articles, the actual content
 
         Args:
             | file (str)        -- path to XML file (or bzipped XML) to digest.
-            | dump (str)        -- the name of the dump ('abstract', 'pagelinks', 'pages-articles')
+            | dump (str)        -- the name of the dump ('abstract', 'pagelinks', 'pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
         """
         super().__init__(file, namespace)
         self.dump = dump
         self.brain = Brain()
+
+        # Create db interface.
+        self.db = Adipose(DATABASE, self.dump)
 
 
     def fetch_dump(self):
@@ -47,7 +54,7 @@ class WikiDigester(Digester):
                     'base': 'http://dumps.wikimedia.org/enwiki/latest/',
                     'abstract': 'enwiki-latest-abstract.xml',
                     'pagelinks': 'enwiki-latest-pagelinks.sql.gz',
-                    'pages-articles': 'enwiki-latest-pages-articles.xml.bz2'
+                    'pages': 'enwiki-latest-pages-articles.xml.bz2'
                 }
 
         # Build full url.
@@ -63,7 +70,7 @@ class WikiDigester(Digester):
         Each kind of dump is processed differently.
         """
 
-        if self.dump == 'pages-articles':
+        if self.dump == 'pages':
             self.iterate('page', self._process_pages)
         elif self.dump == 'pagelinks':
             pass
@@ -76,7 +83,7 @@ class WikiDigester(Digester):
         Empties out the database for
         for this dump.
         """
-        a = Adipose(DATABASE, 'pages')
+        a = Adipose(DATABASE, self.dump)
         a.empty()
 
 
@@ -105,9 +112,6 @@ class WikiDigester(Digester):
         and store to a database.
         """
 
-        # Create db interface.
-        a = Adipose(DATABASE, 'pages')
-
         # Get the text we need.
         title = elem.find('{%s}title' % NAMESPACE).text
         datetime = elem.find('{%s}timestamp' % NAMESPACE).text
@@ -125,4 +129,4 @@ class WikiDigester(Digester):
               }
 
         # Save the doc
-        a.update({'title': title}, doc)
+        self.db.update({'title': title}, doc)
