@@ -70,6 +70,15 @@ class WikiDigester(Digester):
             pass
 
 
+    def purge(self):
+        """
+        Empties out the database for
+        for this dump.
+        """
+        a = Adipose('test', 'pages')
+        a.empty()
+
+
     def _clean(self, text):
         """
         Cleans up MediaWiki text of markup.
@@ -90,9 +99,27 @@ class WikiDigester(Digester):
 
 
     def _process_pages(self, elem):
-        #a = Adipose('test', 'pages')
-        text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
-        print(self.brain.count(text).plot())
+        """
+        Gather frequency distribution of a page,
+        and store to a database.
+        """
 
-        #a.empty() #for testing
-        #a.add(data)
+        # Create db interface.
+        a = Adipose('test', 'pages')
+
+        # Get the text we need.
+        title = elem.find('{%s}title' % NAMESPACE).text
+        text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
+        text = self._clean(text)
+
+        # Get freq dist data.
+        data = dict(self.brain.count(text))
+
+        # Assemble the doc.
+        doc = {
+                'title': title,
+                'freqs': data
+              }
+
+        a.empty() #for testing
+        #a.add(doc)
