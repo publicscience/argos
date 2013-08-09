@@ -8,9 +8,13 @@ Interface for Solr.
 import httplib2
 import sunburnt
 
-SOLR_URL = "http://localhost:8983/solr/"
+SOLR_URL = 'http://localhost:8983/solr/'
 
 class Memory:
+    """
+    An interface for Solr.
+    """
+
     def __init__(self):
         """
         Setup and connect to Solr,
@@ -19,55 +23,49 @@ class Memory:
         h = httplib2.Http(cache='/var/tmp/solr_cache')
         self.memory = sunburnt.SolrInterface(url=SOLR_URL, http_connection=h)
 
-    def recall_unaudited(self, page, per_page=10):
-        """
-        Retrieves unaudited Tweets.
-        """
-        per_page = 10
-        return self.memory.query(audited=False).paginate(start=page*per_page, rows=per_page).execute().result.docs
 
-    def recall_audited(self, page, per_page=10):
+    def recall_page(self, title, page=0, per_page=10):
         """
-        Retrieves audited Tweets.
-        """
-        return self.memory.query(audited=True).paginate(start=page*per_page, rows=per_page).execute().result.docs
+        Retrieves pages by title.
 
-    def recall_positive(self, page, per_page=10):
+        Args:
+            | title (str)       -- the title of the page to retrieve
+            | page (int)        -- the page number to return
+            | per_page (int)    -- the number of results to return per page
         """
-        Retrieves positive (audited) Tweets.
-        """
-        return self.memory.query(audited=True, positive=True).paginate(start=page*per_page, rows=per_page).execute().result.docs
-
-    def recall_negative(self, page, per_page=10):
-        """
-        Retrieves negative (audited) Tweets.
-        """
-        per_page = 10
-        return self.memory.query(audited=True, positive=False).paginate(start=page*per_page, rows=per_page).execute().result.docs
+        return self.memory.query(title=title).paginate(start=page*per_page, rows=per_page).execute().result.docs
 
 
-    def forget(self, tweet):
+    def forget(self, doc):
         """
-        Deletes a Tweet from Solr.
+        Deletes a doc from Solr.
+
+        Args:
+            | doc (dict)  -- the doc object to delete
         """
-        self.memory.delete(tweet)
+        self.memory.delete(doc)
         self.memory.commit()
 
-    def recall(self, tweet_id):
+
+    def recall(self, doc_id):
         """
-        Retrieves a Tweet by id from Solr.
+        Retrieves a doc by id from Solr.
+
+        Args:
+            | doc_id (str)  -- the doc id to retrieve
         """
-        response = self.memory.query(id=tweet_id).execute()
+        response = self.memory.query(id=doc_id).execute()
         if response:
             return response.result.docs[0]
 
-    def memorize(self, tweet):
+
+    def memorize(self, doc):
         """
-        Adds a Tweet to Solr.
+        Adds a doc to Solr.
 
         Args:
-            tweet (string): the Tweet content
+            | doc (str)  -- the doc content
         """
-        self.memory.add(tweet)
+        self.memory.add(doc)
         self.memory.commit()
 
