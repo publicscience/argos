@@ -86,12 +86,9 @@ feeds will be provided by
 [Readability](https://github.com/buriy/python-readability). Twitter
 support will probably be excluded from MVP/V1.0.
 
-### Digester (in progress)
-The `Digester` manages the Wikipedia knowledge base. The core module
-will handle the parsing of the Wikipedia XML dump, with the help of
-[mwlib](https://github.com/pediapress/mwlib). This parsing includes some
-NLP processing, including tokenization, lemmatization, and frequency
-distribution.
+### Digester
+The `Digester` manages the XML parsing. It is a superclass of the
+`WikiDigester`.
 
 The `Digester` also includes:
 
@@ -110,11 +107,17 @@ of storing the parsed and processed information into MongoDB.
 
 ### Brain (in progress)
 The `Brain` provides the text processing functionality, so it functions
-mostly as a wrapper for NLTK.
+mostly as a wrapper for NLTK. It provides parsing functionality such as
+tokenization, lemmatization, and frequency distribution.
 
 ### WikiDigester (in progress)
 The `WikiDigester` is a subclass of the `Digester` and is essentially a
 Digester designed to specifically handle Wikipedia dumps. As such, it
 has some special functionality tailored to this.
+
+### Memory (in progress)
+The `Memory` provides an interface to Solr. The actual Solr instance
+still needs to be ported in with a proper Solr configuration (see
+[Parrott](https://github.com/ftzeng/parrott)).
 
 
