@@ -102,9 +102,6 @@ class WikiDigester(Digester):
         Gather frequency distribution of a page,
         category names, and linked page names,
         and store to the database.
-
-        Need to determine which title is the "true" title
-        (see source for title vs ctitle).
         """
 
         # Get the text we need.
@@ -116,6 +113,8 @@ class WikiDigester(Digester):
 
         # 'ctitle' indicates 'canonical title', i.e. the redirect title, which appears
         # to be the 'official' title of a page. Not all pages have redirects.
+        # Redirects are the title that alternative titles redirect *to*,
+        # thus they could be considered canonical.
         if redirect:
             ctitle = redirect.attrib.get('title')
         else:
