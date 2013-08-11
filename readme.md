@@ -53,6 +53,15 @@ Then you can install this unofficial port like so:
 You should be able to import and use the unofficial port like you would
 the official library (limited to the parsing functions, of course).
 
+To add to this Python 3 porting bonanza, the official `readability-lxml` does not yet support Python 3.
+I have put together an [unofficial
+port](https://github.com/ftzeng/python-readability), which can be
+installed like so:
+```bash
+(shallowthought-env) $ pip uninstall readability-lxml
+(shallowthought-env) $ pip install git+git://github.com/ftzeng/python-readability.git
+```
+
 ## MongoDB
 To setup and run MongoDB ([download](http://www.mongodb.org/downloads)):
 ```bash
