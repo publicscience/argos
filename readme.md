@@ -31,7 +31,24 @@ On OSX, this can be installed with [Homebrew](http://brew.sh/):
 ```bash
 $ brew install libevent
 ```
-Note: `mwlib` is not currently being used. It does not support Python 3.
+The official `mwlib` does not support Python 3 yet.
+I have put together an unofficial, minimal port 
+([mwlib_simple](https://github.com/ftzeng/mwlib_simple))
+to use until the official library has been ported.
+
+Prior to install this port, there are some dependencies:
+```bash
+(shallowthought-env) $ brew install re2c
+(shallowthought-env) $ pip install cython
+```
+
+Then you can install this unofficial port like so:
+```bash
+(shallowthought-env) $ git clone https://github.com/ftzeng/mwlib_simple.git
+(shallowthought-env) $ cd mwlib_simple
+(shallowthought-env) $ python setup.py install
+(shallowthought-env) $ cd .. && rm -rf mwlib_simple
+```
 
 ## MongoDB
 To setup and run MongoDB ([download](http://www.mongodb.org/downloads)):
