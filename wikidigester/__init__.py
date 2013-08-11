@@ -27,12 +27,11 @@ class WikiDigester(Digester):
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
             * abstract => abstracts
-            * pagelinks => links between pages
             * pages => i.e. pages-articles, the actual content
 
         Args:
             | file (str)        -- path to XML file (or bzipped XML) to digest.
-            | dump (str)        -- the name of the dump ('abstract', 'pagelinks', 'pages')
+            | dump (str)        -- the name of the dump ('abstract', 'pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
         """
         super().__init__(file, namespace)
@@ -52,7 +51,6 @@ class WikiDigester(Digester):
         dumps = {
                     'base': 'http://dumps.wikimedia.org/enwiki/latest/',
                     'abstract': 'enwiki-latest-abstract.xml',
-                    'pagelinks': 'enwiki-latest-pagelinks.sql.gz',
                     'pages': 'enwiki-latest-pages-articles.xml.bz2'
                 }
 
@@ -71,8 +69,6 @@ class WikiDigester(Digester):
 
         if self.dump == 'pages':
             self.iterate('page', self._process_pages)
-        elif self.dump == 'pagelinks':
-            pass
         elif self.dump == 'abstract':
             pass
 
