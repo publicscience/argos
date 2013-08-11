@@ -5,7 +5,7 @@ from digester import Digester
 
 class DigesterTest(unittest.TestCase):
     def setUp(self):
-        self.d = Digester('tests/data/wiki.xml', 'http://www.mediawiki.org/xml/export-0.8')
+        self.d = Digester('tests/data/article.xml', 'http://www.mediawiki.org/xml/export-0.8')
 
     def tearDown(self):
         self.d = None

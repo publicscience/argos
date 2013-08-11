@@ -113,9 +113,9 @@ class WikiDigester(Digester):
         """
 
         # Get the text we need.
-        id = elem.find('{%s}id' % NAMESPACE).text
+        id = int(elem.find('{%s}id' % NAMESPACE).text)
         title = elem.find('{%s}title' % NAMESPACE).text
-        datetime = elem.find('{%s}timestamp' % NAMESPACE).text
+        datetime = elem.find('{%s}revision' % NAMESPACE).find('{%s}timestamp' % NAMESPACE).text
         text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
 
         # Extract certain elements.
