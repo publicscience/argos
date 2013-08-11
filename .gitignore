@@ -4,7 +4,7 @@ shallowthought-env/
 .sass-cache/
 node_modules/
 fontcustom/*
-data/
+data/wiki/*.xml
 mongodb/
 *.swp
 doc/_build
