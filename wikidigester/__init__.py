@@ -26,12 +26,11 @@ class WikiDigester(Digester):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
-            * abstract => abstracts
             * pages => i.e. pages-articles, the actual content
 
         Args:
             | file (str)        -- path to XML file (or bzipped XML) to digest.
-            | dump (str)        -- the name of the dump ('abstract', 'pages')
+            | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
         """
         super().__init__(file, namespace)
@@ -44,13 +43,12 @@ class WikiDigester(Digester):
 
     def fetch_dump(self):
         """
-        Downloads this instance's Wikipedia dump to replace
-        this instance's current file.
+        Downloads this instance"s Wikipedia dump to replace
+        this instance"s current file.
         """
 
         dumps = {
                     'base': 'http://dumps.wikimedia.org/enwiki/latest/',
-                    'abstract': 'enwiki-latest-abstract.xml',
                     'pages': 'enwiki-latest-pages-articles.xml.bz2'
                 }
 
@@ -63,14 +61,12 @@ class WikiDigester(Digester):
 
     def digest(self):
         """
-        Will process this instance's dump.
+        Will process this instance"s dump.
         Each kind of dump is processed differently.
         """
 
         if self.dump == 'pages':
             self.iterate('page', self._process_pages)
-        elif self.dump == 'abstract':
-            pass
 
 
     def purge(self):
@@ -85,12 +81,12 @@ class WikiDigester(Digester):
     def _clean(self, text):
         """
         Cleans up MediaWiki text of markup.
-        Currently a 'naive' version in that
+        Currently a "naive" version in that
         it just strips *all* punctuation.
 
         Will eventually want to strip out unnecessary
-        markup syntax as well, such as "File:" and
-        "Category".
+        markup syntax as well, such as 'File:' and
+        'Category'.
 
         Args:
             | text (str)    -- the MediaWiki text to cleanup.
@@ -105,7 +101,10 @@ class WikiDigester(Digester):
         """
         Gather frequency distribution of a page,
         category names, and linked page names,
-        and store to a database.
+        and store to the database.
+
+        Need to determine which title is the "true" title
+        (see source for title vs ctitle).
         """
 
         # Get the text we need.
@@ -113,6 +112,14 @@ class WikiDigester(Digester):
         title = elem.find('{%s}title' % NAMESPACE).text
         datetime = elem.find('{%s}revision' % NAMESPACE).find('{%s}timestamp' % NAMESPACE).text
         text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
+        redirect = elem.find('{%s}redirect' % NAMESPACE)
+
+        # 'ctitle' indicates 'canonical title', i.e. the redirect title, which appears
+        # to be the 'official' title of a page. Not all pages have redirects.
+        if redirect:
+            ctitle = redirect.attrib.get('title')
+        else:
+            ctitle = title
 
         # Extract certain elements.
         # pagelinks is a list of linked page titles.
@@ -121,8 +128,8 @@ class WikiDigester(Digester):
         pagelinks = [pagelink.full_target for pagelink in result.find(parser.ArticleLink)]
 
         # Have to trim the beginning of Category links.
-        # So "Category:Anarchism" becomes just "Anarchism".
-        cstart = len("Category:")
+        # So 'Category:Anarchism' becomes just 'Anarchism'.
+        cstart = len('Category:')
         categories = [category.full_target[cstart:] for category in result.find(parser.CategoryLink)]
 
         # Get freq dist data.
@@ -131,8 +138,8 @@ class WikiDigester(Digester):
 
         # Assemble the doc.
         doc = {
-                '_id': id,
                 'title': title,
+                'redirect': ctitle,
                 'datetime': datetime,
                 'freqs': data,
                 'categories': categories,
@@ -140,4 +147,6 @@ class WikiDigester(Digester):
               }
 
         # Save the doc
-        self.db.update({'_id': id}, doc)
+        # If it exists, update the existing doc.
+        # If not, create it.
+        self.db.update({'_id': id}, {'$set': doc})
