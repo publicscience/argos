@@ -10,9 +10,8 @@ from adipose import Adipose
 from textutils import depunctuate
 from brain import Brain
 
-# mwlib does not support python 3. need to look for alternatives...
-#from mwlib import parser
-#from mwlib.refine.compat import parse_txt
+from mwlib import parser
+from mwlib.refine.compat import parse_txt
 
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
 DATABASE = 'shallowthought'
@@ -109,6 +108,7 @@ class WikiDigester(Digester):
     def _process_pages(self, elem):
         """
         Gather frequency distribution of a page,
+        category names, and linked page names,
         and store to a database.
         """
 
@@ -117,17 +117,30 @@ class WikiDigester(Digester):
         title = elem.find('{%s}title' % NAMESPACE).text
         datetime = elem.find('{%s}timestamp' % NAMESPACE).text
         text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
-        text = self._clean(text)
+
+        # Extract certain elements.
+        # pagelinks is a list of linked page titles.
+        # categories is a list of this page's category titles.
+        result = parse_txt(text)
+        pagelinks = [pagelink.full_target for pagelink in result.find(parser.ArticleLink)]
+
+        # Have to trim the beginning of Category links.
+        # So "Category:Anarchism" becomes just "Anarchism".
+        cstart = len("Category:")
+        categories = [category.full_target[cstart:] for category in result.find(parser.CategoryLink)]
 
         # Get freq dist data.
-        data = dict(self.brain.count(text))
+        clean_text = self._clean(text)
+        data = dict(self.brain.count(clean_text))
 
         # Assemble the doc.
         doc = {
                 '_id': id,
                 'title': title,
                 'datetime': datetime,
-                'freqs': data
+                'freqs': data,
+                'categories': categories,
+                'pagelinks': pagelinks
               }
 
         # Save the doc
