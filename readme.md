@@ -36,7 +36,7 @@ I have put together an unofficial, minimal port
 ([mwlib_simple](https://github.com/ftzeng/mwlib_simple))
 to use until the official library has been ported.
 
-Prior to install this port, there are some dependencies:
+Prior to installation of this port, there are some dependencies:
 ```bash
 (shallowthought-env) $ brew install re2c
 (shallowthought-env) $ pip install cython
@@ -49,6 +49,9 @@ Then you can install this unofficial port like so:
 (shallowthought-env) $ python setup.py install
 (shallowthought-env) $ cd .. && rm -rf mwlib_simple
 ```
+
+You should be able to import and use the unofficial port like you would
+the official library (limited to the parsing functions, of course).
 
 ## MongoDB
 To setup and run MongoDB ([download](http://www.mongodb.org/downloads)):
