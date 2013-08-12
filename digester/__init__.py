@@ -55,7 +55,8 @@ class Digester:
                 print(elem.find('{%s}title' % namespace).text.encode('utf-8'))
         """
 
-        # If bzip (bz2)...
+        # Check if the file is bzipped
+        # and handle accordingly.
         ext = os.path.splitext(self.file)[1]
         if ext == '.bz2':
             file = bz2.BZ2File(self.file, 'r')
