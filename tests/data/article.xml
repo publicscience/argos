@@ -1,5 +1,24 @@
 <mediawiki xmlns="http://www.mediawiki.org/xml/export-0.8/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.8/ http://www.mediawiki.org/xml/export-0.8.xsd" version="0.8" xml:lang="en">
   <page>
+    <title>Fake</title>
+    <ns>4</ns>
+    <id>13</id>
+    <revision>
+      <id>563200406</id>
+      <parentid>563200009</parentid>
+      <timestamp>2013-07-07T05:02:36Z</timestamp>
+      <contributor>
+        <username>Bhny</username>
+        <id>285109</id>
+      </contributor>
+      <comment>simplified strangely convoluted first paragraph</comment>
+      <text xml:space="preserve">this is just a test...of the emergency broadcast system</text>
+      <sha1>2qqjxfkd9qhlb9am7g9que237zxqg6n</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+  </page>
+  <page>
     <title>Anarchism</title>
     <ns>0</ns>
     <id>12</id>

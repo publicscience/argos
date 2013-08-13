@@ -69,34 +69,6 @@ class WikiDigester(Digester):
             self.iterate('page', self._process_pages)
 
 
-    def purge(self):
-        """
-        Empties out the database for
-        for this dump.
-        """
-        a = Adipose(DATABASE, self.dump)
-        a.empty()
-
-
-    def _clean(self, text):
-        """
-        Cleans up MediaWiki text of markup.
-        Currently a "naive" version in that
-        it just strips *all* punctuation.
-
-        Will eventually want to strip out unnecessary
-        markup syntax as well, such as 'File:' and
-        'Category'.
-
-        Args:
-            | text (str)    -- the MediaWiki text to cleanup.
-
-        Returns:
-            | str -- the replaced text.
-        """
-        return depunctuate(text)
-
-
     def _process_pages(self, elem):
         """
         Gather frequency distribution of a page,
@@ -104,12 +76,19 @@ class WikiDigester(Digester):
         and store to the database.
         """
 
+
+        # Check the namespace,
+        # only namespace 0 are articles.
+        # https://en.wikipedia.org/wiki/Wikipedia:Namespace
+        ns = int(self._find(elem, 'ns').text)
+        if ns != 0: return
+
         # Get the text we need.
-        id = int(elem.find('{%s}id' % NAMESPACE).text)
-        title = elem.find('{%s}title' % NAMESPACE).text
-        datetime = elem.find('{%s}revision' % NAMESPACE).find('{%s}timestamp' % NAMESPACE).text
-        text = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE).text
-        redirect = elem.find('{%s}redirect' % NAMESPACE)
+        id          = int(self._find(elem, 'id').text)
+        title       = self._find(elem, 'title').text
+        datetime    = self._find(elem, 'revision', 'timestamp').text
+        text        = self._find(elem, 'revision', 'text').text
+        redirect    = self._find(elem, 'redirect')
 
         # 'ctitle' indicates 'canonical title', i.e. the redirect title, which appears
         # to be the 'official' title of a page. Not all pages have redirects.
@@ -149,3 +128,59 @@ class WikiDigester(Digester):
         # If it exists, update the existing doc.
         # If not, create it.
         self.db.update({'_id': id}, {'$set': doc})
+
+
+    def _find(self, elem, *tags):
+        """
+        Finds a particular subelement of an element.
+
+        Args:
+            | elem (lxml Element)  -- the MediaWiki text to cleanup.
+            | *tags (strs)      -- the tag names to use. See below for clarification.
+
+        Returns:
+            | lxml Element -- the target element.
+
+        You need to provide the tags that lead to it.
+        For example, the `text` element is contained
+        in the `revision` element, so this method would
+        be used like so::
+
+            self._find(elem, 'revision', 'text')
+
+        This method is meant to replace chaining calls
+        like this::
+
+            text_el = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE)
+        """
+        for tag in tags:
+            elem = elem.find('{%s}%s' % (NAMESPACE, tag))
+        return elem
+
+
+    def _clean(self, text):
+        """
+        Cleans up MediaWiki text of markup.
+        Currently a "naive" version in that
+        it just strips *all* punctuation.
+
+        Will eventually want to strip out unnecessary
+        markup syntax as well, such as 'File:' and
+        'Category'.
+
+        Args:
+            | text (str)    -- the MediaWiki text to cleanup.
+
+        Returns:
+            | str -- the replaced text.
+        """
+        return depunctuate(text)
+
+
+    def purge(self):
+        """
+        Empties out the database for
+        for this dump.
+        """
+        a = Adipose(DATABASE, self.dump)
+        a.empty()
