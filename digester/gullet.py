@@ -10,8 +10,7 @@ Can resume downloads if the server supports it
 """
 
 from urllib import request
-import os
-import sys
+import os, time, sys
 
 CHUNK = 16 * 1024
 
@@ -34,8 +33,10 @@ def download(url, save_path, progress=False):
 
     existing_size = 0
 
-    # If file already exists...
-    if os.path.exists(file):
+    # If file already exists,
+    # or a newer file is on the server
+    # (which invalids the in-progress d/l)
+    if os.path.exists(file) and not _expired():
         # Append to existing file.
         outfile = open(file, 'ab')
 
@@ -46,9 +47,9 @@ def download(url, save_path, progress=False):
         headers = {'Range': 'bytes=%s-' % (existing_size)}
         req = request.Request(url, headers=headers)
 
-    # Otherwise, create a new file.
+    # Otherwise, create a new/overwrite existing file.
     else:
-        # Create a new file.
+        # Create/overwrite file.
         outfile = open(file, 'wb')
 
         # Vanilla request.
@@ -96,6 +97,30 @@ def download(url, save_path, progress=False):
         print('URL Error:', e.reason, url)
 
 
+def _expired(url, file):
+    """
+    Determines if the remote file
+    is newer than the local file.
+    """
+    req = request.Request(url)
+    try:
+        resp = request.urlopen(req)
+
+        # Server file last modified.
+        last_mod = resp.headers['Last-Modified']
+        last_mod_time = time.strptime(last_mod, '%a, %d %b %Y %H:%M:%S %Z')
+
+        # Local file last modified.
+        file_last_mod = os.path.getmtime(file)
+        file_last_mod_time = time.gmtime(file_last_mod)
+
+        return last_mod_time > file_last_mod_time
+
+    except request.HTTPError as e:
+        print('HTTP Error:', e.code, url)
+    except request.URLError as e:
+        print('URL Error:', e.reason, url)
+
 def _progress(percent):
     """
     Show a progress bar.
@@ -112,7 +137,6 @@ def _progress(percent):
 
 
 def main():
-    import sys
     if len(sys.argv) < 2:
         sys.exit('Please pass a URL to download from.')
     url = sys.argv[1]

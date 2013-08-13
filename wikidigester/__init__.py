@@ -43,8 +43,8 @@ class WikiDigester(Digester):
 
     def fetch_dump(self):
         """
-        Downloads this instance"s Wikipedia dump to replace
-        this instance"s current file.
+        Downloads this instance's Wikipedia dump to replace
+        this instance's current file.
         """
 
         dumps = {
@@ -61,7 +61,7 @@ class WikiDigester(Digester):
 
     def digest(self):
         """
-        Will process this instance"s dump.
+        Will process this instance's dump.
         Each kind of dump is processed differently.
         """
 
