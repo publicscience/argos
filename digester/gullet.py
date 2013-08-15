@@ -1,4 +1,4 @@
-#!../shallowthought-env/bin/python
+#!../env/dev/bin/python
 
 """
 Gullet

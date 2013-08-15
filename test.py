@@ -1,4 +1,4 @@
-#!shallowthought-env/bin/python
+#!env/shallowthought-env/bin/python
 
 from wikidigester import WikiDigester
 

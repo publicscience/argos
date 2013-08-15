@@ -1,5 +1,3 @@
-#!../shallowthought-env/bin/python
-
 import unittest
 from wikidigester import WikiDigester
 from adipose import Adipose

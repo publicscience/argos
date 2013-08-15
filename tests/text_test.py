@@ -1,5 +1,3 @@
-#!../shallowthought-env/bin/python
-
 import unittest
 import textutils
 

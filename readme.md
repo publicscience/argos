@@ -2,22 +2,22 @@ Shallow Thought
 ===============
 
 ## Setup
-Make sure to setup & activate the `dev` virtualenv before you start:
+Make sure to setup & activate the `dev-env` virtualenv before you start:
 ```bash
-$ virtualenv env/dev --no-site-packages
-$ source env/dev/bin/activate
+$ virtualenv dev-env --no-site-packages
+$ source dev-env/bin/activate
 ```
 
 You may need to specify a Python 3 `virtualenv`, like so:
 ```bash
 $ pip3 install virtualenv
 $ virtualenv-3.3 env/dev --no-site-packages
-$ source env/dev/bin/activate
+$ source dev-env/bin/activate
 ```
 
 Then you can install the dependencies:
 ```bash
-(dev) $ pip install -r requirements.txt
+(dev-env) $ pip install -r requirements.txt
 ```
 
 Note that the `mwlib` package requires `libevent` on your computer.
@@ -40,7 +40,7 @@ These are libraries that do not currently support Python 3:
 
 The latest version of NLTK, which supports Python 3, is installed via:
 ```bash
-(dev) $ pip install git+git://github.com/nltk/nltk.git
+(dev-env) $ pip install git+git://github.com/nltk/nltk.git
 ```
 
 For `mwlib`, I have put together an unofficial, minimal port 
@@ -49,16 +49,16 @@ port should provide all the needed functionality.
 
 Prior to installation of this port, there are some dependencies:
 ```bash
-(dev) $ brew install re2c
-(dev) $ pip install cython
+(dev-env) $ brew install re2c
+(dev-env) $ pip install cython
 ```
 
 Then you can install this unofficial port like so:
 ```bash
-(dev) $ git clone https://github.com/ftzeng/mwlib_simple.git
-(dev) $ cd mwlib_simple
-(dev) $ python setup.py install
-(dev) $ cd .. && rm -rf mwlib_simple
+(dev-env) $ git clone https://github.com/ftzeng/mwlib_simple.git
+(dev-env) $ cd mwlib_simple
+(dev-env) $ python setup.py install
+(dev-env) $ cd .. && rm -rf mwlib_simple
 ```
 
 You should be able to import and use the unofficial port like you would
@@ -68,44 +68,46 @@ the official library (limited to the parsing functions, of course).
 I have put together an [unofficial port](https://github.com/ftzeng/python-readability),
 which can be installed like so:
 ```bash
-(dev) $ pip uninstall readability-lxml
-(dev) $ pip install git+git://github.com/ftzeng/python-readability.git
+(dev-env) $ pip install git+git://github.com/ftzeng/python-readability.git
 ```
 
 [Boto](https://github.com/boto/boto), which is a dependency of [mrjob](https://github.com/Yelp/mrjob),
 can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) installed via:
 ```bash
-(dev) $ pip install git+git://github.com/boto/boto.git@py3kport
+(dev-env) $ pip install git+git://github.com/boto/boto.git@py3kport
 ```
 
+But for now, I will have Boto and mrjob running in a separate Python 2.7
+environment.
+
 ## MongoDB
-To setup and run MongoDB ([download](http://www.mongodb.org/downloads)):
+To download and setup MongoDB, you can use the `tasks` script:
 ```bash
-$ cd /path/to/mongodb/download
-$ ./bin/mongod
+$ ./tasks setup mongo
+```
+
+Then, to run MongoDB:
+```bash
+$ ./tasks mongo
 ```
 That will run MongoDB locally at port `27107`.
 
 ## NLTK
-Usage of the NLTK library requires a few additional downloads. NLTK's
-download interface can be accessed like so:
+Usage of the NLTK library requires a few additional downloads.
+Some of the libraries are *not* Python 3 ready, so you won't
+be able to download all of the proper ones through the NLTK downloader
+interface.
 
+Instead, use the `tasks` script. You can install them all like so:
 ```bash
-$ python
->>> import nltk
->>> nltk.download()
+(dev-env) $ ./tasks setup nltk
 ```
-
-The necessary packages are:
-* Punkt
-* WordNet
 
 
 ## Documentation
 To generate documentation, do:
 ```bash
-$ cd doc
-$ make clean && make html
+(dev-env) $ ./tasks doc
 ```
 
 The documentation will be located at `doc/_build/html/index.html`.
@@ -113,7 +115,7 @@ The documentation will be located at `doc/_build/html/index.html`.
 ## Testing
 To run the tests:
 ```bash
-$ nosetests
+$ nosetests tests
 ```
 
 ## The Future (To Do)
