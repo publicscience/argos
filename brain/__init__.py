@@ -9,6 +9,7 @@ and "intelligence" faculties.
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk import FreqDist
 from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import stopwords
 import string
 
 class Brain:
@@ -41,13 +42,14 @@ class Brain:
 
         freqs = FreqDist()
         lemmr = WordNetLemmatizer()
+        stopwords = list(string.punctuation) + stopwords.words('english')
 
         # Tokenize
         for sentence in sent_tokenize(text):
             for word in word_tokenize(sentence):
 
-                # Ignore punctuation
-                if word in string.punctuation:
+                # Ignore punctuation and stopwords
+                if word in stopwords:
                     continue
 
                 # Lemmatize

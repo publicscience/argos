@@ -23,6 +23,8 @@ then
     # Install NLTK data.
     python -m nltk.downloader punkt
     python -m nltk.downloader wordnet
+    python -m nltk.downloader stopwords
+    #python -m nltk.downloader maxent_treebank_pos_tagger
 
     # Setup MongoDB.
     curl -o mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
