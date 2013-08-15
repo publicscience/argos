@@ -23,7 +23,7 @@ class Brain:
         Create a new brain.
         """
 
-    def count(self, text):
+    def count(self, text, threshold=0):
         """
         Tokenize, stem, and then
         count the word frequency
@@ -34,7 +34,9 @@ class Brain:
         albeit less accurate, alternative?
 
         Args:
-            | text (str)    -- the text to process.
+            | text (str)        -- the text to process.
+            | threshold (int)   -- optionally return only words
+                                with a count above this threshold.
 
         Returns:
             | FreqDist      -- NLTK FreqDist object.
@@ -57,5 +59,9 @@ class Brain:
 
                 # Count
                 freqs.inc(lemma)
+
+        # Filter frequencies
+        if threshold:
+            freqs = {word: count for word, count in freqs.items() if count > threshold}
 
         return freqs

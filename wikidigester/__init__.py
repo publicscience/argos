@@ -112,7 +112,7 @@ class WikiDigester(Digester):
 
         # Get freq dist data.
         clean_text = self._clean(text)
-        data = dict(self.brain.count(clean_text))
+        data = dict(self.brain.count(clean_text, threshold=2))
 
         # Assemble the doc.
         doc = {
