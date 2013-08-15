@@ -10,6 +10,8 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk import FreqDist
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
+from nltk.tag import pos_tag
+from nltk.chunk import batch_ne_chunk
 import string
 
 class Brain:
@@ -44,14 +46,14 @@ class Brain:
 
         freqs = FreqDist()
         lemmr = WordNetLemmatizer()
-        stopwords = list(string.punctuation) + stopwords.words('english')
+        stops = list(string.punctuation) + stopwords.words('english')
 
         # Tokenize
         for sentence in sent_tokenize(text):
             for word in word_tokenize(sentence):
 
                 # Ignore punctuation and stopwords
-                if word in stopwords:
+                if word in stops:
                     continue
 
                 # Lemmatize
@@ -65,3 +67,42 @@ class Brain:
             freqs = {word: count for word, count in freqs.items() if count > threshold}
 
         return freqs
+
+    def recognize(self, text):
+        """
+        Named entity recognition on
+        some text.
+
+        Args:
+            | text (str)    -- the text to process.
+
+        Returns:
+            | set           -- set of unique entity names.
+        """
+
+        sents     = sent_tokenize(text)
+        tokenized = [word_tokenize(sent) for sent in sents]
+        tagged    = [pos_tag(sent) for sent in tokenized]
+        chunked   = batch_ne_chunk(tagged, binary=True)
+
+        entities = []
+        for tree in chunked:
+            entities.extend(self._extract_entities(tree))
+
+        return set(entities)
+
+    def _extract_entities(self, tree):
+        """
+        Extract entities from a tree.
+
+        Args:
+            | tree (Tree) -- the tree to extract from.
+        """
+        entities = []
+        if hasattr(tree, 'node') and tree.node:
+            if tree.node == 'NE':
+                entities.append(' '.join([child[0] for child in tree]))
+            else:
+                for child in tree:
+                    entities.extend(self._extract_entities(child))
+        return entities
