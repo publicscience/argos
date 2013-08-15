@@ -20,21 +20,38 @@ Then you can install the dependencies:
 (shallowthought-env) $ pip install -r requirements.txt
 ```
 
-Since NLTK3.0 (which has Python 3 support) is still in development,
-you will likely need to install that separately:
-```bash
-(shallowthought-env) $ pip install git+git://github.com/nltk/nltk.git
-```
-
 Note that the `mwlib` package requires `libevent` on your computer.
 On OSX, this can be installed with [Homebrew](http://brew.sh/):
 ```bash
 $ brew install libevent
 ```
-The official `mwlib` does not support Python 3 yet.
-I have put together an unofficial, minimal port 
-([mwlib_simple](https://github.com/ftzeng/mwlib_simple))
-to use until the official library has been ported.
+
+### Python 3 insanity
+I have been trying to "future-proof" this project by building it in
+Python 3. Unfortunately, many of the libraries do not yet officially
+support Python 3.
+
+These are libraries that do not currently support Python 3:
+* NLTK – development for NLTK3.0, with Py3 support, is in progress.
+* Boto – a Py3 branch is available.
+* mrjob - no Py3 support available anywhere yet, though there is talk.
+* mwlib - do not appear to be plans for Py3 support.
+* readability-lxml - do not appear to be plans for Py3 support.
+
+The latest version of NLTK, which supports Python 3, is installed via:
+```bash
+(shallowthought-env) $ pip install git+git://github.com/nltk/nltk.git
+```
+
+[Boto](https://github.com/boto/boto), which is a dependency of [mrjob](https://github.com/Yelp/mrjob),
+can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) installed via:
+```bash
+(shallowthought-env) $ pip install git+git://github.com/boto/boto.git@py3kport
+```
+
+For `mwlib`, I have put together an unofficial, minimal port 
+([mwlib_simple](https://github.com/ftzeng/mwlib_simple)). This
+port should provide all the needed functionality.
 
 Prior to installation of this port, there are some dependencies:
 ```bash
@@ -53,10 +70,9 @@ Then you can install this unofficial port like so:
 You should be able to import and use the unofficial port like you would
 the official library (limited to the parsing functions, of course).
 
-To add to this Python 3 porting bonanza, the official `readability-lxml` does not yet support Python 3.
-I have put together an [unofficial
-port](https://github.com/ftzeng/python-readability), which can be
-installed like so:
+`readability-lxml`, is relatively simple, so it is easy to port.
+I have put together an [unofficial port](https://github.com/ftzeng/python-readability),
+which can be installed like so:
 ```bash
 (shallowthought-env) $ pip uninstall readability-lxml
 (shallowthought-env) $ pip install git+git://github.com/ftzeng/python-readability.git
