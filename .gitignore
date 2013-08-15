@@ -1,5 +1,5 @@
 .DS_Store
-shallowthought-env/
+env/
 *.pyc
 .sass-cache/
 node_modules/

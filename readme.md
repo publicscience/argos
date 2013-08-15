@@ -2,22 +2,22 @@ Shallow Thought
 ===============
 
 ## Setup
-Make sure to setup & activate the virtualenv before you start:
+Make sure to setup & activate the `dev` virtualenv before you start:
 ```bash
-$ virtualenv shallowthought-env --no-site-packages
-$ source shallowthought-env/bin/activate
+$ virtualenv env/dev --no-site-packages
+$ source env/dev/bin/activate
 ```
 
 You may need to specify a Python 3 `virtualenv`, like so:
 ```bash
 $ pip3 install virtualenv
-$ virtualenv-3.3 shallowthought-env --no-site-packages
-$ source shallowthought-env/bin/activate
+$ virtualenv-3.3 env/dev --no-site-packages
+$ source env/dev/bin/activate
 ```
 
 Then you can install the dependencies:
 ```bash
-(shallowthought-env) $ pip install -r requirements.txt
+(dev) $ pip install -r requirements.txt
 ```
 
 Note that the `mwlib` package requires `libevent` on your computer.
@@ -34,19 +34,13 @@ support Python 3.
 These are libraries that do not currently support Python 3:
 * NLTK – development for NLTK3.0, with Py3 support, is in progress.
 * Boto – a Py3 branch is available.
-* mrjob - no Py3 support available anywhere yet, though there is talk.
+* mrjob - no Py3 support available yet, but it is coming.
 * mwlib - do not appear to be plans for Py3 support.
 * readability-lxml - do not appear to be plans for Py3 support.
 
 The latest version of NLTK, which supports Python 3, is installed via:
 ```bash
-(shallowthought-env) $ pip install git+git://github.com/nltk/nltk.git
-```
-
-[Boto](https://github.com/boto/boto), which is a dependency of [mrjob](https://github.com/Yelp/mrjob),
-can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) installed via:
-```bash
-(shallowthought-env) $ pip install git+git://github.com/boto/boto.git@py3kport
+(dev) $ pip install git+git://github.com/nltk/nltk.git
 ```
 
 For `mwlib`, I have put together an unofficial, minimal port 
@@ -55,16 +49,16 @@ port should provide all the needed functionality.
 
 Prior to installation of this port, there are some dependencies:
 ```bash
-(shallowthought-env) $ brew install re2c
-(shallowthought-env) $ pip install cython
+(dev) $ brew install re2c
+(dev) $ pip install cython
 ```
 
 Then you can install this unofficial port like so:
 ```bash
-(shallowthought-env) $ git clone https://github.com/ftzeng/mwlib_simple.git
-(shallowthought-env) $ cd mwlib_simple
-(shallowthought-env) $ python setup.py install
-(shallowthought-env) $ cd .. && rm -rf mwlib_simple
+(dev) $ git clone https://github.com/ftzeng/mwlib_simple.git
+(dev) $ cd mwlib_simple
+(dev) $ python setup.py install
+(dev) $ cd .. && rm -rf mwlib_simple
 ```
 
 You should be able to import and use the unofficial port like you would
@@ -74,8 +68,14 @@ the official library (limited to the parsing functions, of course).
 I have put together an [unofficial port](https://github.com/ftzeng/python-readability),
 which can be installed like so:
 ```bash
-(shallowthought-env) $ pip uninstall readability-lxml
-(shallowthought-env) $ pip install git+git://github.com/ftzeng/python-readability.git
+(dev) $ pip uninstall readability-lxml
+(dev) $ pip install git+git://github.com/ftzeng/python-readability.git
+```
+
+[Boto](https://github.com/boto/boto), which is a dependency of [mrjob](https://github.com/Yelp/mrjob),
+can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) installed via:
+```bash
+(dev) $ pip install git+git://github.com/boto/boto.git@py3kport
 ```
 
 ## MongoDB
