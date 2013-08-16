@@ -97,7 +97,7 @@ class WikiDigester(Digester):
         # to be the 'official' title of a page. Not all pages have redirects.
         # Redirects are the title that alternative titles redirect *to*,
         # thus they could be considered canonical.
-        if redirect:
+        if redirect is not None:
             ctitle = redirect.attrib.get('title')
         else:
             ctitle = title
