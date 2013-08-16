@@ -7,8 +7,7 @@ Handles Wikipedia dump processing.
 
 from digester import Digester
 from adipose import Adipose
-from textutils import depunctuate
-from brain import Brain
+import brain
 
 from mwlib import parser
 from mwlib.refine.compat import parse_txt
@@ -40,7 +39,6 @@ class WikiDigester(Digester):
             Digester.__init__(self, file, namespace)
 
         self.dump = dump
-        self.brain = Brain()
 
         # Create db interface.
         self.db = Adipose(DATABASE, self.dump)
@@ -117,7 +115,7 @@ class WikiDigester(Digester):
 
         # Get freq dist data.
         clean_text = self._clean(text)
-        data = dict(self.brain.count(clean_text, threshold=2))
+        data = dict(brain.count(clean_text, threshold=2))
 
         # Assemble the doc.
         doc = {
@@ -179,7 +177,7 @@ class WikiDigester(Digester):
         Returns:
             | str -- the replaced text.
         """
-        return depunctuate(text)
+        return brain.depunctuate(text)
 
 
     def purge(self):
