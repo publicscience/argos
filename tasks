@@ -18,10 +18,17 @@ then
     source dev-env/bin/activate
     nosetests
 
+elif [[ $1 == 'profile' ]]
+then
+    # Profile
+    source dev-env/bin/activate
+    python -m cProfile -s tottime tests/wikidigester_test.py
+
 elif [[ $1 == 'setup' ]]
 then
     if [[ $2 == 'nltk' ]]
     then
+        source dev-env/bin/activate
         # Install NLTK data.
 
         # Tokenizing and lemmatization.
@@ -52,6 +59,7 @@ then
 
     elif [[ $2 == 'mapreduce' ]]
     then
+        source mr-env/bin/activate
         # The mapreduce scripts require Python 2.7.
         # The NTLK data then needs to be the Python 2.7 data,
         # so it will be installed to a separate directory.
