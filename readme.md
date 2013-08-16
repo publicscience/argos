@@ -26,6 +26,8 @@ On OSX, this can be installed with [Homebrew](http://brew.sh/):
 $ brew install libevent
 ```
 
+---
+
 ### Python 3 insanity
 I have been trying to "future-proof" this project by building it in
 Python 3. Unfortunately, many of the libraries do not yet officially
@@ -77,6 +79,19 @@ can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) insta
 (dev-env) $ pip install git+git://github.com/boto/boto.git@py3kport
 ```
 
+#### NLTK
+Usage of the NLTK library requires a few additional downloads.
+Some of the libraries are *not* Python 3 ready, so you won't
+be able to download all of the proper ones through the NLTK downloader
+interface.
+
+Instead, use the `tasks` script. You can install them all like so:
+```bash
+(dev-env) $ ./tasks setup nltk
+```
+
+---
+
 ### Python 2.7 parallel universe
 
 But for now, I will have Boto and mrjob running in a separate Python 2.7
@@ -102,7 +117,9 @@ This can be accomplished via:
 (mr-env) $ ./tasks setup mapreduce
 ```
 
-## MongoDB
+---
+
+### MongoDB
 To download and setup MongoDB, you can use the `tasks` script:
 ```bash
 $ ./tasks setup mongo
@@ -114,17 +131,7 @@ $ ./tasks mongo
 ```
 That will run MongoDB locally at port `27107`.
 
-## NLTK
-Usage of the NLTK library requires a few additional downloads.
-Some of the libraries are *not* Python 3 ready, so you won't
-be able to download all of the proper ones through the NLTK downloader
-interface.
-
-Instead, use the `tasks` script. You can install them all like so:
-```bash
-(dev-env) $ ./tasks setup nltk
-```
-
+---
 
 ## Documentation
 To generate documentation, do:
@@ -134,11 +141,15 @@ To generate documentation, do:
 
 The documentation will be located at `doc/_build/html/index.html`.
 
+---
+
 ## Testing
 To run the tests:
 ```bash
 $ nosetests tests
 ```
+
+---
 
 ## The Future (To Do)
 * Perhaps the main area of future refinement will be all parts relating
