@@ -5,9 +5,11 @@ import re
 
 WORD_RE = re.compile(r"[\w']+")
 
-
 class MRWordFreqCount(MRJob):
-    def mapper(self, _, line):
+    def mapper_init(self):
+        pass
+
+    def mapper(self, key, line):
         for word in WORD_RE.findall(line):
             yield (word.lower(), 1)
 

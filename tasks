@@ -15,7 +15,7 @@ then
 elif [[ $1 == 'test' ]]
 then
     # Run tests
-    source env/dev/bin/activate
+    source dev-env/bin/activate
     nosetests
 
 elif [[ $1 == 'setup' ]]
