@@ -77,8 +77,30 @@ can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) insta
 (dev-env) $ pip install git+git://github.com/boto/boto.git@py3kport
 ```
 
+### Python 2.7 parallel universe
+
 But for now, I will have Boto and mrjob running in a separate Python 2.7
-environment.
+environment. This environment will run and manage the mapreduce jobs.
+
+It's pretty straightforward to setup this environment.
+If you're in the `dev-env`, you need to first deactivate it:
+```bash
+(dev-env) $ deactivate
+```
+
+And then you can setup the env:
+```bash
+$ virtualenv-2.7 mr-env --no-site-packages
+$ source mr-env/bin/activate
+(mr-env) $ pip install -r mapreduce/requirements.txt
+```
+
+Because the NLTK data used in a Python 2.7 environment is different than
+the data used in Python 3.3, you have to install that data separately.
+This can be accomplished via:
+```bash
+(mr-env) $ ./tasks setup mapreduce
+```
 
 ## MongoDB
 To download and setup MongoDB, you can use the `tasks` script:
