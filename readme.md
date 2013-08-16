@@ -131,8 +131,6 @@ $ ./tasks mongo
 ```
 That will run MongoDB locally at port `27107`.
 
----
-
 ## Documentation
 To generate documentation, do:
 ```bash
@@ -141,15 +139,11 @@ To generate documentation, do:
 
 The documentation will be located at `doc/_build/html/index.html`.
 
----
-
 ## Testing
 To run the tests:
 ```bash
 $ nosetests tests
 ```
-
----
 
 ## The Future (To Do)
 * Perhaps the main area of future refinement will be all parts relating
