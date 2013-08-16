@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ $1 == "doc" ]]
+if [[ $1 == 'doc' ]]
 then
     # Build documentation.
     cd doc
@@ -18,7 +18,7 @@ then
     source env/dev/bin/activate
     nosetests
 
-elif [[ $1 == "setup" ]]
+elif [[ $1 == 'setup' ]]
 then
     if [[ $2 == 'nltk' ]]
     then
@@ -49,6 +49,16 @@ then
         tar --extract --file=mongodb.tgz --strip-components=1 --directory=mongodb
         rm mongodb.tgz
         mkdir mongodb/data
+
+    elif [[ $2 == 'mapreduce' ]]
+    then
+        # The mapreduce scripts require Python 2.7.
+        # The NTLK data then needs to be the Python 2.7 data,
+        # so it will be installed to a separate directory.
+        for PACKAGE in punkt wordnet stopwords words maxent_treebank_pos_tagger maxent_ne_chunker
+        do
+            python -m nltk.downloader $PACKAGE -d mapreduce/nltk_data/
+        done
     fi
 fi
 

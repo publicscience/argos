@@ -1,6 +1,7 @@
 .DS_Store
 dev-env/
-mapreduce/mr-env/
+mr-env/
+mapreduce/nltk_data/
 *.pyc
 .sass-cache/
 node_modules/

@@ -33,7 +33,12 @@ class WikiDigester(Digester):
             | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
         """
-        super().__init__(file, namespace)
+        # Python 2.7 support.
+        try:
+            super().__init__(file, namespace)
+        except TypeError:
+            Digester.__init__(self, file, namespace)
+
         self.dump = dump
         self.brain = Brain()
 

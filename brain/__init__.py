@@ -6,6 +6,13 @@ Provides text processing
 and "intelligence" faculties.
 """
 
+# Python 2.7 support.
+import sys
+if sys.version_info <= (3,0):
+    # Point to Py2.7 NLTK data.
+    import nltk, os
+    nltk.data.path = [os.path.abspath('mapreduce/nltk_data/')]
+
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk import FreqDist
 from nltk.stem.wordnet import WordNetLemmatizer
