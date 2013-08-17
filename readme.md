@@ -145,6 +145,26 @@ To run the tests:
 $ nosetests tests
 ```
 
+## Profiling and Performance
+Some profiling for the `WikiDigester` is available in `profiler.py`; run
+it like so:
+```bash
+$ (dev-env) python profiler.py
+```
+After some quick profiling, the hangup is in `Brain.count`. In particular,
+it is the lemmatization that takes up the most time. 
+The profiler wiki data is 384KB. With lemmatization, it takes about 5.45
+seconds to process. Without, it takes only about 1.14 seconds.
+
+The full enwiki pages-articles dump is about 44.9GB. Which is about
+116927 times the amount of the profiler wiki data. With lemmatization,
+a rough estimate for completion is ~637252s ≈ 7 days, 9 hours.
+Without lemmatization, it is roughly 133297s ≈ 1 day, 13 hours.
+
+Turning `Brain.count()` into a mapreduce process should save a lot of
+time. Since it is fundamentally a word counting procedure, it should be
+well-suited for mapreduce.
+
 ## The Future (To Do)
 * Perhaps the main area of future refinement will be all parts relating
 to text processing and analysis.

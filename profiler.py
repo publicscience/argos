@@ -14,14 +14,16 @@ def profile_wikidigester():
     w.db = db
 
     print('Profiling WikiDigester...')
-    #cProfile.runctx('w.digest()', None, {'w': w})
 
     p = cProfile.Profile()
     p.runctx('w.digest()', None, {'w': w})
     ps = pstats.Stats(p)
 
-    # Print the top 10 functions that take the most time.
-    ps.strip_dirs().sort_stats('time').print_stats(10)
+    # See which specific func takes the most time.
+    #ps.strip_dirs().sort_stats('time').print_stats(10)
+
+    # See which top-level funcs takes the most time.
+    ps.sort_stats('cumulative').print_stats(10)
 
 
 if __name__ == '__main__':
