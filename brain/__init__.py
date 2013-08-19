@@ -43,7 +43,7 @@ def count(text, threshold=0):
                             with a count above this threshold.
 
     Returns:
-        | FreqDist      -- NLTK FreqDist object.
+        | dict      -- dict of {word: count}
     """
 
     freqs = FreqDist()
@@ -68,7 +68,7 @@ def count(text, threshold=0):
     if threshold:
         freqs = {word: count for word, count in freqs.items() if count > threshold}
 
-    return freqs
+    return dict(freqs)
 
 
 def recognize(text):

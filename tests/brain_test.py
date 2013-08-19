@@ -10,7 +10,7 @@ class BrainTest(unittest.TestCase):
 
     def test_simple_count(self):
         data = "hey there buddy, hey"
-        freqs = dict(brain.count(data))
+        freqs = brain.count(data)
 
         # 'there' is filtered out as a stopword.
         expected = {
