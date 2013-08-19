@@ -5,7 +5,7 @@ WikiDigester
 Handles Wikipedia dump processing.
 """
 
-from digester import Digester
+from . import Digester
 from adipose import Adipose
 import brain
 

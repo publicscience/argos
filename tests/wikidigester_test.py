@@ -1,5 +1,5 @@
 import unittest
-from wikidigester import WikiDigester
+from digester.wikidigester import WikiDigester
 from adipose import Adipose
 
 class WikiDigesterTest(unittest.TestCase):
@@ -45,7 +45,7 @@ class WikiDigesterTest(unittest.TestCase):
 
         # Check proper data.
         self.assertEqual(page['categories'], categories)
-        self.assertGreater(len(page['pagelinks']), num_pagelinks)
+        self.assertGreaterEqual(len(page['pagelinks']), num_pagelinks)
         self.assertEqual(page['datetime'], datetime)
         self.assertEqual(page['title'], title)
         self.assertEqual(page['redirect'], redirect)

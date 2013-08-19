@@ -1,6 +1,6 @@
 #!dev-env/bin/python
 
-from wikidigester import WikiDigester
+from digester.wikidigester import WikiDigester
 
 def main():
     w = WikiDigester('data/wiki/wiki.xml', 'pages')

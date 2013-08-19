@@ -15,7 +15,7 @@ Import considerations:
     to parse the dump.
 """
 
-from wikidigester import WikiDigester
+from digester.wikidigester import WikiDigester
 import schedule
 import time
 

@@ -1,5 +1,5 @@
 import cProfile, pstats
-from wikidigester import WikiDigester
+from digester.wikidigester import WikiDigester
 from adipose import Adipose
 
 def profile_wikidigester():
