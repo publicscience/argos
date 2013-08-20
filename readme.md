@@ -85,9 +85,9 @@ Some of the libraries are *not* Python 3 ready, so you won't
 be able to download all of the proper ones through the NLTK downloader
 interface.
 
-Instead, use the `tasks` script. You can install them all like so:
+Instead, use the `do` script. You can install them all like so:
 ```bash
-(dev-env) $ ./tasks setup nltk
+(dev-env) $ ./do setup nltk
 ```
 
 ---
@@ -118,27 +118,27 @@ Because the NLTK data used in a Python 2.7 environment is different than
 the data used in Python 3.3, you have to install that data separately.
 This can be accomplished via:
 ```bash
-(mr-env) $ ./tasks setup mapreduce
+(mr-env) $ ./do setup mapreduce
 ```
 
 ---
 
 ### MongoDB
-To download and setup MongoDB, you can use the `tasks` script:
+To download and setup MongoDB, you can use the `do` script:
 ```bash
-$ ./tasks setup mongo
+$ ./do setup mongo
 ```
 
 Then, to run MongoDB:
 ```bash
-$ ./tasks mongo
+$ ./do mongo
 ```
 That will run MongoDB locally at port `27107`.
 
 ## Documentation
 To generate documentation, do:
 ```bash
-(dev-env) $ ./tasks doc
+(dev-env) $ ./do doc
 ```
 
 The documentation will be located at `doc/_build/html/index.html`.
