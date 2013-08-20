@@ -93,6 +93,10 @@ Instead, use the `tasks` script. You can install them all like so:
 ---
 
 ### Python 2.7 parallel universe
+*Note: Currently this env is not in use. I have opted for Celery instead
+of MapReduce/mrjob for distributed Wiki processing. But MapReduce may
+come in handy again for other processing later, so I'm leaving this in
+for now.*
 
 But for now, I will have Boto and mrjob running in a separate Python 2.7
 environment. This environment will run and manage the mapreduce jobs.
