@@ -102,6 +102,9 @@ class WikiDigester(Digester):
         if self.distrib:
             # Send the processing of this page as
             # an async task to a worker.
+            # Pickle (the default serializer for Celery) has
+            # trouble serializing the lxml Element,
+            # so first convert it to a string.
             self._process_page_task.delay(tostring(elem))
         else:
             # Process synchronously.
@@ -122,14 +125,12 @@ class WikiDigester(Digester):
         text        = self._find(elem, 'revision', 'text').text
         redirect    = self._find(elem, 'redirect')
 
-        # 'ctitle' indicates 'canonical title', i.e. the redirect title, which appears
-        # to be the 'official' title of a page. Not all pages have redirects.
-        # Redirects are the title that alternative titles redirect *to*,
-        # thus they could be considered canonical.
+        # 'title' should be the canonical title, i.e. the 'official'
+        # title of a page. If the page redirects to another (the canonical
+        # page), the <redirect> elem contains the canonical title to which
+        # the page redirects.
         if redirect is not None:
-            ctitle = redirect.attrib.get('title')
-        else:
-            ctitle = title
+            title = redirect.attrib.get('title')
 
         # Extract certain elements.
         # pagelinks is a list of linked page titles.
@@ -149,7 +150,6 @@ class WikiDigester(Digester):
         # Assemble the doc.
         doc = {
                 'title': title,
-                'redirect': ctitle,
                 'datetime': datetime,
                 'freqs': data,
                 'categories': categories,
@@ -168,6 +168,7 @@ class WikiDigester(Digester):
         """
         Celery task for asynchronously processing a page.
         """
+        # Convert the elem back to an lxml Element.
         self._process_page(fromstring(elem))
 
 
