@@ -32,7 +32,13 @@ Copyright:
     2013: Francis Tseng
 """
 
-from urllib import request, parse
+# Python 2.7 support.
+try:
+    from urllib import request, parse
+except ImportError:
+    import urllib2 as request
+    import urlparse as parse
+
 import lxml.html
 
 def feeds(url):

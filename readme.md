@@ -2,28 +2,22 @@ Shallow Thought
 ===============
 
 ## Setup
-Make sure to setup & activate the virtualenv before you start:
+Make sure to setup & activate the `dev-env` virtualenv before you start:
 ```bash
-$ virtualenv shallowthought-env --no-site-packages
-$ source shallowthought-env/bin/activate
+$ virtualenv dev-env --no-site-packages
+$ source dev-env/bin/activate
 ```
 
 You may need to specify a Python 3 `virtualenv`, like so:
 ```bash
 $ pip3 install virtualenv
-$ virtualenv-3.3 shallowthought-env --no-site-packages
-$ source shallowthought-env/bin/activate
+$ virtualenv-3.3 env/dev --no-site-packages
+$ source dev-env/bin/activate
 ```
 
 Then you can install the dependencies:
 ```bash
-(shallowthought-env) $ pip install -r requirements.txt
-```
-
-Since NLTK3.0 (which has Python 3 support) is still in development,
-you will likely need to install that separately:
-```bash
-(shallowthought-env) $ pip install git+git://github.com/nltk/nltk.git
+(dev-env) $ pip install -r requirements.txt
 ```
 
 Note that the `mwlib` package requires `libevent` on your computer.
@@ -31,65 +25,120 @@ On OSX, this can be installed with [Homebrew](http://brew.sh/):
 ```bash
 $ brew install libevent
 ```
-The official `mwlib` does not support Python 3 yet.
-I have put together an unofficial, minimal port 
-([mwlib_simple](https://github.com/ftzeng/mwlib_simple))
-to use until the official library has been ported.
+
+---
+
+### Python 3 insanity
+I have been trying to "future-proof" this project by building it in
+Python 3. Unfortunately, many of the libraries do not yet officially
+support Python 3.
+
+These are libraries that do not currently support Python 3:
+* NLTK – development for NLTK3.0, with Py3 support, is in progress.
+* Boto – a Py3 branch is available.
+* mrjob - no Py3 support available yet, but it is coming.
+* mwlib - do not appear to be plans for Py3 support.
+* readability-lxml - do not appear to be plans for Py3 support.
+
+The latest version of NLTK, which supports Python 3, is installed via:
+```bash
+(dev-env) $ pip install git+git://github.com/nltk/nltk.git
+```
+
+For `mwlib`, I have put together an unofficial, minimal port 
+([mwlib_simple](https://github.com/ftzeng/mwlib_simple)). This
+port should provide all the needed functionality.
 
 Prior to installation of this port, there are some dependencies:
 ```bash
-(shallowthought-env) $ brew install re2c
-(shallowthought-env) $ pip install cython
+(dev-env) $ brew install re2c
+(dev-env) $ pip install cython
 ```
 
 Then you can install this unofficial port like so:
 ```bash
-(shallowthought-env) $ git clone https://github.com/ftzeng/mwlib_simple.git
-(shallowthought-env) $ cd mwlib_simple
-(shallowthought-env) $ python setup.py install
-(shallowthought-env) $ cd .. && rm -rf mwlib_simple
+(dev-env) $ git clone https://github.com/ftzeng/mwlib_simple.git
+(dev-env) $ cd mwlib_simple
+(dev-env) $ python setup.py install
+(dev-env) $ cd .. && rm -rf mwlib_simple
 ```
 
 You should be able to import and use the unofficial port like you would
 the official library (limited to the parsing functions, of course).
 
-To add to this Python 3 porting bonanza, the official `readability-lxml` does not yet support Python 3.
-I have put together an [unofficial
-port](https://github.com/ftzeng/python-readability), which can be
-installed like so:
+`readability-lxml`, is relatively simple, so it is easy to port.
+I have put together an [unofficial port](https://github.com/ftzeng/python-readability),
+which can be installed like so:
 ```bash
-(shallowthought-env) $ pip uninstall readability-lxml
-(shallowthought-env) $ pip install git+git://github.com/ftzeng/python-readability.git
+(dev-env) $ pip install git+git://github.com/ftzeng/python-readability.git
 ```
 
-## MongoDB
-To setup and run MongoDB ([download](http://www.mongodb.org/downloads)):
+[Boto](https://github.com/boto/boto), which is a dependency of [mrjob](https://github.com/Yelp/mrjob),
+can have its [Python 3 branch](https://github.com/boto/boto/tree/py3kport) installed via:
 ```bash
-$ cd /path/to/mongodb/download
-$ ./bin/mongod
+(dev-env) $ pip install git+git://github.com/boto/boto.git@py3kport
+```
+
+#### NLTK
+Usage of the NLTK library requires a few additional downloads.
+Some of the libraries are *not* Python 3 ready, so you won't
+be able to download all of the proper ones through the NLTK downloader
+interface.
+
+Instead, use the `tasks` script. You can install them all like so:
+```bash
+(dev-env) $ ./tasks setup nltk
+```
+
+---
+
+### Python 2.7 parallel universe
+*Note: Currently this env is not in use. I have opted for Celery instead
+of MapReduce/mrjob for distributed Wiki processing. But MapReduce may
+come in handy again for other processing later, so I'm leaving this in
+for now.*
+
+But for now, I will have Boto and mrjob running in a separate Python 2.7
+environment. This environment will run and manage the mapreduce jobs.
+
+It's pretty straightforward to setup this environment.
+If you're in the `dev-env`, you need to first deactivate it:
+```bash
+(dev-env) $ deactivate
+```
+
+And then you can setup the env:
+```bash
+$ virtualenv-2.7 mr-env --no-site-packages
+$ source mr-env/bin/activate
+(mr-env) $ pip install -r mapreduce/requirements.txt
+```
+
+Because the NLTK data used in a Python 2.7 environment is different than
+the data used in Python 3.3, you have to install that data separately.
+This can be accomplished via:
+```bash
+(mr-env) $ ./tasks setup mapreduce
+```
+
+---
+
+### MongoDB
+To download and setup MongoDB, you can use the `tasks` script:
+```bash
+$ ./tasks setup mongo
+```
+
+Then, to run MongoDB:
+```bash
+$ ./tasks mongo
 ```
 That will run MongoDB locally at port `27107`.
-
-## NLTK
-Usage of the NLTK library requires a few additional downloads. NLTK's
-download interface can be accessed like so:
-
-```bash
-$ python
->>> import nltk
->>> nltk.download()
-```
-
-The necessary packages are:
-* Punkt
-* WordNet
-
 
 ## Documentation
 To generate documentation, do:
 ```bash
-$ cd doc
-$ make clean && make html
+(dev-env) $ ./tasks doc
 ```
 
 The documentation will be located at `doc/_build/html/index.html`.
@@ -97,8 +146,28 @@ The documentation will be located at `doc/_build/html/index.html`.
 ## Testing
 To run the tests:
 ```bash
-$ nosetests
+$ nosetests tests
 ```
+
+## Profiling and Performance
+Some profiling for the `WikiDigester` is available in `profiler.py`; run
+it like so:
+```bash
+$ (dev-env) python profiler.py
+```
+After some quick profiling, the hangup is in `Brain.count`. In particular,
+it is the lemmatization that takes up the most time. 
+The profiler wiki data is 384KB. With lemmatization, it takes about 5.45
+seconds to process. Without, it takes only about 1.14 seconds.
+
+The full enwiki pages-articles dump is about 44.9GB. Which is about
+116927 times the amount of the profiler wiki data. With lemmatization,
+a rough estimate for completion is ~637252s ≈ 7 days, 9 hours.
+Without lemmatization, it is roughly 133297s ≈ 1 day, 13 hours.
+
+Turning `Brain.count()` into a mapreduce process should save a lot of
+time. Since it is fundamentally a word counting procedure, it should be
+well-suited for mapreduce.
 
 ## The Future (To Do)
 * Perhaps the main area of future refinement will be all parts relating

@@ -1,21 +1,16 @@
-#!../shallowthought-env/bin/python
-
 import unittest
-from brain import Brain
+import brain
 
 class BrainTest(unittest.TestCase):
     def setUp(self):
-        self.b = Brain()
+        pass
 
     def tearDown(self):
-        self.b = None
-
-    def test_instance(self):
-        self.assertIsInstance(self.b, Brain)
+        pass
 
     def test_simple_count(self):
         data = "hey there buddy, hey"
-        freqs = dict(self.b.count(data))
+        freqs = brain.count(data)
 
         # 'there' is filtered out as a stopword.
         expected = {
@@ -27,7 +22,7 @@ class BrainTest(unittest.TestCase):
     def test_entity_recognition(self):
         with open('tests/data/sample.txt', 'r') as f:
             sample = f.read()
-        results = self.b.recognize(sample)
+        results = brain.recognize(sample)
 
         expected = {
                 'Trinity',
@@ -53,6 +48,18 @@ class BrainTest(unittest.TestCase):
         }
 
         self.assertEqual(results, expected)
+
+    def test_trim(self):
+        data = '  hey      there           neighbor   '
+        self.assertEqual(brain.trim(data), 'hey there neighbor')
+
+    def test_depunctuate(self):
+        data = '[h%e@l&l~o* (t/h>e,r.e:'
+        self.assertEqual(brain.depunctuate(data), ' h e l l o   t h e r e ')
+
+    def test_sanitize(self):
+        data = '<html><h1 class="foo">hello there</h1></html>'
+        self.assertEqual(brain.sanitize(data), 'hello there')
 
 if __name__ == '__main__':
 	unittest.main()

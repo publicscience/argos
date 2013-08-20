@@ -1,5 +1,7 @@
 .DS_Store
-shallowthought-env/
+dev-env/
+mr-env/
+mapreduce/nltk_data/
 *.pyc
 .sass-cache/
 node_modules/

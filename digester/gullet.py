@@ -1,4 +1,4 @@
-#!../shallowthought-env/bin/python
+#!../env/dev/bin/python
 
 """
 Gullet
@@ -9,7 +9,12 @@ Can resume downloads if the server supports it
 (that is, it responds with an Accepts-Range header).
 """
 
-from urllib import request
+# Python 2.7 support.
+try:
+    from urllib import request
+except ImportError:
+    import urllib2 as request
+
 import os, time, sys
 
 CHUNK = 16 * 1024

@@ -1,5 +1,3 @@
-#!../shallowthought-env/bin/python
-
 import unittest
 from membrane.feed import Feed
 import membrane.feedfinder as feedfinder
