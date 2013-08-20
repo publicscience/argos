@@ -162,6 +162,11 @@ You can then start the RabbitMQ server with:
 $ rabbitmq-server
 ```
 
+You can start a Celery worker with the `do` script:
+```bash
+(dev-env) $ ./do worker
+```
+
 ## Documentation
 To generate documentation, do:
 ```bash
