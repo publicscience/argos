@@ -11,7 +11,6 @@ source $HOME/.screenrc
 # run the same command again.
 zombie qr
 
-screen -t vim ./do dev
 screen -t mongo ./do mongo
 screen -t worker ./do worker
 screen -t rabbit ./do mq
