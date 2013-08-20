@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Screen script
+# Run with: screen -S <session name> -c [filename]
+
+# Import your regular screen settings
+source $HOME/.screenrc
+
+# When a process dies, keep the window
+# until you input 'q'. Or, input 'r' to
+# run the same command again.
+zombie qr
+
+screen -t vim ./do dev
+screen -t mongo ./do mongo
+screen -t worker ./do worker
+screen -t rabbit ./do mq
+screen -t bash

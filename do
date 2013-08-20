@@ -1,43 +1,71 @@
 #!/bin/bash
 
+# These are various shortcuts for commonly-used commands.
+# Usage: ./do <command>
+
+
+# Build documentation.
 if [[ $1 == 'doc' ]]
 then
-    # Build documentation.
     cd doc
     make clean
     make html
 
+
+# Start MongoDB server.
 elif [[ $1 == 'mongo' ]]
 then
-    # Start MongoDB server.
     ./mongodb/bin/mongod --dbpath mongodb/data
 
+
+# Run tests.
 elif [[ $1 == 'test' ]]
 then
-    # Run tests
     source dev-env/bin/activate
     nosetests
 
+
+# Run profiler.
 elif [[ $1 == 'profile' ]]
 then
-    # Profile
     source dev-env/bin/activate
     python -m cProfile -s tottime tests/wikidigester_test.py
 
+
+# Start a local Celery worker.
 elif [[ $1 == 'worker' ]]
 then
+    source dev-env/bin/activate
     celery worker --loglevel=info --config=tasks.config
 
+
+# Start RabbitMQ server.
 elif [[ $1 == 'mq' ]]
 then
     rabbitmq-server
 
+
+# Start screen session with everything setup.
+elif [[ $1 == 'go' ]]
+then
+    screen -S shallowthought -c .screen
+
+
+# Startup Vim in the proper env.
+elif [[ $1 == 'dev' ]]
+then
+    source dev-env/bin/activate
+    vim .
+
+
+# Setup some stuff.
 elif [[ $1 == 'setup' ]]
 then
+
+    # Install NLTK data (Python 3)
     if [[ $2 == 'nltk' ]]
     then
         source dev-env/bin/activate
-        # Install NLTK data.
 
         # Tokenizing and lemmatization.
         python -m nltk.downloader punkt
@@ -56,6 +84,8 @@ then
         curl -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
         unzip ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
 
+
+    # Install MongoDB
     elif [[ $2 == 'mongo' ]]
     then
         # Setup MongoDB.
@@ -65,6 +95,7 @@ then
         rm mongodb.tgz
         mkdir mongodb/data
 
+    # Setup MapReduce NLTK packages (Python 2.7)
     elif [[ $2 == 'mapreduce' ]]
     then
         source mr-env/bin/activate
