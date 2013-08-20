@@ -12,6 +12,10 @@ import brain
 from mwlib import parser
 from mwlib.refine.compat import parse_txt
 
+from tasks import celery
+
+from lxml.etree import tostring, fromstring
+
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
 DATABASE = 'shallowthought'
 
@@ -21,7 +25,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump, namespace=NAMESPACE):
+    def __init__(self, file, dump, namespace=NAMESPACE, distrib=False):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
@@ -31,7 +35,11 @@ class WikiDigester(Digester):
             | file (str)        -- path to XML file (or bzipped XML) to digest.
             | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
+            | distrib (bool)    -- whether or not digestion should be distributed. Default to False.
+
+        Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
+
         # Python 2.7 support.
         try:
             super().__init__(file, namespace)
@@ -39,9 +47,7 @@ class WikiDigester(Digester):
             Digester.__init__(self, file, namespace)
 
         self.dump = dump
-
-        # Create db interface.
-        self.db = Adipose(DATABASE, self.dump)
+        self.distrib = distrib
 
 
     def fetch_dump(self):
@@ -62,6 +68,14 @@ class WikiDigester(Digester):
         self.download(url)
 
 
+    def purge(self):
+        """
+        Empties out the database for
+        for this dump.
+        """
+        self._db().empty()
+
+
     def digest(self):
         """
         Will process this instance's dump.
@@ -74,17 +88,32 @@ class WikiDigester(Digester):
 
     def _process_pages(self, elem):
         """
-        Gather frequency distribution of a page,
-        category names, and linked page names,
-        and store to the database.
+        Processes pages that are in
+        namespace=0 (i.e. articles).
         """
-
 
         # Check the namespace,
         # only namespace 0 are articles.
         # https://en.wikipedia.org/wiki/Wikipedia:Namespace
         ns = int(self._find(elem, 'ns').text)
         if ns != 0: return
+
+        # Process the page.
+        if self.distrib:
+            # Send the processing of this page as
+            # an async task to a worker.
+            self._process_page_task.delay(tostring(elem))
+        else:
+            # Process synchronously.
+            self._process_page(elem)
+
+
+    def _process_page(self, elem):
+        """
+        Gather frequency distribution of a page,
+        category names, and linked page names,
+        and store to the database.
+        """
 
         # Get the text we need.
         id          = int(self._find(elem, 'id').text)
@@ -130,7 +159,16 @@ class WikiDigester(Digester):
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
-        self.db.update({'_id': id}, {'$set': doc})
+        self._db().update({'_id': id}, {'$set': doc})
+
+
+    from celery.contrib.methods import task_method
+    @celery.task(filter=task_method)
+    def _process_page_task(self, elem):
+        """
+        Celery task for asynchronously processing a page.
+        """
+        self._process_page(fromstring(elem))
 
 
     def _find(self, elem, *tags):
@@ -180,10 +218,23 @@ class WikiDigester(Digester):
         return brain.depunctuate(text)
 
 
-    def purge(self):
+    def _db(self):
         """
-        Empties out the database for
-        for this dump.
+        Returns an interface for this digester's database.
+
+        If a database interface has been set externally,
+        just return that one.
+
+        Otherwise, return the 'canonical' database for this digester.
+
+        This approach is used instead of saving a database interface as
+        as instance variable because the latter approach encounters issues
+        when using distributed tasks.
+
+        The database interface cannot be properly serialized for distributed tasks,
+        so instead we just create a new interface when we need it.
         """
-        a = Adipose(DATABASE, self.dump)
-        a.empty()
+        if hasattr(self, 'db'):
+            return self.db
+        else:
+            return Adipose(DATABASE, self.dump)

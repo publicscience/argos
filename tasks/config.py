@@ -10,4 +10,4 @@ CELERY_MONGODB_BACKEND_SETTINGS = {
 }
 
 # What modules to import on start.
-CELERY_IMPORTS = ('tasks',)
+CELERY_IMPORTS = ('tasks','digester.wikidigester',)
