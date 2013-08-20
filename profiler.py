@@ -1,3 +1,11 @@
+"""
+Profiler
+==============
+
+A basic profiler to measure performance
+and identify bottlenecks.
+"""
+
 import cProfile, pstats
 from digester.wikidigester import WikiDigester
 from adipose import Adipose

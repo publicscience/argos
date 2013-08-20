@@ -135,6 +135,33 @@ $ ./do mongo
 ```
 That will run MongoDB locally at port `27107`.
 
+### Celery & RabbitMQ
+[Celery](http://www.celeryproject.org/) is used for distributed
+asynchronous tasks. It uses RabbitMQ as a broker (the server that
+manages the message queue, which workers pick up jobs from.)
+
+Celery and its dependencies should be installed with the
+`requirements.txt`. You may run into trouble installing `pytz`; I wasn't
+able to install it with pip. You can install it instead like so:
+```bash
+(dev-env) $ easy_install pytz
+```
+
+So you will also need `rabbitmq-server`. It also can be installed with Homebrew:
+```bash
+$ brew install rabbitmq
+```
+You will need to ensure that `/usr/local/sbin` is in your PATH; if it is
+not, add the following to your `~/.bash_profile`:
+```bash
+export PATH="/usr/local/sbin:$PATH"
+```
+
+You can then start the RabbitMQ server with:
+```bash
+$ rabbitmq-server
+```
+
 ## Documentation
 To generate documentation, do:
 ```bash

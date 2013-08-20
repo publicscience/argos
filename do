@@ -24,6 +24,14 @@ then
     source dev-env/bin/activate
     python -m cProfile -s tottime tests/wikidigester_test.py
 
+elif [[ $1 == 'worker' ]]
+then
+    celery worker --loglevel=info --config=tasks.config
+
+elif [[ $1 == 'mq' ]]
+then
+    rabbitmq-server
+
 elif [[ $1 == 'setup' ]]
 then
     if [[ $2 == 'nltk' ]]

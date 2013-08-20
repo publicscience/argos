@@ -1,5 +1,16 @@
 #!../mr-env/bin/python
 
+"""
+MapReduce
+==============
+
+MapReduce jobs for use with mrjob.
+
+Currently not being used, but being reserved
+for later usage (I imagine it will come in handy
+when doing more text processing?)
+"""
+
 from mrjob.job import MRJob
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
