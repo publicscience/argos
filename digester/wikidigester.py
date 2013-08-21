@@ -162,6 +162,11 @@ class WikiDigester(Digester):
                 'pagelinks': pagelinks
               }
 
+        # For exploring the data as separate files.
+        #import json
+        #json.dump(doc, open('dumps/%s' % title, 'w'), sort_keys=True,
+                #indent=4, separators=(',', ': '))
+
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
