@@ -9,15 +9,21 @@ from . import Digester
 from adipose import Adipose
 import brain
 
+# MediaWiki parsing
 from mwlib import parser
 from mwlib.refine.compat import parse_txt
 
+# Asynchronous distributed task queue
 from tasks import celery
+from celery.contrib.methods import task_method
 
+# Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
+
 
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
 DATABASE = 'shallowthought'
+
 
 class WikiDigester(Digester):
     """
@@ -25,7 +31,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump, namespace=NAMESPACE, distrib=False):
+    def __init__(self, file, dump, namespace=NAMESPACE, distrib=False, db=DATABASE):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
@@ -73,7 +79,7 @@ class WikiDigester(Digester):
         Empties out the database for
         for this dump.
         """
-        self._db().empty()
+        self.db().empty()
 
 
     def digest(self):
@@ -159,10 +165,9 @@ class WikiDigester(Digester):
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
-        self._db().update({'_id': id}, {'$set': doc})
+        self.db().update({'_id': id}, {'$set': doc})
 
 
-    from celery.contrib.methods import task_method
     @celery.task(filter=task_method)
     def _process_page_task(self, elem):
         """
@@ -219,23 +224,11 @@ class WikiDigester(Digester):
         return brain.depunctuate(text)
 
 
-    def _db(self):
+    def db(self):
         """
         Returns an interface for this digester's database.
 
-        If a database interface has been set externally,
-        just return that one.
-
-        Otherwise, return the 'canonical' database for this digester.
-
-        This approach is used instead of saving a database interface as
-        as instance variable because the latter approach encounters issues
-        when using distributed tasks.
-
-        The database interface cannot be properly serialized for distributed tasks,
-        so instead we just create a new interface when we need it.
+        The database interface cannot be properly serialized for distributed tasks, so we can't attach it as an instance variable.
+        Instead we just create a new interface when we need it.
         """
-        if hasattr(self, 'db'):
-            return self.db
-        else:
-            return Adipose(DATABASE, self.dump)
+        return Adipose(DATABASE, self.dump)

@@ -12,13 +12,7 @@ from adipose import Adipose
 
 def profile_wikidigester():
     # Create a WikiDigester
-    w = WikiDigester('data/wiki/wiki_profile.xml', 'pages')
-
-    # Setup a database.
-    db = Adipose('test', 'pages')
-
-    # Set WikiDigester to use this database.
-    w.db = db
+    w = WikiDigester('data/wiki/wiki_profile.xml', 'pages', db='test')
     w.purge()
 
     print('Profiling WikiDigester...')
