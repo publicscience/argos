@@ -85,9 +85,9 @@ Some of the libraries are *not* Python 3 ready, so you won't
 be able to download all of the proper ones through the NLTK downloader
 interface.
 
-Instead, use the `tasks` script. You can install them all like so:
+Instead, use the `do` script. You can install them all like so:
 ```bash
-(dev-env) $ ./tasks setup nltk
+(dev-env) $ ./do setup nltk
 ```
 
 ---
@@ -118,27 +118,59 @@ Because the NLTK data used in a Python 2.7 environment is different than
 the data used in Python 3.3, you have to install that data separately.
 This can be accomplished via:
 ```bash
-(mr-env) $ ./tasks setup mapreduce
+(mr-env) $ ./do setup mapreduce
 ```
 
 ---
 
 ### MongoDB
-To download and setup MongoDB, you can use the `tasks` script:
+To download and setup MongoDB, you can use the `do` script:
 ```bash
-$ ./tasks setup mongo
+$ ./do setup mongo
 ```
 
 Then, to run MongoDB:
 ```bash
-$ ./tasks mongo
+$ ./do mongo
 ```
 That will run MongoDB locally at port `27107`.
+
+### Celery & RabbitMQ
+[Celery](http://www.celeryproject.org/) is used for distributed
+asynchronous tasks. It uses RabbitMQ as a broker (the server that
+manages the message queue, which workers pick up jobs from.)
+
+Celery and its dependencies should be installed with the
+`requirements.txt`. You may run into trouble installing `pytz`; I wasn't
+able to install it with pip. You can install it instead like so:
+```bash
+(dev-env) $ easy_install pytz
+```
+
+So you will also need `rabbitmq-server`. It also can be installed with Homebrew:
+```bash
+$ brew install rabbitmq
+```
+You will need to ensure that `/usr/local/sbin` is in your PATH; if it is
+not, add the following to your `~/.bash_profile`:
+```bash
+export PATH="/usr/local/sbin:$PATH"
+```
+
+You can then start the RabbitMQ server with:
+```bash
+$ rabbitmq-server
+```
+
+You can start a Celery worker with the `do` script:
+```bash
+(dev-env) $ ./do worker
+```
 
 ## Documentation
 To generate documentation, do:
 ```bash
-(dev-env) $ ./tasks doc
+(dev-env) $ ./do doc
 ```
 
 The documentation will be located at `doc/_build/html/index.html`.

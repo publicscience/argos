@@ -9,11 +9,21 @@ from . import Digester
 from adipose import Adipose
 import brain
 
+# MediaWiki parsing
 from mwlib import parser
 from mwlib.refine.compat import parse_txt
 
+# Asynchronous distributed task queue
+from tasks import celery
+from celery.contrib.methods import task_method
+
+# Serializing lxml Elements.
+from lxml.etree import tostring, fromstring
+
+
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
 DATABASE = 'shallowthought'
+
 
 class WikiDigester(Digester):
     """
@@ -21,7 +31,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump, namespace=NAMESPACE):
+    def __init__(self, file, dump, namespace=NAMESPACE, distrib=False, db=DATABASE):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
@@ -31,7 +41,11 @@ class WikiDigester(Digester):
             | file (str)        -- path to XML file (or bzipped XML) to digest.
             | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
+            | distrib (bool)    -- whether or not digestion should be distributed. Default to False.
+
+        Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
+
         # Python 2.7 support.
         try:
             super().__init__(file, namespace)
@@ -39,9 +53,7 @@ class WikiDigester(Digester):
             Digester.__init__(self, file, namespace)
 
         self.dump = dump
-
-        # Create db interface.
-        self.db = Adipose(DATABASE, self.dump)
+        self.distrib = distrib
 
 
     def fetch_dump(self):
@@ -62,6 +74,14 @@ class WikiDigester(Digester):
         self.download(url)
 
 
+    def purge(self):
+        """
+        Empties out the database for
+        for this dump.
+        """
+        self.db().empty()
+
+
     def digest(self):
         """
         Will process this instance's dump.
@@ -74,17 +94,35 @@ class WikiDigester(Digester):
 
     def _process_pages(self, elem):
         """
-        Gather frequency distribution of a page,
-        category names, and linked page names,
-        and store to the database.
+        Processes pages that are in
+        namespace=0 (i.e. articles).
         """
-
 
         # Check the namespace,
         # only namespace 0 are articles.
         # https://en.wikipedia.org/wiki/Wikipedia:Namespace
         ns = int(self._find(elem, 'ns').text)
         if ns != 0: return
+
+        # Process the page.
+        if self.distrib:
+            # Send the processing of this page as
+            # an async task to a worker.
+            # Pickle (the default serializer for Celery) has
+            # trouble serializing the lxml Element,
+            # so first convert it to a string.
+            self._process_page_task.delay(tostring(elem))
+        else:
+            # Process synchronously.
+            self._process_page(elem)
+
+
+    def _process_page(self, elem):
+        """
+        Gather frequency distribution of a page,
+        category names, and linked page names,
+        and store to the database.
+        """
 
         # Get the text we need.
         id          = int(self._find(elem, 'id').text)
@@ -93,14 +131,12 @@ class WikiDigester(Digester):
         text        = self._find(elem, 'revision', 'text').text
         redirect    = self._find(elem, 'redirect')
 
-        # 'ctitle' indicates 'canonical title', i.e. the redirect title, which appears
-        # to be the 'official' title of a page. Not all pages have redirects.
-        # Redirects are the title that alternative titles redirect *to*,
-        # thus they could be considered canonical.
+        # 'title' should be the canonical title, i.e. the 'official'
+        # title of a page. If the page redirects to another (the canonical
+        # page), the <redirect> elem contains the canonical title to which
+        # the page redirects.
         if redirect is not None:
-            ctitle = redirect.attrib.get('title')
-        else:
-            ctitle = title
+            title = redirect.attrib.get('title')
 
         # Extract certain elements.
         # pagelinks is a list of linked page titles.
@@ -120,17 +156,30 @@ class WikiDigester(Digester):
         # Assemble the doc.
         doc = {
                 'title': title,
-                'redirect': ctitle,
                 'datetime': datetime,
                 'freqs': data,
                 'categories': categories,
                 'pagelinks': pagelinks
               }
 
+        # For exploring the data as separate files.
+        #import json
+        #json.dump(doc, open('dumps/%s' % title, 'w'), sort_keys=True,
+                #indent=4, separators=(',', ': '))
+
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
-        self.db.update({'_id': id}, {'$set': doc})
+        self.db().update({'_id': id}, {'$set': doc})
+
+
+    @celery.task(filter=task_method)
+    def _process_page_task(self, elem):
+        """
+        Celery task for asynchronously processing a page.
+        """
+        # Convert the elem back to an lxml Element.
+        self._process_page(fromstring(elem))
 
 
     def _find(self, elem, *tags):
@@ -180,10 +229,11 @@ class WikiDigester(Digester):
         return brain.depunctuate(text)
 
 
-    def purge(self):
+    def db(self):
         """
-        Empties out the database for
-        for this dump.
+        Returns an interface for this digester's database.
+
+        The database interface cannot be properly serialized for distributed tasks, so we can't attach it as an instance variable.
+        Instead we just create a new interface when we need it.
         """
-        a = Adipose(DATABASE, self.dump)
-        a.empty()
+        return Adipose(DATABASE, self.dump)
