@@ -48,7 +48,7 @@ def count(text, threshold=0):
 
     freqs = FreqDist()
     lemmr = WordNetLemmatizer()
-    stops = list(string.punctuation) + stopwords.words('english')
+    stops = set(list(string.punctuation) + stopwords.words('english'))
 
     # Tokenize
     for sentence in sent_tokenize(text):
