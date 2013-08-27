@@ -56,6 +56,10 @@ class WikiDigester(Digester):
         self.dump = dump
         self.distrib = distrib
 
+        # Keep track of number of docs.
+        # Necessary for performing TF-IDF processing.
+        self.num_docs = 0
+
 
     def fetch_dump(self):
         """
@@ -141,6 +145,7 @@ class WikiDigester(Digester):
             # https://en.wikipedia.org/wiki/Wikipedia:Namespace
             ns = int(self._find(elem, 'ns').text)
             if ns == 0:
+                self.num_docs += 1
                 yield elem
 
 
