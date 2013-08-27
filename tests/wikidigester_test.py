@@ -29,6 +29,12 @@ class WikiDigesterTest(unittest.TestCase):
         self.w.purge()
         self._digest()
 
+    def test_distrib_digest_many(self):
+        # Requires that RabbitMQ and a Celery worker are running.
+        self.w = WikiDigester('tests/data/articles.xml', 'pages', distrib=True, db='test')
+        self.w.purge()
+        self._digest_many()
+
     def test_local_digest_updates(self):
         self._digest_updates()
 
@@ -74,7 +80,7 @@ class WikiDigesterTest(unittest.TestCase):
 
         # Check that page data was added to db.
         # Check that non ns=0 page was ignored.
-        self.assertEqual(self.w.db().count(), 1, 'Unexpected amount of documents were saved. Perhaps ns!=0 aren\'t being filtered?')
+        self.assertEqual(self.w.db().count(), 1);
 
         # Check that page can be fetched by id.
         page = self.w.db().find({'_id': id})
@@ -85,6 +91,34 @@ class WikiDigesterTest(unittest.TestCase):
         self.assertGreaterEqual(len(page['pagelinks']), num_pagelinks)
         self.assertEqual(page['datetime'], datetime)
         self.assertEqual(page['title'], title)
+
+    def _digest_many(self):
+        pages = {
+                12: 'Anarchism',
+                39: 'Albedo',
+                308: 'Aristotle',
+                309: 'An American in Paris',
+                332: 'Animalia (book)',
+                334: 'International Atomic Time'
+        }
+
+        self.w.digest()
+
+        if self.w.distrib:
+            # There's probably a better way,
+            # but if digestion is distrib,
+            # wait until the task is complete.
+            sleep(6)
+
+        # Check that page data was added to db.
+        # Check that non ns=0 page was ignored.
+        self.assertEqual(self.w.db().count(), 6)
+
+        for id, title in pages.items():
+            # Check that page can be fetched by id.
+            page = self.w.db().find({'_id': id})
+            self.assertIsNotNone(page)
+            self.assertEqual(page['title'], title)
 
     def _digest_updates(self):
         id = 12
