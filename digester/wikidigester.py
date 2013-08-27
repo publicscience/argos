@@ -8,7 +8,11 @@ Handles Wikipedia dump processing.
 from . import Digester
 from adipose import Adipose
 import brain
+
+# Goodies
 from math import log
+from collections import Counter
+from itertools import chain
 
 # MediaWiki parsing.
 from mwlib import parser
@@ -119,15 +123,10 @@ class WikiDigester(Digester):
                 # trouble serializing the lxml Element,
                 # so first convert it to a string.
                 # ===
-                # `_t_generate_tfidf` is being called as a immutable
-                # subtask – i.e. `.si()` – to prevent output of the tasks
-                # from being passed to it. They are not needed, and mess
-                # up the chord. `self` still must be passed, however.
-                tasks = chord(
-                            (self._t_process_page.s(tostring(page))
-                            for page in self._parse_pages()),
-                            self._t_generate_tfidf.si(self)
-                        )()
+                # `_t_generate_tfidf` has to have `self` manually
+                # passed, and is a bit weird. See its definition below.
+                tasks = chord(self._t_process_page.s(tostring(page))
+                              for page in self._parse_pages())(self._t_generate_tfidf.s(self, ))
             else:
                 # Serially/synchronously process pages.
                 for page in self._parse_pages():
@@ -138,9 +137,14 @@ class WikiDigester(Digester):
                 #self._generate_tfidf()
 
 
-    def _generate_tfidf(self):
+    def _generate_tfidf(self, docs):
         """
         Generate the TF-IDF representations for all the digested docs.
+
+        Args:
+            | docs (list)       -- a list of lists, where each list is a doc represented
+                                   as what token_ids were present in the doc.
+                                   e.g. the doc "1 2 4 2 3 4" would be [1,2,3,4]
 
         General TF-IDF formula:
             j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
@@ -149,14 +153,17 @@ class WikiDigester(Digester):
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
+        # To calculate how many documents each token_id appeared in,
+        # first merge all the token_id-presence docs into a token_id-presence corpus.
+        corpus = list(chain.from_iterable(docs))
+
+        # Then, count all the token_ids in the corpus.
+        # doc_counts[token_id] will give the number of documents token_id appears in.
+        doc_counts = dict(Counter(corpus))
+
         # TO DO
         # Load up local token counts (bag of words).
         all_docs = []
-
-        # TO DO
-        # Implement assembling of global token counts.
-        # global_count[token_id] gives the number of documents token_id appears in.
-        global_count = {}
 
         # TO DO
         # Check out gensim for their implementation.
@@ -168,13 +175,21 @@ class WikiDigester(Digester):
 
 
     @celery.task(filter=task_method)
-    def _t_generate_tfidf(self):
-        self._generate_tfidf()
+    def _t_generate_tfidf(docs, self):
+        """
+        The positional argument ordering here is weird,
+        with `self` coming last, because of the way
+        Celery passes parameters to a class method subtask.
+        The *first* argument is the results of the chord's task group,
+        and any arguments you pass in manually come *afterwards*.
+        """
+        self._generate_tfidf(docs)
 
 
     def _parse_pages(self):
         """
-        Parses out and yields pages that are in
+        Parses out and yields pages from the dump.
+        Only yields pages that are in
         namespace=0 (i.e. articles).
         """
         for elem in self.iterate('page'):
@@ -250,6 +265,12 @@ class WikiDigester(Digester):
         # If not, create it.
         self.db().update({'_id': id}, {'$set': doc})
 
+
+        # Return the token_ids that were in this document.
+        # Used for construction of the global doc counts for terms.
+        return list(bag_of_words.keys())
+
+
         # For exploring the data as separate files.
         #import json
         #json.dump(doc, open('dumps/%s' % title, 'w'), sort_keys=True,
@@ -261,11 +282,11 @@ class WikiDigester(Digester):
         """
         Celery task for asynchronously processing a page.
 
-        This is conditionally called upon in `self._parse_pages()`.
+        This is conditionally called upon in `self.digest()`.
         """
         # Convert the elem back to an lxml Element,
         # then process.
-        self._process_page(fromstring(elem))
+        return self._process_page(fromstring(elem))
 
 
     def _find(self, elem, *tags):
