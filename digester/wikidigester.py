@@ -177,6 +177,8 @@ class WikiDigester(Digester):
     def _process_page_task(self, elem):
         """
         Celery task for asynchronously processing a page.
+
+        This is conditionally called upon in `self._process_pages()`.
         """
         # Convert the elem back to an lxml Element.
         self._process_page(fromstring(elem))

@@ -13,6 +13,7 @@ http://www.gnu.org/licenses/lgpl.html
 """
 
 from .dictionary import Dictionary
+from nltk.tokenize import word_tokenize
 
 class Corpus():
 
@@ -76,7 +77,7 @@ class Corpus():
         input stream, yielding them one by one.
 
         Yields:
-            | The processed line for each line in the stream.
+            | The tokenized line for each line in the stream.
         """
 
         # Keep track of how many documents
@@ -87,10 +88,8 @@ class Corpus():
         for line_num, line in enumerate(self.get_stream()):
             self.length += 1
 
-            # Yield each line.
-            # TO DO write actual processing for the line.
-            # Refer to WikiCorpus' implementation of this function.
-            yield someprocessing(line)
+            # Yield each line's tokens.
+            yield word_tokenize(line.lower())
 
 
     def __len__(self):
