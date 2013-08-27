@@ -9,17 +9,22 @@ from . import Digester
 from adipose import Adipose
 import brain
 
-# MediaWiki parsing
+# MediaWiki parsing.
 from mwlib import parser
 from mwlib.refine.compat import parse_txt
 
-# Asynchronous distributed task queue
+# Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
 from celery import chord
 from tasks import celery
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
+
+# Logging.
+from celery.utils.log import get_task_logger
+from logger import logger
+logger = logger(__name__)
 
 
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
@@ -60,6 +65,10 @@ class WikiDigester(Digester):
         # Necessary for performing TF-IDF processing.
         self.num_docs = 0
 
+        # Setup Celery's logger if necessary.
+        if self.distrib:
+            logger = get_task_logger(__name__)
+
 
     def fetch_dump(self):
         """
@@ -76,6 +85,7 @@ class WikiDigester(Digester):
         url = '%s%s' % (dumps['base'], dumps[self.dump])
 
         # Download!
+        logger.info('Fetching %s dump' % self.dump)
         self.download(url)
 
 
@@ -92,6 +102,8 @@ class WikiDigester(Digester):
         Will process this instance's dump.
         Each kind of dump is processed differently.
         """
+
+        logging.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
 
         if self.dump == 'pages':
             if self.distrib:
@@ -126,7 +138,7 @@ class WikiDigester(Digester):
 
 
     def _generate_tfidf(self):
-        pass
+        logging.info('Page processing complete. Generating TF-IDF representations.')
 
 
     @celery.task(filter=task_method)
@@ -156,6 +168,10 @@ class WikiDigester(Digester):
         and store to the database.
         """
 
+        # Log current progress every 1000th doc.
+        if self.num_docs % 1000 == 0:
+            logging.info('Processing document %s' % self.num_docs)
+
         # Get the text we need.
         id          = int(self._find(elem, 'id').text)
         title       = self._find(elem, 'title').text
@@ -163,7 +179,7 @@ class WikiDigester(Digester):
         text        = self._find(elem, 'revision', 'text').text
         redirect    = self._find(elem, 'redirect')
 
-        # 'title' should be the canonical title, i.e. the 'official'
+        # `title` should be the canonical title, i.e. the 'official'
         # title of a page. If the page redirects to another (the canonical
         # page), the <redirect> elem contains the canonical title to which
         # the page redirects.
@@ -203,15 +219,15 @@ class WikiDigester(Digester):
                 'pagelinks': pagelinks
               }
 
-        # For exploring the data as separate files.
-        #import json
-        #json.dump(doc, open('dumps/%s' % title, 'w'), sort_keys=True,
-                #indent=4, separators=(',', ': '))
-
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
         self.db().update({'_id': id}, {'$set': doc})
+
+        # For exploring the data as separate files.
+        #import json
+        #json.dump(doc, open('dumps/%s' % title, 'w'), sort_keys=True,
+                #indent=4, separators=(',', ': '))
 
 
     @celery.task(filter=task_method)
@@ -221,8 +237,8 @@ class WikiDigester(Digester):
 
         This is conditionally called upon in `self._parse_pages()`.
         """
-
-        # Convert the elem back to an lxml Element.
+        # Convert the elem back to an lxml Element,
+        # then process.
         self._process_page(fromstring(elem))
 
 
@@ -277,7 +293,8 @@ class WikiDigester(Digester):
         """
         Returns an interface for this digester's database.
 
-        The database interface cannot be properly serialized for distributed tasks, so we can't attach it as an instance variable.
+        The database interface cannot be properly serialized for distributed tasks,
+        so we can't attach it as an instance variable.
         Instead we just create a new interface when we need it.
         """
         return Adipose(DATABASE, self.dump)
