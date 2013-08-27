@@ -178,7 +178,7 @@ The documentation will be located at `doc/_build/html/index.html`.
 ## Testing
 To run the tests:
 ```bash
-$ nosetests tests
+(dev-env) $ nosetests tests
 ```
 
 ## Profiling and Performance
@@ -197,9 +197,8 @@ The full enwiki pages-articles dump is about 44.9GB. Which is about
 a rough estimate for completion is ~637252s ≈ 7 days, 9 hours.
 Without lemmatization, it is roughly 133297s ≈ 1 day, 13 hours.
 
-Turning `Brain.count()` into a mapreduce process should save a lot of
-time. Since it is fundamentally a word counting procedure, it should be
-well-suited for mapreduce.
+Turning wikidigestion into a distributed process should save a lot of
+time.
 
 ## The Future (To Do)
 * Perhaps the main area of future refinement will be all parts relating
