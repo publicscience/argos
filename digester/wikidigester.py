@@ -8,6 +8,7 @@ Handles Wikipedia dump processing.
 from . import Digester
 from adipose import Adipose
 import brain
+from math import log
 
 # MediaWiki parsing.
 from mwlib import parser
@@ -103,7 +104,7 @@ class WikiDigester(Digester):
         Each kind of dump is processed differently.
         """
 
-        logging.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
+        logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
 
         if self.dump == 'pages':
             if self.distrib:
@@ -138,7 +139,32 @@ class WikiDigester(Digester):
 
 
     def _generate_tfidf(self):
-        logging.info('Page processing complete. Generating TF-IDF representations.')
+        """
+        Generate the TF-IDF representations for all the digested docs.
+
+        General TF-IDF formula:
+            j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
+        Or, more verbosely:
+            tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
+        """
+        logger.info('Page processing complete. Generating TF-IDF representations.')
+
+        # TO DO
+        # Load up local token counts (bag of words).
+        all_docs = []
+
+        # TO DO
+        # Implement assembling of global token counts.
+        # global_count[token_id] gives the number of documents token_id appears in.
+        global_count = {}
+
+        # TO DO
+        # Check out gensim for their implementation.
+        for doc in all_docs:
+            tfidf_doc = {}
+            for token_id in doc:
+                token_count = doc[token_id]
+                tfidf_doc[token_id] = token_count * log((self.num_docs/global_count[token_id]), 2)
 
 
     @celery.task(filter=task_method)
@@ -168,9 +194,9 @@ class WikiDigester(Digester):
         and store to the database.
         """
 
-        # Log current progress every 1000th doc.
-        if self.num_docs % 1000 == 0:
-            logging.info('Processing document %s' % self.num_docs)
+        # Log current progress every 10000th doc.
+        if self.num_docs % 10000 == 0:
+            logger.info('Processing document %s' % self.num_docs)
 
         # Get the text we need.
         id          = int(self._find(elem, 'id').text)
