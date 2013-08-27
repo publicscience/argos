@@ -14,8 +14,9 @@ from mwlib import parser
 from mwlib.refine.compat import parse_txt
 
 # Asynchronous distributed task queue
-from tasks import celery
 from celery.contrib.methods import task_method
+from celery import chord
+from tasks import celery
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
@@ -41,7 +42,7 @@ class WikiDigester(Digester):
             | file (str)        -- path to XML file (or bzipped XML) to digest.
             | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
-            | distrib (bool)    -- whether or not digestion should be distributed. Default to False.
+            | distrib (bool)    -- whether or not digestion should be distributed. Defaults to False.
 
         Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
@@ -89,32 +90,58 @@ class WikiDigester(Digester):
         """
 
         if self.dump == 'pages':
-            self.iterate('page', self._process_pages)
+            if self.distrib:
+                # Create async Celery tasks to
+                # process pages in parallel.
+                # ===
+                # The tasks are in a chord, so that
+                # after all tasks have been completed,
+                # generate TF-IDF representation of all docs.
+                # ===
+                # Pickle (the default serializer for Celery) has
+                # trouble serializing the lxml Element,
+                # so first convert it to a string.
+                # ===
+                # `_t_generate_tfidf` is being called as a immutable
+                # subtask – i.e. `.si()` – to prevent output of the tasks
+                # from being passed to it. They are not needed, and mess
+                # up the chord. `self` still must be passed, however.
+                tasks = chord(
+                            (self._t_process_page.s(tostring(page))
+                            for page in self._parse_pages()),
+                            self._t_generate_tfidf.si(self)
+                        )()
+            else:
+                # Serially/synchronously process pages.
+                for page in self._parse_pages():
+                    self._process_page(page)
+
+                # Generate TF-IDF representation
+                # of all docs upon completion.
+                #self._generate_tfidf()
 
 
-    def _process_pages(self, elem):
+    def _generate_tfidf(self):
+        pass
+
+
+    @celery.task(filter=task_method)
+    def _t_generate_tfidf(self):
+        self._generate_tfidf()
+
+
+    def _parse_pages(self):
         """
-        Processes pages that are in
+        Parses out and yields pages that are in
         namespace=0 (i.e. articles).
         """
-
-        # Check the namespace,
-        # only namespace 0 are articles.
-        # https://en.wikipedia.org/wiki/Wikipedia:Namespace
-        ns = int(self._find(elem, 'ns').text)
-        if ns != 0: return
-
-        # Process the page.
-        if self.distrib:
-            # Send the processing of this page as
-            # an async task to a worker.
-            # Pickle (the default serializer for Celery) has
-            # trouble serializing the lxml Element,
-            # so first convert it to a string.
-            self._process_page_task.delay(tostring(elem))
-        else:
-            # Process synchronously.
-            self._process_page(elem)
+        for elem in self.iterate('page'):
+            # Check the namespace,
+            # only namespace 0 are articles.
+            # https://en.wikipedia.org/wiki/Wikipedia:Namespace
+            ns = int(self._find(elem, 'ns').text)
+            if ns == 0:
+                yield elem
 
 
     def _process_page(self, elem):
@@ -149,15 +176,24 @@ class WikiDigester(Digester):
         cstart = len('Category:')
         categories = [category.full_target[cstart:] for category in result.find(parser.CategoryLink)]
 
-        # Get freq dist data.
+        # Build the bag of words representation of the document.
         clean_text = self._clean(text)
-        data = dict(brain.count(clean_text, threshold=2))
+        bag_of_words = brain.bag_of_words(clean_text)
+
+        # Convert the bag of words to a 'sparse vector' representation.
+        # Not a true sparse vector – it's really a list of (token_id, count) tuples,
+        # but this works for now.
+        # I'd prefer to keep it as dict, but integers as keys is invalid BSON,
+        # so MongoDB rejects it.
+        # When this is retrieved, it should be converted back into a dict:
+        #   dict(sparse_bag_of_words)
+        sparse_bag_of_words = list(bag_of_words.items())
 
         # Assemble the doc.
         doc = {
                 'title': title,
                 'datetime': datetime,
-                'freqs': data,
+                'doc': sparse_bag_of_words,
                 'categories': categories,
                 'pagelinks': pagelinks
               }
@@ -174,12 +210,13 @@ class WikiDigester(Digester):
 
 
     @celery.task(filter=task_method)
-    def _process_page_task(self, elem):
+    def _t_process_page(self, elem):
         """
         Celery task for asynchronously processing a page.
 
-        This is conditionally called upon in `self._process_pages()`.
+        This is conditionally called upon in `self._parse_pages()`.
         """
+
         # Convert the elem back to an lxml Element.
         self._process_page(fromstring(elem))
 

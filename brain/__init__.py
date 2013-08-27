@@ -20,70 +20,76 @@ except ImportError:
     from HTMLParser import HTMLParser
 
 from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk import FreqDist
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tag import pos_tag
 from nltk.chunk import batch_ne_chunk
 import string
+import zlib
 
-def count(text, threshold=0):
+MAX_INT = 2147483647
+
+def bag_of_words(doc, id_limit=MAX_INT, hash_func=zlib.adler32):
     """
     Tokenize, stem, and then
     count the word frequency
-    distribution of a document.
+    distribution of a document,
+    using the hashing trick,
+    to build a bag of words representation
+    of the document.
 
     Lemmatizing may be too slow, perhaps
     Porter Stemming should be used as a faster,
     albeit less accurate, alternative?
 
     Args:
-        | text (str)        -- the text to process.
-        | threshold (int)   -- optionally return only words
-                            with a count above this threshold.
+        | doc (str)         -- the text document to process.
+        | id_limit (int)    -- the maximum amount of token ids this dictionary can hold. Defaults to int32 max (2147483647), it is recommended you scale that back if you don't need that much.
+        | hash_func (func)  -- the hashing function to use for generating token ids.
 
     Returns:
-        | dict      -- dict of {word: count}
+        | dict              -- the bag of words; i.e. dict of {token_id: count}
     """
 
-    freqs = FreqDist()
+    # Bag of words
+    wbag = {}
+
     lemmr = WordNetLemmatizer()
     stops = set(list(string.punctuation) + stopwords.words('english'))
 
     # Tokenize
-    for sentence in sent_tokenize(text):
-        for word in word_tokenize(sentence):
+    for sentence in sent_tokenize(doc):
+        for token in word_tokenize(sentence):
 
             # Ignore punctuation and stopwords
-            if word in stops:
+            if token in stops:
                 continue
 
             # Lemmatize
-            lemma = lemmr.lemmatize(word.lower())
+            lemma = lemmr.lemmatize(token.lower())
 
-            # Count
-            freqs.inc(lemma)
+            # Hash token into its token id.
+            token_id = hash_func( token.encode('utf-8') ) % MAX_INT
 
-    # Filter frequencies
-    if threshold:
-        freqs = {word: count for word, count in freqs.items() if count > threshold}
+            # Increment count for this token id.
+            wbag[token_id] = wbag.get(token_id, 0) + 1
 
-    return dict(freqs)
+    return wbag
 
 
-def recognize(text):
+def recognize(doc):
     """
     Named entity recognition on
-    some text.
+    a text document.
 
     Args:
-        | text (str)    -- the text to process.
+        | doc (str)     -- the document to process.
 
     Returns:
         | set           -- set of unique entity names.
     """
 
-    sents     = sent_tokenize(text)
+    sents     = sent_tokenize(doc)
     tokenized = [word_tokenize(sent) for sent in sents]
     tagged    = [pos_tag(sent) for sent in tokenized]
     chunked   = batch_ne_chunk(tagged, binary=True)
@@ -118,6 +124,7 @@ def trim(text):
     """
     return ' '.join(text.split())
 
+
 def depunctuate(text):
     """
     Removes all punctuation from text,
@@ -134,6 +141,7 @@ def depunctuate(text):
         if isinstance(text, str):
             text = unicode(text, 'utf-8')
         return text.translate(rmap)
+
 
 def sanitize(html):
     """

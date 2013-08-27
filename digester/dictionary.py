@@ -30,19 +30,9 @@ import zlib
 import itertools
 from collections import Counter
 
-# Python 2.7 support.
-#try:
-    #from collections import MutableMapping
-#except ImportError:
-    #from UserDict import DictMixin as MutableMapping
-
-#class Dictionary(MutableMapping):
 class Dictionary():
     """
     A (hash) dictionary.
-
-    Subclasses from UserDict.DictMixin,
-    so that it begins with a minimal dict interface.
     """
 
     def __init__(self, documents=None, id_limit=10000, hash_func=zlib.adler32, debug=False):
