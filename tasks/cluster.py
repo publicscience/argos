@@ -18,23 +18,27 @@ And they can all also be dismantled.
 Configuration is in `aws_config.py`.
 """
 
-from . import aws_config as config
 from boto.ec2.elb import ELBConnection, HealthCheck, LoadBalancer
 from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoScalingGroup, ScalingPolicy
 from boto.ec2.cloudwatch import MetricAlarm
 from boto.ec2.cloudwatch import connect_to_region as cloudwatch_connection
 from boto.ec2 import connect_to_region as region_connection
 
+# Logging
+from logger import logger
+logger = logger(__name__)
+
 # Load configuration.
-REGION = config['REGION']
-AG_NAME = config['AG_NAME']
-LC_NAME = config['LC_NAME']
-ELB_NAME = config['ELB_NAME']
-AMI_IMAGE_ID = config['AMI_IMAGE_ID']
-KEYPAIR_NAME = config['KEYPAIR_NAME']
-ACCESS_KEY = config['AWS_ACCESS_KEY']
-SECRET_KEY = config['AWS_SECRET_KEY']
-SECURITY_GROUPS = config['SECURITY_GROUPS']
+from . import aws_config as c
+REGION = c['REGION']
+AG_NAME = c['AG_NAME']
+LC_NAME = c['LC_NAME']
+ELB_NAME = c['ELB_NAME']
+AMI_IMAGE_ID = c['AMI_IMAGE_ID']
+KEYPAIR_NAME = c['KEYPAIR_NAME']
+ACCESS_KEY = c['AWS_ACCESS_KEY']
+SECRET_KEY = c['AWS_SECRET_KEY']
+SECURITY_GROUPS = c['SECURITY_GROUPS']
 
 
 def commission():
@@ -43,7 +47,14 @@ def commission():
     and everything else it needs.
     """
 
-    conn = connect_as()
+    logger.info('Commissioning new AutoScale Group infrastructure...')
+
+    # Check to see if the AutoScale Group already exists.
+    if not status():
+        logger.info('The AutoScale Group already exists, exiting!')
+        return
+
+    conn = connect_ag()
     conn_elb = connect_elb()
 
     # Get availability zones for region.
@@ -190,13 +201,18 @@ def commission():
                      )
     cloudwatch.create_alarm(scale_dn_alarm)
 
+    logger.info('Commissioning complete.')
+
 
 def decommission():
     """
     Dismantle the AutoScaling group,
     and everything else with it.
     """
-    conn = connect_as()
+
+    logger.info('Decommissioning the AutoScale Group infrastructure...')
+
+    conn = connect_ag()
     conn_elb = connect_elb()
 
     # Shutdown and delete autoscaling groups.
@@ -221,15 +237,37 @@ def decommission():
     # Delete the load balancer.
     conn_elb.delete_load_balancer(ELB_NAME)
 
+    logger.info('Decommissioning complete.')
 
-def connect_as():
+
+def status():
     """
-    Create an AutoScale connection.
+    Checks if the AutoScale Group exists.
+
+    Returns:
+        | int   -- number of AutoScale Groups found.
+    """
+    conn = connect_ag()
+    conn_elb = connect_elb()
+
+    groups = conn.get_all_groups(names=[AG_NAME])
+    return len(groups)
+
+
+def connect_ag():
+    """
+    Create an AutoScale Group connection.
+
+    Returns:
+        | AutoScaleConnection
     """
     return AutoScaleConnection(ACCESS_KEY, SECRET_KEY)
 
 def connect_elb():
     """
     Create an Elastic Load Balancer connection.
+
+    Returns:
+        | ELBConnection
     """
     return ELBConnection(ACCESS_KEY, SECRET_KEY)
