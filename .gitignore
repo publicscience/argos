@@ -14,3 +14,4 @@ doc/_static
 doc/_templates
 dumps/
 log.log
+aws-config.py
