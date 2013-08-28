@@ -1,13 +1,13 @@
 """
-Tasks
+Cluster
 ==============
 
-Tasks for Celery workers to run.
+Sets up and manages clusters
+for distributed tasks.
 """
 
 from celery import Celery
-from celery.task.control import inspect
-from . import celery_config
+from cluster import celery_config
 
 from logger import logger
 
@@ -15,7 +15,7 @@ from logger import logger
 from . import manage
 
 celery = Celery()
-celery.config_from_object(config)
+celery.config_from_object(celery_config)
 
 def workers():
     """
@@ -30,10 +30,11 @@ def workers():
     """
 
     try:
-        workers = inspect().stats()
+        # Get info on available workers.
+        workers = celery.control.inspect().stats()
         if not workers:
             logger.error('No Celery workers available.')
-        return False
+            return False
     except IOError as e:
         logger.error('Error connecting to MQ. Check that it is running.')
         return False

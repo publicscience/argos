@@ -36,7 +36,7 @@ then
 elif [[ $1 == 'worker' ]]
 then
     source dev-env/bin/activate
-    celery worker --loglevel=info --config=tasks.config
+    celery worker --loglevel=info --config=cluster.celery_config
 
 
 # Start RabbitMQ server.

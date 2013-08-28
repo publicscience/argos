@@ -29,16 +29,16 @@ from logger import logger
 logger = logger(__name__)
 
 # Load configuration.
-from . import aws_config as c
-REGION = c['REGION']
-AG_NAME = c['AG_NAME']
-LC_NAME = c['LC_NAME']
-ELB_NAME = c['ELB_NAME']
-AMI_IMAGE_ID = c['AMI_IMAGE_ID']
-KEYPAIR_NAME = c['KEYPAIR_NAME']
-ACCESS_KEY = c['AWS_ACCESS_KEY']
-SECRET_KEY = c['AWS_SECRET_KEY']
-SECURITY_GROUPS = c['SECURITY_GROUPS']
+from cluster import aws_config as c
+REGION = c.REGION
+AG_NAME = c.AG_NAME
+LC_NAME = c.LC_NAME
+ELB_NAME = c.ELB_NAME
+AMI_IMAGE_ID = c.AMI_IMAGE_ID
+KEYPAIR_NAME = c.KEYPAIR_NAME
+ACCESS_KEY = c.AWS_ACCESS_KEY
+SECRET_KEY = c.AWS_SECRET_KEY
+SECURITY_GROUPS = c.SECURITY_GROUPS
 
 
 def commission():
