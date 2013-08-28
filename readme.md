@@ -238,7 +238,7 @@ instance](https://console.aws.amazon.com/ec2/#s=Instances) (click
 'Launch Instance'). I created an Ubuntu Server 13.04 64-bit
 t1.micro instance.
 * Make note of the instance's Public DNS. It should be something like
-`ec2-xxxxxxxxx.us-west-2.computer.amazonaws.com`.
+`ec2-xxxxxxxxx.xxxxxxx.computer.amazonaws.com`.
 * SSH into the instance once it is finished launching:
 
 ```bash
@@ -256,7 +256,7 @@ X.509 certificate (see above on how to create these).
 * On the instance, you need to create a directory to add your private
 key and X.509 certificate. These files should *not* be part of the
 image, so create a temporary directory that will be ignored by the image
-creating process:
+creation process:
 
 ```bash
 $ mkdir /tmp/cert
@@ -288,7 +288,7 @@ and try the installation again.
 
 ```bash
 $ sudo su
-# ec2-bundle-vol -k /tmp/cert/<privatekey>.pem -c /tmp/cert/<cert>.pem
+$ ec2-bundle-vol -k /tmp/cert/<privatekey>.pem -c /tmp/cert/<cert>.pem
 -u <account number w/o dashes> -e /tmp/cert
 ```
 * You need to create an AWS [S3
