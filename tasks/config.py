@@ -1,5 +1,14 @@
+"""
+Config
+==============
+
+Celery configuration.
+"""
+
+# Broker (message queue) url.
 BROKER_URL = 'amqp://guest@localhost//'
 
+# Result backend.
 CELERY_RESULT_BACKEND = 'mongodb'
 CELERY_MONGODB_BACKEND_SETTINGS = {
     'host': 'localhost',
