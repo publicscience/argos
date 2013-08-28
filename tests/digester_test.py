@@ -12,9 +12,8 @@ class DigesterTest(unittest.TestCase):
         self.assertIsInstance(self.d, Digester)
 
     def test_iterate(self):
-        def process_element(elem):
-            self.assertIsNotNone(elem)
-        self.d.iterate('page', process_element)
+        for page in self.d.iterate('page'):
+            self.assertIsNotNone(page)
 
 if __name__ == '__main__':
     unittest.main()

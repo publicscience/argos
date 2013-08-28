@@ -3,6 +3,14 @@ Digester
 ==============
 
 Processes XML dumps.
+
+Some of this package is derived from gensim 0.8.6.
+As such, this Digester package is licensed under
+the GNU LGPL v2.1, which is gensim's license.
+http://www.gnu.org/licenses/lgpl.html
+
+Credit for the gensim-derived modules goes to:
+Homer Strong, Radim Rehurek, and Lars Buitinck.
 """
 
 from lxml import etree
@@ -36,23 +44,17 @@ class Digester:
         self.namespace = '{%s}' % namespace
 
 
-    def iterate(self, tag, process_element):
+    def iterate(self, tag):
         """
-        Iterates over an XML context for a specific tag.
-        Can handle either XML or bzipped XML (.bz2)
+        A generator that iterates over an XML context for a specific tag,
+        yielding each element of the matching tag..
+        Can handle either XML or bzipped XML (.bz2).
 
         Args:
-            | tag (str)                 -- the tag/element to operate on
-            | process_element (func)    -- function to call on each element
+            | tag (str)                 -- the target tag/element to find.
 
-        If you need to process multiple tags, it's suggested that you specify
-        a parent tag, and then `find` the other tags in your `process_element`
-        function (see example below).
-
-        Example `process_element`::
-
-            def process_element(elem):
-                print(elem.find('{%s}title' % namespace).text.encode('utf-8'))
+        Yields:
+            | elem (lxml Element)       -- the target element.
         """
 
         # Check if the file is bzipped
@@ -70,8 +72,9 @@ class Digester:
         # Iterate
         # http://ibm.co/17rvZ
         for event, elem in context:
-            # Run process_element on the element.
-            process_element(elem)
+
+            # Yield the element.
+            yield elem
 
             # Clear the elem, since we're done with it
             elem.clear()

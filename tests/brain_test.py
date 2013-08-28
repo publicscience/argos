@@ -8,16 +8,16 @@ class BrainTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_simple_count(self):
+    def test_bag_of_words(self):
         data = "hey there buddy, hey"
-        freqs = brain.count(data)
+        wbag = brain.bag_of_words(data)
 
         # 'there' is filtered out as a stopword.
         expected = {
-                'hey': 2,
-                'buddy': 1
+                41812295: 2,
+                103809561: 1
         }
-        self.assertEqual(freqs, expected)
+        self.assertEqual(wbag, expected)
 
     def test_entity_recognition(self):
         with open('tests/data/sample.txt', 'r') as f:

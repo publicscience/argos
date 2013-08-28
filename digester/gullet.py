@@ -17,6 +17,10 @@ except ImportError:
 
 import os, time, sys
 
+# Logging.
+from logger import logger
+logger = logger(__name__)
+
 CHUNK = 16 * 1024
 
 def download(url, save_path, progress=False):
@@ -69,15 +73,15 @@ def download(url, save_path, progress=False):
 
         # Check if the file has already been downloaded_size.
         if total_size == existing_size:
-            print('File already downloaded.')
+            logger.info('File already downloaded.')
             return
 
         # Check that the server accepts ranges.
         # If it does not, the server will ignore the Range header,
         # And we have to start all over again.
         if existing_size > 0 and not resp.info().getheader('Accept-Ranges'):
-            print('Server does not allow resuming of downloads.')
-            print('Starting from the beginning! :D')
+            logger.info('Server does not allow resuming of downloads.')
+            logger.info('Starting from the beginning! :D')
             outfile = open(file, 'wb')
 
         if progress:
@@ -97,9 +101,9 @@ def download(url, save_path, progress=False):
             sys.stdout.write('\n')
 
     except request.HTTPError as e:
-        print('HTTP Error:', e.code, url)
+        logger.error('HTTP Error:', e.code, url)
     except request.URLError as e:
-        print('URL Error:', e.reason, url)
+        logger.error('URL Error:', e.reason, url)
 
 
 def _expired(url, file):
@@ -122,9 +126,9 @@ def _expired(url, file):
         return last_mod_time > file_last_mod_time
 
     except request.HTTPError as e:
-        print('HTTP Error:', e.code, url)
+        logger.error('HTTP Error:', e.code, url)
     except request.URLError as e:
-        print('URL Error:', e.reason, url)
+        logger.error('URL Error:', e.reason, url)
 
 def _progress(percent):
     """
@@ -135,7 +139,7 @@ def _progress(percent):
     sys.stdout.flush()
     sys.stdout.write('\b' * (width+10))
 
-    for i in xrange(int(percent)):
+    for i in range(int(percent)):
         sys.stdout.write('=')
         sys.stdout.flush()
     sys.stdout.write('\b' * (width+10))

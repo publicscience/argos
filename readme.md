@@ -167,6 +167,147 @@ You can start a Celery worker with the `do` script:
 (dev-env) $ ./do worker
 ```
 
+#### AWS
+The `Cluster` module manages Celery and additionally provides
+functionality to create an AWS EC2 AutoScaling Group on-demand
+for distributed task processing.
+
+Note that using AWS costs money! You pay for the EC2 instances' usage
+and for [CloudWatch](https://aws.amazon.com/cloudwatch/) instance monitoring and alarms.
+
+Note you will also need to configure `Adipose` accordingly, so that
+your cluster computers have access to the database.
+
+It requires some configuration before it can be used.
+The config file is `cluster/aws_config.py` (there is a sample config
+available that needs to be renamed to this). You will need to fill in
+your AWS access key, secret key, and some other important info.
+
+If you are signed up for AWS, you can create an access key and secret
+key at the [Security
+Credentials](https://console.aws.amazon.com/iam/home?#security_credential) page.
+
+Set `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` to these values.
+
+You will also need to create a key pair, if you don't already have one,
+for EC2. Go to the [EC2
+Key Pairs panel](https://console.aws.amazon.com/ec2/#s=KeyPairs) and
+select 'Create Key Pair'. Give it a name, and the keypair should
+download. Make sure you secure its permissions:
+```bash
+$ chmod 400 /path/to/my/keypair.pem
+```
+And keep it in a safe place.
+
+Set `KEYPAIR_NAME` to this key pair's name.
+
+You also may need to create a new X.509 Certificate. This is also
+accomplished in the [Security
+Credentials](https://console.aws.amazon.com/iam/home?#security_credential) page.
+Under 'X.509 Certificates', click 'Create New Certificate.' The private
+key and certificate should both automatically download. Keep these in a
+safe place.
+
+You can create a new [security
+group](https://console.aws.amazon.com/ec2/#s=SecurityGroups) if you want, or you can set `SECURITY_GROUPS` to `['default']` to use the default security group. Just make sure that your EC2 instances are all in the same security group!
+
+Finally, you will need an AMI (Amazon Machine Image) ID, which can be
+gathered through the [EC2 AMI
+panel](https://console.aws.amazon.com/ec2/v2/#Images:). You can browse
+existing AMIs [here at the AWS
+marketplace](https://aws.amazon.com/amis). See below how to create your
+own AMI.
+
+You can additionally configure the names and region to your
+requirements/liking.
+
+##### Creating your own AMI
+You can customize an existing AMI to your liking, and then save it as a
+private AMI for your own usage. This is probably the easiest way.
+
+For the cluster's use case, instance store-backed AMIs are fine, since
+the data does not need to be persistent and the jobs will be infrequent
+(so startup time is not an issue). The alternative, EBS-backed AMIs,
+cost extra – the instances can be stopped instead of terminated (you
+are able to restart it instead of having to create a new
+instance), so they start up quicker, but you pay for the storage while it is stopped.
+
+The process is:
+* Create a [new EC2
+instance](https://console.aws.amazon.com/ec2/#s=Instances) (click
+'Launch Instance'). I created an Ubuntu Server 13.04 64-bit
+t1.micro instance.
+* Make note of the instance's Public DNS. It should be something like
+`ec2-xxxxxxxxx.xxxxxxx.computer.amazonaws.com`.
+* SSH into the instance once it is finished launching:
+
+```bash
+$ ssh -i /path/to/my/keypair.pem ubuntu@<public DNS>
+```
+* While SSH'd, you can start customizing the image. Install the
+packages you need, etc.
+* You will need your AWS Account Number. This can be found on your
+[Account
+Activity](https://portal.aws.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&action=activity-summary) page.
+It looks something like `1111-1111-1111`, but you want to remove the
+dashes.
+* You will also need your AWS access key, secret key, private key, and
+X.509 certificate (see above on how to create these).
+* On the instance, you need to create a directory to add your private
+key and X.509 certificate. These files should *not* be part of the
+image, so create a temporary directory that will be ignored by the image
+creation process:
+
+```bash
+$ mkdir /tmp/cert
+$ sudo chmod 777 /tmp/cert
+```
+* Now you can upload your private key and X.509 certificate to this
+image. On your local machine:
+
+```bash
+$ scp -i /path/to/my/keypair.pem /path/to/my/privatekey.pem
+/path/to/my/certificate.pem ubuntu@<public DNS>:/tmp/cert
+```
+* On the instance, you will need to install `ec2-ami-tools` if they
+aren't already on the instance:
+
+```bash
+$ sudo apt-get install ec2-ami-tools
+```
+On the Ubuntu AMI that I used, `apt-get` needed access to `multiverse`
+before this would work. To enable `multiverse`, edit
+`etc/apt/sources.list` and uncomment the lines that end in `multiverse`.
+Then run:
+
+```bash
+$ sudo apt-get update
+```
+and try the installation again.
+* Now, on the instance, you can generate the image:
+
+```bash
+$ sudo su
+$ ec2-bundle-vol -k /tmp/cert/<privatekey>.pem -c /tmp/cert/<cert>.pem
+-u <account number w/o dashes> -e /tmp/cert
+```
+* You need to create an AWS [S3
+bucket](https://console.aws.amazon.com/s3/) in the same region as your
+instance. This is where the image will be stored.
+* Now you can upload the image to S3:
+
+```bash
+$ ec2-upload-bundle -b <s3 bucket name> -m <manifest path> -a <your
+access key> -s <your secret key>
+```
+* And now you can register the AMI:
+
+```bash
+$ ec2-register <s3 bucket name>/<path>/<manifest file>.xml -n <what to
+name the image> -O <your access key> -W <your secret key>
+```
+
+
 ## Documentation
 To generate documentation, do:
 ```bash
@@ -178,7 +319,7 @@ The documentation will be located at `doc/_build/html/index.html`.
 ## Testing
 To run the tests:
 ```bash
-$ nosetests tests
+(dev-env) $ nosetests tests
 ```
 
 ## Profiling and Performance
@@ -197,9 +338,8 @@ The full enwiki pages-articles dump is about 44.9GB. Which is about
 a rough estimate for completion is ~637252s ≈ 7 days, 9 hours.
 Without lemmatization, it is roughly 133297s ≈ 1 day, 13 hours.
 
-Turning `Brain.count()` into a mapreduce process should save a lot of
-time. Since it is fundamentally a word counting procedure, it should be
-well-suited for mapreduce.
+Turning wikidigestion into a distributed process should save a lot of
+time.
 
 ## The Future (To Do)
 * Perhaps the main area of future refinement will be all parts relating
