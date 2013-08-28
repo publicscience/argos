@@ -21,7 +21,7 @@ from mwlib.refine.compat import parse_txt
 # Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
 from celery import chord
-from tasks import celery
+from cluster import celery
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
