@@ -21,7 +21,7 @@ from mwlib.refine.compat import parse_txt
 # Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
 from celery import chord
-from cluster import celery
+from cluster import celery, workers
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
@@ -109,6 +109,10 @@ class WikiDigester(Digester):
         """
 
         logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
+
+        if self.distrib and not workers():
+            logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
+            return
 
         if self.dump == 'pages':
             if self.distrib:
