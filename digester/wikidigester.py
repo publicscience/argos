@@ -21,7 +21,7 @@ from mwlib.refine.compat import parse_txt
 # Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
 from celery import chord
-from tasks import celery
+from cluster import celery, workers
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
@@ -110,6 +110,11 @@ class WikiDigester(Digester):
 
         logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
 
+        # Check to see that there are workers available for distributed tasks.
+        if self.distrib and not workers():
+            logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
+            return
+
         if self.dump == 'pages':
             if self.distrib:
                 # Create async Celery tasks to
@@ -129,7 +134,7 @@ class WikiDigester(Digester):
                               for page in self._parse_pages())(self._t_generate_tfidf.s(self, ))
             else:
                 # Serially/synchronously process pages.
-                docs = [self._process__page(page) for page in self._parse_pages()]
+                docs = [self._process_page(page) for page in self._parse_pages()]
 
                 # Generate TF-IDF representation
                 # of all docs upon completion.
