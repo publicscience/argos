@@ -133,7 +133,7 @@ class WikiDigester(Digester):
                               for page in self._parse_pages())(self._t_generate_tfidf.s(self, ))
             else:
                 # Serially/synchronously process pages.
-                docs = [self._process__page(page) for page in self._parse_pages()]
+                docs = [self._process_page(page) for page in self._parse_pages()]
 
                 # Generate TF-IDF representation
                 # of all docs upon completion.
