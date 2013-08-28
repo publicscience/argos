@@ -232,9 +232,6 @@ cost extra – the instances can be stopped instead of terminated (you
 are able to restart it instead of having to create a new
 instance), so they start up quicker, but you pay for the storage while it is stopped.
 
-You will need the [EC2 Command Line
-Tools](http://aws.amazon.com/developertools/351).
-
 The process is:
 * Create a [new EC2
 instance](https://console.aws.amazon.com/ec2/#s=Instances) (click
@@ -243,6 +240,7 @@ t1.micro instance.
 * Make note of the instance's Public DNS. It should be something like
 `ec2-xxxxxxxxx.us-west-2.computer.amazonaws.com`.
 * SSH into the instance once it is finished launching:
+
 ```bash
 $ ssh -i /path/to/my/keypair.pem ubuntu@<public DNS>
 ```
@@ -259,18 +257,21 @@ X.509 certificate (see above on how to create these).
 key and X.509 certificate. These files should *not* be part of the
 image, so create a temporary directory that will be ignored by the image
 creating process:
+
 ```bash
 $ mkdir /tmp/cert
 $ sudo chmod 777 /tmp/cert
 ```
 * Now you can upload your private key and X.509 certificate to this
 image. On your local machine:
+
 ```bash
 $ scp -i /path/to/my/keypair.pem /path/to/my/privatekey.pem
 /path/to/my/certificate.pem ubuntu@<public DNS>:/tmp/cert
 ```
 * On the instance, you will need to install `ec2-ami-tools` if they
 aren't already on the instance:
+
 ```bash
 $ sudo apt-get install ec2-ami-tools
 ```
@@ -278,11 +279,13 @@ On the Ubuntu AMI that I used, `apt-get` needed access to `multiverse`
 before this would work. To enable `multiverse`, edit
 `etc/apt/sources.list` and uncomment the lines that end in `multiverse`.
 Then run:
+
 ```bash
 $ sudo apt-get update
 ```
 and try the installation again.
 * Now, on the instance, you can generate the image:
+
 ```bash
 $ sudo su
 # ec2-bundle-vol -k /tmp/cert/<privatekey>.pem -c /tmp/cert/<cert>.pem
@@ -292,11 +295,13 @@ $ sudo su
 bucket](https://console.aws.amazon.com/s3/) in the same region as your
 instance. This is where the image will be stored.
 * Now you can upload the image to S3:
+
 ```bash
 $ ec2-upload-bundle -b <s3 bucket name> -m <manifest path> -a <your
 access key> -s <your secret key>
 ```
 * And now you can register the AMI:
+
 ```bash
 $ ec2-register <s3 bucket name>/<path>/<manifest file>.xml -n <what to
 name the image> -O <your access key> -W <your secret key>
