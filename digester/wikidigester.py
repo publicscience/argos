@@ -110,6 +110,7 @@ class WikiDigester(Digester):
 
         logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
 
+        # Check to see that there are workers available for distributed tasks.
         if self.distrib and not workers():
             logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
             return

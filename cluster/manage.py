@@ -20,9 +20,8 @@ Configuration is in `aws_config.py`.
 
 from boto.ec2.elb import ELBConnection, HealthCheck, LoadBalancer
 from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoScalingGroup, ScalingPolicy
-from boto.ec2.cloudwatch import MetricAlarm
-from boto.ec2.cloudwatch import connect_to_region as cloudwatch_connection
-from boto.ec2 import connect_to_region as region_connection
+from boto.ec2.cloudwatch import MetricAlarm, CloudWatchConnection
+from boto.ec2 import connect_to_region
 
 # Logging
 from logger import logger
@@ -34,7 +33,7 @@ REGION = c.REGION
 AG_NAME = c.AG_NAME
 LC_NAME = c.LC_NAME
 ELB_NAME = c.ELB_NAME
-AMI_IMAGE_ID = c.AMI_IMAGE_ID
+AMI_ID = c.AMI_ID
 KEYPAIR_NAME = c.KEYPAIR_NAME
 ACCESS_KEY = c.AWS_ACCESS_KEY
 SECRET_KEY = c.AWS_SECRET_KEY
@@ -50,7 +49,7 @@ def commission():
     logger.info('Commissioning new AutoScale Group infrastructure...')
 
     # Check to see if the AutoScale Group already exists.
-    if not status():
+    if status():
         logger.info('The AutoScale Group already exists, exiting!')
         return
 
@@ -58,7 +57,11 @@ def commission():
     conn_elb = connect_elb()
 
     # Get availability zones for region.
-    conn_reg = region_connection(region_name=REGION)
+    conn_reg = connect_to_region(
+                    region_name=REGION,
+                    aws_access_key_id=ACCESS_KEY,
+                    aws_secret_access_key=SECRET_KEY
+               )
     zones = [zone.name for zone in conn_reg.get_all_zones()]
 
 
@@ -78,15 +81,12 @@ def commission():
 
 
     # Create the load balancer.
-    load_balancer = LoadBalancer(
-                        name=ELB_NAME,
-                        health_check=health_check,
-                        availability_zones=zones,
-                        connection=conn_elb
+    load_balancer = conn_elb.create_load_balancer(
+                        ELB_NAME,
+                        zones,
+                        [(80, 80, 'http'), (443, 443, 'tcp')]
                     )
-
-    # Create the load balancer on AWS.
-    elb = conn_elb.create_load_balancer(load_balancer)
+    load_balancer.configure_health_check(health_check)
     # Point your site's CNAME here: elb.dns_name
 
 
@@ -95,7 +95,7 @@ def commission():
                         name=LAUNCH_CONFIG_NAME,
 
                         # AMI ID for autoscaling instances.
-                        image_id=AMI_IMAGE_ID,
+                        image_id=AMI_ID,
 
                         # The name of the EC2 keypair.
                         key_name=KEYPAIR_NAME,
@@ -120,7 +120,7 @@ def commission():
                             load_balancers=[ELB_NAME],
                             availability_zones=zones,
                             launch_config=launch_config,
-                            min_size=4,  # minimum group size
+                            min_size=2,  # minimum group size
                             max_size=8,  # maximum group size
                             connection=conn
                         )
@@ -163,7 +163,11 @@ def commission():
                       )[0]
 
     # Create CloudWatch alarms.
-    cloudwatch = cloudwatch_connection(REGION)
+    cloudwatch = CloudWatchConnection(
+                    region_name=REGION,
+                    aws_access_key_id=ACCESS_KEY,
+                    aws_secret_access_key=SECRET_KEY
+                 )
 
     # We need to specify the "dimensions" of this alarm,
     # which describes what it watches (here, the whole autoscaling group).
