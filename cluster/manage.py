@@ -41,7 +41,6 @@ SECRET_KEY = c.AWS_SECRET_KEY
 KEYPAIR_NAME = c.KEYPAIR_NAME
 PATH_TO_KEY = c.PATH_TO_KEY
 BASE_AMI_ID = c.BASE_AMI_ID
-AMI_ID = c.AMI_ID
 LB_NAME = '%s_loadbalancer' % NAME
 LC_NAME = '%s_launchconfig' % NAME
 HC_NAME = '%s_healthcheck' % NAME
@@ -208,7 +207,7 @@ def commission():
                         name=LC_NAME,
 
                         # AMI ID for autoscaling instances.
-                        image_id=AMI_ID,
+                        image_id=BASE_AMI_ID,
 
                         # The name of the EC2 keypair.
                         key_name=KEYPAIR_NAME,

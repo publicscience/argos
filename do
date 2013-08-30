@@ -27,7 +27,7 @@ then
 elif [[ $1 == 'profile' ]]
 then
     source dev-env/bin/activate
-    python -m cProfile -s tottime tests/wikidigester_test.py
+    python profiler.py
 
 
 # Start a local Celery worker.
@@ -165,6 +165,7 @@ function setup_mapreduce {
 }
 
 function setup_doc {
+    source dev-env/bin/activate
     cd doc
     make clean
     make html
