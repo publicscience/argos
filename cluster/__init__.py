@@ -10,6 +10,7 @@ from celery import Celery
 from cluster import celery_config
 
 from logger import logger
+logger = logger(__name__)
 
 # Expose `manage` when imported.
 from . import manage

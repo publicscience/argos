@@ -1,17 +1,14 @@
-"""
-Config
-==============
+# Used to try getting env variables first.
+import os
 
-Celery configuration.
-"""
-
+# Celery config.
 # Broker (message queue) url.
-BROKER_URL = 'amqp://guest@localhost//'
+BROKER_URL = os.getenv('BROKER_URL', 'amqp://guest@localhost//')
 
 # Result backend.
 CELERY_RESULT_BACKEND = 'mongodb'
 CELERY_MONGODB_BACKEND_SETTINGS = {
-    'host': 'localhost',
+    'host': os.getenv('DB_HOST', 'localhost'),
     'port': 27017,
     'database': 'celery',
 

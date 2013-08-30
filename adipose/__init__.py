@@ -7,12 +7,13 @@ Uses MongoDB, but can be modified.
 """
 
 import pymongo
+import config
 
 class Adipose:
     """
     Provides an interface to a database (MongoDB).
     """
-    def __init__(self, database, collection, host='localhost', port=27017):
+    def __init__(self, database, collection, host=config.DB_HOST, port=27017):
         """
         Create a new interface.
 

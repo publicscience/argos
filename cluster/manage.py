@@ -111,7 +111,7 @@ def commission():
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
     minion_init_script_raw = _load_script('setup_minion.sh')
-    minion_init_script = Template(minion_init_script_raw).substitute(salt_master=instance.private_dns_name)
+    minion_init_script = Template(minion_init_script_raw).substitute(master_dns=instance.private_dns_name)
 
 
     # Create the health check.
