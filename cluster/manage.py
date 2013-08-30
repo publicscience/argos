@@ -39,7 +39,7 @@ SECRET_KEY = c.AWS_SECRET_KEY
 KEYPAIR_NAME = c.KEYPAIR_NAME
 BASE_AMI_ID = c.BASE_AMI_ID
 AMI_ID = c.AMI_ID
-ELB_NAME = '%s_loadbalancer' % NAME
+LB_NAME = '%s_loadbalancer' % NAME
 LC_NAME = '%s_launchconfig' % NAME
 HC_NAME = '%s_healthcheck' % NAME
 AG_NAME = '%s_autoscale' % NAME
@@ -125,9 +125,9 @@ def commission():
 
 
     # Create the load balancer.
-    logger.info('Creating the load balancer (%s)...' % ELB_NAME)
+    logger.info('Creating the load balancer (%s)...' % LB_NAME)
     load_balancer = conn_elb.create_load_balancer(
-                        ELB_NAME,
+                        LB_NAME,
                         zones,
                         [(80, 80, 'http'), (443, 443, 'tcp')]
                     )
@@ -168,7 +168,7 @@ def commission():
     logger.info('Creating the autoscaling group (%s)...' % AG_NAME)
     autoscaling_group = AutoScalingGroup(
                             group_name=AG_NAME,
-                            load_balancers=[ELB_NAME],
+                            load_balancers=[LB_NAME],
                             availability_zones=zones,
                             launch_config=launch_config,
                             min_size=2,  # minimum group size
@@ -296,7 +296,7 @@ def decommission():
     cloudwatch.delete_alarms(['scale_up_on_cpu', 'scale_down_on_cpu'])
 
     # Delete the load balancer.
-    conn_elb.delete_load_balancer(ELB_NAME)
+    conn_elb.delete_load_balancer(LB_NAME)
 
     # Delete the master instance.
     master_id = conn_ec2.get_all_reservations(filters={'name': MASTER_NAME})[0]
