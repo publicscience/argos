@@ -12,7 +12,10 @@ sudo apt-get upgrade -y
 export DB_HOST=$master_dns
 export BROKER_URL=amqp://guest@$master_dns//
 
-# Set Salt Master location and start Minion
+# Edit Minion config to
+# set Salt Master location
 sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
+
+# Start Minion
 salt-minion -d
 

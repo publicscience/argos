@@ -24,7 +24,7 @@ from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoSca
 from boto.ec2.cloudwatch import MetricAlarm, CloudWatchConnection
 from boto.ec2 import EC2Connection
 
-import os
+import os, time, subprocess
 from string import Template
 
 # Logging
@@ -78,10 +78,8 @@ def commission():
     # Authorize HTTP access.
     sec_group.authorize('tcp', 80, 80, '0.0.0.0/0')
 
-    # Authorize SSH access.
-    # This is an example! Probably don't want to allow SSH from anywhere.
-    #web.authorize('tcp', 22, 22, '0.0.0.0/0')
-    #web.revoke('tcp', 22, 22, '0.0.0.0/0')
+    # Authorize SSH access (temporarily).
+    web.authorize('tcp', 22, 22, '0.0.0.0/0')
 
     # Create the Salt Master/RabbitMQ/MongoDB server.
     logger.info('Creating the master instance (%s)...' % MASTER_NAME)
@@ -93,20 +91,82 @@ def commission():
                        instance_type='m1.small',
                        user_data=master_init_script
                    )
+    instance = reservations.instances[0]
+
+    # Wait until the instance is ready.
+    logger.info('Waiting for master instance to launch...')
+    status = instance.update()
+    while status == 'pending':
+        time.sleep(10)
+        status = instance.update()
+    logger.info('Master instance has launched. Configuring...')
 
     # Tag the instance with a name so we can find it later.
-    instance = reservations.instances[0]
     instance.add_tag('name', MASTER_NAME)
 
+
+    # Setup master instance with the Salt state tree.
+
+    # NOTE: Fabric does not yet support Py3.3.
+    # Keeping this in until it does...
     # Set the host for Fabric to connect to.
-    # Seems like this may not be necessary;
-    # everything is handled by the MASTER_INIT_SCRIPT.
     #env.hosts = [instance.public_dns_name]
     #env.user = INSTANCE_USER
     #env.key_filename = PATH_TO_KEY
 
-    # Set RabbitMQ location for local machine and Minions (celery_config.py)
-    # Set MongoDB location on Minions. (celery_config.py)
+    # For now, using subprocess Popen.
+    env = {
+            'host': instance.public_dns_name,
+            'user': INSTANCE_USER,
+            'key_filename': PATH_TO_KEY
+    }
+
+    # Copy over deploy keys into the Salt state tree.
+    salt_path = _get_filepath('salt/')
+    deploy_keys_path = _get_filepath(PATH_TO_DEPLOY_KEYS)
+    deploy_keys = ['id_rsa', 'id_rsa.pub']
+    for key in deploy_keys:
+        subprocess.Popen([
+            'cp',
+            os.path.join(deploy_keys_path, key),
+            os.path.join(salt_path, 'salt/deploy/')
+        ])
+
+    # Copy over Salt state tree to Master.
+    # First have to move to a temporary directory.
+    subprocess.call([
+        'scp',
+        '-r',
+        '-i',
+        env['key_filename'],
+        salt_path,
+        '%s@%s:/tmp/salt' % (env['user'], env['host'])
+    ])
+
+    # Move it to the real directory.
+    subprocess.call([
+        'ssh',
+        '-t',
+        '-i',
+        env['key_filename'],
+        '%s@%s' % (env['user'], env['host']),
+        'sudo',
+        'mv',
+        '/tmp/salt',
+        '/srv'
+    ])
+
+    # Disable SSH access.
+    web.revoke('tcp', 22, 22, '0.0.0.0/0')
+
+    # Clean up the deploy keys.
+    for key in deploy_keys:
+        subprocess.Popen([
+            'rm',
+            os.path.join(salt_path, 'salt/deploy/', key)
+        ])
+
+
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
@@ -314,6 +374,7 @@ def decommission():
     logger.info('Decommissioning complete.')
 
 
+
 def status():
     """
     Checks if the AutoScale Group exists.
@@ -365,5 +426,12 @@ def _load_script(filename):
     """
     Loads a script from this directory.
     """
+    return open(_get_filepath(filename)).read()
+
+def _get_filepath(filename):
+    """
+    Gets filepath for a file
+    relative to this directory.
+    """
     dir = os.path.dirname(__file__)
-    return open(os.path.join(dir, filename)).read()
+    return os.path.abspath(os.path.join(dir, filename))

@@ -307,6 +307,11 @@ $ ec2-register <s3 bucket name>/<path>/<manifest file>.xml -n <what to
 name the image> -O <your access key> -W <your secret key>
 ```
 
+## Deployment
+Generate [SSH deploy
+keys](https://help.github.com/articles/managing-deploy-keys) for this repository, and specify the path to them in
+`cluster/aws_config.py`.
+
 
 ## Documentation
 To generate documentation, do:
