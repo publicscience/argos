@@ -1,6 +1,9 @@
 Shallow Thought
 ===============
 
+Please consult the
+[wiki](https://github.com/publicscience/shallowthought/wiki) for more information.
+
 ## Quick Setup
 
 The setup process for Shallow Thought is fairly complex, but some scripts vastly simplify it.
@@ -49,52 +52,3 @@ but if you want to install it, you can additionally run:
 ```bash
 $ ./do setup mapreduce
 ```
-
-For more details, see [Detailed Setup](Detailed Setup).
-
-## Modules
-### Membrane (in progress)
-The `Membrane` will provide a single common interface to external APIs, such as
-Twitter, and to RSS feeds (via
-        [Feedparser](http://pythonhosted.org/feedparser/introduction.html)).
-Twitter integration will be provided by
-[Tweepy](https://github.com/tweepy/tweepy), and content extraction for
-feeds will be provided by
-[Readability](https://github.com/buriy/python-readability). Twitter
-support will probably be excluded from MVP/V1.0.
-
-### Digester
-The `Digester` manages the XML parsing. It is a superclass of the
-`WikiDigester`.
-
-The `Digester` also includes:
-
-#### Gullet
-The `Gullet` provides a general means of downloading remote files. In
-the case of the Digester, it downloads the latest Wikipedia dumps. It is
-capable of resuming downloads if the server supports it.
-
-### Adipose
-The `Adipose` provides an common interface to a data-persistence store, i.e. a
-database. In its current implementation, this database is MongoDB. It's
-purpose is to provide some flexibility with the database. That is, a
-different database could be swapped in while keeping the Adipose
-interface the same. In the present use case, it will provide a means
-of storing the parsed and processed information into MongoDB.
-
-### Brain (in progress)
-The `Brain` provides the text processing functionality, so it functions
-mostly as a wrapper for NLTK. It provides parsing functionality such as
-tokenization, lemmatization, and frequency distribution.
-
-### WikiDigester (in progress)
-The `WikiDigester` is a subclass of the `Digester` and is essentially a
-Digester designed to specifically handle Wikipedia dumps. As such, it
-has some special functionality tailored to this.
-
-### Memory (in progress)
-The `Memory` provides an interface to Solr. The actual Solr instance
-still needs to be ported in with a proper Solr configuration (see
-[Parrott](https://github.com/ftzeng/parrott)).
-
-
