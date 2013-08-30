@@ -114,7 +114,8 @@ def commission():
     #env.user = INSTANCE_USER
     #env.key_filename = PATH_TO_KEY
 
-    # For now, using subprocess Popen.
+    # For now, using subprocess Popen and call.
+    # Not sure if this is really the best solution...
     env = {
             'host': instance.public_dns_name,
             'user': INSTANCE_USER,
