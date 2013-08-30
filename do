@@ -7,9 +7,7 @@
 # Build documentation.
 if [[ $1 == 'doc' ]]
 then
-    cd doc
-    make clean
-    make html
+    setup_doc
 
 
 # Start MongoDB server.
@@ -51,61 +49,123 @@ then
     screen -S shallowthought -c .screen
 
 
-# Startup Vim in the proper env.
-elif [[ $1 == 'dev' ]]
-then
-    source dev-env/bin/activate
-    vim .
-
-
 # Setup some stuff.
 elif [[ $1 == 'setup' ]]
 then
 
-    # Install NLTK data (Python 3)
-    if [[ $2 == 'nltk' ]]
+    if [[ $2 == 'all' ]]
     then
-        source dev-env/bin/activate
+        setup_dependencies
+        setup_virtualenv
+        setup_nltk
+        setup_mongo
+        setup_doc
 
-        # Tokenizing and lemmatization.
-        python -m nltk.downloader punkt
-        python -m nltk.downloader wordnet
-        python -m nltk.downloader stopwords
+    elif [[ $2 == 'nltk' ]]
+    then
+        setup_nltk
 
-        # Named Entity Recognition
-        python -m nltk.downloader words
-        # Not yet Python 3 ready:
-        #python -m nltk.downloader maxent_treebank_pos_tagger
-        #python -m nltk.downloader maxent_ne_chunker
-
-        # Installing Python 3 ready alternative data
-        curl -o ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
-        unzip ~/nltk_data/chunkers/maxent_ne_chunker.zip
-        curl -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
-        unzip ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
-
-
-    # Install MongoDB
     elif [[ $2 == 'mongo' ]]
     then
-        # Setup MongoDB.
-        curl -o mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
-        mkdir mongodb
-        tar --extract --file=mongodb.tgz --strip-components=1 --directory=mongodb
-        rm mongodb.tgz
-        mkdir mongodb/data
+        setup_mongo
 
-    # Setup MapReduce NLTK packages (Python 2.7)
     elif [[ $2 == 'mapreduce' ]]
     then
-        source mr-env/bin/activate
-        # The mapreduce scripts require Python 2.7.
-        # The NTLK data then needs to be the Python 2.7 data,
-        # so it will be installed to a separate directory.
-        for PACKAGE in punkt wordnet stopwords words maxent_treebank_pos_tagger maxent_ne_chunker
-        do
-            python -m nltk.downloader $PACKAGE -d mapreduce/nltk_data/
-        done
+        setup_mapreduce
+
     fi
 fi
 
+
+function setup_dependencies {
+    # Check if OSX.
+    if [[ "$OSTYPE" =~ ^darwin ]]
+    then
+        brew install screen
+        brew install rabbitmq
+
+        # Required by mwlib.
+        brew install libevent
+        brew install re2c
+
+    # Otherwise, assume Linux...
+    else 
+        sudo apt-get install screen -y
+        sudo apt-get install rabbitmq-server -y
+
+        # Required by mwlib.
+        sudo apt-get install libevent-dev -y
+        sudo apt-get install re2c -y
+
+    fi
+}
+
+function setup_virtualenv {
+    # Setup the Python 3.3 virtualenv.
+    virtualenv-3.3 dev-env --no-site-packages
+    source dev-env/bin/activate
+    pip install -r requirements.txt
+
+    # Install Python 3 versions.
+    pip install git+git://github.com/nltk/nltk.git
+    pip install git+git://github.com/ftzeng/python-readability.git
+    pip install git+git://github.com/boto/boto.git@py3kport
+
+    # Install unofficial mwlib Python 3 port.
+    git clone https://github.com/ftzeng/mwlib_simple.git
+    cd mwlib_simple
+    python setup.py install
+    cd .. && rm -rf mwlib_simple
+}
+
+function setup_mongo {
+    # Setup MongoDB.
+    curl -o mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
+    mkdir mongodb
+    tar --extract --file=mongodb.tgz --strip-components=1 --directory=mongodb
+    rm mongodb.tgz
+    mkdir mongodb/data
+}
+
+function setup_nltk {
+    # Download NLTK (Python 3) data.
+    source dev-env/bin/activate
+
+    # Tokenizing and lemmatization.
+    python -m nltk.downloader punkt
+    python -m nltk.downloader wordnet
+    python -m nltk.downloader stopwords
+
+    # Named Entity Recognition
+    python -m nltk.downloader words
+    # Not yet Python 3 ready:
+    #python -m nltk.downloader maxent_treebank_pos_tagger
+    #python -m nltk.downloader maxent_ne_chunker
+
+    # Installing Python 3 ready alternative data.
+    curl -o ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
+    unzip ~/nltk_data/chunkers/maxent_ne_chunker.zip
+    curl -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
+    unzip ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
+}
+
+function setup_mapreduce {
+    # Setup the mapreduce virtualenv.
+    # The mapreduce scripts require Python 2.7.
+    virtualenv-2.7 mr-env --no-site-packages
+    source mr-env/bin/activate
+    pip install -r mapreduce/requirements.txt
+
+    # The NTLK data then needs to be the Python 2.7 data,
+    # so it will be installed to a separate directory.
+    for PACKAGE in punkt wordnet stopwords words maxent_treebank_pos_tagger maxent_ne_chunker
+    do
+        python -m nltk.downloader $PACKAGE -d mapreduce/nltk_data/
+    done
+}
+
+function setup_doc {
+    cd doc
+    make clean
+    make html
+}
