@@ -24,8 +24,7 @@ from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoSca
 from boto.ec2.cloudwatch import MetricAlarm, CloudWatchConnection
 from boto.ec2 import EC2Connection
 
-from fabric.api import *
-
+import os
 from string import Template
 
 # Logging
@@ -49,8 +48,6 @@ HC_NAME = '%s_healthcheck' % NAME
 AG_NAME = '%s_autoscale' % NAME
 SG_NAME = '%s_security' % NAME
 MASTER_NAME = '%s_master' % NAME
-MINION_INIT_SCRIPT_RAW = open('setup_minion.sh').read()
-MASTER_INIT_SCRIPT = open('setup_master.sh').read()
 
 def commission():
     """
@@ -64,9 +61,9 @@ def commission():
         logger.info('The AutoScale Group already exists, exiting!')
         return
 
-    conn_asg = connect_asg()
-    conn_elb = connect_elb()
-    conn_ec2 = connect_ec2()
+    conn_asg = _connect_asg()
+    conn_elb = _connect_elb()
+    conn_ec2 = _connect_ec2()
 
     # Get availability zones for region.
     zones = [zone.name for zone in conn_ec2.get_all_zones()]
@@ -88,12 +85,13 @@ def commission():
 
     # Create the Salt Master/RabbitMQ/MongoDB server.
     logger.info('Creating the master instance (%s)...' % MASTER_NAME)
+    master_init_script = _load_script('setup_master.sh')
     reservations = conn_ec2.run_instances(
                        BASE_AMI_ID,
                        key_name=KEYPAIR_NAME,
                        security_groups=[SECURITY_GROUP_NAME],
                        instance_type='m1.small',
-                       user_data=MASTER_INIT_SCRIPT
+                       user_data=master_init_script
                    )
 
     # Tag the instance with a name so we can find it later.
@@ -112,7 +110,8 @@ def commission():
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
-    MINION_INIT_SCRIPT = Template(MINION_INIT_SCRIPT_RAW).substitute(salt_master=instance.private_dns_name)
+    minion_init_script_raw = _load_script('setup_minion.sh')
+    minion_init_script = Template(minion_init_script_raw).substitute(salt_master=instance.private_dns_name)
 
 
     # Create the health check.
@@ -155,7 +154,7 @@ def commission():
 
                         # User data;
                         # the initialization script for the instances.
-                        user_data=MINION_INIT_SCRIPT,
+                        user_data=minion_init_script,
 
                         # Security groups the instance will be in.
                         security_groups=[SECURITY_GROUP_NAME],
@@ -275,9 +274,9 @@ def decommission():
 
     logger.info('Decommissioning the cluster...')
 
-    conn_asg = connect_asg()
-    conn_elb = connect_elb()
-    conn_ec2 = connect_ec2()
+    conn_asg = _connect_asg()
+    conn_elb = _connect_elb()
+    conn_ec2 = _connect_ec2()
 
     # Shutdown and delete autoscaling groups.
     groups = conn_asg.get_all_groups(names=[AG_NAME])
@@ -322,13 +321,13 @@ def status():
     Returns:
         | int   -- number of AutoScale Groups found.
     """
-    conn_asg = connect_asg()
+    conn_asg = _connect_asg()
 
     groups = conn_asg.get_all_groups(names=[AG_NAME])
     return len(groups)
 
 
-def connect_asg():
+def _connect_asg():
     """
     Create an AutoScale Group connection.
 
@@ -337,7 +336,8 @@ def connect_asg():
     """
     return AutoScaleConnection(ACCESS_KEY, SECRET_KEY)
 
-def connect_ec2():
+
+def _connect_ec2():
     """
     Creates an EC2 connection.
 
@@ -350,7 +350,8 @@ def connect_ec2():
                 aws_secret_access_key=SECRET_KEY
            )
 
-def connect_elb():
+
+def _connect_elb():
     """
     Create an Elastic Load Balancer connection.
 
@@ -358,3 +359,11 @@ def connect_elb():
         | ELBConnection
     """
     return ELBConnection(ACCESS_KEY, SECRET_KEY)
+
+
+def _load_script(filename):
+    """
+    Loads a script from this directory.
+    """
+    dir = os.path.dirname(__file__)
+    return open(os.path.join(dir, filename)).read()
