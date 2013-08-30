@@ -3,80 +3,6 @@
 # These are various shortcuts for commonly-used commands.
 # Usage: ./do <command>
 
-
-# Build documentation.
-if [[ $1 == 'doc' ]]
-then
-    setup_doc
-
-
-# Start MongoDB server.
-elif [[ $1 == 'mongo' ]]
-then
-    ./mongodb/bin/mongod --dbpath mongodb/data
-
-
-# Run tests.
-elif [[ $1 == 'test' ]]
-then
-    source dev-env/bin/activate
-    nosetests
-
-
-# Run profiler.
-elif [[ $1 == 'profile' ]]
-then
-    source dev-env/bin/activate
-    python profiler.py
-
-
-# Start a local Celery worker.
-elif [[ $1 == 'worker' ]]
-then
-    source dev-env/bin/activate
-    celery worker --loglevel=info --config=cluster.celery_config
-
-
-# Start RabbitMQ server.
-elif [[ $1 == 'mq' ]]
-then
-    rabbitmq-server
-
-
-# Start screen session with everything setup.
-elif [[ $1 == 'go' ]]
-then
-    screen -S shallowthought -c .screen
-
-
-# Setup some stuff.
-elif [[ $1 == 'setup' ]]
-then
-
-    if [[ $2 == 'all' ]]
-    then
-        setup_dependencies
-        setup_virtualenv
-        setup_nltk
-        setup_mongo
-        setup_doc
-
-    elif [[ $2 == 'nltk' ]]
-    then
-        setup_nltk
-
-    elif [[ $2 == 'mongo' ]]
-    then
-        setup_mongo
-
-    elif [[ $2 == 'mapreduce' ]]
-    then
-        setup_mapreduce
-
-    fi
-fi
-
-
 function setup_dependencies {
     # Check if OSX.
     if [[ "$OSTYPE" =~ ^darwin ]]
@@ -170,3 +96,82 @@ function setup_doc {
     make clean
     make html
 }
+
+
+# Build documentation.
+if [[ $1 == 'doc' ]]
+then
+    setup_doc
+
+
+# Start MongoDB server.
+elif [[ $1 == 'mongo' ]]
+then
+    ./mongodb/bin/mongod --dbpath mongodb/data
+
+
+# Run tests.
+elif [[ $1 == 'test' ]]
+then
+    source dev-env/bin/activate
+    nosetests
+
+
+# Run profiler.
+elif [[ $1 == 'profile' ]]
+then
+    source dev-env/bin/activate
+    python profiler.py
+
+
+# Start a local Celery worker.
+elif [[ $1 == 'worker' ]]
+then
+    source dev-env/bin/activate
+    celery worker --loglevel=info --config=cluster.celery_config
+
+
+# Start RabbitMQ server.
+elif [[ $1 == 'mq' ]]
+then
+    rabbitmq-server
+
+
+# Start screen session with everything setup.
+elif [[ $1 == 'go' ]]
+then
+    screen -S shallowthought -c .screen
+
+
+# Setup some stuff.
+elif [[ $1 == 'setup' ]]
+then
+
+    if [[ $2 == 'all' ]]
+    then
+        setup_dependencies
+        setup_virtualenv
+        setup_nltk
+        setup_mongo
+        setup_doc
+
+    elif [[ $2 == 'venv' ]]
+    then
+        setup_virtualenv
+
+    elif [[ $2 == 'nltk' ]]
+    then
+        setup_nltk
+
+    elif [[ $2 == 'mongo' ]]
+    then
+        setup_mongo
+
+    elif [[ $2 == 'mapreduce' ]]
+    then
+        setup_mapreduce
+
+    fi
+fi
+
+
