@@ -1,8 +1,18 @@
 Shallow Thought
 ===============
 
-Please consult the
-[wiki](https://github.com/publicscience/shallowthought/wiki) for more information.
+* Setup
+    * [[Quick Setup|Quick-Setup]]
+    * [[AWS Setup|AWS-Setup]]
+    * [[Detailed Setup|Detailed-Setup]]
+* Modules
+    * [[Digester (and WikiDigester)|Digester]]
+    * [[Cluster|Cluster]]
+    * [[Adipose|Adipose]]
+    * [[Brain|Brain]]
+    * [[Membrane|Membrane]]
+* [[Generating documentation|Documentation]]
+* [[Testing and Performance|Testing-and-Performance]]
 
 ## Quick Setup
 
