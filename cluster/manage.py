@@ -24,6 +24,8 @@ from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoSca
 from boto.ec2.cloudwatch import MetricAlarm, CloudWatchConnection
 from boto.ec2 import EC2Connection
 
+from fabric.api import *
+
 from string import Template
 
 # Logging
@@ -34,9 +36,11 @@ logger = logger(__name__)
 from cluster import aws_config as c
 REGION = c.REGION
 NAME = c.CLUSTER_NAME
+INSTANCE_USER = c.INSTANCE_USER
 ACCESS_KEY = c.AWS_ACCESS_KEY
 SECRET_KEY = c.AWS_SECRET_KEY
 KEYPAIR_NAME = c.KEYPAIR_NAME
+PATH_TO_KEY = c.PATH_TO_KEY
 BASE_AMI_ID = c.BASE_AMI_ID
 AMI_ID = c.AMI_ID
 LB_NAME = '%s_loadbalancer' % NAME
@@ -96,12 +100,15 @@ def commission():
     instance = reservations.instances[0]
     instance.add_tag('name', MASTER_NAME)
 
-    # Get info to connect to the instance.
-    instance_public_dns = instance.public_dns_name
-    instance_public_ip = instance.ip_address
+    # Set the host for Fabric to connect to.
+    # Seems like this may not be necessary;
+    # everything is handled by the MASTER_INIT_SCRIPT.
+    #env.hosts = [instance.public_dns_name]
+    #env.user = INSTANCE_USER
+    #env.key_filename = PATH_TO_KEY
 
-    # Setup the Master server with Salt Master, RabbitMQ, and MongoDB.
-
+    # Set RabbitMQ location for local machine and Minions (celery_config.py)
+    # Set MongoDB location on Minions. (celery_config.py)
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
