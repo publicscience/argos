@@ -2,17 +2,17 @@
 
 # Add Salt, RabbitMQ, and MongoDB APT repos.
 sudo add-apt-repository ppa:saltstack/salt -y
-echo "deb http://www.rabbitmq.com/debian testing main" | sudo tee -a /etc/apt/sources.list
-wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc -o /tmp/rabbitmq-signing-key-public.asc
-sudo apt-key add /tmp/rabbitmq-signing-key-public.asc
-rm /tmp/rabbitmq-signing-key-public.asc
+echo 'deb http://www.rabbitmq.com/debian testing main' | sudo tee -a /etc/apt/sources.list
+wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+sudo apt-key add rabbitmq-signing-key-public.asc
+rm rabbitmq-signing-key-public.asc
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
 sudo apt-get update -y
 
 # Install Salt, RabbitMQ, MongoDB, and git.
 sudo apt-get install salt-master -y
-sudo apt-get install rabbitmq-server -y
+sudo apt-get install rabbitmq-server -y --force-yes
 sudo apt-get install mongodb-10gen
 sudo apt-get install git -y
 
