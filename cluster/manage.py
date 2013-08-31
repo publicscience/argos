@@ -21,10 +21,11 @@ Configuration is in `aws_config.py`.
 
 from boto.ec2.elb import ELBConnection, HealthCheck, LoadBalancer
 from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoScalingGroup, ScalingPolicy
-from boto.ec2.cloudwatch import MetricAlarm, CloudWatchConnection
-from boto.ec2 import EC2Connection
+from boto.ec2.cloudwatch import MetricAlarm
+from boto.ec2.cloudwatch import connect_to_region as cw_connect_to_region
+from boto.ec2 import connect_to_region
 
-import os, time, subprocess
+import os, time, subprocess, base64
 from string import Template
 
 # Logging
@@ -40,13 +41,14 @@ ACCESS_KEY = c.AWS_ACCESS_KEY
 SECRET_KEY = c.AWS_SECRET_KEY
 KEYPAIR_NAME = c.KEYPAIR_NAME
 PATH_TO_KEY = c.PATH_TO_KEY
+PATH_TO_DEPLOY_KEYS = c.PATH_TO_DEPLOY_KEYS
 BASE_AMI_ID = c.BASE_AMI_ID
-LB_NAME = '%s_loadbalancer' % NAME
-LC_NAME = '%s_launchconfig' % NAME
-HC_NAME = '%s_healthcheck' % NAME
-AG_NAME = '%s_autoscale' % NAME
-SG_NAME = '%s_security' % NAME
-MASTER_NAME = '%s_master' % NAME
+LB_NAME = '%s-loadbalancer' % NAME
+LC_NAME = '%s-launchconfig' % NAME
+HC_NAME = '%s-healthcheck' % NAME
+AG_NAME = '%s-autoscale' % NAME
+SG_NAME = '%s-security' % NAME
+MASTER_NAME = '%s-master' % NAME
 
 def commission():
     """
@@ -78,7 +80,7 @@ def commission():
     sec_group.authorize('tcp', 80, 80, '0.0.0.0/0')
 
     # Authorize SSH access (temporarily).
-    web.authorize('tcp', 22, 22, '0.0.0.0/0')
+    sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
 
     # Create the Salt Master/RabbitMQ/MongoDB server.
     logger.info('Creating the master instance (%s)...' % MASTER_NAME)
@@ -86,18 +88,18 @@ def commission():
     reservations = conn_ec2.run_instances(
                        BASE_AMI_ID,
                        key_name=KEYPAIR_NAME,
-                       security_groups=[SECURITY_GROUP_NAME],
+                       security_groups=[SG_NAME],
                        instance_type='m1.small',
-                       user_data=master_init_script
+                       user_data=master_init_script # TEST THIS IN CONSOLE
                    )
     instance = reservations.instances[0]
 
     # Wait until the instance is ready.
     logger.info('Waiting for master instance to launch...')
-    status = instance.update()
-    while status == 'pending':
+    istatus = instance.update()
+    while istatus == 'pending':
         time.sleep(10)
-        status = instance.update()
+        istatus = instance.update()
     logger.info('Master instance has launched. Configuring...')
 
     # Tag the instance with a name so we can find it later.
@@ -118,7 +120,7 @@ def commission():
     env = {
             'host': instance.public_dns_name,
             'user': INSTANCE_USER,
-            'key_filename': PATH_TO_KEY
+            'key_filename': _get_filepath(PATH_TO_KEY)
     }
 
     # Copy over deploy keys into the Salt state tree.
@@ -143,21 +145,22 @@ def commission():
         '%s@%s:/tmp/salt' % (env['user'], env['host'])
     ])
 
+    # TO DO fix this, getting connection refused.
     # Move it to the real directory.
-    subprocess.call([
-        'ssh',
-        '-t',
-        '-i',
-        env['key_filename'],
-        '%s@%s' % (env['user'], env['host']),
-        'sudo',
-        'mv',
-        '/tmp/salt',
-        '/srv'
-    ])
+    #subprocess.call([
+        #'ssh',
+        #'-t',
+        #'-i',
+        #env['key_filename'],
+        #'%s@%s' % (env['user'], env['host']),
+        #'sudo',
+        #'mv',
+        #'/tmp/salt',
+        #'/srv'
+    #])
 
     # Disable SSH access.
-    web.revoke('tcp', 22, 22, '0.0.0.0/0')
+    sec_group.revoke('tcp', 22, 22, '0.0.0.0/0')
 
     # Clean up the deploy keys.
     for key in deploy_keys:
@@ -170,9 +173,7 @@ def commission():
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
-    minion_init_script_raw = _load_script('setup_minion.sh')
-    minion_init_script = Template(minion_init_script_raw).substitute(master_dns=instance.private_dns_name)
-
+    minion_init_script = _load_script('setup_minion.sh', master_dns=instance.private_dns_name)
 
     # Create the health check.
     logger.info('Creating the health check (%s)...' % HC_NAME)
@@ -195,7 +196,7 @@ def commission():
     load_balancer = conn_elb.create_load_balancer(
                         LB_NAME,
                         zones,
-                        [(80, 80, 'http'), (443, 443, 'tcp')]
+                        listeners=[(80, 80, 'http'), (443, 443, 'tcp')]
                     )
     load_balancer.configure_health_check(health_check)
     # Point your site's CNAME here: load_balancer.dns_name
@@ -217,10 +218,10 @@ def commission():
                         user_data=minion_init_script,
 
                         # Security groups the instance will be in.
-                        security_groups=[SECURITY_GROUP_NAME],
+                        security_groups=[SG_NAME],
 
                         # Instance size.
-                        instance_type='t1.micro',
+                        instance_type='m1.small',
 
                         # Enable monitoring (for CloudWatch).
                         instance_monitoring=True
@@ -258,7 +259,7 @@ def commission():
                       )
     scale_dn_policy = ScalingPolicy(
                           name='scale_down',
-                          adjustment_type='ChangeInCapcity',
+                          adjustment_type='ChangeInCapacity',
                           as_name=AG_NAME,
                           scaling_adjustments=-1, # instances to remove
                           cooldown=180
@@ -282,11 +283,7 @@ def commission():
 
     # Create CloudWatch alarms.
     logger.info('Creating CloudWatch MetricAlarms...')
-    cloudwatch = CloudWatchConnection(
-                    region_name=REGION,
-                    aws_access_key_id=ACCESS_KEY,
-                    aws_secret_access_key=SECRET_KEY
-                 )
+    cloudwatch = _connect_clw()
 
     # We need to specify the "dimensions" of this alarm,
     # which describes what it watches (here, the whole autoscaling group).
@@ -338,38 +335,67 @@ def decommission():
     conn_elb = _connect_elb()
     conn_ec2 = _connect_ec2()
 
+    # Delete policies.
+    logger.info('Deleting scaling policies...')
+    #conn_asg.delete_policy('scale_down', autoscale_group=AG_NAME)
+    #conn_asg.delete_policy('scale_up', autoscale_group=AG_NAME)
+
+    # Delete alarms.
+    logger.info('Deleting CloudWatch MetricAlarms...')
+    cloudwatch = _connect_clw()
+    cloudwatch.delete_alarms(['scale_up_on_cpu', 'scale_down_on_cpu'])
+
     # Shutdown and delete autoscaling groups.
+    logger.info('Deleting the autoscaling group (%s)...' % AG_NAME)
     groups = conn_asg.get_all_groups(names=[AG_NAME])
     for group in groups:
+        group_instance_ids = [i.instance_id for i in group.instances]
+
+        # Shutdown all group instances.
+        logger.info('Terminating group instances...')
         group.shutdown_instances()
+
+        # If there are still instances left in the group,
+        # wait until they shut down.
+        if group_instance_ids:
+            group_instances = [r.instances[0] for r in conn_ec2.get_all_instances(instance_ids=group_instance_ids)]
+
+            logger.info('Waiting for group instances to shutdown...')
+            while len(group_instances) > 0:
+                time.sleep(10)
+                print(len(group_instances))
+                for i in group_instances:
+                    if i.update() == 'running':
+                        print(i.__dict__)
+                group_instances = [i for i in group_instances if i.update() != 'terminated']
+
+        # Delete the group.
         group.delete()
 
     # Delete launch configs.
+    logger.info('Deleting the launch configuration (%s)...' % LC_NAME)
     launch_configs = conn_asg.get_all_launch_configurations(names=[LC_NAME])
     for lc in launch_configs:
         lc.delete()
 
-    # Delete policies.
-    conn_asg.delete_policy('scale_down')
-    conn_asg.delete_policy('scale_up')
-
-    # Delete alarms.
-    cloudwatch = CloudWatchConnection(
-                    region_name=REGION,
-                    aws_access_key_id=ACCESS_KEY,
-                    aws_secret_access_key=SECRET_KEY
-                 )
-    cloudwatch.delete_alarms(['scale_up_on_cpu', 'scale_down_on_cpu'])
-
     # Delete the load balancer.
+    logger.info('Deleting the load balancer (%s)...' % LB_NAME)
     conn_elb.delete_load_balancer(LB_NAME)
 
-    # Delete the master instance.
-    master_id = conn_ec2.get_all_reservations(filters={'name': MASTER_NAME})[0]
-    conn_ec2.terminate_instances([master_id])
+    # Delete the master instance(s).
+    logger.info('Deleting the master instance (%s)...' % MASTER_NAME)
+    master_instances = conn_ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': MASTER_NAME})
+    for reservation in master_instances:
+        for i in reservation.instances:
+            i.terminate()
+            istatus = i.update()
+            while istatus == 'shutting-down':
+                time.sleep(10)
+                istatus = i.update()
 
     # Delete the security group.
-    conn_ec2.delete_security_group(name=SECURITY_GROUP_NAME)
+    logger.info('Deleting the security group (%s)...' % SG_NAME)
+    conn_ec2.delete_security_group(name=SG_NAME)
 
     logger.info('Decommissioning complete.')
 
@@ -405,8 +431,8 @@ def _connect_ec2():
     Returns:
         | EC2Connection
     """
-    return EC2Connection(
-                region_name=REGION,
+    return connect_to_region(
+                REGION,
                 aws_access_key_id=ACCESS_KEY,
                 aws_secret_access_key=SECRET_KEY
            )
@@ -422,11 +448,41 @@ def _connect_elb():
     return ELBConnection(ACCESS_KEY, SECRET_KEY)
 
 
-def _load_script(filename):
+def _connect_clw():
     """
-    Loads a script from this directory.
+    Creates a CloudWatch connection.
+
+    Returns:
+        | CloudWatchConnection
     """
-    return open(_get_filepath(filename)).read()
+    return cw_connect_to_region(
+                    REGION,
+                    aws_access_key_id=ACCESS_KEY,
+                    aws_secret_access_key=SECRET_KEY
+                 )
+
+
+def _load_script(filename, **kwargs):
+    """
+    Loads a script from this directory as bytes.
+    This script will be passed as `user-data`.
+
+    Args:
+        | filename (str)    -- the filename or path of the script to open.
+        | **kwargs          -- optional keyword arguments of a variable and
+                            the value to replace it with in the script.
+
+    When you specify `**kwargs`, say `foo=bar`, then every instance of ``$foo`
+    will be replaced with `bar`.
+    """
+    script = open(_get_filepath(filename), 'r').read()
+
+    # Substitute for specified vars.
+    if kwargs:
+        script = Template(script).substitute(**kwargs)
+
+    # Turn into bytes.
+    return script.encode('utf-8')
 
 def _get_filepath(filename):
     """
