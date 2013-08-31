@@ -35,7 +35,11 @@ function setup_virtualenv {
     # Install Python 3 versions.
     pip install git+git://github.com/nltk/nltk.git
     pip install git+git://github.com/ftzeng/python-readability.git
-    pip install git+git://github.com/boto/boto.git@py3kport
+    #pip install git+git://github.com/boto/boto.git@py3kport
+
+    # Temporarily using my fork until my pull request is accepted.
+    # https://github.com/boto/boto/pull/1698
+    pip install git+git://github.com/ftzeng/boto.git@py3kport
 
     # Install unofficial mwlib Python 3 port.
     git clone https://github.com/ftzeng/mwlib_simple.git
