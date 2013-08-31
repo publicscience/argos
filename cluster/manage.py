@@ -80,6 +80,7 @@ def commission():
     sec_group.authorize('tcp', 80, 80, '0.0.0.0/0')
 
     # Authorize SSH access (temporarily).
+    logger.info('Temporarily enabling SSH access to master instance...')
     sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
 
     # Create the Salt Master/RabbitMQ/MongoDB server.
@@ -90,7 +91,7 @@ def commission():
                        key_name=KEYPAIR_NAME,
                        security_groups=[SG_NAME],
                        instance_type='m1.small',
-                       user_data=master_init_script # TEST THIS IN CONSOLE
+                       user_data=master_init_script
                    )
     instance = reservations.instances[0]
 
@@ -124,6 +125,7 @@ def commission():
     }
 
     # Copy over deploy keys into the Salt state tree.
+    logger.info('Copying deploy keys to the Salt state tree...')
     salt_path = _get_filepath('salt/')
     deploy_keys_path = _get_filepath(PATH_TO_DEPLOY_KEYS)
     deploy_keys = ['id_rsa', 'id_rsa.pub']
@@ -136,33 +138,57 @@ def commission():
 
     # Copy over Salt state tree to Master.
     # First have to move to a temporary directory.
+    # '-o StrictHostKeyChecking no' automatically adds
+    # the instance to SSH known hosts.
+    logger.info('Secure copying Salt state tree to /tmp/salt on the master instance...')
+
+    # Wait for SSH to become active...
+    time.sleep(10)
+
+    print('TRYING TO SSH')
+    print(env['key_filename'])
+    print(salt_path)
+    print('%s@%s:/tmp/salt' % (env['user'], env['host']))
+
+    scp = [
+            'scp',
+            '-r',
+            '-o',
+            'StrictHostKeyChecking=no',
+            '-i',
+            env['key_filename'],
+            salt_path,
+            '%s@%s:/tmp/salt' % (env['user'], env['host'])
+    ]
+
+    # Get output from the command to check for errors.
+    results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
+
+    # Check if we couldn't connect, and try again.
+    while b'Connection refused' in results[1]:
+        results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
+
+
+    # Move it to the real directory.
+    logger.info('Moving Salt state tree to /srv/salt on the master instance... ')
     subprocess.call([
-        'scp',
-        '-r',
+        'ssh',
+        '-t',
         '-i',
         env['key_filename'],
-        salt_path,
-        '%s@%s:/tmp/salt' % (env['user'], env['host'])
+        '%s@%s' % (env['user'], env['host']),
+        'sudo',
+        'mv',
+        '/tmp/salt',
+        '/srv'
     ])
 
-    # TO DO fix this, getting connection refused.
-    # Move it to the real directory.
-    #subprocess.call([
-        #'ssh',
-        #'-t',
-        #'-i',
-        #env['key_filename'],
-        #'%s@%s' % (env['user'], env['host']),
-        #'sudo',
-        #'mv',
-        #'/tmp/salt',
-        #'/srv'
-    #])
-
     # Disable SSH access.
+    logger.info('Disabling SSH access to master instance...')
     sec_group.revoke('tcp', 22, 22, '0.0.0.0/0')
 
     # Clean up the deploy keys.
+    logger.info('Cleaning up deploy keys... ')
     for key in deploy_keys:
         subprocess.Popen([
             'rm',
@@ -251,17 +277,17 @@ def commission():
     # These scaling policies change the size of the group.
     logger.info('Creating scaling policies...')
     scale_up_policy = ScalingPolicy(
-                          name='scale_up',
+                          name='scale-up',
                           adjustment_type='ChangeInCapacity',
                           as_name=AG_NAME,
-                          scaling_adjustment=1, # instances to add
+                          scaling_adjustment=1,
                           cooldown=180
                       )
     scale_dn_policy = ScalingPolicy(
-                          name='scale_down',
+                          name='scale-down',
                           adjustment_type='ChangeInCapacity',
                           as_name=AG_NAME,
-                          scaling_adjustments=-1, # instances to remove
+                          scaling_adjustment=-1,
                           cooldown=180
                       )
 
@@ -274,11 +300,11 @@ def commission():
     # to edit them.
     scale_up_policy = conn_asg.get_all_policies(
                           as_group=AG_NAME,
-                          policy_names=['scale_up']
+                          policy_names=['scale-up']
                       )[0]
     scale_dn_policy = conn_asg.get_all_policies(
                           as_group=AG_NAME,
-                          policy_names=['scale_down']
+                          policy_names=['scale-down']
                       )[0]
 
     # Create CloudWatch alarms.
@@ -292,7 +318,7 @@ def commission():
     # Create the scale up alarm.
     # Scale up when average CPU utilization becomes greater than 70%.
     scale_up_alarm = MetricAlarm(
-                        name='scale_up_on_cpu',
+                        name='scale-up-on-cpu',
                         namespace='AWS/EC2',
                         metric='CPUUtilization',
                         statistic='Average',
@@ -308,7 +334,7 @@ def commission():
     # Create the scale down alarm.
     # Scale down when average CPU utilization becomes less than 40%.
     scale_dn_alarm = MetricAlarm(
-                        name='scale_down_on_cpu',
+                        name='scale-down-on-cpu',
                         namespace='AWS/EC2',
                         metric='CPUUtilization',
                         statistic='Average',
@@ -335,17 +361,13 @@ def decommission():
     conn_elb = _connect_elb()
     conn_ec2 = _connect_ec2()
 
-    # Delete policies.
-    logger.info('Deleting scaling policies...')
-    #conn_asg.delete_policy('scale_down', autoscale_group=AG_NAME)
-    #conn_asg.delete_policy('scale_up', autoscale_group=AG_NAME)
-
     # Delete alarms.
     logger.info('Deleting CloudWatch MetricAlarms...')
     cloudwatch = _connect_clw()
-    cloudwatch.delete_alarms(['scale_up_on_cpu', 'scale_down_on_cpu'])
+    cloudwatch.delete_alarms(['scale-up-on-cpu', 'scale-down-on-cpu'])
 
     # Shutdown and delete autoscaling groups.
+    # This also deletes the groups' scaling policies.
     logger.info('Deleting the autoscaling group (%s)...' % AG_NAME)
     groups = conn_asg.get_all_groups(names=[AG_NAME])
     for group in groups:
@@ -363,11 +385,13 @@ def decommission():
             logger.info('Waiting for group instances to shutdown...')
             while len(group_instances) > 0:
                 time.sleep(10)
-                print(len(group_instances))
-                for i in group_instances:
-                    if i.update() == 'running':
-                        print(i.__dict__)
                 group_instances = [i for i in group_instances if i.update() != 'terminated']
+
+        # Wait until all group activities have stopped.
+        group_activities = group.get_activities()
+        while len(group_activities) > 0:
+            time.sleep(10)
+            group_activities = [a for a in group.get_activities() if a.status_code == 'InProgress']
 
         # Delete the group.
         group.delete()
