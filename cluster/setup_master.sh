@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Add Salt, RabbitMQ, and MongoDB APT repos.
+sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:saltstack/salt -y
 echo 'deb http://www.rabbitmq.com/debian testing main' | sudo tee -a /etc/apt/sources.list
 wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
