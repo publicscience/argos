@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Install Salt
+sudo apt-get install software-properties-common -y
 sudo add-apt-repository ppa:saltstack/salt -y
 sudo apt-get update -y
 sudo apt-get install salt-minion -y
@@ -14,7 +15,7 @@ export BROKER_URL=amqp://guest@$master_dns//
 
 # Edit Minion config to
 # set Salt Master location
-sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
+sudo sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
 
 # Start Minion
 salt-minion -d
