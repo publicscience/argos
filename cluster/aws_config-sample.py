@@ -3,7 +3,6 @@ AWS_SECRET_KEY = 'your secret key'
 
 CLUSTER_NAME = 'cluster'
 REGION = 'us-east-1'
-AMI_ID= 'my_ami'
 KEYPAIR_NAME = 'key_name'
 INSTANCE_USER = 'ubuntu'
 
