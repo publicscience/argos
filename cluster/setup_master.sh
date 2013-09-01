@@ -24,7 +24,7 @@ sudo ufw allow salt
 
 # Edit Master config to
 # Accept all pending Minion keys
-sed -i 's/#auto_accept: False/auto_accept: True/' /etc/salt/master
+sudo sed -i 's/#auto_accept: False/auto_accept: True/' /etc/salt/master
 
 # Start Salt, RabbitMQ, and MongoDB
 sudo service mongodb start
