@@ -25,6 +25,12 @@ sudo ufw allow salt
 # Edit Master config to
 # Accept all pending Minion keys
 sudo sed -i 's/#auto_accept: False/auto_accept: True/' /etc/salt/master
+# Enable fileserver at /srv/salt
+# and enable pillar at /srv/pillar
+# (looking for a nicer way of handling this...)
+sudo sed -i '/#\(file\|pillar\)_roots:/ s/^#//' /etc/salt/master
+sudo sed -i '/#\s\{2\}base:/ s/^#//' /etc/salt/master
+sudo sed -i '/#\s\{4\}\-\s\/srv\/(\salt\|pillar\)/ s/^#//' /etc/salt/master
 
 # Start Salt, RabbitMQ, and MongoDB
 sudo service mongodb start
