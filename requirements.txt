@@ -35,4 +35,4 @@ git+git://github.com/ftzeng/python-readability.git
 git+git://github.com/ftzeng/boto.git@py3kport
 
 # Install unofficial mwlib Python 3 port.
-git+git://github.com/ftzeng/mwlib_simple.git
+git+git://github.com/ftzeng/mwlib_simple.git@simple
