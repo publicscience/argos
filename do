@@ -9,6 +9,7 @@ function setup_dependencies {
     then
         brew install screen
         brew install rabbitmq
+        brew install wget
 
         # Required by mwlib.
         brew install libevent
@@ -18,7 +19,7 @@ function setup_dependencies {
     else 
         sudo apt-get install screen -y
         sudo apt-get install rabbitmq-server -y
-        sudo apt-get install curl -y
+        sudo apt-get install unzip -y
 
         # Required by mwlib.
         sudo apt-get install libevent-dev -y
@@ -51,7 +52,7 @@ function setup_virtualenv {
 
 function setup_mongo {
     # Setup MongoDB.
-    curl -o mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
+    wget -O mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
     mkdir mongodb
     tar --extract --file=mongodb.tgz --strip-components=1 --directory=mongodb
     rm mongodb.tgz
@@ -74,9 +75,9 @@ function setup_nltk {
     #python -m nltk.downloader maxent_ne_chunker
 
     # Installing Python 3 ready alternative data.
-    curl -o ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
+    wget -O ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
     unzip ~/nltk_data/chunkers/maxent_ne_chunker.zip
-    curl -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
+    wget -O ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
     unzip ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
 }
 
