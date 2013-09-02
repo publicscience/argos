@@ -31,6 +31,7 @@ pip-pkgs:
     pip.installed:
         - names:
             - virtualenv
+            - cython
         - bin_env: pip-3.3
         - require:
             - pkg: app-pkgs
@@ -48,6 +49,7 @@ digester:
             - file: publickey
             - file: ssh_config
 
+# Setup the virtualenv.
 app-venv:
     virtualenv.managed:
         - name: /var/app/digester/dev-env
