@@ -16,6 +16,8 @@ export BROKER_URL=amqp://guest@$master_dns//
 # Edit Minion config to
 # set Salt Master location
 sudo sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
+# automatically call 'highstate' on connection.
+sudo sed -i "s/#startup_states: ''/startup_states: highstate/" /etc/salt/minion
 
 # Start Minion
 salt-minion -d
