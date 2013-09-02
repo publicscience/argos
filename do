@@ -79,11 +79,11 @@ function setup_nltk {
     # Installing Python 3 ready alternative data.
     mkdir ~/nltk_data/chunkers
     wget -O ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/raw/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
-    unzip -o ~/nltk_data/chunkers/maxent_ne_chunker.zip
+    unzip -o ~/nltk_data/chunkers/maxent_ne_chunker.zip -d ~/nltk_data/chunkers
     rm ~/nltk_data/chunkers/maxent_ne_chunker.zip
     mkdir ~/nltk_data/taggers
     wget -O ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/raw/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
-    unzip -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
+    unzip -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip -d ~/nltk_data/taggers
     rm ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
 }
 
