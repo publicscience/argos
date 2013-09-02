@@ -48,15 +48,6 @@ digester:
             - file: publickey
             - file: ssh_config
 
-# Run custom setup script instead
-# of Salt's virtualenv setup (below).
-nltk-data:
-    cmd.run:
-        - cwd: /var/app/digester/
-        - name: /var/app/digester/do setup nltk
-        - require:
-            - virtualenv: app-venv
-
 app-venv:
     virtualenv.managed:
         - name: /var/app/digester/dev-env
@@ -70,3 +61,12 @@ app-venv:
             - git: digester
             - pkg: lxml-deps
             - pkg: mwlib-deps
+
+# Run custom setup script instead
+# of Salt's virtualenv setup (below).
+nltk-data:
+    cmd.run:
+        - cwd: /var/app/digester/
+        - name: /var/app/digester/do setup nltk
+        - require:
+            - virtualenv: app-venv
