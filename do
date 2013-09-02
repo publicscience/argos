@@ -25,6 +25,8 @@ function setup_dependencies {
         sudo apt-get install libevent-dev -y
         sudo apt-get install re2c -y
 
+        # Required by lxml.
+        sudo apt-get install libxml2-dev libxslt1-dev python-dev lib32z1-dev -y
     fi
 }
 
