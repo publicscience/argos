@@ -163,7 +163,7 @@ then
         setup_doc
 
     # Set up a minion/worker environment.
-    if [[ $2 == 'worker' ]]
+    elif [[ $2 == 'worker' ]]
     then
         setup_dependencies
         setup_virtualenv
