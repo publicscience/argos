@@ -54,7 +54,6 @@ app-venv:
     virtualenv.managed:
         - name: /var/app/digester/dev-env
         - venv_bin: virtualenv-3.3
-        - python: /usr/bin/python3.3
         - requirements: /var/app/digester/requirements.txt
         - no_site_packages: true
         - require:
