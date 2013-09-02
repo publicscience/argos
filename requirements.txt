@@ -24,3 +24,15 @@ pytz==2013b
 simplejson==3.3.0
 six==1.3.0
 python-dateutil==2.1
+
+# Install Python 3 versions.
+git+git://github.com/nltk/nltk.git
+git+git://github.com/ftzeng/python-readability.git
+
+#git+git://github.com/boto/boto.git@py3kport
+# Temporarily using my fork until my pull request is accepted.
+# https://github.com/boto/boto/pull/1698
+pip install git+git://github.com/ftzeng/boto.git@py3kport
+
+# Install unofficial mwlib Python 3 port.
+pip install git+git://github.com/ftzeng/mwlib_simple.git

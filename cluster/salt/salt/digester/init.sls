@@ -8,6 +8,23 @@ app-pkgs:
             - git
             - python3.3
             - python3-pip
+            - unzip
+
+# Required by lxml.
+lxml-deps:
+    pkg.installed:
+        - names:
+            - libxml2-dev
+            - libxslt1-dev
+            - python-dev
+            - lib32z1-dev
+
+# Required by mwlib.
+mwlib-deps:
+    pkg.installed:
+        - names:
+            - libevent-dev
+            - re2c
 
 # Ensure virtualenv-3.3 is installed.
 pip-pkgs:
@@ -33,27 +50,23 @@ digester:
 
 # Run custom setup script instead
 # of Salt's virtualenv setup (below).
-app-venv:
+nltk-data:
     cmd.run:
         - cwd: /var/app/digester/
-        - name: /var/app/digester/do setup worker
+        - name: /var/app/digester/do setup nltk
+        - require:
+            - virtualenv: app-venv
+
+app-venv:
+    virtualenv.managed:
+        - name: /var/app/digester/dev-env
+        - venv_bin: virtualenv-3.3
+        - python: /usr/bin/python3.3
+        - requirements: /var/app/digester/requirements.txt
+        - no_site_packages: true
         - require:
             - pkg: app-pkgs
             - pip: pip-pkgs
             - git: digester
-
-# Having some issues with installing Python 3.3 requirements...
-# Temporarily disabled; the custom setup script in the repository
-# seems to do the job.
-#app-venv:
-    #virtualenv.managed:
-        #- name: /var/app/digester/dev-env
-        #- venv_bin: virtualenv-3.3
-        #- python: /usr/bin/python3.3
-        #- requirements: /var/app/digester/requirements.txt
-        #- no_site_packages: true
-        #- clear: false
-        #- require:
-            #- pkg: app-pkgs
-            #- pip: pip-pkgs
-            #- git: digester
+            - pkg: lxml-deps
+            - pkg: mwlib-deps

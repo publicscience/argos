@@ -35,21 +35,6 @@ function setup_virtualenv {
     virtualenv-3.3 dev-env --no-site-packages
     source dev-env/bin/activate
     pip install -r requirements.txt
-
-    # Install Python 3 versions.
-    pip install git+git://github.com/nltk/nltk.git
-    pip install git+git://github.com/ftzeng/python-readability.git
-    #pip install git+git://github.com/boto/boto.git@py3kport
-
-    # Temporarily using my fork until my pull request is accepted.
-    # https://github.com/boto/boto/pull/1698
-    pip install git+git://github.com/ftzeng/boto.git@py3kport
-
-    # Install unofficial mwlib Python 3 port.
-    git clone https://github.com/ftzeng/mwlib_simple.git
-    cd mwlib_simple
-    python setup.py install
-    cd .. && rm -rf mwlib_simple
 }
 
 function setup_mongo {
