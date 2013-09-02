@@ -77,10 +77,14 @@ function setup_nltk {
     #python -m nltk.downloader maxent_ne_chunker
 
     # Installing Python 3 ready alternative data.
-    wget -O ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
-    unzip ~/nltk_data/chunkers/maxent_ne_chunker.zip
-    wget -O ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/blob/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
-    unzip ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
+    mkdir ~/nltk_data/chunkers
+    wget -O ~/nltk_data/chunkers/maxent_ne_chunker.zip 'https://github.com/jskda/nltk_data/raw/gh-pages-repickle/packages/chunkers/maxent_ne_chunker.zip'
+    unzip -o ~/nltk_data/chunkers/maxent_ne_chunker.zip
+    rm ~/nltk_data/chunkers/maxent_ne_chunker.zip
+    mkdir ~/nltk_data/taggers
+    wget -O ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip 'https://github.com/jskda/nltk_data/raw/gh-pages-repickle/packages/taggers/maxent_treebank_pos_tagger.zip'
+    unzip -o ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
+    rm ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
 }
 
 function setup_mapreduce {
@@ -171,6 +175,10 @@ then
         setup_dependencies
         setup_virtualenv
         setup_nltk
+
+    elif [[ $2 == 'deps' ]]
+    then
+        setup_dependencies
 
     elif [[ $2 == 'venv' ]]
     then
