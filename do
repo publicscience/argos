@@ -18,6 +18,7 @@ function setup_dependencies {
     else 
         sudo apt-get install screen -y
         sudo apt-get install rabbitmq-server -y
+        sudo apt-get install curl -y
 
         # Required by mwlib.
         sudo apt-get install libevent-dev -y
@@ -151,6 +152,8 @@ then
 elif [[ $1 == 'setup' ]]
 then
 
+    # Set up a new development
+    # or master environment.
     if [[ $2 == 'all' ]]
     then
         setup_dependencies
@@ -158,6 +161,13 @@ then
         setup_nltk
         setup_mongo
         setup_doc
+
+    # Set up a minion/worker environment.
+    if [[ $2 == 'worker' ]]
+    then
+        setup_dependencies
+        setup_virtualenv
+        setup_nltk
 
     elif [[ $2 == 'venv' ]]
     then
@@ -177,5 +187,3 @@ then
 
     fi
 fi
-
-

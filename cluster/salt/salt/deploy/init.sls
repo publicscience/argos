@@ -1,9 +1,11 @@
+# Copy over SSH config.
 ssh_config:
     file.managed:
         - name: /root/.ssh/config
         - source: salt://deploy/ssh_config
         - makedirs: True
 
+# Copy over Github deploy keys.
 deploykey:
     file.managed:
         - name: /root/.ssh/github
@@ -11,6 +13,7 @@ deploykey:
         - makedirs: True
         - mode: 600
 
+# Copy over Github deploy keys.
 publickey:
     file.managed:
         - name: /root/.ssh/github.pub
