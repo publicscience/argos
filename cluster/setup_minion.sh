@@ -19,4 +19,3 @@ sudo sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
 
 # Start Minion
 salt-minion -d
-
