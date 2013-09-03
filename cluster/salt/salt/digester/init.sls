@@ -9,6 +9,8 @@ app-pkgs:
             - python3.3
             - python3-pip
             - unzip
+            # For getting latest python-dateutil.
+            - bzr
 
 # Required by lxml.
 lxml-deps:
@@ -48,19 +50,6 @@ digester:
             - file: deploykey
             - file: publickey
             - file: ssh_config
-
-# Run custom setup script instead
-# of Salt's virtualenv setup (below).
-#app-venv:
-    #cmd.run:
-        #- cwd: /var/app/digester/
-        #- name: /var/app/digester/do setup venv
-        #- require:
-            #- pkg: app-pkgs
-            #- pip: pip-pkgs
-            #- git: digester
-            #- pkg: lxml-deps
-            #- pkg: mwlib-deps
 
 app-nltk-data:
     cmd.run:
