@@ -424,6 +424,14 @@ def decommission():
     logger.info('Decommissioning complete.')
 
 
+def create_worker_image():
+    """
+    Create an AMI for workers,
+    based off of the base AMI.
+    """
+
+    conn_ec2 = _connect_ec2()
+
 
 def status():
     """
