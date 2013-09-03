@@ -23,11 +23,11 @@ pymongo==2.5.2
 pytz==2013b
 simplejson==3.3.0
 six==1.3.0
-python-dateutil==2.1
 
 # Install Python 3 versions.
 git+git://github.com/nltk/nltk.git
 git+git://github.com/ftzeng/python-readability.git
+git+git://github.com/ftzeng/python-dateutil.git
 
 #git+git://github.com/boto/boto.git@py3kport
 # Temporarily using my fork until my pull request is accepted.

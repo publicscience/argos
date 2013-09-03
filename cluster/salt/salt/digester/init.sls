@@ -9,6 +9,7 @@ app-pkgs:
             - python3.3
             - python3-pip
             - unzip
+            - bzr
 
 # Required by lxml.
 lxml-deps:
@@ -51,37 +52,38 @@ digester:
 
 # Run custom setup script instead
 # of Salt's virtualenv setup (below).
-app-venv:
-    cmd.run:
-        - cwd: /var/app/digester/
-        - name: /var/app/digester/do setup venv
-        - require:
-            - pkg: app-pkgs
-            - pip: pip-pkgs
-            - git: digester
-            - pkg: lxml-deps
-            - pkg: mwlib-deps
-
-app-nltk-data:
-    cmd.run:
-        - cwd: /var/app/digester/
-        - name: /var/app/digester/do setup nltk
-        - require:
-            - cmd: app-venv
-
-# Setup the virtualenv.
-# Having a lot of issues with this.
-# For now, using custom setup script.
 #app-venv:
-    #virtualenv.managed:
-        #- name: /var/app/digester/dev-env
+    #cmd.run:
         #- cwd: /var/app/digester/
-        #- venv_bin: virtualenv-3.3
-        #- requirements: /var/app/digester/requirements.txt
-        #- no_site_packages: true
+        #- name: /var/app/digester/do setup venv
         #- require:
             #- pkg: app-pkgs
             #- pip: pip-pkgs
             #- git: digester
             #- pkg: lxml-deps
             #- pkg: mwlib-deps
+
+app-nltk-data:
+    cmd.run:
+        - cwd: /var/app/digester/
+        - name: /var/app/digester/do setup nltk
+        - require:
+            #- cmd: app-venv
+            - virtualenv: app-venv
+
+# Setup the virtualenv.
+# Having a lot of issues with this.
+# For now, using custom setup script.
+app-venv:
+    virtualenv.managed:
+        - name: /var/app/digester/dev-env
+        - cwd: /var/app/digester/
+        - venv_bin: virtualenv-3.3
+        - requirements: /var/app/digester/requirements.txt
+        - no_site_packages: true
+        - require:
+            - pkg: app-pkgs
+            - pip: pip-pkgs
+            - git: digester
+            - pkg: lxml-deps
+            - pkg: mwlib-deps
