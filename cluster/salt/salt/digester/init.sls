@@ -9,7 +9,6 @@ app-pkgs:
             - python3.3
             - python3-pip
             - unzip
-            - bzr
 
 # Required by lxml.
 lxml-deps:
