@@ -24,10 +24,12 @@ pytz==2013b
 simplejson==3.3.0
 six==1.3.0
 
+# pypi's python-dateutil isn't up to date, use latest.
+bzr+https://code.launchpad.net/~dateutil/dateutil/trunk
+
 # Install Python 3 versions.
 git+git://github.com/nltk/nltk.git
 git+git://github.com/ftzeng/python-readability.git
-git+git://github.com/ftzeng/python-dateutil.git
 
 #git+git://github.com/boto/boto.git@py3kport
 # Temporarily using my fork until my pull request is accepted.
