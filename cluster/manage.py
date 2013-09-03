@@ -43,6 +43,7 @@ KEYPAIR_NAME = c.KEYPAIR_NAME
 PATH_TO_KEY = c.PATH_TO_KEY
 PATH_TO_DEPLOY_KEYS = c.PATH_TO_DEPLOY_KEYS
 BASE_AMI_ID = c.BASE_AMI_ID
+WORKER_AMI_ID = BASE_AMI_ID     # By default, worker AMI is same as base AMI.
 LB_NAME = '%s-loadbalancer' % NAME
 LC_NAME = '%s-launchconfig' % NAME
 HC_NAME = '%s-healthcheck' % NAME
@@ -106,9 +107,6 @@ def commission():
     # Tag the instance with a name so we can find it later.
     instance.add_tag('name', MASTER_NAME)
 
-
-    # Setup master instance with the Salt state tree.
-
     # NOTE: Fabric does not yet support Py3.3.
     # Keeping this in until it does...
     # Set the host for Fabric to connect to.
@@ -124,78 +122,12 @@ def commission():
             'key_filename': _get_filepath(PATH_TO_KEY)
     }
 
-    # Copy over deploy keys into the Salt state tree.
-    logger.info('Copying deploy keys to the Salt state tree...')
-    salt_path = _get_filepath('salt/')
-    deploy_keys_path = _get_filepath(PATH_TO_DEPLOY_KEYS)
-    deploy_keys = ['id_rsa', 'id_rsa.pub']
-    for key in deploy_keys:
-        subprocess.Popen([
-            'cp',
-            os.path.join(deploy_keys_path, key),
-            os.path.join(salt_path, 'salt/deploy/')
-        ])
-
-    # Copy over Salt state tree to Master.
-    # First have to move to a temporary directory.
-    # '-o StrictHostKeyChecking no' automatically adds
-    # the instance to SSH known hosts.
-    logger.info('Secure copying Salt state tree to /tmp/salt on the master instance...')
-
-    # Wait for SSH to become active...
-    time.sleep(10)
-
-    print('TRYING TO SSH')
-    print(env['key_filename'])
-    print(salt_path)
-    print('%s@%s:/tmp/salt' % (env['user'], env['host']))
-
-    scp = [
-            'scp',
-            '-r',
-            '-o',
-            'StrictHostKeyChecking=no',
-            '-i',
-            env['key_filename'],
-            salt_path,
-            '%s@%s:/tmp/salt' % (env['user'], env['host'])
-    ]
-
-    # Get output from the command to check for errors.
-    results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
-
-    # Check if we couldn't connect, and try again.
-    while b'Connection refused' in results[1]:
-        results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
-
-
-    # Move it to the real directory.
-    logger.info('Moving Salt state tree to /srv/salt on the master instance... ')
-    subprocess.call([
-        'ssh',
-        '-t',
-        '-i',
-        env['key_filename'],
-        '%s@%s' % (env['user'], env['host']),
-        'sudo',
-        'mv',
-        '/tmp/salt',
-        '/srv'
-    ])
+    # Setup master instance with the Salt state tree.
+    _transfer_salt(env['host'], env['user'], env['key_filename'])
 
     # Disable SSH access.
     logger.info('Disabling SSH access to master instance...')
     sec_group.revoke('tcp', 22, 22, '0.0.0.0/0')
-
-    # Clean up the deploy keys.
-    logger.info('Cleaning up deploy keys... ')
-    for key in deploy_keys:
-        subprocess.Popen([
-            'rm',
-            os.path.join(salt_path, 'salt/deploy/', key)
-        ])
-
-
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
@@ -234,7 +166,7 @@ def commission():
                         name=LC_NAME,
 
                         # AMI ID for autoscaling instances.
-                        image_id=BASE_AMI_ID,
+                        image_id=WORKER_AMI_ID,
 
                         # The name of the EC2 keypair.
                         key_name=KEYPAIR_NAME,
@@ -431,6 +363,83 @@ def create_worker_image():
     """
 
     conn_ec2 = _connect_ec2()
+    sg_name = 'worker-image'
+
+    # Create a new security group.
+    logger.info('Creating a temporary security group...')
+    sec_group = conn_ec2.create_security_group(sg_name, 'Temporary, for worker image')
+
+    # Authorize SSH access (temporarily).
+    logger.info('Temporarily enabling SSH access to base instance...')
+    sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
+
+    # Create the instance the AMI will be generated from.
+    logger.info('Creating the base instance...')
+    image_init_script = _load_script('setup_image.sh')
+    reservations = conn_ec2.run_instances(
+                       BASE_AMI_ID,
+                       key_name=KEYPAIR_NAME,
+                       instance_type='m1.small',
+                       user_data=image_init_script
+                   )
+    instance = reservations.instances[0]
+
+    # Wait until the instance is ready.
+    logger.info('Waiting for base instance to launch...')
+    istatus = instance.update()
+    while istatus == 'pending':
+        time.sleep(10)
+        istatus = instance.update()
+    logger.info('Base instance has launched. Configuring...')
+
+    # Tag the instance with a name so we can find it later.
+    instance.add_tag('name', 'worker-image')
+
+    # Create the AMI and get its ID.
+    logger.info('Creating worker image...')
+    WORKER_AMI_ID = instance.create_image('worker-image', description='Base image for workers')
+
+    worker_image = conn_ec2.get_all_images([WORKER_AMI_ID])[0]
+
+    istatus = worker_image.update()
+    while istatus == 'pending':
+        time.sleep(20)
+        istatus = worker_image.update()
+    logger.info('Created worker image with id %s' % WORKER_AMI_ID)
+
+    env = {
+            'host': instance.public_dns_name,
+            'user': INSTANCE_USER,
+            'key_filename': _get_filepath(PATH_TO_KEY)
+    }
+
+    # Setup base instance with the Salt state tree.
+    _transfer_salt(env['host'], env['user'], env['key_filename'])
+
+    # Destroy base instance.
+    logger.info('Destroying base instance...')
+    instance.terminate()
+    istatus = instance.update()
+    while istatus == 'shutting-down':
+        time.sleep(10)
+        istatus = instance.update()
+
+    # Delete security group.
+    logger.info('Deleting the temporary security group...')
+    conn_ec2.delete_security_group(name=sg_name)
+
+    logger.info('AMI creation complete.')
+
+
+def delete_worker_image(image_id=WORKER_AMI_ID):
+    """
+    Deregisters the worker AMI.
+    """
+
+    conn_ec2 = _connect_ec2
+    if image_id:
+        logger.info('Deleting worker image with id %s' % image_id)
+        conn_ec2.deregister_image(image_id)
 
 
 def status():
@@ -444,6 +453,80 @@ def status():
 
     groups = conn_asg.get_all_groups(names=[AG_NAME])
     return len(groups)
+
+
+def _transfer_salt(host, user, key):
+    """
+    Transfer Salt state and other necessary files
+    to the specified host.
+
+    Args:
+        | host (str)    -- the host to connect to.
+        | user (str)    -- the user to connect as.
+        | key  (str)    -- the path to the key to connect with.
+    """
+
+    # Copy over deploy keys into the Salt state tree.
+    logger.info('Copying deploy keys to the Salt state tree...')
+    salt_path = _get_filepath('salt/')
+    deploy_keys_path = _get_filepath(PATH_TO_DEPLOY_KEYS)
+    deploy_keys = ['id_rsa', 'id_rsa.pub']
+    for key in deploy_keys:
+        subprocess.Popen([
+            'cp',
+            os.path.join(deploy_keys_path, key),
+            os.path.join(salt_path, 'salt/deploy/')
+        ])
+
+    # Copy over Salt state tree to the host.
+    # First have to move to a temporary directory.
+    # '-o StrictHostKeyChecking no' automatically adds
+    # the instance to SSH known hosts.
+    logger.info('Secure copying Salt state tree to /tmp/salt on the instance...')
+
+    # Wait for SSH to become active...
+    time.sleep(10)
+
+    scp = [
+            'scp',
+            '-r',
+            '-o',
+            'StrictHostKeyChecking=no',
+            '-i',
+            key,
+            salt_path,
+            '%s@%s:/tmp/salt' % (user, host)
+    ]
+
+    # Get output from the command to check for errors.
+    results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
+
+    # Check if we couldn't connect, and try again.
+    while b'Connection refused' in results[1]:
+        results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
+
+
+    # Move it to the real directory.
+    logger.info('Moving Salt state tree to /srv/salt on the instance... ')
+    subprocess.call([
+        'ssh',
+        '-t',
+        '-i',
+        key,
+        '%s@%s' % (user, host),
+        'sudo',
+        'mv',
+        '/tmp/salt',
+        '/srv'
+    ])
+
+    # Clean up the deploy keys.
+    logger.info('Cleaning up deploy keys... ')
+    for key in deploy_keys:
+        subprocess.Popen([
+            'rm',
+            os.path.join(salt_path, 'salt/deploy/', key)
+        ])
 
 
 def _connect_asg():
