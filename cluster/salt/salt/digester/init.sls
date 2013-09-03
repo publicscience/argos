@@ -49,14 +49,12 @@ digester:
             - file: publickey
             - file: ssh_config
 
-# Setup the virtualenv.
+# Run custom setup script instead
+# of Salt's virtualenv setup (below).
 app-venv:
-    virtualenv.managed:
-        - name: /var/app/digester/dev-env
+    cmd.run:
         - cwd: /var/app/digester/
-        - venv_bin: virtualenv-3.3
-        - requirements: /var/app/digester/requirements.txt
-        - no_site_packages: true
+        - name: /var/app/digester/do setup venv
         - require:
             - pkg: app-pkgs
             - pip: pip-pkgs
@@ -64,11 +62,26 @@ app-venv:
             - pkg: lxml-deps
             - pkg: mwlib-deps
 
-# Run custom setup script instead
-# of Salt's virtualenv setup (below).
-nltk-data:
+app-nltk-data:
     cmd.run:
         - cwd: /var/app/digester/
         - name: /var/app/digester/do setup nltk
         - require:
-            - virtualenv: app-venv
+            - cmd: app-venv
+
+# Setup the virtualenv.
+# Having a lot of issues with this.
+# For now, using custom setup script.
+#app-venv:
+    #virtualenv.managed:
+        #- name: /var/app/digester/dev-env
+        #- cwd: /var/app/digester/
+        #- venv_bin: virtualenv-3.3
+        #- requirements: /var/app/digester/requirements.txt
+        #- no_site_packages: true
+        #- require:
+            #- pkg: app-pkgs
+            #- pip: pip-pkgs
+            #- git: digester
+            #- pkg: lxml-deps
+            #- pkg: mwlib-deps
