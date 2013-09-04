@@ -124,6 +124,8 @@ then
 # Start a local Celery worker.
 elif [[ $1 == 'worker' ]]
 then
+    src_dir=`dirname $0`
+    cd $src_dir
     source dev-env/bin/activate
     celery worker --loglevel=info --config=cluster.celery_config
 
