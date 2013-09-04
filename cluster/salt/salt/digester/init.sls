@@ -61,7 +61,7 @@ app-nltk-data:
             - virtualenv: app-venv
 
 # Start the Celery worker.
-{% if grains['role'] == 'worker' }
+{% if grains.get('role') == 'worker' %}
 app-worker:
     cmd.run:
         - cwd: /var/app/digester/
