@@ -17,7 +17,7 @@ def load_script(filename, **kwargs):
     When you specify `**kwargs`, say `foo=bar`, then every instance of ``$foo`
     will be replaced with `bar`.
     """
-    script = open(_get_filepath(filename), 'r').read()
+    script = open(get_filepath(filename), 'r').read()
 
     # Substitute for specified vars.
     if kwargs:
