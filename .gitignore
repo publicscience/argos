@@ -14,5 +14,6 @@ doc/_static
 doc/_templates
 dumps/
 log.log
+boto.log
 cluster/aws_config.ini
 keys/
