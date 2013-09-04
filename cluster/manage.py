@@ -39,17 +39,8 @@ logging.basicConfig(filename='logs/boto.log', level=logging.DEBUG)
 
 # Load configuration.
 from configparser import ConfigParser
-CONFIG_FILE = get_filepath('aws_config.ini')
-
-# Test the config file exists.
-# If it doesn't, just use the sample file.
-try:
-    with open(CONFIG_FILE): pass
-except IOError:
-    CONFIG_FILE = get_filepath('aws_config-sample.ini')
-
 config = ConfigParser()
-config.read(CONFIG_FILE)
+config.read(get_filepath('aws_config.ini'))
 c = config['CONFIG']
 
 REGION = c['REGION']
