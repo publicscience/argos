@@ -43,8 +43,7 @@ def download(url, save_path, progress=False):
     existing_size = 0
 
     # If file already exists,
-    # or a newer file is on the server
-    # (which invalids the in-progress d/l)
+    # but there is not a newer file is on the server...
     if os.path.exists(file) and not _expired():
         # Append to existing file.
         outfile = open(file, 'ab')

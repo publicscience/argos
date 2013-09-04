@@ -84,7 +84,7 @@ def command_master(command, key=PATH_TO_KEY, user=INSTANCE_USER):
     Examples::
 
         command_master(['sudo', 'echo', 'hello'])
-        command_master(['sudo', '/var/app/digester/do worker'])
+        command_master(['sudo', '/var/app/digester/do', 'worker'])
     """
     host = c.get('MASTER_PUBLIC_DNS')
     ssh = [

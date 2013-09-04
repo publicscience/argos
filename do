@@ -130,6 +130,12 @@ then
     celery worker --loglevel=info --config=cluster.celery_config
 
 
+elif [[ $1 == 'digest' ]]
+then
+    source dev-env/bin/activate
+    python digest.py
+
+
 # Start RabbitMQ server.
 elif [[ $1 == 'mq' ]]
 then
