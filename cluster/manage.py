@@ -20,6 +20,7 @@ Configuration is in `aws_config.py`.
 """
 
 from boto.ec2.elb import ELBConnection, HealthCheck, LoadBalancer
+from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType
 from boto.ec2.autoscale import AutoScaleConnection, LaunchConfiguration, AutoScalingGroup, ScalingPolicy
 from boto.ec2.cloudwatch import MetricAlarm
 from boto.ec2.cloudwatch import connect_to_region as cw_connect_to_region
@@ -33,23 +34,31 @@ from logger import logger
 logger = logger(__name__)
 
 # Load configuration.
-from cluster import aws_config as c
-REGION = c.REGION
-NAME = c.CLUSTER_NAME
-INSTANCE_USER = c.INSTANCE_USER
-ACCESS_KEY = c.AWS_ACCESS_KEY
-SECRET_KEY = c.AWS_SECRET_KEY
-KEYPAIR_NAME = c.KEYPAIR_NAME
-PATH_TO_KEY = c.PATH_TO_KEY
-PATH_TO_DEPLOY_KEYS = c.PATH_TO_DEPLOY_KEYS
-BASE_AMI_ID = c.BASE_AMI_ID
-WORKER_AMI_ID = BASE_AMI_ID     # By default, worker AMI is same as base AMI.
+from configparser import ConfigParser
+CONFIG_FILE = 'aws_config.py'
+config = ConfigParser()
+config.read(CONFIG_FILE)
+c = config['CONFIG']
+
+REGION = c['REGION']
+NAME = c['CLUSTER_NAME']
+INSTANCE_USER = c['INSTANCE_USER']
+ACCESS_KEY = c['AWS_ACCESS_KEY']
+SECRET_KEY = c['AWS_SECRET_KEY']
+KEYPAIR_NAME = c['KEYPAIR_NAME']
+PATH_TO_KEY = c['PATH_TO_KEY']
+PATH_TO_DEPLOY_KEYS = c['PATH_TO_DEPLOY_KEYS']
+BASE_AMI_ID = c['BASE_AMI_ID']
+
 LB_NAME = '%s-loadbalancer' % NAME
 LC_NAME = '%s-launchconfig' % NAME
 HC_NAME = '%s-healthcheck' % NAME
 AG_NAME = '%s-autoscale' % NAME
 SG_NAME = '%s-security' % NAME
 MASTER_NAME = '%s-master' % NAME
+
+# By default, worker AMI is same as base AMI.
+WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
 def commission():
     """
@@ -102,7 +111,7 @@ def commission():
     while istatus == 'pending':
         time.sleep(10)
         istatus = instance.update()
-    logger.info('Master instance has launched. Configuring...')
+    logger.info('Master instance has launched at %s. Configuring...' % instance.public_dns_name)
 
     # Tag the instance with a name so we can find it later.
     instance.add_tag('name', MASTER_NAME)
@@ -365,22 +374,38 @@ def create_worker_image():
     conn_ec2 = _connect_ec2()
     sg_name = 'worker-image'
 
+    #if _get_secgroup(sg_name):
+        #conn_ec2.delete_security_group(sg_name)
+
     # Create a new security group.
-    logger.info('Creating a temporary security group...')
-    sec_group = conn_ec2.create_security_group(sg_name, 'Temporary, for worker image')
+    #logger.info('Creating a temporary security group...')
+    #sec_group = conn_ec2.create_security_group(sg_name, 'Temporary, for worker image')
 
     # Authorize SSH access (temporarily).
-    logger.info('Temporarily enabling SSH access to base instance...')
-    sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
+    #logger.info('Temporarily enabling SSH access to base instance...')
+    #sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
+
+    # Create an EBS (block storage) for the image.
+    # Size is in GB.
+    block_device = BlockDeviceType(size=25, delete_on_termination=True)
+    bdm = BlockDeviceMapping()
+    bdm['/dev/sda1'] = block_device
 
     # Create the instance the AMI will be generated from.
+    # *Not* using a user data init script here; instead
+    # executing it via ssh.
+    # Executing the init script via user data makes it
+    # difficult to know when the system is ready to be
+    # turned into an image.
+    # Running the init script manually means image creation
+    # can be execute serially after the script is done.
     logger.info('Creating the base instance...')
-    image_init_script = _load_script('setup_image.sh')
     reservations = conn_ec2.run_instances(
                        BASE_AMI_ID,
                        key_name=KEYPAIR_NAME,
+                       security_groups=[sg_name],
                        instance_type='m1.small',
-                       user_data=image_init_script
+                       block_device_map=bdm
                    )
     instance = reservations.instances[0]
 
@@ -390,31 +415,76 @@ def create_worker_image():
     while istatus == 'pending':
         time.sleep(10)
         istatus = instance.update()
-    logger.info('Base instance has launched. Configuring...')
+    logger.info('Base instance has launched at %s. Configuring...' % instance.public_dns_name)
 
     # Tag the instance with a name so we can find it later.
     instance.add_tag('name', 'worker-image')
+
+    env = {
+        'host': instance.public_dns_name,
+        'user': INSTANCE_USER,
+        'key_filename': _get_filepath(PATH_TO_KEY)
+    }
+
+    # Setup base instance with the Salt state tree.
+    # This waits until the instance is ready to accept commands.
+    _transfer_salt(env['host'], env['user'], env['key_filename'])
+
+    # Transfer init script.
+    logger.info('Transferring the init script...')
+    image_init_script = _get_filepath('setup_image.sh')
+    subprocess.call([
+        'scp',
+        '-r',
+        '-o',
+        'StrictHostKeyChecking=no',
+        '-i',
+        env['key_filename'],
+        image_init_script,
+        '%s@%s:/tmp/' % (env['user'], env['host'])
+    ])
+
+    # Execute the script.
+    logger.info('Executing the init script...')
+    subprocess.call([
+        'ssh',
+        '-t',
+        '-i',
+        env['key_filename'],
+        '%s@%s' % (env['user'], env['host']),
+        'sudo',
+        'bash',
+        '/tmp/setup_image.sh'
+    ])
+
+    # Delete the script.
+    logger.info('Cleaning up the init script...')
+    subprocess.call([
+        'ssh',
+        '-t',
+        '-i',
+        env['key_filename'],
+        '%s@%s' % (env['user'], env['host']),
+        'sudo',
+        'rm',
+        '/tmp/setup_image.sh'
+    ])
 
     # Create the AMI and get its ID.
     logger.info('Creating worker image...')
     WORKER_AMI_ID = instance.create_image('worker-image', description='Base image for workers')
 
-    worker_image = conn_ec2.get_all_images([WORKER_AMI_ID])[0]
+    # Update config.
+    c['WORKER_AMI_ID'] = WORKER_AMI_ID
+    config.save(open(CONFIG_FILE, 'w'))
 
+    # Wait until worker is ready.
+    worker_image = conn_ec2.get_all_images([WORKER_AMI_ID])[0]
     istatus = worker_image.update()
     while istatus == 'pending':
-        time.sleep(20)
+        time.sleep(10)
         istatus = worker_image.update()
     logger.info('Created worker image with id %s' % WORKER_AMI_ID)
-
-    env = {
-            'host': instance.public_dns_name,
-            'user': INSTANCE_USER,
-            'key_filename': _get_filepath(PATH_TO_KEY)
-    }
-
-    # Setup base instance with the Salt state tree.
-    _transfer_salt(env['host'], env['user'], env['key_filename'])
 
     # Destroy base instance.
     logger.info('Destroying base instance...')
@@ -436,11 +506,14 @@ def delete_worker_image(image_id=WORKER_AMI_ID):
     Deregisters the worker AMI.
     """
 
-    conn_ec2 = _connect_ec2
+    conn_ec2 = _connect_ec2()
     if image_id:
         logger.info('Deleting worker image with id %s' % image_id)
-        conn_ec2.deregister_image(image_id)
+        conn_ec2.deregister_image(image_id, delete_snapshot=True)
 
+        logger.info('Deleting EBS volume...')
+        volume = conn_ec2.get_all_volumes()[0]
+        volume.delete()
 
 def status():
     """
@@ -455,7 +528,23 @@ def status():
     return len(groups)
 
 
-def _transfer_salt(host, user, key):
+def _get_secgroup(name):
+    """
+    Get a security group by name.
+
+    Args:
+        | name (str)    -- the name of the security group.
+
+    Returns:
+        | SecurityGroup if found, else None.
+    """
+    conn_ec2 = _connect_ec2()
+    for sg in conn_ec2.get_all_security_groups():
+        if sg.name == name:
+            return sg
+
+
+def _transfer_salt(host, user, keyfile):
     """
     Transfer Salt state and other necessary files
     to the specified host.
@@ -463,7 +552,7 @@ def _transfer_salt(host, user, key):
     Args:
         | host (str)    -- the host to connect to.
         | user (str)    -- the user to connect as.
-        | key  (str)    -- the path to the key to connect with.
+        | keyfile (str)    -- the path to the key to connect with.
     """
 
     # Copy over deploy keys into the Salt state tree.
@@ -493,7 +582,7 @@ def _transfer_salt(host, user, key):
             '-o',
             'StrictHostKeyChecking=no',
             '-i',
-            key,
+            keyfile,
             salt_path,
             '%s@%s:/tmp/salt' % (user, host)
     ]
@@ -503,20 +592,21 @@ def _transfer_salt(host, user, key):
 
     # Check if we couldn't connect, and try again.
     while b'Connection refused' in results[1]:
+        time.sleep(10)
         results = subprocess.Popen(scp, stderr=subprocess.PIPE).communicate()
 
 
     # Move it to the real directory.
-    logger.info('Moving Salt state tree to /srv/salt on the instance... ')
+    logger.info('Moving Salt state tree to /srv/salt on the instance...')
     subprocess.call([
         'ssh',
         '-t',
         '-i',
-        key,
+        keyfile,
         '%s@%s' % (user, host),
         'sudo',
         'mv',
-        '/tmp/salt',
+        '/tmp/salt/*',
         '/srv'
     ])
 
