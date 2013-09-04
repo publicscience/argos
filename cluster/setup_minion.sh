@@ -10,8 +10,8 @@ sudo apt-get upgrade -y
 
 # Set env variables.
 # The application will uses these to configure Celery and the DB.
-export DB_HOST=$master_dns
-export BROKER_URL=amqp://guest@$master_dns//
+echo -e '\nexport DB_HOST='$master_dns | sudo tee -a ~/.bashrc
+echo -e 'export BROKER_URL=amqp://guest@'$master_dns'//' | sudo tee -a ~/.bashrc
 
 # Edit Minion config to
 # set Salt Master location
@@ -23,4 +23,5 @@ sudo sed -i "s/#startup_states: ''/startup_states: highstate/" /etc/salt/minion
 echo -e 'role: worker' | sudo tee -a /etc/salt/grains
 
 # Start Minion
-service salt-minion restart
+sudo service salt-minion stop
+sudo salt-minion -l info
