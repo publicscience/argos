@@ -90,6 +90,10 @@ def commission():
     # Authorize HTTP access.
     sec_group.authorize('tcp', 80, 80, '0.0.0.0/0')
 
+    # Authorize MongoDB and RabbitMQ ports.
+    sec_group.authorize('tcp', 27017, 27017, '0.0.0.0/0')
+    sec_group.authorize('tcp', 5672, 5672, '0.0.0.0/0')
+
     # Authorize SSH access (temporarily).
     logger.info('Temporarily enabling SSH access to master instance...')
     sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
@@ -131,6 +135,12 @@ def commission():
             'user': INSTANCE_USER,
             'key_filename': _get_filepath(PATH_TO_KEY)
     }
+
+    # Setup env variables so Celery knows where to look.
+    # Retrieved in celery_config.py
+    # You need to re-import celery_config after this has changed.
+    os.environ['DB_HOST'] = env['host']
+    os.environ['BROKER_URL'] = 'amqp://guest@%s//' % env['host']
 
     # Setup master instance with the Salt state tree.
     _transfer_salt(env['host'], env['user'], env['key_filename'])
