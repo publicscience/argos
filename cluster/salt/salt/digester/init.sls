@@ -60,6 +60,16 @@ app-nltk-data:
             #- cmd: app-venv
             - virtualenv: app-venv
 
+# Start the Celery worker.
+{% if 'worker' in grains['roles'] %}
+app-worker:
+    cmd.run:
+        - cwd: /var/app/digester/
+        - name: /var/app/digester/do worker
+        - require:
+            - cmd: app-nltk-data
+{% endif %}
+
 # Setup the virtualenv.
 # Having a lot of issues with this.
 # For now, using custom setup script.

@@ -16,7 +16,7 @@ The following are created:
 
 And they can all also be dismantled.
 
-Configuration is in `aws_config.py`.
+Configuration is in `aws_config.ini`.
 """
 
 from boto.ec2.elb import ELBConnection, HealthCheck, LoadBalancer
@@ -35,7 +35,7 @@ logger = logger(__name__)
 
 # Load configuration.
 from configparser import ConfigParser
-CONFIG_FILE = 'aws_config.py'
+CONFIG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), 'aws_config.ini'))
 config = ConfigParser()
 config.read(CONFIG_FILE)
 c = config['CONFIG']
@@ -59,6 +59,7 @@ MASTER_NAME = '%s-master' % NAME
 
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
+
 
 def commission():
     """
@@ -374,16 +375,16 @@ def create_worker_image():
     conn_ec2 = _connect_ec2()
     sg_name = 'worker-image'
 
-    #if _get_secgroup(sg_name):
-        #conn_ec2.delete_security_group(sg_name)
+    if _get_secgroup(sg_name):
+        conn_ec2.delete_security_group(sg_name)
 
     # Create a new security group.
-    #logger.info('Creating a temporary security group...')
-    #sec_group = conn_ec2.create_security_group(sg_name, 'Temporary, for worker image')
+    logger.info('Creating a temporary security group...')
+    sec_group = conn_ec2.create_security_group(sg_name, 'Temporary, for worker image')
 
     # Authorize SSH access (temporarily).
-    #logger.info('Temporarily enabling SSH access to base instance...')
-    #sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
+    logger.info('Temporarily enabling SSH access to base instance...')
+    sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
 
     # Create an EBS (block storage) for the image.
     # Size is in GB.
@@ -476,7 +477,7 @@ def create_worker_image():
 
     # Update config.
     c['WORKER_AMI_ID'] = WORKER_AMI_ID
-    config.save(open(CONFIG_FILE, 'w'))
+    config.write(open(CONFIG_FILE, 'w'))
 
     # Wait until worker is ready.
     worker_image = conn_ec2.get_all_images([WORKER_AMI_ID])[0]
@@ -498,7 +499,7 @@ def create_worker_image():
     logger.info('Deleting the temporary security group...')
     conn_ec2.delete_security_group(name=sg_name)
 
-    logger.info('AMI creation complete.')
+    logger.info('AMI creation complete. (%s)' % WORKER_AMI_ID)
 
 
 def delete_worker_image(image_id=WORKER_AMI_ID):
@@ -514,6 +515,7 @@ def delete_worker_image(image_id=WORKER_AMI_ID):
         logger.info('Deleting EBS volume...')
         volume = conn_ec2.get_all_volumes()[0]
         volume.delete()
+
 
 def status():
     """
