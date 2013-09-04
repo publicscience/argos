@@ -527,15 +527,10 @@ def delete_worker_image(image_id=WORKER_AMI_ID):
     """
     Deregisters the worker AMI.
     """
-
     conn_ec2 = _connect_ec2()
     if image_id:
         logger.info('Deleting worker image with id %s' % image_id)
         conn_ec2.deregister_image(image_id, delete_snapshot=True)
-
-        logger.info('Deleting EBS volume...')
-        volume = conn_ec2.get_all_volumes()[0]
-        volume.delete()
 
 
 def status():
