@@ -15,6 +15,9 @@ logger = logger(__name__)
 celery = Celery()
 celery.config_from_object(celery_config)
 
+# Expose `manage` as `cluster.manage`.
+from cluster import manage
+
 import math
 from celery import chord
 @celery.task
