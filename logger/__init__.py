@@ -16,7 +16,7 @@ def logger(name):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # Output to file.
-    fh = logging.FileHandler('logs/log.log')
+    fh = logging.FileHandler('logger/logs/log.log')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
