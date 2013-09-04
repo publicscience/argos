@@ -7,6 +7,8 @@ Setup workers for Celery.
 Here, an EC2 AutoScale Group is used.
 
 The following are created:
+    * AMI of the worker machine
+    * Master EC2 instance
     * Security Group
     * Elastic Load Balancer (with Health Check)
     * Launch Configuration
@@ -57,7 +59,7 @@ INSTANCE_USER = c['INSTANCE_USER']
 ACCESS_KEY = c['AWS_ACCESS_KEY']
 SECRET_KEY = c['AWS_SECRET_KEY']
 KEYPAIR_NAME = c['KEYPAIR_NAME']
-PATH_TO_KEY = c['PATH_TO_KEY']
+PATH_TO_KEY = get_filepath(c['PATH_TO_KEY'])
 PATH_TO_DEPLOY_KEYS = c['PATH_TO_DEPLOY_KEYS']
 BASE_AMI_ID = c['BASE_AMI_ID']
 
@@ -70,6 +72,30 @@ MASTER_NAME = '%s-master' % NAME
 
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
+
+
+def command_master(command, key=PATH_TO_KEY, user=INSTANCE_USER):
+    """
+    Issue a command to the master.
+
+    Args:
+        | command (list)    -- a list of the command parameters.
+
+    Examples::
+
+        command_master(['sudo', 'echo', 'hello'])
+        command_master(['sudo', '/var/app/digester/do worker'])
+    """
+    host = c.get('MASTER_PUBLIC_DNS')
+    ssh = [
+        'ssh',
+        '-t',
+        '-i',
+        key,
+        '%s@%s' % (user, host)
+    ]
+    if host:
+        subprocess.call(ssh + command)
 
 
 def commission():
@@ -109,15 +135,25 @@ def commission():
     logger.info('Temporarily enabling SSH access to master instance...')
     sec_group.authorize('tcp', 22, 22, '0.0.0.0/0')
 
+    # Create an EBS (block storage) for the image.
+    # Size is in GB.
+    # Need a lot of space for the Wiki dump and MongoDB.
+    # Do NOT delete this volume on termination, since it will have our processed data.
+    block_device = BlockDeviceType(size=125, delete_on_termination=False)
+    bdm = BlockDeviceMapping()
+    bdm['/dev/sda1'] = block_device
+
     # Create the Salt Master/RabbitMQ/MongoDB server.
+    # The Master instance is a souped-up worker, so we use the worker image.
     logger.info('Creating the master instance (%s)...' % MASTER_NAME)
     master_init_script = load_script('setup_master.sh')
     reservations = conn_ec2.run_instances(
-                       BASE_AMI_ID,
+                       WORKER_AMI_ID,
                        key_name=KEYPAIR_NAME,
                        security_groups=[SG_NAME],
                        instance_type='m1.small',
-                       user_data=master_init_script
+                       user_data=master_init_script,
+                       block_device_map=bdm
                    )
     instance = reservations.instances[0]
 
@@ -128,6 +164,10 @@ def commission():
         time.sleep(10)
         istatus = instance.update()
     logger.info('Master instance has launched at %s. Configuring...' % instance.public_dns_name)
+
+    # Update config.
+    c['MASTER_PUBLIC_DNS'] = instance.public_dns_name
+    config.write(open(CONFIG_FILE, 'w'))
 
     # Tag the instance with a name so we can find it later.
     instance.add_tag('name', MASTER_NAME)
@@ -144,17 +184,23 @@ def commission():
     env = {
             'host': instance.public_dns_name,
             'user': INSTANCE_USER,
-            'key_filename': get_filepath(PATH_TO_KEY)
+            'key_filename': PATH_TO_KEY
     }
 
+    # Leaving the following out, since it is expected that
+    # digestion be run *on* the master instance, in which case
+    # the database and broker will both be at localhost (since they
+    # also run on the master).
     # Setup env variables so Celery knows where to look.
     # Retrieved in celery_config.py
     # You need to re-import celery_config after this has changed.
-    os.environ['DB_HOST'] = env['host']
-    os.environ['BROKER_URL'] = 'amqp://guest@%s//' % env['host']
+    #os.environ['DB_HOST'] = env['host']
+    #os.environ['BROKER_URL'] = 'amqp://guest@%s//' % env['host']
 
+    # This is unnecessary now; the Salt state tree is
+    # present on the worker image already.
     # Setup master instance with the Salt state tree.
-    _transfer_salt(env['host'], env['user'], env['key_filename'])
+    #_transfer_salt(env['host'], env['user'], env['key_filename'])
 
     # Disable SSH access.
     logger.info('Disabling SSH access to master instance...')
@@ -445,7 +491,7 @@ def create_worker_image():
     env = {
         'host': instance.public_dns_name,
         'user': INSTANCE_USER,
-        'key_filename': get_filepath(PATH_TO_KEY)
+        'key_filename': PATH_TO_KEY
     }
 
     # Setup base instance with the Salt state tree.
