@@ -3,6 +3,7 @@ Some utility functions.
 """
 
 import os
+from string import Template
 
 def load_script(filename, **kwargs):
     """
