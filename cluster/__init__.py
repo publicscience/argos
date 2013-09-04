@@ -24,6 +24,7 @@ from celery import chord
 def pow(x, y):
     return math.pow(x, y)
 
+@celery.task
 def done(nums):
     return sum(nums)
 

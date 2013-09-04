@@ -28,14 +28,27 @@ from boto.ec2 import connect_to_region
 
 import os, time, subprocess, base64
 from string import Template
+from cluster.util import get_filepath, load_script
 
 # Logging
 from logger import logger
 logger = logger(__name__)
 
+# Boto logging.
+import logging
+logging.basicConfig(filename='boto.log', level=logging.DEBUG)
+
 # Load configuration.
 from configparser import ConfigParser
-CONFIG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), 'aws_config.ini'))
+CONFIG_FILE = get_filepath('aws_config.ini')
+
+# Test the config file exists.
+# If it doesn't, just use the sample file.
+try:
+    with open(CONFIG_FILE): pass
+except IOError:
+    CONFIG_FILE = get_filepath('aws_config-sample.ini')
+
 config = ConfigParser()
 config.read(CONFIG_FILE)
 c = config['CONFIG']
@@ -100,7 +113,7 @@ def commission():
 
     # Create the Salt Master/RabbitMQ/MongoDB server.
     logger.info('Creating the master instance (%s)...' % MASTER_NAME)
-    master_init_script = _load_script('setup_master.sh')
+    master_init_script = load_script('setup_master.sh')
     reservations = conn_ec2.run_instances(
                        BASE_AMI_ID,
                        key_name=KEYPAIR_NAME,
@@ -133,7 +146,7 @@ def commission():
     env = {
             'host': instance.public_dns_name,
             'user': INSTANCE_USER,
-            'key_filename': _get_filepath(PATH_TO_KEY)
+            'key_filename': get_filepath(PATH_TO_KEY)
     }
 
     # Setup env variables so Celery knows where to look.
@@ -151,7 +164,7 @@ def commission():
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
-    minion_init_script = _load_script('setup_minion.sh', master_dns=instance.private_dns_name)
+    minion_init_script = load_script('setup_minion.sh', master_dns=instance.private_dns_name)
 
     # Create the health check.
     logger.info('Creating the health check (%s)...' % HC_NAME)
@@ -434,7 +447,7 @@ def create_worker_image():
     env = {
         'host': instance.public_dns_name,
         'user': INSTANCE_USER,
-        'key_filename': _get_filepath(PATH_TO_KEY)
+        'key_filename': get_filepath(PATH_TO_KEY)
     }
 
     # Setup base instance with the Salt state tree.
@@ -443,7 +456,7 @@ def create_worker_image():
 
     # Transfer init script.
     logger.info('Transferring the init script...')
-    image_init_script = _get_filepath('setup_image.sh')
+    image_init_script = get_filepath('setup_image.sh')
     subprocess.call([
         'scp',
         '-r',
@@ -569,8 +582,8 @@ def _transfer_salt(host, user, keyfile):
 
     # Copy over deploy keys into the Salt state tree.
     logger.info('Copying deploy keys to the Salt state tree...')
-    salt_path = _get_filepath('salt/')
-    deploy_keys_path = _get_filepath(PATH_TO_DEPLOY_KEYS)
+    salt_path = get_filepath('salt/')
+    deploy_keys_path = get_filepath(PATH_TO_DEPLOY_KEYS)
     deploy_keys = ['id_rsa', 'id_rsa.pub']
     for key in deploy_keys:
         subprocess.Popen([
@@ -678,33 +691,3 @@ def _connect_clw():
                     aws_secret_access_key=SECRET_KEY
                  )
 
-
-def _load_script(filename, **kwargs):
-    """
-    Loads a script from this directory as bytes.
-    This script will be passed as `user-data`.
-
-    Args:
-        | filename (str)    -- the filename or path of the script to open.
-        | **kwargs          -- optional keyword arguments of a variable and
-                            the value to replace it with in the script.
-
-    When you specify `**kwargs`, say `foo=bar`, then every instance of ``$foo`
-    will be replaced with `bar`.
-    """
-    script = open(_get_filepath(filename), 'r').read()
-
-    # Substitute for specified vars.
-    if kwargs:
-        script = Template(script).substitute(**kwargs)
-
-    # Turn into bytes.
-    return script.encode('utf-8')
-
-def _get_filepath(filename):
-    """
-    Gets filepath for a file
-    relative to this directory.
-    """
-    dir = os.path.dirname(__file__)
-    return os.path.abspath(os.path.join(dir, filename))
