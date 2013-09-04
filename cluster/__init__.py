@@ -18,6 +18,19 @@ from . import manage
 celery = Celery()
 celery.config_from_object(celery_config)
 
+import math
+from celery import chord
+@celery.task
+def pow(x, y):
+    return math.pow(x, y)
+
+def done(nums):
+    return sum(nums)
+
+def test():
+    tasks = chord(pow(x, 2) for x in range(100))(done())
+
+
 def workers():
     """
     Get info about currently available Celery workers.
