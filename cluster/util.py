@@ -2,6 +2,8 @@
 Some utility functions.
 """
 
+import os
+
 def load_script(filename, **kwargs):
     """
     Loads a script from this directory as bytes.
