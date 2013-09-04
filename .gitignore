@@ -14,5 +14,5 @@ doc/_static
 doc/_templates
 dumps/
 log.log
-aws_config.py
+cluster/aws_config.ini
 keys/

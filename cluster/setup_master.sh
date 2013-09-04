@@ -34,5 +34,5 @@ sudo sed -i '/#\s\{4\}\-\s\/srv\/(\salt\|pillar\)/ s/^#//' /etc/salt/master
 
 # Start Salt, RabbitMQ, and MongoDB
 sudo service mongodb start
-sudo service salt-master start
+sudo service salt-master restart
 sudo rabbitmq-server

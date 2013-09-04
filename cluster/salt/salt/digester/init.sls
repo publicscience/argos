@@ -51,6 +51,7 @@ digester:
             - file: publickey
             - file: ssh_config
 
+# Download NLTK data.
 app-nltk-data:
     cmd.run:
         - cwd: /var/app/digester/
@@ -58,6 +59,16 @@ app-nltk-data:
         - require:
             #- cmd: app-venv
             - virtualenv: app-venv
+
+# Start the Celery worker.
+{% if grains.get('role') == 'worker' %}
+app-worker:
+    cmd.run:
+        - cwd: /var/app/digester/
+        - name: /var/app/digester/do worker
+        - require:
+            - cmd: app-nltk-data
+{% endif %}
 
 # Setup the virtualenv.
 # Having a lot of issues with this.
