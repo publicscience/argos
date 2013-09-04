@@ -27,7 +27,6 @@ from boto.ec2.cloudwatch import connect_to_region as cw_connect_to_region
 from boto.ec2 import connect_to_region
 
 import os, time, subprocess, base64
-from string import Template
 from cluster.util import get_filepath, load_script
 
 # Logging
@@ -36,21 +35,12 @@ logger = logger(__name__)
 
 # Boto logging.
 import logging
-logging.basicConfig(filename='boto.log', level=logging.DEBUG)
+logging.basicConfig(filename='logs/boto.log', level=logging.DEBUG)
 
 # Load configuration.
 from configparser import ConfigParser
-CONFIG_FILE = get_filepath('aws_config.ini')
-
-# Test the config file exists.
-# If it doesn't, just use the sample file.
-try:
-    with open(CONFIG_FILE): pass
-except IOError:
-    CONFIG_FILE = get_filepath('aws_config-sample.ini')
-
 config = ConfigParser()
-config.read(CONFIG_FILE)
+config.read(get_filepath('aws_config.ini'))
 c = config['CONFIG']
 
 REGION = c['REGION']

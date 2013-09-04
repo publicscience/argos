@@ -12,9 +12,6 @@ from cluster import celery_config
 from logger import logger
 logger = logger(__name__)
 
-# Expose `manage` when imported.
-from . import manage
-
 celery = Celery()
 celery.config_from_object(celery_config)
 
