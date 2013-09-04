@@ -20,7 +20,7 @@ sudo sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
 sudo sed -i "s/#startup_states: ''/startup_states: highstate/" /etc/salt/minion
 
 # Set the grains so we can target minions as workers.
-echo -e 'roles:\n  - worker' | sudo tee -a /etc/salt/grains
+echo -e 'role: worker' | sudo tee -a /etc/salt/grains
 
 # Start Minion
 service salt-minion restart
