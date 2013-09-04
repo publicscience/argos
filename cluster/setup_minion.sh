@@ -20,4 +20,4 @@ sudo sed -i 's/#master: salt/master: $master_dns/' /etc/salt/minion
 sudo sed -i "s/#startup_states: ''/startup_states: highstate/" /etc/salt/minion
 
 # Start Minion
-salt-minion -d
+service salt-minion restart
