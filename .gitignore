@@ -15,4 +15,4 @@ doc/_templates
 dumps/
 cluster/aws_config.ini
 keys/
-*.log
+logger/logs/*.log

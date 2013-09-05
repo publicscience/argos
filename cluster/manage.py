@@ -37,7 +37,7 @@ logger = logger(__name__)
 
 # Boto logging.
 import logging
-logging.basicConfig(filename='boto.log', level=logging.DEBUG)
+logging.basicConfig(filename='logger/logs/boto.log', level=logging.DEBUG)
 
 # Load configuration.
 from configparser import ConfigParser
