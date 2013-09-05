@@ -15,5 +15,10 @@ class DigesterTest(unittest.TestCase):
         for page in self.d.iterate('page'):
             self.assertIsNotNone(page)
 
+    def test_iterate_bz2(self):
+        self.d.file = 'tests/data/article.xml.bz2'
+        for page in self.d.iterate('page'):
+            self.assertIsNotNone(page)
+
 if __name__ == '__main__':
     unittest.main()
