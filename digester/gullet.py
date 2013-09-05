@@ -1,5 +1,3 @@
-#!../env/dev/bin/python
-
 """
 Gullet
 ==============
@@ -91,10 +89,14 @@ def download(url, save_path, progress=False):
             # Write the chunk to the file.
             outfile.write(chunk)
 
+            # Update existing size.
+            existing_size += len(chunk)
+
+            percent_complete = (existing_size/total_size) * 100
+
             # Show progress.
             if progress:
-                existing_size += len(chunk)
-                _progress( (existing_size/total_size) * 100 )
+                _progress(percent_complete)
 
         if progress:
             sys.stdout.write('\n')
