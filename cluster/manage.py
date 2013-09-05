@@ -64,8 +64,8 @@ PATH_TO_DEPLOY_KEYS = c['PATH_TO_DEPLOY_KEYS']
 BASE_AMI_ID = c['BASE_AMI_ID']
 
 LB_NAME = '%s-loadbalancer' % NAME
-LC_NAME = '%s-launchconfig' % NAME
 HC_NAME = '%s-healthcheck' % NAME
+LC_NAME = '%s-launchconfig' % NAME
 AG_NAME = '%s-autoscale' % NAME
 SG_NAME = '%s-security' % NAME
 MASTER_NAME = '%s-master' % NAME
@@ -137,9 +137,9 @@ def commission():
 
     # Create an EBS (block storage) for the image.
     # Size is in GB.
-    # Need a lot of space for the Wiki dump and MongoDB.
+    # Need a lot of space for the Wiki dump on MongoDB.
     # Do NOT delete this volume on termination, since it will have our processed data.
-    block_device = BlockDeviceType(size=125, delete_on_termination=False)
+    block_device = BlockDeviceType(size=120, delete_on_termination=False)
     bdm = BlockDeviceMapping()
     bdm['/dev/sda1'] = block_device
 
@@ -211,29 +211,29 @@ def commission():
     minion_init_script = load_script('setup_minion.sh', master_dns=instance.private_dns_name)
 
     # Create the health check.
-    logger.info('Creating the health check (%s)...' % HC_NAME)
-    health_check = HealthCheck(
-                       HC_NAME,
+    #logger.info('Creating the health check (%s)...' % HC_NAME)
+    #health_check = HealthCheck(
+                       #HC_NAME,
 
-                       # Seconds between health checks.
-                       interval=20,
+                       ## Seconds between health checks.
+                       #interval=20,
 
-                       # The target of the health checks.
-                       target='HTTP:80/index.html',
+                       ## The target of the health checks.
+                       #target='HTTP:80/index.html',
 
-                       # Seconds to wait for ping response.
-                       timeout=3
-                   )
+                       ## Seconds to wait for ping response.
+                       #timeout=3
+                   #)
 
 
     # Create the load balancer.
-    logger.info('Creating the load balancer (%s)...' % LB_NAME)
-    load_balancer = conn_elb.create_load_balancer(
-                        LB_NAME,
-                        zones,
-                        listeners=[(80, 80, 'http'), (443, 443, 'tcp')]
-                    )
-    load_balancer.configure_health_check(health_check)
+    #logger.info('Creating the load balancer (%s)...' % LB_NAME)
+    #load_balancer = conn_elb.create_load_balancer(
+                        #LB_NAME,
+                        #zones,
+                        #listeners=[(80, 80, 'http'), (443, 443, 'tcp')]
+                    #)
+    #load_balancer.configure_health_check(health_check)
     # Point your site's CNAME here: load_balancer.dns_name
 
 
@@ -270,11 +270,11 @@ def commission():
     logger.info('Creating the autoscaling group (%s)...' % AG_NAME)
     autoscaling_group = AutoScalingGroup(
                             group_name=AG_NAME,
-                            load_balancers=[LB_NAME],
+                            #load_balancers=[LB_NAME],
                             availability_zones=zones,
                             launch_config=launch_config,
-                            min_size=2,  # minimum group size
-                            max_size=8,  # maximum group size
+                            min_size=1,  # minimum group size
+                            max_size=4,  # maximum group size
                             connection=conn_asg
                         )
 
@@ -412,8 +412,8 @@ def decommission():
         lc.delete()
 
     # Delete the load balancer.
-    logger.info('Deleting the load balancer (%s)...' % LB_NAME)
-    conn_elb.delete_load_balancer(LB_NAME)
+    #logger.info('Deleting the load balancer (%s)...' % LB_NAME)
+    #conn_elb.delete_load_balancer(LB_NAME)
 
     # Delete the master instance(s).
     logger.info('Deleting the master instance (%s)...' % MASTER_NAME)
@@ -455,7 +455,7 @@ def create_worker_image():
 
     # Create an EBS (block storage) for the image.
     # Size is in GB.
-    block_device = BlockDeviceType(size=25, delete_on_termination=True)
+    block_device = BlockDeviceType(size=10, delete_on_termination=True)
     bdm = BlockDeviceMapping()
     bdm['/dev/sda1'] = block_device
 
