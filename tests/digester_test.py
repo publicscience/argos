@@ -216,6 +216,8 @@ class WikiDigesterTest(unittest.TestCase):
         # Pipe all output to /dev/null.
         cls.mq = cls._run_process(['rabbitmq-server'])
         cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config'])
+        # Wait for everything...(need to implement a better checker here)
+        time.sleep(5)
 
     @classmethod
     def tearDownClass(cls):
