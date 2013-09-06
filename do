@@ -15,6 +15,9 @@ function setup_dependencies {
         brew install libevent
         brew install re2c
 
+        # MongoDB
+        brew install mongodb
+
     # Otherwise, assume Linux...
     else 
         sudo apt-get install screen -y
@@ -27,6 +30,9 @@ function setup_dependencies {
 
         # Required by lxml.
         sudo apt-get install libxml2-dev libxslt1-dev python-dev lib32z1-dev -y
+
+        # MongoDB
+        sudo apt-get install mongodb -y
     fi
 }
 
@@ -35,15 +41,6 @@ function setup_virtualenv {
     virtualenv-3.3 dev-env --no-site-packages
     source dev-env/bin/activate
     pip install -r requirements.txt
-}
-
-function setup_mongo {
-    # Setup MongoDB.
-    wget -O mongodb.tgz 'http://fastdl.mongodb.org/osx/mongodb-osx-x86_64-2.4.5.tgz'
-    mkdir mongodb
-    tar --extract --file=mongodb.tgz --strip-components=1 --directory=mongodb
-    rm mongodb.tgz
-    mkdir mongodb/data
 }
 
 function setup_nltk {
@@ -104,7 +101,7 @@ then
 # Start MongoDB server.
 elif [[ $1 == 'mongo' ]]
 then
-    ./mongodb/bin/mongod --dbpath mongodb/data
+    mongod --dbpath db
 
 
 # Run tests.
@@ -159,7 +156,6 @@ then
         setup_dependencies
         setup_virtualenv
         setup_nltk
-        setup_mongo
         setup_doc
 
     # Set up a minion/worker environment.
@@ -180,10 +176,6 @@ then
     elif [[ $2 == 'nltk' ]]
     then
         setup_nltk
-
-    elif [[ $2 == 'mongo' ]]
-    then
-        setup_mongo
 
     elif [[ $2 == 'mapreduce' ]]
     then
