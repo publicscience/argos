@@ -1,10 +1,11 @@
 import unittest
-import os, subprocess, socket, time
+from tests import RequiresDB
 from unittest.mock import patch, mock_open, MagicMock
 from digester import Digester, gullet
 from digester.wikidigester import WikiDigester
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import NamedTemporaryFile
 from io import BytesIO
+import os, time
 
 class DigesterTest(unittest.TestCase):
     def setUp(self):
@@ -194,23 +195,10 @@ class GulletTest(unittest.TestCase):
         self.mock_open.assert_called_with(tmpfile.name, 'wb')
 
 
-class WikiDigesterTest(unittest.TestCase):
+class WikiDigesterTest(unittest.TestCase, RequiresDB):
     @classmethod
     def setUpClass(cls):
-        # Check if MongoDB is already running.
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.connect(('localhost', 27017))
-        except (IOError, socket.error):
-            # Start MongoDB
-            # Note: need to attach the tmpdir to the class,
-            # or Python garbage collects it, and the MongoDB closes because
-            # its db is gone.
-            cls.tmpdir = TemporaryDirectory()
-            cls.db = cls._run_process(['mongod', '--dbpath', cls.tmpdir.name])
-
-            # Wait until MongoDB is running.
-            cls._wait_for_db()
+        cls.setup_db()
 
         # Try to run RabbitMQ and a Celery worker.
         # Pipe all output to /dev/null.
@@ -221,9 +209,7 @@ class WikiDigesterTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Kill the db if it's running.
-        if hasattr(cls, 'db'):
-            cls.db.kill()
+        cls.teardown_db()
 
         # Kill RabbitMQ and Celery.
         cls.worker.kill()
@@ -274,7 +260,6 @@ class WikiDigesterTest(unittest.TestCase):
         self.w.purge()
         self.w.digest()
 
-        # Warning: `doc` is a DOOZY
         id = 12
         doc = dict([(36962594, 1), (42533182, 1), (70517173, 1), (137495135, 2), (148374140, 2), (190251741, 2), (194249450, 1), (195691240, 1), (252707675, 1), (255853421, 1), (258540396, 2), (288490391, 1), (288949150, 1), (290915221, 2), (307364791, 2), (319357912, 1), (320078809, 2), (321848282, 1), (388039736, 1), (399836250, 1), (470287521, 1), (471008418, 1), (555877666, 1), (637666682, 1)])
         page = self.w.db().find({'_id': id})
@@ -376,40 +361,6 @@ class WikiDigesterTest(unittest.TestCase):
 
         # Check that categories have been updated.
         self.assertGreater(len(page['categories']), 0)
-
-    @classmethod
-    def _wait_for_db(cls):
-        """
-        Wait until the database is up and running.
-        Thanks to: mongo-python-driver (http://goo.gl/h30mC2)
-
-        Returns:
-            | True when database is ready
-            | False if database failed to become ready after 160 tries.
-        """
-        tries = 0
-        while cls.db.poll() is None and tries < 160:
-            tries += 1
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            try:
-                try:
-                    s.connect(('localhost', 27017))
-                    return True
-                except (IOError, socket.error) as e:
-                    time.sleep(0.25)
-            finally:
-                s.close()
-        return False
-
-    @classmethod
-    def _run_process(cls, cmds):
-        """
-        Convenience method for running commands.
-
-        Args:
-            | cmds (list)   -- list of command args
-        """
-        return subprocess.Popen(cmds, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 if __name__ == '__main__':
