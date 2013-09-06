@@ -1,7 +1,16 @@
 import unittest
 from adipose import Adipose
+from tests import RequiresDB
 
-class AdiposeTest(unittest.TestCase):
+class AdiposeTest(unittest.TestCase, RequiresDB):
+    @classmethod
+    def setUpClass(cls):
+        cls.setup_db()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.teardown_db()
+
     def setUp(self):
         self.a = Adipose('test', 'test_collection')
         self.a.empty()

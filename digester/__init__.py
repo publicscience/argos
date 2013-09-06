@@ -2,7 +2,7 @@
 Digester
 ==============
 
-Processes XML dumps.
+Processes XML or bzipped XML dumps.
 
 Some of this package is derived from gensim 0.8.6.
 As such, this Digester package is licensed under
