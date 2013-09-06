@@ -42,12 +42,12 @@ def download(url, save_path, progress=False):
 
     # If file already exists,
     # but there is not a newer file is on the server...
-    if os.path.exists(file) and not _expired():
+    if os.path.exists(file) and not _expired(url, file):
         # Append to existing file.
         outfile = open(file, 'ab')
 
         # Figure out how many bytes we've got.
-        existing_size = os.path.getsize(file)
+        existing_size = outfile.tell()
 
         # Setup request for only the remaining bytes.
         headers = {'Range': 'bytes=%s-' % (existing_size)}
