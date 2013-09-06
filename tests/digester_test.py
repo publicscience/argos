@@ -103,12 +103,6 @@ class GulletTest(unittest.TestCase):
         is_expired = gullet._expired('http://www.example.com/foo.bz2', 'foo.bz2')
         self.assertFalse(is_expired)
 
-    def test_does_not_download_existing(self):
-        # Create the mock response.
-        #mock_resp = MagicMock(headers={'Last-Modified':'Wed, 01 Sep 2013 08:53:26 GMT'})
-        #self.mock_urlopen.return_value = mock_resp
-        pass
-
     def test_ignores_existing_download(self):
         """
         Download should skip if the file already
@@ -121,6 +115,8 @@ class GulletTest(unittest.TestCase):
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
+        # Should have opened new file to append to,
+        # but not actually write anything.
         tmpfile.write.assert_not_called()
         self.mock_open.assert_called_once_with(self.local_file, 'ab')
 
@@ -137,6 +133,7 @@ class GulletTest(unittest.TestCase):
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
+        # Should have written to existing file (appended).
         tmpfile.write.assert_called()
         self.mock_open.assert_called_once_with(self.local_file, 'ab')
 
@@ -153,6 +150,7 @@ class GulletTest(unittest.TestCase):
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
+        # Should have written to new file.
         tmpfile.write.assert_called()
         self.mock_open.assert_called_once_with(self.local_file, 'wb')
 
@@ -168,6 +166,7 @@ class GulletTest(unittest.TestCase):
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
+        # Should have written to new file.
         tmpfile.write.assert_called()
         self.mock_open.assert_called_once_with(self.local_file, 'wb')
 
