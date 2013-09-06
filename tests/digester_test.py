@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import patch, mock_open, MagicMock
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
 from digester import Digester, gullet
 from io import BytesIO
+import os
 
 class DigesterTest(unittest.TestCase):
     def setUp(self):
@@ -28,17 +29,9 @@ class GulletTest(unittest.TestCase):
     def setUp(self):
         self.data = b"A lot has changed in the past 300 years. People are no longer obsessed with the accumulation of things. We've eliminated hunger, want, the need for possessions. We've grown out of our infancy."
 
-        # Setup file paths and urls.
-        self.file = 'test.txt'
-        self.url = 'http://foo.com/%s' % self.file
-        self.save_path = '/foo/bar'
-        self.local_file = '%s/%s' % (self.save_path, self.file)
 
         # Mock opening and writing the local file.
         self.mock_open = self.create_patch('builtins.open')
-
-        # Mock network communication (opening urls).
-        self.mock_urlopen = self.create_patch('urllib.request.urlopen')
 
         # Mock last modified time for file.
         mock_getmtime = self.create_patch('os.path.getmtime')
@@ -47,19 +40,10 @@ class GulletTest(unittest.TestCase):
         # Mock that the file exists.
         self.create_patch('os.path.exists').return_value = True
 
-        # Mock response from server.
-        self.mock_response = MagicMock(
-                                headers={
-                                    'Accept-Ranges': 'bytes',
-                                    'Last-Modified': 'Wed, 05 Sep 2013 08:53:26 GMT',
-                                    'Content-Length': '192'
-                                }
-                             )
-        self.mock_urlopen.return_value = self.mock_response
-
-        # Mock iteration (should change this to mock just resp.read())
-        self.mock_iter = self.create_patch('builtins.iter')
-        self.mock_iter.return_value = [self.data]
+        # Mock network communication (opening urls) and
+        # and mock response from server.
+        self.mock_urlopen = self.create_patch('urllib.request.urlopen')
+        self.content_length = len(self.data)
 
     def tearDown(self):
         pass
@@ -67,41 +51,80 @@ class GulletTest(unittest.TestCase):
     def create_patch(self, name):
         """
         Helper for patching/mocking methods.
+
+        Args:
+            | name (str)       -- the 'module.package.method' to mock.
         """
         patcher = patch(name, autospec=True)
         thing = patcher.start()
         self.addCleanup(patcher.stop)
         return thing
 
-    def create_file(self, complete=False):
+    def mock_file(self, complete=False):
         """
-        Create a mock file to work with.
-        """
+        Create a named mock existing download file to work with.
 
-        tmpfile = TemporaryFile()
+        Args:
+            | complete (bool)  -- True = the file is a completed download,
+                                  False = the file is only partially completed.
+        """
+        tmpfile = NamedTemporaryFile()
 
         if complete:
             tmpfile.write(self.data)
         else:
-            tmpfile.write(self.data[::2])
+            # Start with the first 12 bytes.
+            tmpfile.write(self.data[:12])
 
-        # Mock out the write func.
-        tmpfile.write = MagicMock()
+        # Setup file paths and urls.
+        self.save_path, self.file = os.path.split(tmpfile.name)
+        self.url = 'http://foo.com/%s' % self.file
+
         return tmpfile
+
+    def mock_response(self, partial=False):
+        """
+        Create a mock HTTP response to work with.
+
+        Args:
+            | partial (bool)  -- True = only the 'remaining' bytes are sent,
+                                 False = all the bytes are sent.
+        """
+        if partial:
+            # Start after the first 12 bytes.
+            mock_response = BytesIO(self.data[12:])
+        else:
+            mock_response = BytesIO(self.data)
+        mock_response.headers = {
+            'Accept-Ranges': 'bytes',
+            'Last-Modified': 'Wed, 05 Sep 2013 08:53:26 GMT',
+            'Content-Length': str(self.content_length)
+        }
+        self.mock_urlopen.return_value = mock_response
+        return mock_response
 
     def test_detects_expired(self):
         # Set remote file timestamp.
-        self.mock_response.headers['Last-Modified'] = 'Wed, 05 Sep 2013 08:53:26 GMT'
+        mock_resp = self.mock_response()
+        mock_resp.headers['Last-Modified'] = 'Wed, 05 Sep 2013 08:53:26 GMT'
 
         is_expired = gullet._expired('http://www.example.com/foo.bz2', 'foo.bz2')
         self.assertTrue(is_expired)
 
     def test_detects_not_expired(self):
         # Set remote file timestamp.
-        self.mock_response.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
+        mock_resp = self.mock_response()
+        mock_resp.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
 
         is_expired = gullet._expired('http://www.example.com/foo.bz2', 'foo.bz2')
         self.assertFalse(is_expired)
+
+    def test_download(self):
+        """
+        Download a file.
+        """
+        pass
+
 
     def test_ignores_existing_download(self):
         """
@@ -109,16 +132,17 @@ class GulletTest(unittest.TestCase):
         is fully downloaded and is not expired.
         """
         # Set remote file to not be expired.
-        self.mock_response.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
+        mock_resp = self.mock_response()
+        mock_resp.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
 
-        tmpfile = self.create_file(complete=True)
+        tmpfile = self.mock_file(complete=True)
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
         # Should have opened new file to append to,
         # but not actually write anything.
-        tmpfile.write.assert_not_called()
-        self.mock_open.assert_called_once_with(self.local_file, 'ab')
+        self.assertEquals(tmpfile.tell(), self.content_length)
+        self.mock_open.assert_called_once_with(tmpfile.name, 'ab')
 
     def test_download_continues(self):
         """
@@ -127,15 +151,16 @@ class GulletTest(unittest.TestCase):
         and the server supports 'Accept-Ranges'.
         """
         # Set remote file to not be expired.
-        self.mock_response.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
+        mock_resp = self.mock_response(partial=True)
+        mock_resp.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
 
-        tmpfile = self.create_file()
+        tmpfile = self.mock_file()
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
-        # Should have written to existing file (appended).
-        tmpfile.write.assert_called()
-        self.mock_open.assert_called_once_with(self.local_file, 'ab')
+        # Should have appended to existing file.
+        self.assertEquals(tmpfile.tell(), self.content_length)
+        self.mock_open.assert_called_once_with(tmpfile.name, 'ab')
 
     def test_restarts_expired_download(self):
         """
@@ -144,31 +169,35 @@ class GulletTest(unittest.TestCase):
         """
 
         # Set remote file to be expired.
-        self.mock_response.headers['Last-Modified'] = 'Wed, 05 Sep 2013 08:53:26 GMT'
+        mock_resp = self.mock_response()
+        mock_resp.headers['Last-Modified'] = 'Wed, 05 Sep 2013 08:53:26 GMT'
 
-        tmpfile = self.create_file()
+        tmpfile = self.mock_file()
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
         # Should have written to new file.
-        tmpfile.write.assert_called()
-        self.mock_open.assert_called_once_with(self.local_file, 'wb')
+        self.assertEquals(tmpfile.tell(), self.content_length)
+        self.mock_open.assert_called_once_with(tmpfile.name, 'wb')
 
     def test_restarts_unsupported_download(self):
         """
         Download should restart if the server does not
         support 'Accept-Ranges'.
         """
+        # Set remote file to not be expired, and
         # Get rid of the Accept-Ranges header.
-        self.mock_response.pop('Accept-Ranges', None)
+        mock_resp = self.mock_response()
+        mock_resp.headers['Last-Modified'] = 'Wed, 01 Sep 2013 08:53:26 GMT'
+        mock_resp.headers.pop('Accept-Ranges', None)
 
-        tmpfile = self.create_file()
+        tmpfile = self.mock_file()
         self.mock_open.return_value = tmpfile
         gullet.download(self.url, self.save_path)
 
         # Should have written to new file.
-        tmpfile.write.assert_called()
-        self.mock_open.assert_called_once_with(self.local_file, 'wb')
+        self.assertEquals(tmpfile.tell(), self.content_length)
+        self.mock_open.assert_called_with(tmpfile.name, 'wb')
 
 
 

@@ -57,6 +57,7 @@ def download(url, save_path, progress=False):
     else:
         # Create/overwrite file.
         outfile = open(file, 'wb')
+        outfile.seek(0)
 
         # Vanilla request.
         req = request.Request(url)
@@ -66,7 +67,7 @@ def download(url, save_path, progress=False):
         resp = request.urlopen(req)
 
         # Get total size of content.
-        total_size = float(resp.info().getheader('Content-Length').strip())
+        total_size = float(resp.headers['Content-Length'].strip())
 
         # Check if the file has already been downloaded_size.
         if total_size == existing_size:
@@ -76,16 +77,17 @@ def download(url, save_path, progress=False):
         # Check that the server accepts ranges.
         # If it does not, the server will ignore the Range header,
         # And we have to start all over again.
-        if existing_size > 0 and not resp.info().getheader('Accept-Ranges'):
+        if existing_size > 0 and not resp.headers.get('Accept-Ranges', None):
             logger.info('Server does not allow resuming of downloads.')
             logger.info('Starting from the beginning! :D')
             outfile = open(file, 'wb')
+            outfile.seek(0)
 
         if progress:
             _progress( (existing_size/total_size) * 100 )
 
         # Pull out the chunks!
-        for chunk in iter(lambda: resp.read(CHUNK), ''):
+        for chunk in iter(lambda: resp.read(CHUNK), b''):
             # Write the chunk to the file.
             outfile.write(chunk)
 
