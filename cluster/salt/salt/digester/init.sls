@@ -57,23 +57,47 @@ app-nltk-data:
         - cwd: /var/app/digester/
         - name: /var/app/digester/do setup nltk
         - require:
-            #- cmd: app-venv
-            - virtualenv: app-venv
+            - virtualenv: venv
 
 # Start the Celery worker.
-{% if grains.get('role') == 'worker' %}
-app-worker:
+{% if 'worker' in grains.get('roles', []) %}
+worker:
     cmd.run:
         - cwd: /var/app/digester/
-        - name: /var/app/digester/do worker
+        - name: ./dev-env/bin/celeryd --loglevel=info --config cluster.celery_config
         - require:
+            - virtualenv: venv
             - cmd: app-nltk-data
 {% endif %}
+
+# Ensure RabbitMQ and MongoDB
+# are installed and running.
+{% if 'master' in grains.get('roles', []) %}
+rabbitmq-server:
+    service.running:
+        - enable: True
+        - require:
+            - pkg: rabbitmq-server
+    pkg.installed:
+        - require:
+            - cmd: rabbitmq-server
+    cmd.script:
+        - source: salt://scripts/install-rabbitmq.sh
+
+mongodb:
+     service.running:
+        - enable: True
+        - require:
+            - pkg: mongodb
+     pkg:
+        - installed
+{% endif %}
+
 
 # Setup the virtualenv.
 # Having a lot of issues with this.
 # For now, using custom setup script.
-app-venv:
+venv:
     virtualenv.managed:
         - name: /var/app/digester/dev-env
         - cwd: /var/app/digester/

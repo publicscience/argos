@@ -66,6 +66,7 @@ LC_NAME = '%s-launchconfig' % NAME
 AG_NAME = '%s-autoscale' % NAME
 SG_NAME = '%s-security' % NAME
 MASTER_NAME = '%s-master' % NAME
+WORKER_IMAGE_NAME = '%s-worker-image' % NAME
 
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
@@ -308,7 +309,7 @@ def decommission():
     for reservation in master_instances:
         for i in reservation.instances:
             i.terminate()
-            _wait_until_terminated(i)
+        _wait_until_terminated(reservation.instances)
 
     # Delete the security group.
     logger.info('Deleting the security group (%s)...' % SG_NAME)
@@ -327,7 +328,7 @@ def create_worker_image():
     """
 
     conn_ec2 = _connect_ec2()
-    sg_name = 'worker-image'
+    sg_name = WORKER_IMAGE_NAME
 
     if _get_security_group(sg_name):
         logger.info('Conflicting security group exists. Deleting...')
@@ -369,7 +370,7 @@ def create_worker_image():
     logger.info('Base instance has launched at %s. Configuring...' % instance.public_dns_name)
 
     # Tag the instance with a name so we can find it later.
-    instance.add_tag('name', 'worker-image')
+    instance.add_tag('name', WORKER_IMAGE_NAME)
 
     env = {
         'host': instance.public_dns_name,
@@ -396,7 +397,7 @@ def create_worker_image():
 
     # Create the AMI and get its ID.
     logger.info('Creating worker image...')
-    WORKER_AMI_ID = instance.create_image('worker-image', description='Base image for workers')
+    WORKER_AMI_ID = instance.create_image(WORKER_IMAGE_NAME, description='Base image for workers')
 
     # Update config.
     c['WORKER_AMI_ID'] = WORKER_AMI_ID
@@ -407,26 +408,34 @@ def create_worker_image():
     _wait_until_ready(worker_image)
     logger.info('Created worker image with id %s' % WORKER_AMI_ID)
 
-    logger.info('Cleaning up worker image infrastructure...')
-    clean_worker_image(instance, sg_name)
+    # Clean up the worker image infrastructure.
+    clean_worker_image()
 
     logger.info('AMI creation complete. (%s)' % WORKER_AMI_ID)
 
     return WORKER_AMI_ID
 
-def clean_worker_image(base_instance, sg_name):
+def clean_worker_image():
     """
     Decommissions the infrastructure used to
     construct the worker image.
     """
-    # Destroy base instance.
-    logger.info('Destroying base instance...')
-    base_instance.terminate()
-    _wait_until_terminated(base_instance)
+    logger.info('Cleaning up worker image infrastructure...')
+    conn_ec2 = _connect_ec2()
+
+    # Terminate base instance.
+    logger.info('Terminating base instance...')
+    base_instances = conn_ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': WORKER_IMAGE_NAME})
+    for reservation in base_instances:
+        for i in reservation.instances:
+            i.terminate()
+        _wait_until_terminated(reservation.instances)
 
     # Delete security group.
     logger.info('Deleting the temporary security group...')
-    _delete_security_group(sg_name, purge=True)
+    _delete_security_group(WORKER_IMAGE_NAME, purge=True)
+
+    logger.info('Worker image cleanup complete.')
 
 
 def delete_worker_image(image_id=WORKER_AMI_ID):
@@ -539,7 +548,7 @@ def _delete_security_group(name, purge=False):
     """
     conn_ec2 = _connect_ec2()
     try:
-        conn_ec2._delete_security_group(name=name)
+        conn_ec2.delete_security_group(name=name)
     except EC2ResponseError as e:
         # Check if there are still instances in the group.
         sg = _get_security_group(name)
