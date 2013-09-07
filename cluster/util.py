@@ -2,7 +2,7 @@
 Some utility functions.
 """
 
-import os
+import os, subprocess, time
 from string import Template
 
 def load_script(filename, **kwargs):

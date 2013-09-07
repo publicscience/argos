@@ -27,7 +27,7 @@ def done(nums):
     return sum(nums)
 
 def test():
-    tasks = chord(pow(x, 2) for x in range(100))(done())
+    return chord(pow.s(x, 2) for x in range(100))(done.s())
 
 
 def workers():
