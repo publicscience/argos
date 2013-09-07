@@ -17,4 +17,5 @@ sudo sed -i "s/#startup_states: ''/startup_states: highstate/" /etc/salt/minion
 echo -e 'roles:\n  - worker' | sudo tee -a /etc/salt/grains
 
 # Restart Salt Minion
-sudo service salt-minion restart
+#sudo service salt-minion restart
+sudo salt-minion

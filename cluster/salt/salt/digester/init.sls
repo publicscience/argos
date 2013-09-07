@@ -59,8 +59,8 @@ app-nltk-data:
         - require:
             - virtualenv: venv
 
-# Start the Celery worker.
 {% if 'worker' in grains.get('roles', []) %}
+# Start the Celery worker.
 worker:
     cmd.run:
         - cwd: /var/app/digester/
@@ -68,10 +68,16 @@ worker:
         - require:
             - virtualenv: venv
             - cmd: app-nltk-data
+
+salt-minion:
+    service.running:
+        - enable: True
+        - require:
+            - pkg: salt-minion
+    pkg:
+        - installed
 {% endif %}
 
-# Ensure RabbitMQ and MongoDB
-# are installed and running.
 {% if 'master' in grains.get('roles', []) %}
 rabbitmq-server:
     service.running:
@@ -90,6 +96,14 @@ mongodb:
         - require:
             - pkg: mongodb
      pkg:
+        - installed
+
+salt-master:
+    service.running:
+        - enable: True
+        - require:
+            - pkg: salt-master
+    pkg:
         - installed
 {% endif %}
 
