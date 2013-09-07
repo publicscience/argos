@@ -24,3 +24,6 @@ echo -e 'role: worker' | sudo tee -a /etc/salt/grains
 
 # Start Minion
 sudo service salt-minion restart
+
+# Start Celery worker.
+sudo /var/app/digester/do worker
