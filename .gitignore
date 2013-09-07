@@ -16,3 +16,5 @@ dumps/
 cluster/aws_config.ini
 keys/
 logger/logs/*.log
+id_rsa
+id_rsa.pub
