@@ -15,21 +15,6 @@ logger = logger(__name__)
 celery = Celery()
 celery.config_from_object(celery_config)
 
-# TESTING
-import math
-from celery import chord
-@celery.task
-def pow(x, y):
-    return math.pow(x, y)
-
-@celery.task
-def done(nums):
-    return sum(nums)
-
-def test():
-    return chord(pow.s(x, 2) for x in range(100))(done.s())
-
-
 def workers():
     """
     Get info about currently available Celery workers.
@@ -54,3 +39,20 @@ def workers():
 
     logger.info('There are %s workers available.' % len(workers))
     return workers
+
+
+def active():
+    """
+    Get info about currently executing tasks.
+    """
+    try:
+        active_tasks = celery.control.inspect().active()
+        if not active_tasks:
+            logger.info('No active tasks.')
+            return False
+    except IOError as e:
+        logger.error('Error connecting to MQ. Check that it is running.')
+        return False
+
+    logger.info('There are %s executing tasks.' % len(active_tasks))
+    return active_tasks

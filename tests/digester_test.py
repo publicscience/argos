@@ -5,6 +5,7 @@ from digester import Digester, gullet
 from digester.wikidigester import WikiDigester
 from tempfile import NamedTemporaryFile
 from io import BytesIO
+from cluster.tasks import workers
 import os, time
 
 class DigesterTest(unittest.TestCase):
@@ -202,18 +203,21 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
         # Try to run RabbitMQ and a Celery worker.
         # Pipe all output to /dev/null.
-        cls.mq = cls._run_process(['rabbitmq-server'])
-        cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config'])
-        # Wait for everything...(need to implement a better checker here)
-        time.sleep(5)
+        if not workers():
+            cls.mq = cls._run_process(['rabbitmq-server'])
+            cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config'])
+            # Wait for everything...(need to implement a better checker here)
+            time.sleep(5)
 
     @classmethod
     def tearDownClass(cls):
         cls.teardown_db()
 
         # Kill RabbitMQ and Celery.
-        cls.worker.kill()
-        cls.mq.kill()
+        if cls.worker:
+            cls.worker.kill()
+        if cls.mq:
+            cls.mq.kill()
 
     def setUp(self):
         # Create the WikiDigester and purge its db.
