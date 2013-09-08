@@ -221,7 +221,7 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
     def setUp(self):
         # Create the WikiDigester and purge its db.
-        self.w = WikiDigester('tests/data/article.xml', 'pages', db='test')
+        self.w = WikiDigester('tests/data/article.xml', db='test')
         self.w.purge()
 
     def tearDown(self):
@@ -240,13 +240,13 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
     def test_distrib_digest(self):
         # Requires that RabbitMQ and a Celery worker are running.
-        self.w = WikiDigester('tests/data/article.xml', 'pages', distrib=True, db='test')
+        self.w = WikiDigester('tests/data/article.xml', distrib=True, db='test')
         self.w.purge()
         self._digest()
 
     def test_distrib_digest_many(self):
         # Requires that RabbitMQ and a Celery worker are running.
-        self.w = WikiDigester('tests/data/articles.xml', 'pages', distrib=True, db='test')
+        self.w = WikiDigester('tests/data/articles.xml', distrib=True, db='test')
         self.w.purge()
         self._digest_many()
 
@@ -255,7 +255,7 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
     def test_distrib_digest_updates(self):
         # Requires that RabbitMQ and a Celery worker are running.
-        self.w = WikiDigester('tests/data/article.xml', 'pages', distrib=True, db='test')
+        self.w = WikiDigester('tests/data/article.xml', distrib=True, db='test')
         self.w.purge()
         self._digest_updates()
 

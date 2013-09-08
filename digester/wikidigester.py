@@ -10,6 +10,7 @@ from adipose import Adipose
 import brain
 
 # Goodies
+from os.path import exists
 from math import log
 from collections import Counter
 from itertools import chain
@@ -42,7 +43,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump, namespace=NAMESPACE, distrib=False, db=DATABASE):
+    def __init__(self, file, dump='pages', namespace=NAMESPACE, distrib=False, db=DATABASE, url=None):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
@@ -54,6 +55,7 @@ class WikiDigester(Digester):
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
             | distrib (bool)    -- whether or not digestion should be distributed. Defaults to False.
             | db (str)          -- the name of the database to save to.
+            | url (str)         -- the url from where the dump can be fetched.
 
         Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
@@ -67,6 +69,7 @@ class WikiDigester(Digester):
         self.database = db
         self.dump = dump
         self.distrib = distrib
+        self.url = url
 
         # Keep track of number of docs.
         # Necessary for performing TF-IDF processing.
@@ -83,17 +86,19 @@ class WikiDigester(Digester):
         this instance's current file.
         """
 
+        # Default dump files.
         dumps = {
                     'base': 'http://dumps.wikimedia.org/enwiki/latest/',
                     'pages': 'enwiki-latest-pages-articles.xml.bz2'
                 }
 
-        # Build full url.
-        url = '%s%s' % (dumps['base'], dumps[self.dump])
+        # Build a default url if one is not specified.
+        if not self.url:
+            self.url = '%s%s' % (dumps['base'], dumps[self.dump])
 
         # Download!
-        logger.info('Fetching %s dump' % self.dump)
-        self.download(url)
+        logger.info('Fetching %s dump from %s' % (self.dump, self.url))
+        self.download(self.url)
 
 
     def purge(self):
@@ -109,6 +114,11 @@ class WikiDigester(Digester):
         Will process this instance's dump.
         Each kind of dump is processed differently.
         """
+
+        # Check if the specified file exists.
+        if not exists(self.file):
+            logger.info('Specified file not found, fetching...')
+            self.fetch_dump()
 
         logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
 
