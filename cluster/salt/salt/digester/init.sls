@@ -91,12 +91,12 @@ rabbitmq-server:
         - source: salt://scripts/install-rabbitmq.sh
 
 mongodb:
-     service.running:
+    service.running:
         - enable: True
         - require:
             - pkg: mongodb
     pkg.installed:
-        - name: mongodb-10gen
+        - mongodb-10gen
         - require:
             - cmd: mongodb
     cmd.script:
