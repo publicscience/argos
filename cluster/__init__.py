@@ -442,10 +442,10 @@ def create_worker_image(use_existing_base=True):
         else:
             # Create a new one if necessary.
             logger.info('No existing worker base instance found. A new one is being created...')
-            base_instance = create_worker_image()
+            base_instance = create_worker_base()
     else:
         logger.info('Creating a new worker base instance...')
-        base_instance = create_worker_image()
+        base_instance = create_worker_base()
 
     try:
         # Create the AMI and get its ID.
