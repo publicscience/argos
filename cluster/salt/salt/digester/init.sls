@@ -95,8 +95,12 @@ mongodb:
         - enable: True
         - require:
             - pkg: mongodb
-     pkg:
-        - installed
+    pkg.installed:
+        - name: mongodb-10gen
+        - require:
+            - cmd: mongodb
+    cmd.script:
+        - source: salt://scripts/install-mongodb.sh
 
 salt-master:
     service.running:
