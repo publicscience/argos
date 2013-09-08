@@ -33,7 +33,7 @@ logger = logger(__name__)
 
 
 NAMESPACE = 'http://www.mediawiki.org/xml/export-0.8/'
-DATABASE = 'shallowthought'
+DATABASE = 'wikidigester'
 
 
 class WikiDigester(Digester):
@@ -53,6 +53,7 @@ class WikiDigester(Digester):
             | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
             | distrib (bool)    -- whether or not digestion should be distributed. Defaults to False.
+            | db (str)          -- the name of the database to save to.
 
         Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
@@ -63,6 +64,7 @@ class WikiDigester(Digester):
         except TypeError:
             Digester.__init__(self, file, namespace)
 
+        self.database = db
         self.dump = dump
         self.distrib = distrib
 
@@ -146,8 +148,8 @@ class WikiDigester(Digester):
         Generate the TF-IDF representations for all the digested docs.
 
         Args:
-            | docs (list)       -- a list of lists, where each list is a doc represented
-                                   as what token_ids were present in the doc.
+            | docs (list)       -- a list of docs, where each doc is a list of
+                                    what token_ids were present in the doc.
                                    e.g. the doc "1 2 4 2 3 4" would be [1,2,3,4]
 
         General TF-IDF formula:
@@ -159,23 +161,28 @@ class WikiDigester(Digester):
 
         # To calculate how many documents each token_id appeared in,
         # first merge all the token_id-presence docs into a token_id-presence corpus.
+        # This is basically a mega list that is a merging of all the individual docs-as-token-lists.
         corpus = list(chain.from_iterable(docs))
 
         # Then, count all the token_ids in the corpus.
-        # doc_counts[token_id] will give the number of documents token_id appears in.
-        doc_counts = dict(Counter(corpus))
+        # corpus_counts[token_id] will give the number of documents token_id appears in.
+        corpus_counts = dict(Counter(corpus))
 
-        # TO DO
-        # Load up local token counts (bag of words).
-        all_docs = []
+        # Iterate over all docs
+        # in the digester's collection.
+        db = self.db()
+        for doc in db.all():
+            tfidf_dict = {}
 
-        # TO DO
-        # Check out gensim for their implementation.
-        for doc in all_docs:
-            tfidf_doc = {}
-            for token_id in doc:
-                token_count = doc[token_id]
-                tfidf_doc[token_id] = token_count * log((self.num_docs/global_count[token_id]), 2)
+            # Convert each token's count to its tf-idf value.
+            for token_id, token_count in doc['freqs']:
+                tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
+
+            # Update the record's `doc` value to the tf-idf representation.
+            # Need to convert to a list of tuples,
+            # since the db won't take a dict.
+            tfidf_doc = list(tfidf_dict.items())
+            db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
 
 
     @celery.task(filter=task_method)
@@ -259,9 +266,12 @@ class WikiDigester(Digester):
         doc = {
                 'title': title,
                 'datetime': datetime,
-                'doc': sparse_bag_of_words,
+                'freqs': sparse_bag_of_words,
                 'categories': categories,
-                'pagelinks': pagelinks
+                'pagelinks': pagelinks,
+
+                # Will eventually hold the tf-idf representation.
+                'doc': {}
               }
 
         # Save the doc
@@ -348,4 +358,4 @@ class WikiDigester(Digester):
         so we can't attach it as an instance variable.
         Instead we just create a new interface when we need it.
         """
-        return Adipose(DATABASE, self.dump)
+        return Adipose(self.database, self.dump)

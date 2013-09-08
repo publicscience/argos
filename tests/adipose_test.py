@@ -43,6 +43,25 @@ class AdiposeTest(unittest.TestCase, RequiresDB):
         result = self.a.find(data)
         self.assertEquals(result, data)
 
+    def test_all(self):
+        data = [
+            {'title': 'foo'},
+            {'title': 'bar'},
+            {'title': 'hey'}
+        ]
+        for doc in data:
+            self.a.add(doc)
+
+        for idx, doc in enumerate(self.a.all()):
+            self.assertEquals(data[idx]['title'], doc['title'])
+
+    def test_all_no_limit(self):
+        data = [{'title': x} for x in range(1000)]
+        for doc in data:
+            self.a.add(doc)
+        for idx, doc in enumerate(self.a.all()):
+            self.assertEquals(data[idx]['title'], doc['title'])
+
     def test_index(self):
         data = [{'title': str(x)} for x in range(20) ]
         self.a.add(data)

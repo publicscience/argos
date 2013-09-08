@@ -255,6 +255,39 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
         self.w.purge()
         self._digest_updates()
 
+    def test_tfidf(self):
+        # Some fake token ids (hashes).
+        docs = [
+                [(111, 4), (222, 8), (333, 2)],
+                [(111, 8), (333, 4)],
+                [(111, 2)],
+                [(111, 6), (222, 2)]
+        ]
+
+        expected = [
+                [[111, 0.0], [222, 8.0], [333, 2.0]],
+                [[111, 0.0], [333, 4.0]],
+                [[111, 0.0]],
+                [[111, 0.0], [222, 2.0]]
+        ]
+
+        self.w.num_docs = len(docs)
+
+        docs_tokens = []
+        for doc in docs:
+            docs_tokens.append([token[0] for token in doc])
+
+        # Add each dummy doc.
+        for idx, doc in enumerate(docs):
+            self.w.db().add({'title': idx, 'freqs': doc})
+
+        self.w._generate_tfidf(docs_tokens)
+
+        for idx, doc in enumerate(expected):
+            tfidf = self.w.db().find({'title': idx })['doc']
+            print(tfidf)
+            self.assertEquals(dict(doc), dict(tfidf))
+
     def test_bag_of_words_retrieval(self):
         self.w = WikiDigester('tests/data/simple_article.xml', 'pages', db='test')
         self.w.purge()
@@ -263,7 +296,7 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
         id = 12
         doc = dict([(36962594, 1), (42533182, 1), (70517173, 1), (137495135, 2), (148374140, 2), (190251741, 2), (194249450, 1), (195691240, 1), (252707675, 1), (255853421, 1), (258540396, 2), (288490391, 1), (288949150, 1), (290915221, 2), (307364791, 2), (319357912, 1), (320078809, 2), (321848282, 1), (388039736, 1), (399836250, 1), (470287521, 1), (471008418, 1), (555877666, 1), (637666682, 1)])
         page = self.w.db().find({'_id': id})
-        self.assertEqual(dict(page['doc']), doc)
+        self.assertEqual(dict(page['freqs']), doc)
 
     def _digest(self):
         id = 12

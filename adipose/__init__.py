@@ -37,6 +37,7 @@ class Adipose:
         # Select a collection
         self.collection = self.db[collection]
 
+
     def add(self, data):
         """
         Add data to the db.
@@ -50,6 +51,7 @@ class Adipose:
             adipose.add({'title': 'foo', 'category': 'fum'})
         """
         self.collection.insert(data)
+
 
     def update(self, query, data):
         """
@@ -65,6 +67,7 @@ class Adipose:
         """
         self.collection.update(query, data, upsert=True)
 
+
     def index(self, key):
         """
         Indexes the data by the specified key.
@@ -73,6 +76,7 @@ class Adipose:
             | key (str) -- key to index on
         """
         self.collection.ensure_index('title', unique=True)
+
 
     def find(self, query):
         """
@@ -87,11 +91,29 @@ class Adipose:
         """
         return self.collection.find_one(query)
 
+
+    def all(self):
+        """
+        Returns an iterable for all records
+        in the collection.
+
+        Example::
+
+            for doc in adipose.all():
+                # do stuff
+
+        Returns:
+            | iterable -- cursor to iterate over all docs with.
+        """
+        return self.collection.find()
+
+
     def empty(self):
         """
         Empties the database collection/table.
         """
         self.collection.remove()
+
 
     def count(self):
         """
