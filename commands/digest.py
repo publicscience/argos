@@ -1,4 +1,4 @@
-from ..digest.wikidigester import WikiDigester
+from digest.wikidigester import WikiDigester
 
 def main():
     w = WikiDigester('/tmp/wiki.xml', 'pages', distrib=True, db='wikidump')
