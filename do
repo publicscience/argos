@@ -69,21 +69,6 @@ function setup_nltk {
     rm ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
 }
 
-function setup_mapreduce {
-    # Setup the mapreduce virtualenv.
-    # The mapreduce scripts require Python 2.7.
-    virtualenv-2.7 mr-env --no-site-packages
-    source mr-env/bin/activate
-    pip install -r mapreduce/requirements.txt
-
-    # The NTLK data then needs to be the Python 2.7 data,
-    # so it will be installed to a separate directory.
-    for PACKAGE in punkt wordnet stopwords words maxent_treebank_pos_tagger maxent_ne_chunker
-    do
-        python -m nltk.downloader $PACKAGE -d mapreduce/nltk_data/
-    done
-}
-
 function setup_doc {
     source dev-env/bin/activate
     cd doc
@@ -176,10 +161,6 @@ then
     elif [[ $2 == 'nltk' ]]
     then
         setup_nltk
-
-    elif [[ $2 == 'mapreduce' ]]
-    then
-        setup_mapreduce
 
     fi
 fi
