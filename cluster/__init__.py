@@ -71,7 +71,7 @@ def commission(use_existing_image=True):
     if use_existing_image:
         logger.info('Looking for an existing worker image...')
         images = ec2.get_all_images(filters={'name': names['WORKER_IMAGE']})
-        if len(images) > 0:
+        if images:
             WORKER_AMI_ID = images[0].image_id
 
             logger.info('Existing worker image found. (%s)' % WORKER_AMI_ID)
@@ -294,7 +294,7 @@ def decommission(preserve_image=True):
 
         # Wait until all group activities have stopped.
         group_activities = group.get_activities()
-        while len(group_activities) > 0:
+        while group_activities:
             time.sleep(10)
             group_activities = [a for a in group.get_activities() if a.status_code == 'InProgress']
 
@@ -326,22 +326,19 @@ def decommission(preserve_image=True):
     logger.info('Decommissioning complete.')
 
 
-def create_worker_image():
+def create_worker_base():
     """
-    Create an AMI for workers,
-    based off of the base AMI.
+    Create the base instance for the
+    worker image.
     """
+    ec2 = connect.ec2()
+    sg_name = names['WORKER_IMAGE']
 
-    # Clean up any existing worker images.
-    # Things usually mess up if there
-    # is conflicting/existing stuff.
-    clean_worker_image()
-    delete_worker_image()
+    # Clean up any existing worker base instances,
+    # since it will screw things up.
+    delete_worker_base()
 
     try:
-        ec2 = connect.ec2()
-        sg_name = names['WORKER_IMAGE']
-
         if manage.get_security_group(sg_name):
             logger.info('Conflicting security group exists. Deleting...')
             manage.delete_security_group(sg_name, purge=True)
@@ -365,7 +362,7 @@ def create_worker_image():
         # difficult to know when the system is ready to be
         # turned into an image.
         # Running the init script manually means image creation
-        # can be execute serially after the script is done.
+        # can be executed serially after the script is done.
         logger.info('Creating the base instance...')
         reservations = ec2.run_instances(
                            BASE_AMI_ID,
@@ -407,9 +404,53 @@ def create_worker_image():
         logger.info('Cleaning up the init script...')
         command.ssh(['sudo', 'rm', '/tmp/setup_image.sh'], host=env['host'], user=env['user'], key=env['key_filename'])
 
+        logger.info('Worker base instance successfully created.')
+
+        return instance
+
+    except EC2ResponseError as e:
+        logger.error('Error creating the worker base instance, undoing...')
+
+        # Try to undo all the changes.
+        delete_worker_base()
+
+        # Re-raise the error.
+        raise e
+
+
+def create_worker_image(use_existing_base=True):
+    """
+    Create an AMI for workers,
+    based off of the base instance.
+    """
+    ec2 = connect.ec2()
+
+    # Clean up any existing worker images.
+    # Things usually mess up if there
+    # is conflicting/existing stuff.
+    delete_worker_image()
+
+    # Try to use an existing base if specified.
+    if use_existing_base:
+        logger.info('Looking for an existing worker base instance...')
+        base_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['WORKER_IMAGE']})
+        for reservation in base_instances:
+            if reservation.instances:
+                base_instance = reservation.instances[0]
+                logger.info('Existing worker base instance found.')
+                break
+        else:
+            # Create a new one if necessary.
+            logger.info('No existing worker base instance found. A new one is being created...')
+            base_instance = create_worker_image()
+    else:
+        logger.info('Creating a new worker base instance...')
+        base_instance = create_worker_image()
+
+    try:
         # Create the AMI and get its ID.
         logger.info('Creating worker image...')
-        WORKER_AMI_ID = instance.create_image(names['WORKER_IMAGE'], description='Base image for workers')
+        WORKER_AMI_ID = base_instance.create_image(names['WORKER_IMAGE'], description='Base image for workers')
 
         # Update config.
         c['WORKER_AMI_ID'] = WORKER_AMI_ID
@@ -421,7 +462,7 @@ def create_worker_image():
         logger.info('Created worker image with id %s' % WORKER_AMI_ID)
 
         # Clean up the worker image infrastructure.
-        clean_worker_image()
+        delete_worker_base()
 
         logger.info('AMI creation complete. (%s)' % WORKER_AMI_ID)
 
@@ -431,13 +472,13 @@ def create_worker_image():
         logger.error('Error creating the worker image, undoing...')
 
         # Try to undo all the changes.
-        clean_worker_image()
         delete_worker_image()
 
         # Re-raise the error.
         raise e
 
-def clean_worker_image():
+
+def delete_worker_base():
     """
     Decommissions the infrastructure used to
     construct the worker image.
@@ -457,15 +498,17 @@ def clean_worker_image():
     logger.info('Deleting the temporary security group...')
     manage.delete_security_group(names['WORKER_IMAGE'], purge=True)
 
-    logger.info('Worker image cleanup complete.')
+    logger.info('Worker base instance cleanup complete.')
 
 
-def delete_worker_image(image_id=WORKER_AMI_ID):
+def delete_worker_image():
     """
     Deregisters the worker AMI and deletes its snapshot.
     """
     ec2 = connect.ec2()
-    if image_id:
+    images = ec2.get_all_images(filters={'name': names['WORKER_IMAGE']})
+    for image in images:
+        image_id = image.image_id
         logger.info('Deleting worker image with id %s' % image_id)
         try:
             try:
