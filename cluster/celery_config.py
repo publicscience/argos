@@ -21,3 +21,5 @@ CELERY_IMPORTS = ('cluster','digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
+
+CELERYD_LOG_FILE="logger/logs/celery.log"
