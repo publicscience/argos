@@ -101,7 +101,7 @@ class Digester:
         save_path = os.path.dirname(self.file)
 
         # Download!
-        gullet.download(url, save_path)
+        saved_filepath = gullet.download(url, save_path)
 
         # Rename downloaded file to match Digester's file.
-        os.rename(file, self.file)
+        os.rename(saved_filepath, self.file)

@@ -103,6 +103,9 @@ def download(url, save_path, progress=False):
         if progress:
             sys.stdout.write('\n')
 
+        # Return the download's filepath.
+        return file
+
     except request.HTTPError as e:
         logger.error('HTTP Error:', e.code, url)
     except request.URLError as e:
