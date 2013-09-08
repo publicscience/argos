@@ -21,7 +21,7 @@ names = config.names()
 host, user, key = c['MASTER_PUBLIC_DNS'], c['INSTANCE_USER'], get_filepath(c['PATH_TO_KEY'])
 app_path = '/var/app/digester'
 py_path = join(app_path, 'dev-env/bin/python')
-cmds_path = join(app_path, 'cluster/commands/')
+cmds_path = join(app_path, 'commands/')
 
 
 def remote(func):
