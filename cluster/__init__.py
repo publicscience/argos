@@ -508,7 +508,7 @@ def delete_worker_image():
     ec2 = connect.ec2()
     images = ec2.get_all_images(filters={'name': names['WORKER_IMAGE']})
     for image in images:
-        image_id = image.image_id
+        image_id = image.id
         logger.info('Deleting worker image with id %s' % image_id)
         try:
             try:
