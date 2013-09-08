@@ -76,7 +76,7 @@ def _command(script):
     """
     Convenience method for calling a command script on master.
     """
-    ssh(['sudo', py_path, join(cmds_path, script)],
+    ssh(['cd', '%s;' % app_path, 'sudo', py_path, join(cmds_path, script)],
             host=host, user=user, key=key)
 
 

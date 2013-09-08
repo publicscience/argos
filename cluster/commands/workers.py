@@ -1,7 +1,7 @@
-import cluster.tasks
+from ..cluster import tasks
 
 def main():
-    cluster.tasks.workers()
+    tasks.workers()
 
 if __name__ == '__main__':
     main()
