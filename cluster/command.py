@@ -6,6 +6,7 @@ Interface for commanding the cluster.
 """
 
 import subprocess, time
+from os.path import join
 from cluster.util import get_filepath, load_script
 from cluster.manage import get_security_group
 
@@ -18,7 +19,9 @@ c = config.load()
 names = config.names()
 
 host, user, key = c['MASTER_PUBLIC_DNS'], c['INSTANCE_USER'], get_filepath(c['PATH_TO_KEY'])
-py_path = '/var/app/digester/dev-env/bin/python'
+app_path = '/var/app/digester'
+py_path = join(app_path, 'dev-env/bin/python')
+cmds_path = join(app_path, 'cluster/commands/')
 
 
 def remote(func):
@@ -30,14 +33,26 @@ def remote(func):
         rule = ['tcp', 22, 22, '0.0.0.0/0']
 
         sec_group = get_security_group(names['SG'])
-        sec_group.authorize(*rule)
+
+        # Check if SSH is already authorized.
+        rule_exists = False
+        for r in sec_group.rules:
+            if r.from_port == '22' and r.to_port == '22' and r.ip_protocol == 'tcp':
+                for grant in r.grants:
+                    if grant.cidr_ip == '0.0.0.0/0':
+                        rule_exists = True
+                        break
+
+        if not rule_exists:
+            sec_group.authorize(*rule)
 
         # Wait a little...
-        sleep(5)
+        time.sleep(5)
 
         func()
 
-        sec_group.revoke(*rule)
+        if not rule_exists:
+            sec_group.revoke(*rule)
     return wrapped
 
 
@@ -46,8 +61,7 @@ def wikidigest():
     """
     Command the cluster to begin WikiDigestion.
     """
-    ssh(['sudo', py_path, '/var/app/digester/digest.py'],
-            host=host, user=user, key=key)
+    _command('digest.py')
 
 @remote
 def systems_check():
@@ -55,7 +69,15 @@ def systems_check():
     Check that distributed processing is working ok
     on a newly commissioned cluster.
     """
-    pass
+    _command('workers.py')
+
+
+def _command(script):
+    """
+    Convenience method for calling a command script on master.
+    """
+    ssh(['sudo', py_path, join(cmd_path, script)],
+            host=host, user=user, key=key)
 
 
 # Eventually Fabric can replace all the below.
@@ -74,6 +96,8 @@ def ssh(cmd, host=None, user=None, key=None):
         '-t',
         '-i',
         key,
+        '-o',
+        'StrictHostKeyChecking=no',
         '%s@%s' % (user, host)
     ]
     return _call_remote_process(ssh + cmd)

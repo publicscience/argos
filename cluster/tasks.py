@@ -51,4 +51,6 @@ def workers():
     except IOError as e:
         logger.error('Error connecting to MQ. Check that it is running.')
         return False
+
+    logger.info('There are %s workers available.' % len(workers))
     return workers
