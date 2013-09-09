@@ -224,6 +224,8 @@ class WikiDigester(Digester):
                 self.num_docs += 1
                 yield elem
 
+        logger.info('There are %s docs in this dump.' % self.num_docs)
+
 
     def _process_page(self, elem):
         """
