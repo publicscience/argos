@@ -194,6 +194,8 @@ class WikiDigester(Digester):
             tfidf_doc = list(tfidf_dict.items())
             db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
 
+        logger.info('TF-IDF calculations completed!')
+
 
     @celery.task(filter=task_method)
     def _t_generate_tfidf(docs, self):
