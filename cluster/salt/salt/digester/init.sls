@@ -96,7 +96,7 @@ mongodb:
         - require:
             - pkg: mongodb
     pkg.installed:
-        - mongodb-10gen
+        - name: mongodb-10gen
         - require:
             - cmd: mongodb
     cmd.script:
