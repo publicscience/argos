@@ -24,9 +24,9 @@ class TasksTest(unittest.TestCase, RequiresDB):
         cls.teardown_db()
 
         # Kill RabbitMQ and Celery.
-        if cls.worker:
+        if hasattr(cls, 'worker'):
             cls.worker.kill()
-        if cls.mq:
+        if hasattr(cls, 'mq'):
             cls.mq.kill()
 
     def test_chord(self):
