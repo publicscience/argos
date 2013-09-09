@@ -76,7 +76,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
         logger.info('Looking for an existing worker image...')
         images = ec2.get_all_images(filters={'name': names['WORKER_IMAGE']})
         if images:
-            WORKER_AMI_ID = images[0].image_id
+            WORKER_AMI_ID = images[0].id
 
             logger.info('Existing worker image found. (%s)' % WORKER_AMI_ID)
 
