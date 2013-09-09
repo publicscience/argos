@@ -21,7 +21,6 @@ names = config.names()
 host, user, key = c['MASTER_PUBLIC_DNS'], c['INSTANCE_USER'], get_filepath(c['PATH_TO_KEY'])
 app_path = '/var/app/digester'
 py_path = join(app_path, 'dev-env/bin/python')
-cmds_path = join(app_path, 'commands/')
 
 
 def remote(func):
@@ -61,7 +60,14 @@ def wikidigest():
     """
     Command the cluster to begin WikiDigestion.
     """
-    _command('digest.py')
+    _command('digest')
+
+@remote
+def digest_check():
+    """
+    Run a digestion on a single part of the Wiki dump.
+    """
+    _command('digest_check')
 
 @remote
 def systems_check():
@@ -69,14 +75,17 @@ def systems_check():
     Check that distributed processing is working ok
     on a newly commissioned cluster.
     """
-    _command('workers.py')
+    _command('workers')
 
 
-def _command(script):
+def _command(command):
     """
-    Convenience method for calling a command script on master.
+    Convenience method for calling a command on master.
+
+    Will look something like:
+        $ python -c 'import cluster.commands as cmd; cmd.workers()'
     """
-    ssh(['cd', '%s;' % app_path, 'sudo', py_path, join(cmds_path, script)],
+    ssh(['cd', '%s;' % app_path, 'sudo', py_path, '-c', '"import cluster.commands as cmd; cmd.%s()"', command],
             host=host, user=user, key=key)
 
 
