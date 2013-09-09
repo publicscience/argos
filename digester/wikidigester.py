@@ -117,7 +117,7 @@ class WikiDigester(Digester):
 
         # Check if the specified file exists.
         if not exists(self.file):
-            logger.info('Specified file not found, fetching...')
+            logger.info('Specified file %s not found, fetching...' % self.file)
             self.fetch_dump()
 
         logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
