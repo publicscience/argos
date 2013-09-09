@@ -32,9 +32,9 @@ from cluster import manage, connect, command, config
 from logger import logger
 logger = logger(__name__)
 
-# Boto logging.
+# Cluster logging.
 import logging
-logging.basicConfig(filename='logger/logs/boto.log', level=logging.DEBUG)
+logging.basicConfig(filename='logger/logs/cluster.log', level=logging.DEBUG)
 
 c = config.load()
 names = config.names()
@@ -48,13 +48,17 @@ BASE_AMI_ID = c['BASE_AMI_ID']
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
-def commission(use_existing_image=True):
+def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.small'):
     """
     Setup a new cluster.
 
     Args:
         | use_existing_image (bool)  -- whether or not to try
                                         using an existing image.
+        | min_size (int)             -- the minimum size of the cluster
+        | max_size (int)             -- the maximum size of the cluster
+        | instance_type (str)        -- the type of instance to use in the cluster.
+                                        See: https://aws.amazon.com/ec2/instance-types/instance-details/
     """
 
     logger.info('Commissioning new cluster...')
@@ -156,7 +160,7 @@ def commission(use_existing_image=True):
                         key_name=KEYPAIR_NAME,          # The name of the EC2 keypair.
                         user_data=minion_init_script,   # User data: the initialization script for the instances.
                         security_groups=[names['SG']],      # Security groups the instance will be in.
-                        instance_type='m1.small',       # Instance size.
+                        instance_type=instance_type,       # Instance size.
                         instance_monitoring=True        # Enable monitoring (for CloudWatch).
                     )
 
@@ -169,8 +173,8 @@ def commission(use_existing_image=True):
                             group_name=names['AG'],
                             availability_zones=zones,
                             launch_config=launch_config,
-                            min_size=1,  # minimum group size
-                            max_size=4,  # maximum group size
+                            min_size=min_size,  # minimum group size
+                            max_size=max_size,  # maximum group size
                             connection=asg
                         )
 
