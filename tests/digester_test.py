@@ -284,12 +284,12 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
         # Add each dummy doc.
         for doc in docs:
-            self.w.db().add({'title': doc[0], 'freqs': doc[1]})
+            self.w.db().add({'_id': doc[0], 'freqs': doc[1]})
 
         self.w._generate_tfidf(prepped_docs)
 
         for idx, doc in enumerate(expected):
-            tfidf = self.w.db().find({'title': idx })['doc']
+            tfidf = self.w.db().find({'_id': idx })['doc']
             self.assertEquals(dict(doc), dict(tfidf))
 
     def test_bag_of_words_retrieval(self):

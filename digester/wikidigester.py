@@ -159,11 +159,11 @@ class WikiDigester(Digester):
 
         Args:
             | docs (list)       -- a list of docs, where each doc is a tuple of
-                                   ( title, [document vector] ).
+                                   ( id, [document vector] ).
                                    The "document vector" is a list of the token_ids that
                                    appeared in that document.
-                                   e.g. the doc 'foo', which looked like '1 2 4 2 3 4'
-                                   would be ('foo', [1,2,3,4])
+                                   e.g. the doc with id 12, which looked like '1 2 4 2 3 4'
+                                   would be (12, [1,2,3,4])
 
         General TF-IDF formula:
             j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
@@ -173,8 +173,8 @@ class WikiDigester(Digester):
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
         # Separate out the titles and the document vectors.
-        # e.g (title1, title2, title3) and ([1,2,3], [1,3,4], [1,2,4])
-        doc_titles, doc_vecs = zip(*docs)
+        # e.g (12, 13, 14) and ([1,2,3], [1,3,4], [1,2,4])
+        doc_ids, doc_vecs = zip(*docs)
 
         # To calculate how many documents each token_id appeared in,
         # first merge all the token_id-presence doc vectors into a token_id-presence corpus.
@@ -190,8 +190,8 @@ class WikiDigester(Digester):
         # Iterate over all docs
         # the specified docs.
         db = self.db()
-        for title in doc_titles:
-            doc = db.find({'title': title})
+        for doc_id in doc_ids:
+            doc = db.find({'_id': doc_id})
             tfidf_dict = {}
 
             # Convert each token's count to its tf-idf value.
@@ -217,6 +217,9 @@ class WikiDigester(Digester):
         and any arguments you pass in manually come *afterwards*.
         """
         self._generate_tfidf(docs)
+
+
+    #def _calculate_tfidf(self)
 
 
     def _parse_pages(self):
@@ -306,9 +309,9 @@ class WikiDigester(Digester):
 
         # Return the token_ids that were in this document.
         # Used for construction of the global doc counts for terms.
-        # Need to tag it with the title it's from; this way we know
+        # Need to tag it with the its doc id; this way we know
         # which page records to update.
-        return ( title, list(bag_of_words.keys()) )
+        return ( id, list(bag_of_words.keys()) )
 
 
         # For exploring the data as separate files.
