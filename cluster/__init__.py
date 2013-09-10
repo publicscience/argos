@@ -574,10 +574,12 @@ def _transfer_salt(host, user, keyfile):
             os.path.join(salt_path, 'salt/deploy/')
         ])
 
+    # Copy over config files into the Salt state tree.
     logger.info('Copying config files to the Salt state tree...')
     cluster_config = get_filepath('config.ini')
     app_config = get_filepath('../config.py')
-    for config in [cluster_config, app_config]:
+    configs = [cluster_config, app_config]
+    for config in configs:
         subprocess.Popen([
             'cp',
             config,
@@ -598,10 +600,20 @@ def _transfer_salt(host, user, keyfile):
     logger.info('Moving Salt state tree to /srv/salt on the instance...')
     command.ssh(['sudo', 'mv', '/tmp/salt/*', '/srv'], host=host, user=user, key=keyfile)
 
-    # Clean up the deploy keys.
+    # Clean up the deploy keys files.
     logger.info('Cleaning up deploy keys... ')
     for key in deploy_keys:
         subprocess.Popen([
             'rm',
             os.path.join(salt_path, 'salt/deploy/', key)
         ])
+
+    # Clean up the config files.
+    logger.info('Cleaning up config files...')
+    for config in configs:
+        config = os.path.basename(config)
+        subprocess.Popen([
+            'rm',
+            os.path.join(salt_path, 'salt/deploy/', config)
+        ])
+
