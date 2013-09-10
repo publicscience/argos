@@ -17,3 +17,4 @@ cluster/aws_config.ini
 logger/logs/*.log
 id_rsa
 id_rsa.pub
+config.py

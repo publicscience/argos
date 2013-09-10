@@ -165,10 +165,6 @@ class WikiDigester(Digester):
                                    e.g. the doc with id 12, which looked like '1 2 4 2 3 4'
                                    would be (12, [1,2,3,4])
 
-        General TF-IDF formula:
-            j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
-        Or, more verbosely:
-            tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
@@ -189,22 +185,12 @@ class WikiDigester(Digester):
 
         # Iterate over all docs
         # the specified docs.
-        db = self.db()
-        for doc_id in doc_ids:
-            doc = db.find({'_id': doc_id})
-            tfidf_dict = {}
-
-            # Convert each token's count to its tf-idf value.
-            for token_id, token_count in doc['freqs']:
-                tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
-
-            # Update the record's `doc` value to the tf-idf representation.
-            # Need to convert to a list of tuples,
-            # since the db won't take a dict.
-            tfidf_doc = list(tfidf_dict.items())
-            db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
-
-        logger.info('TF-IDF calculations completed!')
+        if self.distrib:
+            tasks = [self._t_calculate_tfidf.s(doc_id, corpus_counts) for doc_id in doc_ids]
+        else:
+            for doc_id in doc_ids:
+                self._calculate_tfidf(doc_id, corpus_counts)
+            logger.info('TF-IDF calculations completed!')
 
 
     @celery.task(filter=task_method)
@@ -219,7 +205,34 @@ class WikiDigester(Digester):
         self._generate_tfidf(docs)
 
 
-    #def _calculate_tfidf(self)
+    def _calculate_tfidf(self, doc_id, corpus_counts):
+        """
+        General TF-IDF formula:
+            j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
+        Or, more verbosely:
+            tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
+        """
+        db = self.db()
+        doc = db.find({'_id': doc_id})
+        tfidf_dict = {}
+
+        # Convert each token's count to its tf-idf value.
+        for token_id, token_count in doc['freqs']:
+            tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
+
+        # Update the record's `doc` value to the tf-idf representation.
+        # Need to convert to a list of tuples,
+        # since the db won't take a dict.
+        tfidf_doc = list(tfidf_dict.items())
+        db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
+
+
+    @celery.task(filter=task_method)
+    def _t_calculate_tfidf(self, doc_id, corpus_counts):
+        """
+        Celery task for asynchronously calculating TF-IDF.
+        """
+        self._calculate_tfidf(doc_id, corpus_counts)
 
 
     def _parse_pages(self):

@@ -8,6 +8,7 @@ distributed task processing.
 
 from celery import Celery
 from cluster import celery_config
+import config
 
 from logger import logger
 logger = logger(__name__)
@@ -56,3 +57,6 @@ def active():
 
     logger.info('There are %s executing tasks.' % len(active_tasks))
     return active_tasks
+
+@celery.task
+def notify(msg)
