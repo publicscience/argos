@@ -36,8 +36,8 @@ logger = logger(__name__)
 import logging
 logging.basicConfig(filename='logger/logs/cluster.log', level=logging.DEBUG)
 
-c = config.load()
-names = config.names()
+c = config.load('cluster')
+names = config.cluster_names()
 
 INSTANCE_USER = c['INSTANCE_USER']
 KEYPAIR_NAME = c['KEYPAIR_NAME']
@@ -155,7 +155,11 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
-    minion_init_script = load_script('scripts/setup_minion.sh', master_dns=instance.private_dns_name)
+    # Also with the mail server password, so workers can send email notifications.
+    minion_init_script = load_script('scripts/setup_minion.sh',
+            master_dns=instance.private_dns_name,
+            mail_pass=config.load('mail')['MAIL_PASS']
+    )
 
     # Create the launch configuration.
     logger.info('Creating the launch configuration (%s)...' % names['LC'])

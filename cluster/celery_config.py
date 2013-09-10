@@ -17,7 +17,7 @@ CELERY_MONGODB_BACKEND_SETTINGS = {
 }
 
 # What modules to import on start.
-CELERY_IMPORTS = ('tests.tasks_test','digester.wikidigester',)
+CELERY_IMPORTS = ('tests.tasks_test', 'cluster', 'digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
