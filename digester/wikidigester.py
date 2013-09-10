@@ -22,7 +22,7 @@ from mwlib.refine.compat import parse_txt
 # Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
 from celery import chord
-from cluster.tasks import celery, workers
+from cluster.tasks import celery, workers, notify
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
@@ -186,7 +186,8 @@ class WikiDigester(Digester):
         # Iterate over all docs
         # the specified docs.
         if self.distrib:
-            tasks = [self._t_calculate_tfidf.s(doc_id, corpus_counts) for doc_id in doc_ids]
+            tasks = chord(self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                          for doc_id in doc_ids)(notify.si('TF-IDF calculations completed!'))
         else:
             for doc_id in doc_ids:
                 self._calculate_tfidf(doc_id, corpus_counts)

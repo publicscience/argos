@@ -9,6 +9,7 @@ distributed task processing.
 from celery import Celery
 from cluster import celery_config
 import config
+import smtplib
 
 from logger import logger
 logger = logger(__name__)
@@ -59,4 +60,12 @@ def active():
     return active_tasks
 
 @celery.task
-def notify(msg)
+def notify(msg):
+    """
+    Send an e-mail notification.
+    """
+    server = smtplib.SMTP(*config.EMAIL_SERVER)
+    server.starttls()
+    server.login(*config.EMAIL_LOGIN)
+    for target in config.EMAIL_TARGETS:
+        server.sendmail(config.EMAIL_LOGIN[0], target, msg)
