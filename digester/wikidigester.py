@@ -173,18 +173,19 @@ class WikiDigester(Digester):
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
         # Separate out the titles and the document vectors.
+        # e.g (title1, title2, title3) and ([1,2,3], [1,3,4], [1,2,4])
         doc_titles, doc_vecs = zip(*docs)
 
         # To calculate how many documents each token_id appeared in,
         # first merge all the token_id-presence doc vectors into a token_id-presence corpus.
         # This is basically a mega list that is a merging of all the individual docs-as-token-lists.
+        # e.g. [1,1,1,2,2,3,3,4,4]
         corpus = list(chain.from_iterable(doc_vecs))
 
         # Then, count all the token_ids in the corpus.
         # corpus_counts[token_id] will give the number of documents token_id appears in.
+        # e.g. {1: 3, 2: 2, 3: 2, 4: 2}
         corpus_counts = dict(Counter(corpus))
-
-        print(corpus_counts)
 
         # Iterate over all docs
         # the specified docs.
