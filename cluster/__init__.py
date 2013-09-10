@@ -101,7 +101,9 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Authorize HTTP, MongoDB, and RabbitMQ ports.
     logger.info('Creating the security group (%s)...' % names['SG'])
     ports = [80, 27017, 5672]
-    if ssh: ports.append(22)
+    if ssh:
+        logger.info('SSH is enabled!')
+        ports.append(22)
     sec_group = manage.security_group(names['SG'], 'The cluster security group.', ports=ports)
 
     # Create an EBS (block storage) for the image.
@@ -157,6 +159,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Create the launch configuration.
     logger.info('Creating the launch configuration (%s)...' % names['LC'])
+    logger.info('Cluster is composed of %s instances.' % instance_type)
     launch_config = LaunchConfiguration(
                         name=names['LC'],
                         image_id=WORKER_AMI_ID,         # AMI ID for autoscaling instances.
