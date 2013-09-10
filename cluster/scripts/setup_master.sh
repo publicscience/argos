@@ -17,6 +17,7 @@ sudo sed -i '/#\s\{4\}\-\s\/srv\/\(salt\|pillar\)/ s/^#//' /etc/salt/master
 
 # Set the `role` grain for this instance to be 'master'.
 echo -e 'roles:\n  - master' | sudo tee -a /etc/salt/grains
+echo -e 'mail_pass: $mail_pass' | sudo tee -a /etc/salt/grains
 
 # Restart Salt Master.
 sudo service salt-master restart
