@@ -22,7 +22,7 @@ from mwlib.refine.compat import parse_txt
 # Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
 from celery import chord
-from cluster.tasks import celery, workers
+from cluster.tasks import celery, workers, notify
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
@@ -43,7 +43,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump='pages', namespace=NAMESPACE, distrib=False, db=DATABASE, url=None):
+    def __init__(self, file, dump='pages', namespace=NAMESPACE, distrib=False, db=DATABASE, url=None, silent=False):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
@@ -56,6 +56,7 @@ class WikiDigester(Digester):
             | distrib (bool)    -- whether or not digestion should be distributed. Defaults to False.
             | db (str)          -- the name of the database to save to.
             | url (str)         -- the url from where the dump can be fetched.
+            | silent (bool)     -- whether or not to send email notifications.
 
         Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
@@ -70,6 +71,7 @@ class WikiDigester(Digester):
         self.dump = dump
         self.distrib = distrib
         self.url = url
+        self.silent = silent
 
         # Keep track of number of docs.
         # Necessary for performing TF-IDF processing.
@@ -158,43 +160,44 @@ class WikiDigester(Digester):
         Generate the TF-IDF representations for all the digested docs.
 
         Args:
-            | docs (list)       -- a list of docs, where each doc is a list of
-                                    what token_ids were present in the doc.
-                                   e.g. the doc "1 2 4 2 3 4" would be [1,2,3,4]
+            | docs (list)       -- a list of docs, where each doc is a tuple of
+                                   ( id, [document vector] ).
+                                   The "document vector" is a list of the token_ids that
+                                   appeared in that document.
+                                   e.g. the doc with id 12, which looked like '1 2 4 2 3 4'
+                                   would be (12, [1,2,3,4])
 
-        General TF-IDF formula:
-            j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
-        Or, more verbosely:
-            tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
+        # Separate out the titles and the document vectors.
+        # e.g (12, 13, 14) and ([1,2,3], [1,3,4], [1,2,4])
+        doc_ids, doc_vecs = zip(*docs)
+
         # To calculate how many documents each token_id appeared in,
-        # first merge all the token_id-presence docs into a token_id-presence corpus.
+        # first merge all the token_id-presence doc vectors into a token_id-presence corpus.
         # This is basically a mega list that is a merging of all the individual docs-as-token-lists.
-        corpus = list(chain.from_iterable(docs))
+        # e.g. [1,1,1,2,2,3,3,4,4]
+        corpus = list(chain.from_iterable(doc_vecs))
 
         # Then, count all the token_ids in the corpus.
         # corpus_counts[token_id] will give the number of documents token_id appears in.
+        # e.g. {1: 3, 2: 2, 3: 2, 4: 2}
         corpus_counts = dict(Counter(corpus))
 
         # Iterate over all docs
-        # in the digester's collection.
-        db = self.db()
-        for doc in db.all():
-            tfidf_dict = {}
-
-            # Convert each token's count to its tf-idf value.
-            for token_id, token_count in doc['freqs']:
-                tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
-
-            # Update the record's `doc` value to the tf-idf representation.
-            # Need to convert to a list of tuples,
-            # since the db won't take a dict.
-            tfidf_doc = list(tfidf_dict.items())
-            db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
-
-        logger.info('TF-IDF calculations completed!')
+        # the specified docs.
+        if self.distrib:
+            if self.silent:
+                tasks = [self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                              for doc_id in doc_ids]
+            else:
+                tasks = chord(self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                              for doc_id in doc_ids)(notify.si('TF-IDF calculations completed!'))
+        else:
+            for doc_id in doc_ids:
+                self._calculate_tfidf(doc_id, corpus_counts)
+            logger.info('TF-IDF calculations completed!')
 
 
     @celery.task(filter=task_method)
@@ -207,6 +210,36 @@ class WikiDigester(Digester):
         and any arguments you pass in manually come *afterwards*.
         """
         self._generate_tfidf(docs)
+
+
+    def _calculate_tfidf(self, doc_id, corpus_counts):
+        """
+        General TF-IDF formula:
+            j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
+        Or, more verbosely:
+            tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
+        """
+        db = self.db()
+        doc = db.find({'_id': doc_id})
+        tfidf_dict = {}
+
+        # Convert each token's count to its tf-idf value.
+        for token_id, token_count in doc['freqs']:
+            tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
+
+        # Update the record's `doc` value to the tf-idf representation.
+        # Need to convert to a list of tuples,
+        # since the db won't take a dict.
+        tfidf_doc = list(tfidf_dict.items())
+        db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
+
+
+    @celery.task(filter=task_method)
+    def _t_calculate_tfidf(self, doc_id, corpus_counts):
+        """
+        Celery task for asynchronously calculating TF-IDF.
+        """
+        self._calculate_tfidf(doc_id, corpus_counts)
 
 
     def _parse_pages(self):
@@ -296,7 +329,9 @@ class WikiDigester(Digester):
 
         # Return the token_ids that were in this document.
         # Used for construction of the global doc counts for terms.
-        return list(bag_of_words.keys())
+        # Need to tag it with the its doc id; this way we know
+        # which page records to update.
+        return ( id, list(bag_of_words.keys()) )
 
 
         # For exploring the data as separate files.

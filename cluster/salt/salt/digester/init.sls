@@ -70,6 +70,7 @@ worker:
             - cmd: app-nltk-data
             - file: worker
             - file: db-config
+            - file: mail-config
     file.sed:
         - name: /var/app/digester/cluster/celery_config.py
         - before: 'localhost'
@@ -79,6 +80,7 @@ worker:
         - require:
             - git: digester
 
+# Setup db to point to proper host.
 db-config:
     file.sed:
         - name: /var/app/digester/config.py
@@ -87,7 +89,9 @@ db-config:
         - backup: ''
         - flags: 'g'
         - require:
-            - git: digester
+            - file: app-config
+        - watch:
+            - file: /var/app/digester/config.py
 
 salt-minion:
     service.running:
@@ -131,6 +135,39 @@ salt-master:
     pkg:
         - installed
 {% endif %}
+
+# The following is run on any non-image instance.
+# (since the image does not have any roles set)
+{% if grains.get('roles', []) %}
+# Move app's cluster config-sample.ini to config.ini.
+cluster-config:
+    file.managed:
+        - name: /var/app/digester/cluster/config.ini
+        - source: /var/app/digester/cluster/config-sample.ini
+        - require:
+            - git: digester
+
+# Setup mail server login.
+mail-config:
+    file.sed
+        - name: /var/app/digester/cluster/config.ini
+        - before: 'your-pass'
+        - after: {{ grains.get('mail_pass') }}
+        - backup: ''
+        - flags: 'g'
+        - require:
+            - file: app-config
+        - watch:
+            - file: /var/app/digester/cluster/config.ini
+
+# Move app's config-sample.py to config.py.
+app-config:
+    file.managed:
+        - name: /var/app/digester/config.py
+        - source: /var/app/digester/config-sample.py
+        - require:
+            - git: digester
+{% endif }
 
 
 # Setup the virtualenv.

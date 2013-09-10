@@ -11,7 +11,7 @@ from boto.ec2.cloudwatch import connect_to_region as cw_connect_to_region
 
 # Load configuration.
 from cluster import config
-c = config.load()
+c = config.load('cluster')
 
 REGION = c['REGION']
 ACCESS_KEY = c['AWS_ACCESS_KEY']

@@ -2,7 +2,7 @@ import unittest
 from adipose import Adipose
 from tests import RequiresDB
 
-class AdiposeTest(unittest.TestCase, RequiresDB):
+class AdiposeTest(RequiresDB):
     @classmethod
     def setUpClass(cls):
         cls.setup_db()
