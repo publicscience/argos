@@ -43,7 +43,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump='pages', namespace=NAMESPACE, distrib=False, db=DATABASE, url=None):
+    def __init__(self, file, dump='pages', namespace=NAMESPACE, distrib=False, db=DATABASE, url=None, silent=False):
         """
         Initialize the WikiDigester with a file and a namespace.
         The dumps can be:
@@ -56,6 +56,7 @@ class WikiDigester(Digester):
             | distrib (bool)    -- whether or not digestion should be distributed. Defaults to False.
             | db (str)          -- the name of the database to save to.
             | url (str)         -- the url from where the dump can be fetched.
+            | silent (bool)     -- whether or not to send email notifications.
 
         Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
@@ -70,6 +71,7 @@ class WikiDigester(Digester):
         self.dump = dump
         self.distrib = distrib
         self.url = url
+        self.silent = silent
 
         # Keep track of number of docs.
         # Necessary for performing TF-IDF processing.
@@ -186,8 +188,12 @@ class WikiDigester(Digester):
         # Iterate over all docs
         # the specified docs.
         if self.distrib:
-            tasks = chord(self._t_calculate_tfidf.s(doc_id, corpus_counts)
-                          for doc_id in doc_ids)(notify.si('TF-IDF calculations completed!'))
+            if self.silent:
+                tasks = [self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                              for doc_id in doc_ids]
+            else:
+                tasks = chord(self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                              for doc_id in doc_ids)(notify.si('TF-IDF calculations completed!'))
         else:
             for doc_id in doc_ids:
                 self._calculate_tfidf(doc_id, corpus_counts)
