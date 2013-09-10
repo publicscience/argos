@@ -451,8 +451,11 @@ def create_worker_image(use_existing_base=True):
         for reservation in base_instances:
             if reservation.instances:
                 base_instance = reservation.instances[0]
-                logger.info('Existing worker base instance found.')
-                break
+                if base_instance.update() != 'ready':
+                    continue
+                else:
+                    logger.info('Existing worker base instance found.')
+                    break
         else:
             # Create a new one if necessary.
             logger.info('No existing worker base instance found. A new one is being created...')
