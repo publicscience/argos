@@ -149,7 +149,7 @@ cluster-config:
 
 # Setup mail server login.
 mail-config:
-    file.sed
+    file.sed:
         - name: /var/app/digester/cluster/config.ini
         - before: 'your-pass'
         - after: {{ grains.get('mail_pass') }}
