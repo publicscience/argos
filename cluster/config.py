@@ -9,30 +9,25 @@ from configparser import ConfigParser
 from cluster.util import get_filepath
 
 config = ConfigParser()
-
-# See if the config file is available,
-# if not, try the sample file.
-config_file = get_filepath('aws_config.ini')
-try:
-    with open(config_file): pass
-except IOError:
-    config_file = get_filepath('aws_config-sample.ini')
+config_file = get_filepath('config.ini')
 config.read(config_file)
 
-
-def load():
+def load(name):
     """
-    Return the AWS configuration.
+    Return a section of the config file.
+
+    Args:
+        | name (str)    -- the name of the section to return.
     """
-    return config['CONFIG']
+    return config[name]
 
 
-def names():
+def cluster_names():
     """
     Loads the names for the cluster's components.
     """
 
-    name = config['CONFIG']['CLUSTER_NAME']
+    name = config['cluster']['CLUSTER_NAME']
 
     names = {
             'LC': '%s-launchconfig' % name,

@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 # Import cluster config
 from cluster import config
-c = config.load()
-names = config.names()
+c = config.load('cluster')
+names = config.cluster_names()
 
 host, user, key = c['MASTER_PUBLIC_DNS'], c['INSTANCE_USER'], get_filepath(c['PATH_TO_KEY'])
 app_path = '/var/app/digester'
