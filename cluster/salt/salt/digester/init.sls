@@ -167,7 +167,7 @@ app-config:
         - source: /var/app/digester/config-sample.py
         - require:
             - git: digester
-{% endif }
+{% endif %}
 
 
 # Setup the virtualenv.
