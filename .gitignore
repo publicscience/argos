@@ -13,7 +13,7 @@ doc/_build
 doc/_static
 doc/_templates
 dumps/
-cluster/aws_config.ini
+cluster/config.ini
 logger/logs/*.log
 id_rsa
 id_rsa.pub
