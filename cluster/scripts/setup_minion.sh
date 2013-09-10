@@ -7,8 +7,8 @@ sudo pkill -9 -f salt-minion
 
 # Set env variables.
 # The application will uses these to configure Celery and the DB.
-echo -e '\nexport DB_HOST='$master_dns | sudo tee -a /etc/environment
-echo -e 'export BROKER_URL=amqp://guest@'$master_dns'//' | sudo tee -a /etc/environment
+#echo -e '\nexport DB_HOST='$master_dns | sudo tee -a /etc/environment
+#echo -e 'export BROKER_URL=amqp://guest@'$master_dns'//' | sudo tee -a /etc/environment
 
 # Edit Minion config to
 # set Salt Master location
