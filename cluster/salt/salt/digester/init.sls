@@ -89,8 +89,6 @@ db-config:
         - flags: 'g'
         - require:
             - file: app-config
-        - watch:
-            - file: /var/app/digester/config.py
 
 salt-minion:
     service.running:
