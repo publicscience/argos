@@ -48,7 +48,7 @@ BASE_AMI_ID = c['BASE_AMI_ID']
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
-def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.small'):
+def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.small', ssh=False):
     """
     Setup a new cluster.
 
@@ -59,6 +59,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
         | max_size (int)             -- the maximum size of the cluster
         | instance_type (str)        -- the type of instance to use in the cluster.
                                         See: https://aws.amazon.com/ec2/instance-types/instance-details/
+        | ssh (bool)                 -- whether or not to enable SSH access on the cluster.
     """
 
     logger.info('Commissioning new cluster...')
@@ -99,7 +100,9 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Create a new security group.
     # Authorize HTTP, MongoDB, and RabbitMQ ports.
     logger.info('Creating the security group (%s)...' % names['SG'])
-    sec_group = manage.security_group(names['SG'], 'The cluster security group.', ports=[80, 27017, 5672])
+    ports = [80, 27017, 5672]
+    if ssh: ports.append(22)
+    sec_group = manage.security_group(names['SG'], 'The cluster security group.', ports=ports)
 
     # Create an EBS (block storage) for the image.
     # Size is in GB.

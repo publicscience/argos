@@ -64,14 +64,24 @@ app-nltk-data:
 worker:
     cmd.run:
         - cwd: /var/app/digester/
-        - name: ./dev-env/bin/celeryd --loglevel=info --config cluster.celery_config
+        - name: ./dev-env/bin/celeryd --loglevel=info --config cluster.celery_config --logfile /var/log/celery.log
         - require:
             - virtualenv: venv
             - cmd: app-nltk-data
+            - file: worker
+    file.sed:
+        - name: /var/app/digester/cluster/celery_config.py
+        - before: 'localhost'
+        - after: {{ grains.get('master') }}
+        - backup: ''
+        - flags: 'g'
+        - require:
+            - git: digester
 
 salt-minion:
     service.running:
         - enable: True
+        - reload: True
         - require:
             - pkg: salt-minion
     pkg:
