@@ -158,9 +158,12 @@ class WikiDigester(Digester):
         Generate the TF-IDF representations for all the digested docs.
 
         Args:
-            | docs (list)       -- a list of docs, where each doc is a list of
-                                    what token_ids were present in the doc.
-                                   e.g. the doc "1 2 4 2 3 4" would be [1,2,3,4]
+            | docs (list)       -- a list of docs, where each doc is a tuple of
+                                   ( title, [document vector] ).
+                                   The "document vector" is a list of the token_ids that
+                                   appeared in that document.
+                                   e.g. the doc 'foo', which looked like '1 2 4 2 3 4'
+                                   would be ('foo', [1,2,3,4])
 
         General TF-IDF formula:
             j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
@@ -169,19 +172,25 @@ class WikiDigester(Digester):
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
+        # Separate out the titles and the document vectors.
+        doc_titles, doc_vecs = zip(*docs)
+
         # To calculate how many documents each token_id appeared in,
-        # first merge all the token_id-presence docs into a token_id-presence corpus.
+        # first merge all the token_id-presence doc vectors into a token_id-presence corpus.
         # This is basically a mega list that is a merging of all the individual docs-as-token-lists.
-        corpus = list(chain.from_iterable(docs))
+        corpus = list(chain.from_iterable(doc_vecs))
 
         # Then, count all the token_ids in the corpus.
         # corpus_counts[token_id] will give the number of documents token_id appears in.
         corpus_counts = dict(Counter(corpus))
 
+        print(corpus_counts)
+
         # Iterate over all docs
-        # in the digester's collection.
+        # the specified docs.
         db = self.db()
-        for doc in db.all():
+        for title in doc_titles:
+            doc = db.find({'title': title})
             tfidf_dict = {}
 
             # Convert each token's count to its tf-idf value.
@@ -296,7 +305,9 @@ class WikiDigester(Digester):
 
         # Return the token_ids that were in this document.
         # Used for construction of the global doc counts for terms.
-        return list(bag_of_words.keys())
+        # Need to tag it with the title it's from; this way we know
+        # which page records to update.
+        return ( title, list(bag_of_words.keys()) )
 
 
         # For exploring the data as separate files.

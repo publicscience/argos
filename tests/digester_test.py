@@ -262,10 +262,10 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
     def test_tfidf(self):
         # Some fake token ids (hashes).
         docs = [
-                [(111, 4), (222, 8), (333, 2)],
-                [(111, 8), (333, 4)],
-                [(111, 2)],
-                [(111, 6), (222, 2)]
+                ( 0, [(111, 4), (222, 8), (333, 2)] ),
+                ( 1, [(111, 8), (333, 4)] ),
+                ( 2, [(111, 2)] ),
+                ( 3, [(111, 6), (222, 2)] )
         ]
 
         expected = [
@@ -277,19 +277,19 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
         self.w.num_docs = len(docs)
 
-        docs_tokens = []
+        prepped_docs = []
         for doc in docs:
-            docs_tokens.append([token[0] for token in doc])
+            tokens = [token[0] for token in doc[1]]
+            prepped_docs.append((doc[0], tokens))
 
         # Add each dummy doc.
-        for idx, doc in enumerate(docs):
-            self.w.db().add({'title': idx, 'freqs': doc})
+        for doc in docs:
+            self.w.db().add({'title': doc[0], 'freqs': doc[1]})
 
-        self.w._generate_tfidf(docs_tokens)
+        self.w._generate_tfidf(prepped_docs)
 
         for idx, doc in enumerate(expected):
             tfidf = self.w.db().find({'title': idx })['doc']
-            print(tfidf)
             self.assertEquals(dict(doc), dict(tfidf))
 
     def test_bag_of_words_retrieval(self):
