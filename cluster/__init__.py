@@ -155,10 +155,8 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
-    # Also with the mail server password, so workers can send email notifications.
     minion_init_script = load_script('scripts/setup_minion.sh',
-            master_dns=instance.private_dns_name,
-            mail_pass=config.load('mail')['MAIL_PASS']
+            master_dns=instance.private_dns_name
     )
 
     # Create the launch configuration.
@@ -573,6 +571,16 @@ def _transfer_salt(host, user, keyfile):
         subprocess.Popen([
             'cp',
             os.path.join(deploy_keys_path, key),
+            os.path.join(salt_path, 'salt/deploy/')
+        ])
+
+    logger.info('Copying config files to the Salt state tree...')
+    cluster_config = get_filepath('config.ini')
+    app_config = get_filepath('../config.py')
+    for config in [cluster_config, app_config]:
+        subprocess.Popen([
+            'cp',
+            config,
             os.path.join(salt_path, 'salt/deploy/')
         ])
 

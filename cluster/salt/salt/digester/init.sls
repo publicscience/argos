@@ -139,32 +139,19 @@ salt-master:
 # The following is run on any non-image instance.
 # (since the image does not have any roles set)
 {% if grains.get('roles', []) %}
-# Move app's cluster config-sample.ini to config.ini.
+# Copy over the cluster config.
 cluster-config:
     file.managed:
         - name: /var/app/digester/cluster/config.ini
-        - source: /var/app/digester/cluster/config-sample.ini
+        - source: salt://deploy/config.ini
         - require:
             - git: digester
 
-# Setup mail server login.
-mail-config:
-    file.sed:
-        - name: /var/app/digester/cluster/config.ini
-        - before: 'your-pass'
-        - after: {{ grains.get('mail_pass') }}
-        - backup: ''
-        - flags: 'g'
-        - require:
-            - file: app-config
-        - watch:
-            - file: /var/app/digester/cluster/config.ini
-
-# Move app's config-sample.py to config.py.
+# Copy over the app config.
 app-config:
     file.managed:
         - name: /var/app/digester/config.py
-        - source: /var/app/digester/config-sample.py
+        - source: salt://deploy/config.py
         - require:
             - git: digester
 {% endif %}
