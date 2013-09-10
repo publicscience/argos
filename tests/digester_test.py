@@ -1,11 +1,10 @@
 import unittest
-from tests import RequiresDB
+from tests import RequiresMocks, RequiresWorkers
 from unittest.mock import patch, mock_open, MagicMock
 from digester import Digester, gullet
 from digester.wikidigester import WikiDigester
 from tempfile import NamedTemporaryFile
 from io import BytesIO
-from cluster.tasks import workers
 import os, time
 
 class DigesterTest(unittest.TestCase):
@@ -28,7 +27,7 @@ class DigesterTest(unittest.TestCase):
             self.assertIsNotNone(page)
 
 
-class GulletTest(unittest.TestCase):
+class GulletTest(RequiresMocks):
     def setUp(self):
         self.data = b"A lot has changed in the past 300 years. People are no longer obsessed with the accumulation of things. We've eliminated hunger, want, the need for possessions. We've grown out of our infancy."
 
@@ -50,18 +49,6 @@ class GulletTest(unittest.TestCase):
 
     def tearDown(self):
         pass
-
-    def create_patch(self, name):
-        """
-        Helper for patching/mocking methods.
-
-        Args:
-            | name (str)       -- the 'module.package.method' to mock.
-        """
-        patcher = patch(name, autospec=True)
-        thing = patcher.start()
-        self.addCleanup(patcher.stop)
-        return thing
 
     def mock_file(self, complete=False):
         """
@@ -196,29 +183,7 @@ class GulletTest(unittest.TestCase):
         self.mock_open.assert_called_with(tmpfile.name, 'wb')
 
 
-class WikiDigesterTest(unittest.TestCase, RequiresDB):
-    @classmethod
-    def setUpClass(cls):
-        cls.setup_db()
-
-        # Try to run RabbitMQ and a Celery worker.
-        # Pipe all output to /dev/null.
-        if not workers():
-            cls.mq = cls._run_process(['rabbitmq-server'])
-            cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config'])
-            # Wait for everything...(need to implement a better checker here)
-            time.sleep(5)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.teardown_db()
-
-        # Kill RabbitMQ and Celery.
-        if hasattr(cls, 'worker'):
-            cls.worker.kill()
-        if hasattr(cls, 'mq'):
-            cls.mq.kill()
-
+class WikiDigesterTest(RequiresWorkers):
     def setUp(self):
         # Create the WikiDigester and purge its db.
         self.w = WikiDigester('tests/data/article.xml', db='test')
@@ -240,13 +205,13 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
     def test_distrib_digest(self):
         # Requires that RabbitMQ and a Celery worker are running.
-        self.w = WikiDigester('tests/data/article.xml', distrib=True, db='test')
+        self.w = WikiDigester('tests/data/article.xml', distrib=True, db='test', silent=True)
         self.w.purge()
         self._digest()
 
     def test_distrib_digest_many(self):
         # Requires that RabbitMQ and a Celery worker are running.
-        self.w = WikiDigester('tests/data/articles.xml', distrib=True, db='test')
+        self.w = WikiDigester('tests/data/articles.xml', distrib=True, db='test', silent=True)
         self.w.purge()
         self._digest_many()
 
@@ -255,7 +220,7 @@ class WikiDigesterTest(unittest.TestCase, RequiresDB):
 
     def test_distrib_digest_updates(self):
         # Requires that RabbitMQ and a Celery worker are running.
-        self.w = WikiDigester('tests/data/article.xml', distrib=True, db='test')
+        self.w = WikiDigester('tests/data/article.xml', distrib=True, db='test', silent=True)
         self.w.purge()
         self._digest_updates()
 
