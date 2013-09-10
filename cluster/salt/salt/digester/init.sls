@@ -69,8 +69,19 @@ worker:
             - virtualenv: venv
             - cmd: app-nltk-data
             - file: worker
+            - file: db-config
     file.sed:
         - name: /var/app/digester/cluster/celery_config.py
+        - before: 'localhost'
+        - after: {{ grains.get('master') }}
+        - backup: ''
+        - flags: 'g'
+        - require:
+            - git: digester
+
+db-config:
+    file.sed:
+        - name: /var/app/digester/config.py
         - before: 'localhost'
         - after: {{ grains.get('master') }}
         - backup: ''

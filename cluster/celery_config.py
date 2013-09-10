@@ -2,6 +2,9 @@
 # Broker (message queue) url.
 BROKER_URL = 'amqp://guest@localhost//'
 
+# Try connecting ad infinitum.
+BROKER_CONNECTION_MAX_RETRIES = None
+
 # Result backend.
 CELERY_RESULT_BACKEND = 'mongodb'
 CELERY_MONGODB_BACKEND_SETTINGS = {
