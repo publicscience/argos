@@ -70,7 +70,6 @@ worker:
             - cmd: app-nltk-data
             - file: worker
             - file: db-config
-            - file: mail-config
     file.sed:
         - name: /var/app/digester/cluster/celery_config.py
         - before: 'localhost'
