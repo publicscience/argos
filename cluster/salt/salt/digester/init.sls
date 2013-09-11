@@ -64,12 +64,14 @@ app-nltk-data:
 worker:
     cmd.run:
         - cwd: /var/app/digester/
-        - name: ./dev-env/bin/celeryd --loglevel=info --config cluster.celery_config --logfile /var/log/celery.log
+        - name: ./dev-env/bin/celeryd --loglevel=info --config=cluster.celery_config --logfile=/var/log/celery.log --concurrency=8
         - require:
             - virtualenv: venv
             - cmd: app-nltk-data
             - file: worker
             - file: db-config
+            - file: cluster-config
+            - file: app-config
     file.sed:
         - name: /var/app/digester/cluster/celery_config.py
         - before: 'localhost'

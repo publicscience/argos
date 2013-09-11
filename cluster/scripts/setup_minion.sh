@@ -21,7 +21,7 @@ echo -e 'roles:\n  - worker' | sudo tee -a /etc/salt/grains
 echo -e 'master: $master_dns' | sudo tee -a /etc/salt/grains
 
 # Start the salt minion backup.
-sudo service salt-minion start
+#sudo service salt-minion start
 
 # This may be more reliable.
 sudo salt-call state.highstate --local
