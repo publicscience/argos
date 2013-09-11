@@ -233,13 +233,15 @@ class WikiDigester(Digester):
         tfidf_doc = list(tfidf_dict.items())
         db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
 
+        return tfidf_doc
+
 
     @celery.task(filter=task_method)
     def _t_calculate_tfidf(self, doc_id, corpus_counts):
         """
         Celery task for asynchronously calculating TF-IDF.
         """
-        self._calculate_tfidf(doc_id, corpus_counts)
+        return self._calculate_tfidf(doc_id, corpus_counts)
 
 
     def _parse_pages(self):
