@@ -101,6 +101,7 @@ class RequiresWorkers(RequiresDB):
         # Pipe all output to /dev/null.
         if not workers():
             cls.mq = cls._run_process(['rabbitmq-server'])
+            cls.backend = cls._run_process('redis-server')
             cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config'])
             # Wait for everything...(need to implement a better checker here)
             time.sleep(5)
@@ -112,3 +113,5 @@ class RequiresWorkers(RequiresDB):
             cls.worker.kill()
         if hasattr(cls, 'mq'):
             cls.mq.kill()
+        if hasattr(cls, 'backend'):
+            cls.backend.kill()

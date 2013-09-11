@@ -100,7 +100,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Create a new security group.
     # Authorize HTTP, MongoDB, and RabbitMQ ports.
     logger.info('Creating the security group (%s)...' % names['SG'])
-    ports = [80, 27017, 5672]
+    ports = [80, 27017]
     if ssh:
         logger.info('SSH is enabled!')
         ports.append(22)

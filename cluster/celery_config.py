@@ -6,15 +6,7 @@ BROKER_URL = 'amqp://guest@localhost//'
 BROKER_CONNECTION_MAX_RETRIES = None
 
 # Result backend.
-CELERY_RESULT_BACKEND = 'mongodb'
-CELERY_MONGODB_BACKEND_SETTINGS = {
-    'host': 'localhost',
-    'port': 27017,
-    'database': 'celery',
-
-    # What collection to store task metadata.
-    'taskmeta_collection': 'taskmeta'
-}
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # What modules to import on start.
 CELERY_IMPORTS = ('tests.tasks_test', 'cluster', 'digester.wikidigester',)

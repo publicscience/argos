@@ -18,6 +18,9 @@ function setup_dependencies {
         # MongoDB
         brew install mongodb
 
+        # Redis
+        brew install redis
+
     # Otherwise, assume Linux...
     else 
         sudo apt-get install screen -y
