@@ -131,12 +131,12 @@ redis-server:
         - enable: True
         - require:
             - file: redis-server
+            - file: redis-config
     file.managed:
         - name: /etc/init/redis-server.conf
         - source: salt://deploy/redis-server.conf
         - require:
             - cmd: redis-server
-            - file: redis-config
     cmd.script:
         - source: salt://scripts/install-redis.sh
 
