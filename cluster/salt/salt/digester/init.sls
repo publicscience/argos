@@ -126,6 +126,19 @@ mongodb:
     cmd.script:
         - source: salt://scripts/install-mongodb.sh
 
+redis-server:
+    service.running:
+        - enable: True
+        - require:
+            - file: redis-server
+    file.managed:
+        - name: /etc/init/redis-server.conf
+        - source: salt://deploy/redis-server.conf
+        - require:
+            - cmd: redis-server
+    cmd.script:
+        - source: salt://scripts/install-redis.sh
+
 salt-master:
     service.running:
         - enable: True
