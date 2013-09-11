@@ -7,10 +7,6 @@ cd /tmp/redis-stable
 make
 make install
 
-# Copy over default config.
-sudo mkdir -p /etc/redis
-sudo cp /tmp/redis-stable/redis.conf /etc/redis/redis.conf
-
 # Cleanup.
 cd ..
 rm -rf /tmp/redis-stable

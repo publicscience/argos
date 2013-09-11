@@ -136,8 +136,15 @@ redis-server:
         - source: salt://deploy/redis-server.conf
         - require:
             - cmd: redis-server
+            - file: redis-config
     cmd.script:
         - source: salt://scripts/install-redis.sh
+
+redis-config:
+    file.managed:
+        - name: /etc/redis/redis.conf
+        - makedirs: True
+        - source: salt://deploy/redis.conf
 
 salt-master:
     service.running:
