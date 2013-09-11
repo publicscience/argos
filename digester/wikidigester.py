@@ -189,11 +189,11 @@ class WikiDigester(Digester):
         # the specified docs.
         if self.distrib:
             if self.silent:
-                tasks = [self._t_calculate_tfidf.s(doc_id, corpus_counts)
-                              for doc_id in doc_ids]
+                tasks = group(self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                              for doc_id in doc_ids)
             else:
                 tasks = chord(self._t_calculate_tfidf.s(doc_id, corpus_counts)
-                              for doc_id in doc_ids)(notify.si('TF-IDF calculations completed!'))
+                              for doc_id in doc_ids)(notify.s('TF-IDF calculations completed for %s!' % self.file))
         else:
             for doc_id in doc_ids:
                 self._calculate_tfidf(doc_id, corpus_counts)

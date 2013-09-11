@@ -63,12 +63,13 @@ def active():
     return active_tasks
 
 @celery.task
-def notify(body):
+def notify(results, body):
     """
     Send an e-mail notification.
     """
     c = config.load('mail')
     from_addr = c['MAIL_USER']
+    body = body + '\n%s results.' % len(results)
 
     # Construct the message.
     msg = MIMEMultipart()
