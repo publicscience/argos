@@ -48,7 +48,7 @@ BASE_AMI_ID = c['BASE_AMI_ID']
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
-def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.small', ssh=False):
+def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.medium', master_instance_type='m1.medium', ssh=False):
     """
     Setup a new cluster.
 
@@ -59,6 +59,8 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
         | max_size (int)             -- the maximum size of the cluster
         | instance_type (str)        -- the type of instance to use in the cluster.
                                         See: https://aws.amazon.com/ec2/instance-types/instance-details/
+        | master_instance_type (str) -- the type of master instance to use for the cluster.
+                                        Recommended that it has at least a few GB of memory.
         | ssh (bool)                 -- whether or not to enable SSH access on the cluster.
     """
 
@@ -121,7 +123,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
                        WORKER_AMI_ID,
                        key_name=KEYPAIR_NAME,
                        security_groups=[names['SG']],
-                       instance_type='m1.small',
+                       instance_type=master_instance_type,
                        user_data=master_init_script,
                        block_device_map=bdm
                    )
