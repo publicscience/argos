@@ -112,7 +112,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Size is in GB.
     # Need a lot of space for the Wiki dump on MongoDB.
     # Do NOT delete this volume on termination, since it will have our processed data.
-    bdm = manage.create_block_device(size=200, delete=False)
+    bdm = manage.create_block_device(size=300, delete=False)
 
     # Create the Salt Master/RabbitMQ/MongoDB server.
     # The Master instance is a souped-up worker, so we use the worker image.
@@ -580,7 +580,8 @@ def _transfer_salt(host, user, keyfile):
     logger.info('Copying config files to the Salt state tree...')
     cluster_config = get_filepath('config.ini')
     app_config = get_filepath('../config.py')
-    configs = [cluster_config, app_config]
+    celery_config = get_filepath('celery_config.py')
+    configs = [cluster_config, app_config, celery_config]
     for config in configs:
         subprocess.Popen([
             'cp',

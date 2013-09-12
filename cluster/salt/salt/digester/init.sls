@@ -80,6 +80,8 @@ worker:
         - flags: 'g'
         - require:
             - git: digester
+            - file: celery-config
+
 
 # Setup db to point to proper host.
 db-config:
@@ -171,6 +173,14 @@ app-config:
     file.managed:
         - name: /var/app/digester/config.py
         - source: salt://deploy/config.py
+        - require:
+            - git: digester
+
+# Copy over the Celery config.
+celery-config:
+    file.managed:
+        - name: /var/app/digester/cluster/celery_config.py
+        - source: salt://deploy/celery_config.py
         - require:
             - git: digester
 {% endif %}

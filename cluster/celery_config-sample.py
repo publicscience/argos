@@ -13,3 +13,14 @@ CELERY_IMPORTS = ('tests.tasks_test', 'cluster', 'digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
+
+# Send emails on errors
+CELERY_SEND_TASK_ERROR_EMAILS = True
+ADMINS = (
+    ('Francis Tseng', 'ftzeng@gmail.com')
+)
+SERVER_EMAIL = 'shallow.thought.bot@gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'shallow.thought.bot@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-pass'
