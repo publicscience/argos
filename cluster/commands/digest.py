@@ -16,8 +16,8 @@ from html.parser import HTMLParser
 from urllib import request
 
 # Logging.
-from logger import logger
-logger = logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 def main():
