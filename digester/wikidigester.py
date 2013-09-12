@@ -188,22 +188,29 @@ class WikiDigester(Digester):
 
         # Iterate over all docs
         # the specified docs.
-        if self.distrib:
-            # Save the corpus counts to MongoDB.
-            # MongoDB does not accept integers as keys,
-            # so convert to a list of tuples.
-            corpus_doc = { 'counts': list(corpus_counts.items()) }
-            self.corpus().update({'title': '_corpus_counts'}, {'$set': corpus_doc})
-            if self.silent:
-                tasks = group(self._t_calculate_tfidf.s(doc_id)
-                              for doc_id in doc_ids)
-            else:
-                tasks = chord(self._t_calculate_tfidf.s(doc_id)
-                              for doc_id in doc_ids)(notify.si('TF-IDF calculations completed for %s!' % self.file))
-        else:
-            for doc_id in doc_ids:
-                self._calculate_tfidf(doc_id, corpus_counts)
-            logger.info('TF-IDF calculations completed!')
+        #if self.distrib:
+            ## Save the corpus counts to MongoDB.
+            ## MongoDB does not accept integers as keys,
+            ## so convert to a list of tuples.
+            #corpus_doc = { 'counts': list(corpus_counts.items()) }
+            #self.corpus().update({'title': '_corpus_counts'}, {'$set': corpus_doc})
+            #if self.silent:
+                #tasks = group(self._t_calculate_tfidf.s(doc_id)
+                              #for doc_id in doc_ids)
+            #else:
+                #tasks = chord(self._t_calculate_tfidf.s(doc_id)
+                              #for doc_id in doc_ids)(notify.si('TF-IDF calculations completed for %s!' % self.file))
+        #else:
+            #for doc_id in doc_ids:
+                #self._calculate_tfidf(doc_id, corpus_counts)
+            #logger.info('TF-IDF calculations completed!')
+
+        for doc_id in doc_ids:
+            self._calculate_tfidf(doc_id, corpus_counts)
+        logger.info('TF-IDF calculations completed!')
+
+        processed_name = self.url if self.url else self.file
+        notify('TF-IDF calculations complete for %s!' % processed_name)
 
 
     @celery.task(filter=task_method)
