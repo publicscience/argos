@@ -109,6 +109,7 @@ class WikiDigester(Digester):
         for this dump.
         """
         self.db().empty()
+        self.corpus().empty()
 
 
     def digest(self):
@@ -188,11 +189,16 @@ class WikiDigester(Digester):
         # Iterate over all docs
         # the specified docs.
         if self.distrib:
+            # Save the corpus counts to MongoDB.
+            # MongoDB does not accept integers as keys,
+            # so convert to a list of tuples.
+            corpus_doc = { 'counts': list(corpus_counts.items()) }
+            self.corpus().update({'title': '_corpus_counts'}, {'$set': corpus_doc})
             if self.silent:
-                tasks = group(self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                tasks = group(self._t_calculate_tfidf.s(doc_id)
                               for doc_id in doc_ids)
             else:
-                tasks = chord(self._t_calculate_tfidf.s(doc_id, corpus_counts)
+                tasks = chord(self._t_calculate_tfidf.s(doc_id)
                               for doc_id in doc_ids)(notify.si('TF-IDF calculations completed for %s!' % self.file))
         else:
             for doc_id in doc_ids:
@@ -241,6 +247,8 @@ class WikiDigester(Digester):
         """
         Celery task for asynchronously calculating TF-IDF.
         """
+        corpus_doc = self.corpus().find({'title': '_corpus_counts'})
+        corpus_counts = dict(corpus_doc['counts'])
         return self._calculate_tfidf(doc_id, corpus_counts)
 
 
@@ -410,3 +418,6 @@ class WikiDigester(Digester):
         Instead we just create a new interface when we need it.
         """
         return Adipose(self.database, self.dump)
+
+    def corpus(self):
+        return Adipose(self.database, 'corpus_%s' % self.dump)
