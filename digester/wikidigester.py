@@ -243,7 +243,7 @@ class WikiDigester(Digester):
 
 
     @celery.task(filter=task_method)
-    def _t_calculate_tfidf(self, doc_id, corpus_counts):
+    def _t_calculate_tfidf(self, doc_id):
         """
         Celery task for asynchronously calculating TF-IDF.
         """
