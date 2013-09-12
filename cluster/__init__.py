@@ -536,7 +536,7 @@ def delete_worker_image():
                 ec2.deregister_image(image_id)
 
         except EC2ResponseError as e:
-            logger.error('Could not deregister the image. It may already be deregistered.')
+            logger.warning('Could not deregister the image. It may already be deregistered.')
 
 
 def group_exists():

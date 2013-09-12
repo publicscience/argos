@@ -145,6 +145,7 @@ class WikiDigester(Digester):
                 # ===
                 # `_t_generate_tfidf` has to have `self` manually
                 # passed, and is a bit weird. See its definition below.
+                logger.info('Creating jobs for the pages...')
                 tasks = chord(self._t_process_page.s(tostring(page))
                               for page in self._parse_pages())(self._t_generate_tfidf.s(self, ))
             else:

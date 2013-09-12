@@ -83,7 +83,7 @@ def delete_security_group(name, purge=False):
                 logger.error('Could not delete security group. It still has running instances.')
 
         else:
-            logger.error('Could not delete security group. It may already be deleted.')
+            logger.warning('Could not delete security group. It may already be deleted.')
 
 
 def create_block_device(size=10, delete=False):
