@@ -68,14 +68,14 @@ class Adipose:
         self.collection.update(query, data, upsert=True)
 
 
-    def index(self, key):
+    def index(self, key='title'):
         """
         Indexes the data by the specified key.
 
         Args:
             | key (str) -- key to index on
         """
-        self.collection.ensure_index('title', unique=True)
+        self.collection.ensure_index(key, unique=True)
 
 
     def find(self, query):
