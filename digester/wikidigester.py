@@ -187,49 +187,6 @@ class WikiDigester(Digester):
         # e.g. {1: 3, 2: 2, 3: 2, 4: 2}
         corpus_counts = dict(Counter(corpus))
 
-        """
-        NOTE:
-        The distributed processing of the tf-idf calculations is currently disabled.
-        It seems to be significantly slower than just having a single worker process it serially.
-        Initially, I had the corpus_counts being passed as part of the message to the message queue,
-        but this crashed RabbitMQ or Redis (or both) because of the amount of data (it's a fairly large corpus,
-        and there are thousands of messages carrying it). That data is redundant; i.e. it does not change and is
-        the same for every job. So the current solution is to store it to MongoDB on the master,
-        and have each worker access it.
-
-        However, this is *significantly* slows this down. On a 4 c1.xlarge cluster, the processing of a 151MB dump
-        took about 8-9 minutes when using MongoDB as the source for the corpus. When processing the tf-idf calculations serially
-        on a single worker, this takes only 3 minutes.
-
-        This speed increase is likely due to the fact that the corpus is stored in memory, and does not need to be fetched
-        from an external source.
-
-        The downside is that the other workers are sitting idle while these calculations happen. But it's possible that these
-        calculations are so fast that these extra workers are not sitting idle for very long.
-
-        A potential compromise is to either have a Redis instance running locally on each worker, fetching the corpus
-        from Mongo once and then storing it in the local Redis instance. However, I'm not sure how much of a performance gain this would be.
-
-        Another potential compromise is to distribute the tf-idf calculations in chunks, so that each worker takes on 1000 docs at a time,
-        and thus only has to fetch the corpus once per 1000 docs.
-        """
-        #if self.distrib:
-            ## Save the corpus counts to MongoDB.
-            ## MongoDB does not accept integers as keys,
-            ## so convert to a list of tuples.
-            #corpus_doc = { 'counts': list(corpus_counts.items()) }
-            #self.corpus().update({'title': '_corpus_counts'}, {'$set': corpus_doc})
-            #if self.silent:
-                #tasks = group(self._t_calculate_tfidf.s(doc_id)
-                              #for doc_id in doc_ids)
-            #else:
-                #tasks = chord(self._t_calculate_tfidf.s(doc_id)
-                              #for doc_id in doc_ids)(notify.si('TF-IDF calculations completed for %s!' % self.file))
-        #else:
-            #for doc_id in doc_ids:
-                #self._calculate_tfidf(doc_id, corpus_counts)
-            #logger.info('TF-IDF calculations completed!')
-
         # Iterate over all docs
         # the specified docs.
         for doc_id in doc_ids:
@@ -278,16 +235,6 @@ class WikiDigester(Digester):
         return tfidf_doc
 
 
-    @celery.task(filter=task_method)
-    def _t_calculate_tfidf(self, doc_id):
-        """
-        Celery task for asynchronously calculating TF-IDF.
-        """
-        corpus_doc = self.corpus().find({'title': '_corpus_counts'})
-        corpus_counts = dict(corpus_doc['counts'])
-        return self._calculate_tfidf(doc_id, corpus_counts)
-
-
     def _parse_pages(self):
         """
         Parses out and yields pages from the dump.
@@ -312,10 +259,6 @@ class WikiDigester(Digester):
         category names, and linked page names,
         and store to the database.
         """
-
-        # Log current progress every 10000th doc.
-        if self.num_docs % 10000 == 0:
-            logger.info('Processing document %s' % self.num_docs)
 
         # Get the text we need.
         id          = int(self._find(elem, 'id').text)
