@@ -109,7 +109,6 @@ class WikiDigester(Digester):
         for this dump.
         """
         self.db().empty()
-        self.corpus().empty()
 
 
     def digest(self):
@@ -397,6 +396,3 @@ class WikiDigester(Digester):
         Instead we just create a new interface when we need it.
         """
         return Adipose(self.database, self.dump)
-
-    def corpus(self):
-        return Adipose(self.database, 'corpus_%s' % self.dump)
