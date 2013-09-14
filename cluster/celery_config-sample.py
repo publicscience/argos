@@ -14,6 +14,12 @@ CELERY_IMPORTS = ('tests.tasks_test', 'cluster', 'digester.wikidigester',)
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
 
+# Acknowledge the task *after* it has completed.
+CELERY_ACKS_LATE = True
+
+# Only cache 1 result at most.
+CELERY_MAX_CACHED_RESULTS = 1
+
 # Send emails on errors
 CELERY_SEND_TASK_ERROR_EMAILS = True
 ADMINS = (

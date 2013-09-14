@@ -124,3 +124,10 @@ class Adipose:
         """
         return self.collection.count()
 
+
+    def close(self):
+        """
+        Close the connection.
+        """
+        self.client.close()
+

@@ -102,7 +102,7 @@ class RequiresWorkers(RequiresDB):
         if not workers():
             cls.mq = cls._run_process(['rabbitmq-server'])
             cls.backend = cls._run_process('redis-server')
-            cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config'])
+            cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config', '--loglevel=INFO', '--logfile=logger/logs/celery.log'])
             # Wait for everything...(need to implement a better checker here)
             time.sleep(5)
 
