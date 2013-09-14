@@ -100,29 +100,32 @@ class WikiDigester(Digester):
         logger.info('Beginning digestion of pages.')
 
         # Serially/synchronously process pages.
-        docs = [self._handle_page(page) for page in self._parse_pages()]
+        doc_ids = [self._handle_page(page) for page in self._parse_pages()]
 
         # Generate TF-IDF representation
         # of all docs upon completion.
-        self._generate_tfidf(docs)
+        self._generate_tfidf(doc_ids)
 
 
-    def _prepare_tfidf(self, docs):
+    def _prepare_tfidf(self, doc_ids):
         """
         Generate the corpus and pull out the
         doc ids for TF-IDF generation.
 
         Args:
-            | docs (list)       -- a list of docs, where each doc is a tuple of
-                                   ( id, [document vector] ).
-                                   The "document vector" is a list of the token_ids that
-                                   appeared in that document.
-                                   e.g. the doc with id 12, which looked like '1 2 4 2 3 4'
-                                   would be (12, [1,2,3,4])
+            | doc_ids (list)       -- a list of docs ids.
         """
-        # Separate out the titles and the document vectors.
-        # e.g (12, 13, 14) and ([1,2,3], [1,3,4], [1,2,4])
-        doc_ids, doc_vecs = zip(*docs)
+        db = self.db()
+
+        # Extract the doc vectors (i.e. token lists) from each doc,
+        # resulting in a list of lists,
+        # e.g. [[1,2,3], [1,3,4], [1,2,4]]
+        doc_vecs = []
+        print(doc_ids)
+        for doc_id in doc_ids:
+            doc = db.find({'_id': doc_id})
+            doc_vecs.append(doc['tokens'])
+        db.close()
 
         # To calculate how many documents each token_id appeared in,
         # first merge all the token_id-presence doc vectors into a token_id-presence corpus.
@@ -138,17 +141,17 @@ class WikiDigester(Digester):
         return doc_ids, corpus_counts
 
 
-    def _generate_tfidf(self, docs):
+    def _generate_tfidf(self, doc_ids):
         """
         Generate the TF-IDF representations for all the digested docs.
 
         Args:
-            | docs (list)       -- see `_prepare_tfidf`.
+            | doc_ids (list)       -- a list of doc ids.
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
         db = self.db()
-        doc_ids, corpus_counts = self._prepare_tfidf(docs)
+        doc_ids, corpus_counts = self._prepare_tfidf(doc_ids)
 
         # Iterate over all docs
         # the specified docs.
@@ -181,8 +184,6 @@ class WikiDigester(Digester):
         db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
 
         db.close()
-
-        return tfidf_doc
 
 
     def _parse_pages(self):
@@ -243,8 +244,6 @@ class WikiDigester(Digester):
         # but this works for now.
         # I'd prefer to keep it as dict, but integers as keys is invalid BSON,
         # so MongoDB rejects it.
-        # When this is retrieved, it should be converted back into a dict:
-        #   dict(sparse_bag_of_words)
         sparse_bag_of_words = list(bag_of_words.items())
 
         # Assemble the doc.
@@ -254,30 +253,29 @@ class WikiDigester(Digester):
                 'freqs': sparse_bag_of_words,
                 'categories': categories,
                 'pagelinks': pagelinks,
+                'tokens': list(bag_of_words.keys()),
 
                 # Will eventually hold the tf-idf representation.
                 'doc': {}
         }
 
-        return id, doc, bag_of_words
+        return id, doc
 
 
     def _handle_page(self, elem):
         """
         Processes then saves a page to db.
         """
-        id, doc, bag_of_words = self._process_page(elem)
+        id, doc = self._process_page(elem)
 
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
         self.db().update({'_id': id}, {'$set': doc})
 
-        # Return the token_ids that were in this document.
-        # Used for construction of the global doc counts for terms.
-        # Need to tag it with the its doc id; this way we know
-        # which page records to update.
-        return ( id, list(bag_of_words.keys()) )
+        # Return the id for each page,
+        # so we know which ones belonged to this digestion.
+        return id
 
 
     def _clean(self, text):
@@ -420,7 +418,7 @@ class WikiDigesterDistributed(WikiDigester):
         doc = db.find({'_id': doc_id})
         elem = doc['raw'].decode('utf-8')
 
-        id, doc, bag_of_words = self._process_page(fromstring(elem))
+        id, doc = self._process_page(fromstring(elem))
 
         # Save/update the processed doc.
         # This is using the cached db again.
@@ -428,12 +426,13 @@ class WikiDigesterDistributed(WikiDigester):
 
         db.close()
 
-        # Return this for each page, so we can build the corpus.
-        return ( id, list(bag_of_words.keys()) )
+        # Return the id for each page,
+        # so we know which ones belonged to this digestion.
+        return id
 
 
     @celery.task(filter=task_method)
-    def _generate_tfidf(docs, self):
+    def _generate_tfidf(doc_ids, self):
         """
         The positional argument ordering here is weird,
         with `self` coming last, because of the way
@@ -444,7 +443,7 @@ class WikiDigesterDistributed(WikiDigester):
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
         db = self.db()
-        doc_ids, corpus_counts = self._prepare_tfidf(docs)
+        doc_ids, corpus_counts = self._prepare_tfidf(doc_ids)
 
         for doc_id in doc_ids:
             # Get the doc from the cached db in the Celery task.
