@@ -415,7 +415,7 @@ def create_worker_base():
                            BASE_AMI_ID,
                            key_name=KEYPAIR_NAME,
                            security_groups=[sg_name],
-                           instance_type='m1.small',
+                           instance_type='m1.medium',
                            block_device_map=bdm
                        )
         instance = reservations.instances[0]
