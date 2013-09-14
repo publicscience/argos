@@ -33,6 +33,7 @@ def cluster_names():
             'LC': '%s-launchconfig' % name,
             'AG': '%s-autoscale' % name,
             'SG': '%s-security' % name,
+            'DB': '%s-database' % name,
             'MASTER': '%s-master' % name,
             'WORKER_IMAGE': '%s-worker-image' % name
     }

@@ -75,20 +75,19 @@ worker:
     file.sed:
         - name: /var/app/digester/cluster/celery_config.py
         - before: 'localhost'
-        - after: {{ grains.get('master') }}
+        - after: {{ grains.get('broker') }}
         - backup: ''
         - flags: 'g'
         - require:
             - git: digester
             - file: celery-config
 
-
 # Setup db to point to proper host.
 db-config:
     file.sed:
         - name: /var/app/digester/config.py
         - before: 'localhost'
-        - after: {{ grains.get('master') }}
+        - after: {{ grains.get('dbhost') }}
         - backup: ''
         - flags: 'g'
         - require:
@@ -104,18 +103,7 @@ salt-minion:
         - installed
 {% endif %}
 
-{% if 'master' in grains.get('roles', []) %}
-rabbitmq-server:
-    service.running:
-        - enable: True
-        - require:
-            - pkg: rabbitmq-server
-    pkg.installed:
-        - require:
-            - cmd: rabbitmq-server
-    cmd.script:
-        - source: salt://scripts/install-rabbitmq.sh
-
+{% if 'database' in grains.get('roles', []) %}
 mongodb:
     service.running:
         - enable: True
@@ -127,6 +115,19 @@ mongodb:
             - cmd: mongodb
     cmd.script:
         - source: salt://scripts/install-mongodb.sh
+{% endif %}
+
+{% if 'master' in grains.get('roles', []) %}
+rabbitmq-server:
+    service.running:
+        - enable: True
+        - require:
+            - pkg: rabbitmq-server
+    pkg.installed:
+        - require:
+            - cmd: rabbitmq-server
+    cmd.script:
+        - source: salt://scripts/install-rabbitmq.sh
 
 redis-server:
     service.running:
@@ -147,6 +148,17 @@ redis-config:
         - name: /etc/redis/redis.conf
         - makedirs: True
         - source: salt://deploy/redis.conf
+
+# Setup db to point to proper host.
+db-config:
+    file.sed:
+        - name: /var/app/digester/config.py
+        - before: 'localhost'
+        - after: {{ grains.get('dbhost') }}
+        - backup: ''
+        - flags: 'g'
+        - require:
+            - file: app-config
 
 salt-master:
     service.running:

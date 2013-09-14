@@ -48,20 +48,21 @@ BASE_AMI_ID = c['BASE_AMI_ID']
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
-def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.medium', master_instance_type='m1.medium', ssh=False):
+def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.medium', master_instance_type='m1.medium', database_instance_type='m1.medium', ssh=False):
     """
     Setup a new cluster.
 
     Args:
-        | use_existing_image (bool)  -- whether or not to try
-                                        using an existing image.
-        | min_size (int)             -- the minimum size of the cluster
-        | max_size (int)             -- the maximum size of the cluster
-        | instance_type (str)        -- the type of instance to use in the cluster.
-                                        See: https://aws.amazon.com/ec2/instance-types/instance-details/
-        | master_instance_type (str) -- the type of master instance to use for the cluster.
-                                        Recommended that it has at least a few GB of memory.
-        | ssh (bool)                 -- whether or not to enable SSH access on the cluster.
+        | use_existing_image (bool)     -- whether or not to try
+                                           using an existing image.
+        | min_size (int)                -- the minimum size of the cluster
+        | max_size (int)                -- the maximum size of the cluster
+        | instance_type (str)           -- the type of instance to use in the cluster.
+                                           See: https://aws.amazon.com/ec2/instance-types/instance-details/
+        | master_instance_type (str)    -- the type of master instance to use for the cluster.
+                                           Recommended that it has at least a few GB of memory.
+        | database_instance_type (str)  -- the type of database instance to use for the cluster.
+        | ssh (bool)                    -- whether or not to enable SSH access on the cluster.
     """
 
     logger.info('Commissioning new cluster...')
@@ -100,7 +101,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     zones = [zone.name for zone in ec2.get_all_zones()]
 
     # Create a new security group.
-    # Authorize HTTP, MongoDB, and RabbitMQ ports.
+    # Authorize HTTP and MongoDB ports.
     logger.info('Creating the security group (%s)...' % names['SG'])
     ports = [80, 27017]
     if ssh:
@@ -108,17 +109,48 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
         ports.append(22)
     sec_group = manage.security_group(names['SG'], 'The cluster security group.', ports=ports)
 
+    logger.info('Using AMI %s' % WORKER_AMI_ID)
+
+    # Create the database instance.
+    logger.info('Creating the database instance (%s)...' % names['DB'])
+
     # Create an EBS (block storage) for the image.
     # Size is in GB.
     # Need a lot of space for the Wiki dump on MongoDB.
     # Do NOT delete this volume on termination, since it will have our processed data.
-    bdm = manage.create_block_device(size=300, delete=False)
+    db_bdm = manage.create_block_device(size=500, delete=False)
 
-    # Create the Salt Master/RabbitMQ/MongoDB server.
+    db_init_script = load_script('scripts/setup_db.sh')
+    db_reservations = ec2.run_instances(
+                       WORKER_AMI_ID,
+                       key_name=KEYPAIR_NAME,
+                       security_groups=[names['SG']],
+                       instance_type=database_instance_type,
+                       user_data=db_init_script,
+                       block_device_map=db_bdm
+                   )
+    db_instance = db_reservations.instances[0]
+
+    # Wait until the database instance is ready.
+    logger.info('Waiting for master instance to launch...')
+    manage.wait_until_ready(db_instance)
+    logger.info('Database instance has launched at %s.' % db_instance.public_dns_name)
+
+    # Update config.
+    c['DATABASE_PUBLIC_DNS'] = instance.public_dns_name
+    config.update()
+
+    # Tag the instance with a name so we can find it later.
+    instance.add_tag('name', names['DB'])
+
+    # Create the Salt Master/RabbitMQ server.
     # The Master instance is a souped-up worker, so we use the worker image.
     logger.info('Creating the master instance (%s)...' % names['MASTER'])
-    logger.info('Using AMI %s' % WORKER_AMI_ID)
-    master_init_script = load_script('scripts/setup_master.sh')
+
+    bdm = manage.create_block_device(size=150, delete=True)
+    master_init_script = load_script('scripts/setup_master.sh',
+            db_dns=db_instance.private_dns_name
+    )
     reservations = ec2.run_instances(
                        WORKER_AMI_ID,
                        key_name=KEYPAIR_NAME,
@@ -129,7 +161,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
                    )
     instance = reservations.instances[0]
 
-    # Wait until the instance is ready.
+    # Wait until the master instance is ready.
     logger.info('Waiting for master instance to launch...')
     manage.wait_until_ready(instance)
     logger.info('Master instance has launched at %s. Configuring...' % instance.public_dns_name)
@@ -158,7 +190,8 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
     minion_init_script = load_script('scripts/setup_minion.sh',
-            master_dns=instance.private_dns_name
+            master_dns=instance.private_dns_name,
+            db_dns=db_instance.private_dns_name
     )
 
     # Create the launch configuration.
