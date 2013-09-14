@@ -415,13 +415,12 @@ class WikiDigesterDistributed(WikiDigester):
         want to be passing full elements as part of the messages.
         """
         db = self.db()
+
         # Get the element from the cached db in the Celery task.
         doc = db.find({'_id': doc_id})
         elem = doc['raw'].decode('utf-8')
 
         id, doc, bag_of_words = self._process_page(fromstring(elem))
-
-        print(doc)
 
         # Save/update the processed doc.
         # This is using the cached db again.
