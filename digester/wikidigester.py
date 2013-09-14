@@ -147,13 +147,16 @@ class WikiDigester(Digester):
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
+        db = self.db()
         doc_ids, corpus_counts = self._prepare_tfidf(docs)
 
         # Iterate over all docs
         # the specified docs.
         for doc_id in doc_ids:
-            doc = self.db().find({'_id': doc_id})
+            doc = db.find({'_id': doc_id})
             self._calculate_tfidf(doc, corpus_counts)
+
+        db.close()
         logger.info('TF-IDF calculations completed!')
 
 
@@ -164,6 +167,7 @@ class WikiDigester(Digester):
         Or, more verbosely:
             tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
         """
+        db = self.db()
         tfidf_dict = {}
 
         # Convert each token's count to its tf-idf value.
@@ -174,7 +178,9 @@ class WikiDigester(Digester):
         # Need to convert to a list of tuples,
         # since the db won't take a dict.
         tfidf_doc = list(tfidf_dict.items())
-        self.db().update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
+        db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
+
+        db.close()
 
         return tfidf_doc
 
@@ -438,8 +444,8 @@ class WikiDigesterDistributed(WikiDigester):
         """
         logger.info('Page processing complete. Generating TF-IDF representations.')
 
-        doc_ids, corpus_counts = self._prepare_tfidf(docs)
         db = self.db()
+        doc_ids, corpus_counts = self._prepare_tfidf(docs)
 
         for doc_id in doc_ids:
             # Get the doc from the cached db in the Celery task.

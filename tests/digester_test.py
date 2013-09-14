@@ -24,7 +24,6 @@ class DigesterTest(unittest.TestCase):
             self.assertIsNotNone(page)
 
 
-
 class WikiDigesterTest(RequiresDB):
     def setUp(self):
         # Create the WikiDigester and purge its db.
