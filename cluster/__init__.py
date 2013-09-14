@@ -132,16 +132,16 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     db_instance = db_reservations.instances[0]
 
     # Wait until the database instance is ready.
-    logger.info('Waiting for master instance to launch...')
+    logger.info('Waiting for database instance to launch...')
     manage.wait_until_ready(db_instance)
     logger.info('Database instance has launched at %s.' % db_instance.public_dns_name)
 
     # Update config.
-    c['DATABASE_PUBLIC_DNS'] = instance.public_dns_name
+    c['DATABASE_PUBLIC_DNS'] = db_instance.public_dns_name
     config.update()
 
     # Tag the instance with a name so we can find it later.
-    instance.add_tag('name', names['DB'])
+    db_instance.add_tag('name', names['DB'])
 
     # Create the Salt Master/RabbitMQ server.
     # The Master instance is a souped-up worker, so we use the worker image.
@@ -358,6 +358,14 @@ def decommission(preserve_image=True):
     logger.info('Deleting the master instance (%s)...' % names['MASTER'])
     master_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['MASTER']})
     for reservation in master_instances:
+        for i in reservation.instances:
+            i.terminate()
+        manage.wait_until_terminated(reservation.instances)
+
+    # Delete the database instance(s).
+    logger.info('Deleting the database instance (%s)...' % names['DB'])
+    db_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['DB']})
+    for reservation in db_instances:
         for i in reservation.instances:
             i.terminate()
         manage.wait_until_terminated(reservation.instances)
