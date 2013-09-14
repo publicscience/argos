@@ -8,7 +8,7 @@ than processing the entirety the dump as
 a single file.
 """
 
-from digester.wikidigester import WikiDigester
+from digester.wikidigester import WikiDigesterDistributed
 
 # For collecting dump links.
 import re
@@ -33,7 +33,7 @@ def main():
     # Download and digest each part individually.
     for idx, part in enumerate(parts):
         logger.info('Digesting pages dump part %s (%s/%s)' % (part, idx, len(parts)))
-        w = WikiDigester('/tmp/%s' % part, distrib=True, db='wikidump', url=url+part)
+        w = WikiDigesterDistributed('/tmp/%s' % part, db='wikidump', url=url+part)
 
         # Digest.
         w.digest()

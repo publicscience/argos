@@ -45,6 +45,10 @@ class WikiDigesterTest(RequiresDB):
     def test_digest(self):
         self._digest()
 
+    def test_digest_many(self):
+        self.w = WikiDigester('tests/data/articles.xml', db='test')
+        self._digest_many()
+
     def test_digest_updates(self):
         self._digest_updates()
 
@@ -82,7 +86,7 @@ class WikiDigesterTest(RequiresDB):
             self.assertEquals(dict(doc), dict(tfidf))
 
     def test_bag_of_words_retrieval(self):
-        self.w = WikiDigester('tests/data/simple_article.xml', 'pages', db='test')
+        self.w = WikiDigester('tests/data/simple_article.xml', db='test')
         self.w.purge()
         self.w.digest()
 
@@ -190,6 +194,7 @@ class WikiDigesterDistributedTest(RequiresWorkers):
         self._digest()
 
     def test_digest_many(self):
+        self.w = WikiDigesterDistributed('tests/data/articles.xml', silent=True, db='test')
         self._digest_many()
 
     def test_digest_updates(self):

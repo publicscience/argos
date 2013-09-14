@@ -21,14 +21,13 @@ from mwlib.refine.compat import parse_txt
 
 # Asynchronous distributed task queue.
 from celery.contrib.methods import task_method
-from celery import chord
+from celery import chord, Task
 from cluster.tasks import celery, workers, notify
 
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
 
 # Logging.
-from celery.utils.log import get_task_logger
 from logger import logger
 logger = logger(__name__)
 
@@ -39,26 +38,19 @@ DATABASE = 'wikidigester'
 
 class WikiDigester(Digester):
     """
-    Processes Wikipedia XML dumps.
+    Processes Wikipedia XML pages-articles dumps.
     Subclass of Digester.
     """
 
-    def __init__(self, file, dump='pages', namespace=NAMESPACE, distrib=False, db=DATABASE, url=None, silent=False):
+    def __init__(self, file, namespace=NAMESPACE, db=DATABASE, url=None):
         """
         Initialize the WikiDigester with a file and a namespace.
-        The dumps can be:
-            * pages => i.e. pages-articles, the actual content
 
         Args:
             | file (str)        -- path to XML file (or bzipped XML) to digest.
-            | dump (str)        -- the name of the dump ('pages')
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
-            | distrib (bool)    -- whether or not digestion should be distributed. Defaults to False.
             | db (str)          -- the name of the database to save to.
             | url (str)         -- the url from where the dump can be fetched.
-            | silent (bool)     -- whether or not to send email notifications.
-
-        Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
         """
 
         # Python 2.7 support.
@@ -68,18 +60,12 @@ class WikiDigester(Digester):
             Digester.__init__(self, file, namespace)
 
         self.database = db
-        self.dump = dump
-        self.distrib = distrib
+        self._db = None
         self.url = url
-        self.silent = silent
 
         # Keep track of number of docs.
         # Necessary for performing TF-IDF processing.
         self.num_docs = 0
-
-        # Setup Celery's logger if necessary.
-        if self.distrib:
-            logger = get_task_logger(__name__)
 
 
     def fetch_dump(self):
@@ -89,32 +75,21 @@ class WikiDigester(Digester):
         """
 
         # Default dump files.
-        dumps = {
-                    'base': 'http://dumps.wikimedia.org/enwiki/latest/',
-                    'pages': 'enwiki-latest-pages-articles.xml.bz2'
-                }
+        base = 'http://dumps.wikimedia.org/enwiki/latest/'
+        pages = 'enwiki-latest-pages-articles.xml.bz2'
 
         # Build a default url if one is not specified.
         if not self.url:
-            self.url = '%s%s' % (dumps['base'], dumps[self.dump])
+            self.url = '%s%s' % (base, pages)
 
         # Download!
-        logger.info('Fetching %s dump from %s' % (self.dump, self.url))
+        logger.info('Fetching pages dump from %s' % (self.url))
         self.download(self.url)
-
-
-    def purge(self):
-        """
-        Empties out the database for
-        for this dump.
-        """
-        self.db().empty()
 
 
     def digest(self):
         """
         Will process this instance's dump.
-        Each kind of dump is processed differently.
         """
 
         # Check if the specified file exists.
@@ -122,43 +97,20 @@ class WikiDigester(Digester):
             logger.info('Specified file %s not found, fetching...' % self.file)
             self.fetch_dump()
 
-        logger.info('Beginning digestion of %s. Distributed is %s' % (self.dump, self.distrib))
+        logger.info('Beginning digestion of pages.')
 
-        # Check to see that there are workers available for distributed tasks.
-        if self.distrib and not workers():
-            logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
-            return
+        # Serially/synchronously process pages.
+        docs = [self._handle_page(page) for page in self._parse_pages()]
 
-        if self.dump == 'pages':
-            if self.distrib:
-                # Create async Celery tasks to
-                # process pages in parallel.
-                # ===
-                # The tasks are in a chord, so that
-                # after all tasks have been completed,
-                # generate TF-IDF representation of all docs.
-                # ===
-                # Pickle (the default serializer for Celery) has
-                # trouble serializing the lxml Element,
-                # so first convert it to a string.
-                # ===
-                # `_t_generate_tfidf` has to have `self` manually
-                # passed, and is a bit weird. See its definition below.
-                logger.info('Creating jobs for the pages...')
-                tasks = chord(self._t_process_page.s(tostring(page))
-                              for page in self._parse_pages())(self._t_generate_tfidf.s(self, ))
-            else:
-                # Serially/synchronously process pages.
-                docs = [self._process_page(page) for page in self._parse_pages()]
-
-                # Generate TF-IDF representation
-                # of all docs upon completion.
-                self._generate_tfidf(docs)
+        # Generate TF-IDF representation
+        # of all docs upon completion.
+        self._generate_tfidf(docs)
 
 
-    def _generate_tfidf(self, docs):
+    def _prepare_tfidf(self, docs):
         """
-        Generate the TF-IDF representations for all the digested docs.
+        Generate the corpus and pull out the
+        doc ids for TF-IDF generation.
 
         Args:
             | docs (list)       -- a list of docs, where each doc is a tuple of
@@ -167,10 +119,7 @@ class WikiDigester(Digester):
                                    appeared in that document.
                                    e.g. the doc with id 12, which looked like '1 2 4 2 3 4'
                                    would be (12, [1,2,3,4])
-
         """
-        logger.info('Page processing complete. Generating TF-IDF representations.')
-
         # Separate out the titles and the document vectors.
         # e.g (12, 13, 14) and ([1,2,3], [1,3,4], [1,2,4])
         doc_ids, doc_vecs = zip(*docs)
@@ -186,39 +135,35 @@ class WikiDigester(Digester):
         # e.g. {1: 3, 2: 2, 3: 2, 4: 2}
         corpus_counts = dict(Counter(corpus))
 
+        return doc_ids, corpus_counts
+
+
+    def _generate_tfidf(self, docs):
+        """
+        Generate the TF-IDF representations for all the digested docs.
+
+        Args:
+            | docs (list)       -- see `_prepare_tfidf`.
+        """
+        logger.info('Page processing complete. Generating TF-IDF representations.')
+
+        doc_ids, corpus_counts = self._prepare_tfidf(docs)
+
         # Iterate over all docs
         # the specified docs.
         for doc_id in doc_ids:
-            self._calculate_tfidf(doc_id, corpus_counts)
+            doc = self.db().find({'_id': doc_id})
+            self._calculate_tfidf(doc, corpus_counts)
         logger.info('TF-IDF calculations completed!')
 
-        # Notify of completion!
-        if self.distrib and not self.silent:
-            processed_name = self.url if self.url else self.file
-            notify('TF-IDF calculations complete for %s!' % processed_name)
 
-
-    @celery.task(filter=task_method)
-    def _t_generate_tfidf(docs, self):
-        """
-        The positional argument ordering here is weird,
-        with `self` coming last, because of the way
-        Celery passes parameters to a class method subtask.
-        The *first* argument is the results of the chord's task group,
-        and any arguments you pass in manually come *afterwards*.
-        """
-        self._generate_tfidf(docs)
-
-
-    def _calculate_tfidf(self, doc_id, corpus_counts):
+    def _calculate_tfidf(self, doc, corpus_counts):
         """
         General TF-IDF formula:
             j_w[i] = j[i] * log_2(num_docs_corpus / num_docs_term)
         Or, more verbosely:
             tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
         """
-        db = self.db()
-        doc = db.find({'_id': doc_id})
         tfidf_dict = {}
 
         # Convert each token's count to its tf-idf value.
@@ -229,7 +174,7 @@ class WikiDigester(Digester):
         # Need to convert to a list of tuples,
         # since the db won't take a dict.
         tfidf_doc = list(tfidf_dict.items())
-        db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
+        self.db().update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
 
         return tfidf_doc
 
@@ -255,8 +200,7 @@ class WikiDigester(Digester):
     def _process_page(self, elem):
         """
         Gather frequency distribution of a page,
-        category names, and linked page names,
-        and store to the database.
+        category names, and linked page names.
         """
 
         # Get the text we need.
@@ -307,65 +251,27 @@ class WikiDigester(Digester):
 
                 # Will eventually hold the tf-idf representation.
                 'doc': {}
-              }
+        }
+
+        return id, doc, bag_of_words
+
+
+    def _handle_page(self, elem):
+        """
+        Processes then saves a page to db.
+        """
+        id, doc, bag_of_words = self._process_page(elem)
 
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
         self.db().update({'_id': id}, {'$set': doc})
 
-
         # Return the token_ids that were in this document.
         # Used for construction of the global doc counts for terms.
         # Need to tag it with the its doc id; this way we know
         # which page records to update.
         return ( id, list(bag_of_words.keys()) )
-
-
-        # For exploring the data as separate files.
-        #import json
-        #json.dump(doc, open('dumps/%s' % title, 'w'), sort_keys=True,
-                #indent=4, separators=(',', ': '))
-
-
-    @celery.task(filter=task_method)
-    def _t_process_page(self, elem):
-        """
-        Celery task for asynchronously processing a page.
-
-        This is conditionally called upon in `self.digest()`.
-        """
-        # Convert the elem back to an lxml Element,
-        # then process.
-        return self._process_page(fromstring(elem))
-
-
-    def _find(self, elem, *tags):
-        """
-        Finds a particular subelement of an element.
-
-        Args:
-            | elem (lxml Element)  -- the MediaWiki text to cleanup.
-            | *tags (strs)      -- the tag names to use. See below for clarification.
-
-        Returns:
-            | lxml Element -- the target element.
-
-        You need to provide the tags that lead to it.
-        For example, the `text` element is contained
-        in the `revision` element, so this method would
-        be used like so::
-
-            self._find(elem, 'revision', 'text')
-
-        This method is meant to replace chaining calls
-        like this::
-
-            text_el = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE)
-        """
-        for tag in tags:
-            elem = elem.find('{%s}%s' % (NAMESPACE, tag))
-        return elem
 
 
     def _clean(self, text):
@@ -391,8 +297,165 @@ class WikiDigester(Digester):
         """
         Returns an interface for this digester's database.
 
-        The database interface cannot be properly serialized for distributed tasks,
-        so we can't attach it as an instance variable.
-        Instead we just create a new interface when we need it.
+        This will "cache" the db client so that there aren't too many.
         """
-        return Adipose(self.database, self.dump)
+        if self._db is None:
+            self._db = Adipose(self.database, 'pages')
+        return self._db
+
+
+    def purge(self):
+        """
+        Empties out the database for
+        for this dump.
+        """
+        self.db().empty()
+
+
+
+
+class WikiDigesterDistributed(WikiDigester):
+    """
+    A distributed version of WikiDigester.
+
+    Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
+
+    See the WikiDigester methods for more comprehensive commenting and documentation.
+    """
+
+    def __init__(self, *args, silent=False, **kwargs):
+        """
+        See WikiDigester for all the args.
+
+        Args:
+            | silent (bool)        -- whether or not to send an email on digestion completion.
+        """
+
+        # Python 2.7 support.
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError:
+            WikiDigester.__init__(self, *args, **kwargs)
+
+        self.silent = silent
+
+
+    def digest(self):
+        """
+        Will process this instance's dump as a distributed,
+        asynchronous set of tasks.
+        """
+
+        # Check if the specified file exists.
+        if not exists(self.file):
+            logger.info('Specified file %s not found, fetching...' % self.file)
+            self.fetch_dump()
+
+        logger.info('Beginning distributed digestion of pages.')
+
+        # Check to see that there are workers available for distributed tasks.
+        if not workers():
+            logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
+            return
+
+        # Create async Celery tasks to
+        # process pages in parallel.
+        # ===
+        # The tasks are in a chord, so that
+        # after all tasks have been completed,
+        # generate TF-IDF representation of all docs.
+        # ===
+        # `_generate_tfidf` has to have `self` manually
+        # passed, and is a bit weird. See its definition below.
+        logger.info('Creating jobs for the pages...')
+        tasks = chord(self._handle_page.s(doc_id)
+                      for doc_id in self._parse_pages())(self._generate_tfidf.s(self, ))
+
+
+    def _parse_pages(self):
+        """
+        Instead of yielding the elements,
+        yield the doc ids so they can fetched
+        from the db.
+        """
+        db = self.db()
+        for elem in self.iterate('page'):
+            # Check the namespace,
+            # only namespace 0 are articles.
+            # https://en.wikipedia.org/wiki/Wikipedia:Namespace
+            ns = int(self._find(elem, 'ns').text)
+            if ns == 0:
+                self.num_docs += 1
+
+                # Save the raw doc (the xml) to db so that workers
+                # will have access to it.
+                doc_id = int(self._find(elem, 'id').text)
+
+                doc = { 'raw': tostring(elem) }
+                db.update({'_id': doc_id}, {'$set': doc})
+
+                yield doc_id
+
+        db.close()
+        logger.info('There are %s docs in this dump.' % self.num_docs)
+
+
+    @celery.task(filter=task_method)
+    def _handle_page(self, doc_id):
+        """
+        Celery task for asynchronously handling and processing a page.
+
+        Takes a doc_id instead of an element (elem), since we don't
+        want to be passing full elements as part of the messages.
+        """
+        db = self.db()
+        # Get the element from the cached db in the Celery task.
+        doc = db.find({'_id': doc_id})
+        elem = doc['raw'].decode('utf-8')
+
+        id, doc, bag_of_words = self._process_page(fromstring(elem))
+
+        print(doc)
+
+        # Save/update the processed doc.
+        # This is using the cached db again.
+        db.update({'_id': id}, {'$set': doc})
+
+        db.close()
+
+        # Return this for each page, so we can build the corpus.
+        return ( id, list(bag_of_words.keys()) )
+
+
+    @celery.task(filter=task_method)
+    def _generate_tfidf(docs, self):
+        """
+        The positional argument ordering here is weird,
+        with `self` coming last, because of the way
+        Celery passes parameters to a class method subtask.
+        The *first* argument is the results of the chord's task group,
+        and any arguments you pass in manually come *afterwards*.
+        """
+        logger.info('Page processing complete. Generating TF-IDF representations.')
+
+        doc_ids, corpus_counts = self._prepare_tfidf(docs)
+        db = self.db()
+
+        for doc_id in doc_ids:
+            # Get the doc from the cached db in the Celery task.
+            doc = db.find({'_id': doc_id})
+            self._calculate_tfidf(doc, corpus_counts)
+
+        db.close()
+
+        # Notify of completion!
+        if not self.silent:
+            processed_name = self.url if self.url else self.file
+            notify('TF-IDF calculations complete for %s!' % processed_name)
+
+
+    def db(self):
+        """
+        Returns an interface for this digester's database.
+        """
+        return Adipose(self.database, 'pages')

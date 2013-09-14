@@ -88,6 +88,34 @@ class Digester:
         del context
 
 
+    def _find(self, elem, *tags):
+        """
+        Finds a particular subelement of an element.
+
+        Args:
+            | elem (lxml Element)  -- the element to search through.
+            | *tags (strs)         -- the tag names to use. See below for clarification.
+
+        Returns:
+            | lxml Element -- the target element.
+
+        You need to provide the tags that lead to it.
+        For example, the `text` element is contained
+        in the `revision` element, so this method would
+        be used like so::
+
+            self._find(elem, 'revision', 'text')
+
+        This method is meant to replace chaining calls
+        like this::
+
+            text_el = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE)
+        """
+        for tag in tags:
+            elem = elem.find('%s%s' % (self.namespace, tag))
+        return elem
+
+
     def download(self, url):
         """
         Downloads a file from the specified URL to replace
