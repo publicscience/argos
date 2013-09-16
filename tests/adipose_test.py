@@ -1,5 +1,7 @@
 import unittest
-from adipose import Adipose
+import adipose
+from adipose import Adipose, InvalidDocument
+from operator import itemgetter
 from tests import RequiresDB
 
 class AdiposeTest(RequiresDB):
@@ -33,9 +35,26 @@ class AdiposeTest(RequiresDB):
         self.assertEqual(self.a.count(), 0)
 
     def test_add_multiple(self):
-        data = [{'title': str(x)} for x in range(20) ]
+        data = [{'title': str(x)} for x in range(20)]
         self.a.add(data)
         self.assertEquals(self.a.count(), 20)
+
+    def test_add_multiple_oversized_doc(self):
+        # Save the max message size to restore it.
+        true_max_message_size = adipose.MAX_MESSAGE_SIZE
+        adipose.MAX_MESSAGE_SIZE = 10
+        data = [{'title': 'abcdefghijkl%s' % x} for x in range(10)]
+        self.assertRaises(InvalidDocument, self.a.add, data)
+        adipose.MAX_MESSAGE_SIZE = true_max_message_size
+
+    def test_add_multiple_oversized_list(self):
+        # Save the max message size to restore it.
+        true_max_message_size = adipose.MAX_MESSAGE_SIZE
+        adipose.MAX_MESSAGE_SIZE = 100
+        data = [{'title': 'abcdefghijkl%s' % x} for x in range(20)]
+        self.a.add(data)
+        self.assertEquals(self.a.count(), 20)
+        adipose.MAX_MESSAGE_SIZE = true_max_message_size
 
     def test_query(self):
         data = {'title': 'foo'}
@@ -59,7 +78,10 @@ class AdiposeTest(RequiresDB):
         data = [{'title': x} for x in range(1000)]
         for doc in data:
             self.a.add(doc)
-        for idx, doc in enumerate(self.a.all()):
+
+        # Sort docs by title so that they go from 0-1000, in order.
+        sorted_results = sorted([doc for doc in self.a.all()], key=itemgetter('title'))
+        for idx, doc in enumerate(sorted_results):
             self.assertEquals(data[idx]['title'], doc['title'])
 
     def test_index(self):

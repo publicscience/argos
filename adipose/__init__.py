@@ -8,6 +8,11 @@ Uses MongoDB, but can be modified.
 
 import pymongo
 import config
+import sys
+from pymongo.errors import InvalidDocument
+
+# Maximum MongoDB message size, in bytes.
+MAX_MESSAGE_SIZE = 48000000
 
 class Adipose:
     """
@@ -41,6 +46,8 @@ class Adipose:
     def add(self, data):
         """
         Add data to the db.
+        If bulk inserting (i.e. passing in a list),
+        will automatically break the list into smaller lists if it exceeds Mongo's maximum message size.
 
         Args:
             | data (dict) -- the data to be saved.
@@ -50,7 +57,20 @@ class Adipose:
 
             adipose.add({'title': 'foo', 'category': 'fum'})
         """
-        self.collection.insert(data)
+
+        # Check size of message, if bulk inserting.
+        if isinstance(data, list) and sys.getsizeof(data) > MAX_MESSAGE_SIZE:
+            # If there's only one doc and it's still too large,
+            # then the doc is just too large.
+            if len(data) == 1:
+                raise InvalidDocument('Document exceeds maximum message size (%s)' % MAX_MESSAGE_SIZE)
+
+            # If it is too large, recursively split in half until each message is an appropriate size.
+            midpoint = int(len(data)/2)
+            self.add(data[:midpoint])
+            self.add(data[midpoint:])
+        else:
+            self.collection.insert(data)
 
 
     def update(self, query, data):
