@@ -88,15 +88,17 @@ class Adipose:
         self.collection.update(query, data, upsert=True)
 
 
-    def index(self, key='_id'):
+    def index(self, key='_id', enforce_uniqueness=False):
         """
         Indexes the data by the specified key.
-        This enforces key uniqueness by dropping duplicates.
+        This enforces key uniqueness by dropping duplicates,
+        if specified,
+        and ignores docs without the key (i.e. is sparse).
 
         Args:
             | key (str) -- key to index on
         """
-        self.collection.ensure_index(key, unique=True, dropDups=True)
+        self.collection.ensure_index(key, unique=True, dropDups=enforce_uniqueness, sparse=True)
 
 
     def find(self, query):
