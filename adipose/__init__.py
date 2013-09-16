@@ -88,14 +88,15 @@ class Adipose:
         self.collection.update(query, data, upsert=True)
 
 
-    def index(self, key='title'):
+    def index(self, key='_id'):
         """
         Indexes the data by the specified key.
+        This enforces key uniqueness by dropping duplicates.
 
         Args:
             | key (str) -- key to index on
         """
-        self.collection.ensure_index(key, unique=True)
+        self.collection.ensure_index(key, unique=True, dropDups=True)
 
 
     def find(self, query):
