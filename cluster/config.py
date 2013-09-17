@@ -34,6 +34,7 @@ def cluster_names():
             'AG': '%s-autoscale' % name,
             'SG': '%s-security' % name,
             'DB': '%s-database' % name,
+            'MQ': '%s-broker' % name,
             'MASTER': '%s-master' % name,
             'WORKER_IMAGE': '%s-worker-image' % name
     }

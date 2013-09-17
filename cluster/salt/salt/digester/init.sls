@@ -68,14 +68,16 @@ worker:
         - require:
             - virtualenv: venv
             - cmd: app-nltk-data
-            - file: worker
             - file: db-config
             - file: cluster-config
             - file: app-config
+            - file: mq-config
+
+mq-config:
     file.sed:
         - name: /var/app/digester/cluster/celery_config.py
         - before: 'localhost'
-        - after: {{ grains.get('broker') }}
+        - after: {{ grains.get('mqhost') }}
         - backup: ''
         - flags: 'g'
         - require:
@@ -117,7 +119,7 @@ mongodb:
         - source: salt://scripts/install-mongodb.sh
 {% endif %}
 
-{% if 'master' in grains.get('roles', []) %}
+{% if 'broker' in grains.get('roles', []) %}
 rabbitmq-server:
     service.running:
         - enable: True
@@ -148,7 +150,9 @@ redis-config:
         - name: /etc/redis/redis.conf
         - makedirs: True
         - source: salt://deploy/redis.conf
+{% endif %}
 
+{% if 'master' in grains.get('roles', []) %}
 # Setup db to point to proper host.
 db-config:
     file.sed:
@@ -159,6 +163,17 @@ db-config:
         - flags: 'g'
         - require:
             - file: app-config
+
+mq-config:
+    file.sed:
+        - name: /var/app/digester/cluster/celery_config.py
+        - before: 'localhost'
+        - after: {{ grains.get('mqhost') }}
+        - backup: ''
+        - flags: 'g'
+        - require:
+            - git: digester
+            - file: celery-config
 
 salt-master:
     service.running:

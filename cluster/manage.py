@@ -101,7 +101,6 @@ def create_block_device(size=10, delete=False):
     return bdm
 
 
-
 def wait_until_ready(instance):
     """
     Wait until an instance is ready.

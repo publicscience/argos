@@ -48,7 +48,7 @@ BASE_AMI_ID = c['BASE_AMI_ID']
 # By default, worker AMI is same as base AMI.
 WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
-def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.medium', master_instance_type='m1.medium', database_instance_type='m1.medium', ssh=False):
+def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.medium', master_instance_type='m1.medium', database_instance_type='m1.medium', broker_instance_type='m1.medium', ssh=False):
     """
     Setup a new cluster.
 
@@ -62,6 +62,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
         | master_instance_type (str)    -- the type of master instance to use for the cluster.
                                            Recommended that it has at least a few GB of memory.
         | database_instance_type (str)  -- the type of database instance to use for the cluster.
+        | broker_instance_type (str)    -- the type of broker (message queue) instance to use for the cluster.
         | ssh (bool)                    -- whether or not to enable SSH access on the cluster.
     """
 
@@ -119,59 +120,57 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Need a lot of space for the Wiki dump on MongoDB.
     # Do NOT delete this volume on termination, since it will have our processed data.
     db_bdm = manage.create_block_device(size=500, delete=False)
-
     db_init_script = load_script('scripts/setup_db.sh')
-    db_reservations = ec2.run_instances(
-                       WORKER_AMI_ID,
-                       key_name=KEYPAIR_NAME,
-                       security_groups=[names['SG']],
-                       instance_type=database_instance_type,
-                       user_data=db_init_script,
-                       block_device_map=db_bdm
-                   )
-    db_instance = db_reservations.instances[0]
 
-    # Wait until the database instance is ready.
-    logger.info('Waiting for database instance to launch...')
-    manage.wait_until_ready(db_instance)
-    logger.info('Database instance has launched at %s.' % db_instance.public_dns_name)
+    db_instance = _create_instance(
+            name=names['DB'],
+            instance_type=database_instance_type,
+            init_script=db_init_script,
+            block_device_map=db_bdm
+    )
 
     # Update config.
     c['DATABASE_PUBLIC_DNS'] = db_instance.public_dns_name
     config.update()
 
-    # Tag the instance with a name so we can find it later.
-    db_instance.add_tag('name', names['DB'])
 
-    # Create the Salt Master/RabbitMQ server.
+    # Create the broker/message queue instance (RabbitMQ and Redis).
+    logger.info('Creating the broker (message queue) instance (%s)...' % names['MQ'])
+
+    mq_bdm = manage.create_block_device(size=150, delete=True)
+    mq_init_script = load_script('scripts/setup_mq.sh')
+
+    mq_instance = _create_instance(
+            name=names['MQ'],
+            instance_type=broker_instance_type,
+            init_script=mq_init_script,
+            block_device_map=mq_bdm
+    )
+
+    # Update config.
+    c['BROKER_PUBLIC_DNS'] = mq_instance.public_dns_name
+    config.update()
+
+
+    # Create the Salt Master instance.
     # The Master instance is a souped-up worker, so we use the worker image.
     logger.info('Creating the master instance (%s)...' % names['MASTER'])
 
-    bdm = manage.create_block_device(size=150, delete=True)
+    master_bdm = manage.create_block_device(size=150, delete=True)
     master_init_script = load_script('scripts/setup_master.sh',
-            db_dns=db_instance.private_dns_name
+            db_dns=db_instance.private_dns_name,
+            mq_dns=mq_instance.private_dns_name
     )
-    reservations = ec2.run_instances(
-                       WORKER_AMI_ID,
-                       key_name=KEYPAIR_NAME,
-                       security_groups=[names['SG']],
-                       instance_type=master_instance_type,
-                       user_data=master_init_script,
-                       block_device_map=bdm
-                   )
-    instance = reservations.instances[0]
-
-    # Wait until the master instance is ready.
-    logger.info('Waiting for master instance to launch...')
-    manage.wait_until_ready(instance)
-    logger.info('Master instance has launched at %s. Configuring...' % instance.public_dns_name)
+    master_instance = _create_instance(
+            name=names['MASTER'],
+            instance_type=master_instance_type,
+            init_script=master_init_script,
+            block_device_map=master_bdm
+    )
 
     # Update config.
-    c['MASTER_PUBLIC_DNS'] = instance.public_dns_name
+    c['MASTER_PUBLIC_DNS'] = master_instance.public_dns_name
     config.update()
-
-    # Tag the instance with a name so we can find it later.
-    instance.add_tag('name', names['MASTER'])
 
     # NOTE: Fabric does not yet support Py3.3.
     # Set the host for Fabric to connect to.
@@ -182,7 +181,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # For now, using subprocess Popen and call.
     # Not sure if this is really the best solution...
     env = {
-            'host': instance.public_dns_name,
+            'host': master_instance.public_dns_name,
             'user': INSTANCE_USER,
             'key_filename': PATH_TO_KEY
     }
@@ -190,8 +189,9 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     # Replace the $salt_master var in the raw Minion init script with the Master DNS name,
     # so Minions will know where to connect to.
     minion_init_script = load_script('scripts/setup_minion.sh',
-            master_dns=instance.private_dns_name,
-            db_dns=db_instance.private_dns_name
+            master_dns=master_instance.private_dns_name,
+            db_dns=db_instance.private_dns_name,
+            mq_dns=mq_instance.private_dns_name
     )
 
     # Create the launch configuration.
@@ -358,6 +358,14 @@ def decommission(preserve_image=True):
     logger.info('Deleting the master instance (%s)...' % names['MASTER'])
     master_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['MASTER']})
     for reservation in master_instances:
+        for i in reservation.instances:
+            i.terminate()
+        manage.wait_until_terminated(reservation.instances)
+
+    # Delete the broker/message queue instance(s).
+    logger.info('Deleting the broker (message queue) instance (%s)...' % names['MQ'])
+    mq_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['MQ']})
+    for reservation in mq_instances:
         for i in reservation.instances:
             i.terminate()
         manage.wait_until_terminated(reservation.instances)
@@ -661,3 +669,27 @@ def _transfer_salt(host, user, keyfile):
             os.path.join(salt_path, 'salt/deploy/', config)
         ])
 
+
+def _create_instance(name=None, instance_type='m1.medium', block_device_map=None, init_script=None):
+    """
+    Convenience method for creating a new instance.
+    """
+    ec2 = connect.ec2()
+
+    reservations = ec2.run_instances(
+                       WORKER_AMI_ID,
+                       key_name=KEYPAIR_NAME,
+                       security_groups=[names['SG']],
+                       instance_type=instance_type,
+                       user_data=init_script,
+                       block_device_map=block_device_map
+                   )
+    instance = reservations.instances[0]
+
+    logger.info('Waiting for instance %s to launch...' % name)
+    manage.wait_until_ready(instance)
+    logger.info('Instance %s has launched at %s' % (name, instance.public_dns_name))
+
+    # Tag the instance with a name so we can find it later.
+    instance.add_tag('name', name)
+    return instance
