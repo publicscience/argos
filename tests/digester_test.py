@@ -69,15 +69,16 @@ class WikiDigesterTest(RequiresDB):
 
         self.w.num_docs = len(docs)
 
-        doc_ids = []
+        prepped_docs = []
         for doc in docs:
             tokens = [token[0] for token in doc[1]]
-            doc_ids.append(doc[0])
+            prepped_docs.append((doc[0], tokens))
 
-            # Add dummy doc.
-            self.w.db().add({'_id': doc[0], 'freqs': doc[1], 'tokens': tokens})
+        # Add each dummy doc.
+        for doc in docs:
+            self.w.db().add({'_id': doc[0], 'freqs': doc[1]})
 
-        self.w._generate_tfidf(doc_ids)
+        self.w._generate_tfidf(prepped_docs)
 
         for idx, doc in enumerate(expected):
             tfidf = self.w.db().find({'_id': idx })['doc']
