@@ -10,9 +10,7 @@ amqp==1.2.1
 anyjson==0.3.3
 billiard==2.7.3.32
 celery==3.0.22
-chardet==2.1.1
 docutils==0.11
-feedparser==5.1.3
 ipython==1.0.0
 itsdangerous==0.23
 kombu==2.5.13
@@ -25,6 +23,12 @@ simplejson==3.3.0
 six==1.3.0
 redis==2.8.0
 celery-with-redis==3.0
+
+# Use latest feedparser and unofficial Py3 chardet port.
+# Although feedparser says it supports Py3.3,
+# the latest release (which is almost a year old) does not seem to.
+git+http://code.google.com/p/feedparser
+git+git://github.com/bsidhom/python3-chardet.git
 
 # pypi's python-dateutil isn't up to date, use latest.
 bzr+https://code.launchpad.net/~dateutil/dateutil/trunk
