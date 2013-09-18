@@ -14,7 +14,8 @@ Example::
 """
 
 import feedparser
-import urllib
+from urllib import request
+from http.cookiejar import CookieJar
 from . import feedfinder
 from brain import trim, sanitize
 from readability.readability import Document
@@ -42,7 +43,7 @@ def entries(url):
         eurl = entry.links[0].href
 
         # Complete HTML content for this entry.
-        html = self.fetch_full_text(eurl)
+        html = fetch_full_text(eurl)
 
         entries.append({
             'url': eurl,
@@ -78,5 +79,11 @@ def fetch_full_text(url):
     Returns:
         | str -- the full text, including html.
     """
-    html = urllib.urlopen(url).read()
+
+    # Some sites, such as NYTimes, track which
+    # articles have been viewed with cookies.
+    # Without cookies, you get thrown into an infinite loop.
+    cookies = CookieJar()
+    opener = request.build_opener(request.HTTPCookieProcessor(cookies))
+    html = opener.open(url).read()
     return Document(html).summary()
