@@ -1,0 +1,33 @@
+import unittest
+from tests import RequiresMocks
+import membrane.feed as feed
+import membrane.feedfinder as feedfinder
+
+class FeedTest(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+
+class FeedFinderTest(RequiresMocks):
+    def setUp(self):
+        #self.mock_get = self.create_patch('feedfinder._get')
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_feeds(self):
+        feed_url = feedfinder.feeds('http://spaceandtim.es')
+        self.assertEqual(feed_url, ['http://spaceandtim.es/feed'])
+
+    def test_is_feed(self):
+        self.assertTrue(feedfinder._is_feed('http://spaceandtim.es/feed/'))
+
+    def test_is_not_feed(self):
+        self.assertFalse(feedfinder._is_feed('http://spaceandtim.es/'))
+
+
+#mock_page = 
