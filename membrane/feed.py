@@ -4,6 +4,13 @@ Feed
 
 Provides an interface for
 accessing RSS feeds.
+
+Example::
+
+    # Print entries from a feed.
+    site = 'http://www.polygon.com/'
+    feed_url = find_feed(site)
+    print(entries(feed_url))
 """
 
 import feedparser
@@ -12,81 +19,64 @@ from . import feedfinder
 from brain import trim, sanitize
 from readability.readability import Document
 
-class Feed:
+
+def entries(url):
     """
-    Provides an interface for
-    accessing RSS feeds.
+    Parse a feed from the specified url,
+    gathering the latest entries.
 
-    Example::
+    Args:
+        | url (str)    -- the url of the feed.
 
-        # Print entries from a feed.
-        site = 'http://www.polygon.com/'
-        f = Feed()
-        feed_url = f.find_feed(site)
-        print f.entries(feed_url)
+    Returns:
+        | list -- list of processed latest entries (as dicts).
     """
+    # Fetch the feed data.
+    data = feedparser.parse(url)
 
-    def __init__(self):
-        """
-        Create a new interface.
-        """
-        pass
+    # Build the entry dicts.
+    entries = []
+    for entry in data.entries:
 
-    def entries(self, url):
-        """
-        Parse a feed from the specified url,
-        gathering the latest entries.
+        # URL for this entry.
+        eurl = entry.links[0].href
 
-        Args:
-            | url (str)    -- the url of the feed.
+        # Complete HTML content for this entry.
+        html = self.fetch_full_text(eurl)
 
-        Returns:
-            | list -- list of processed latest entries (as dicts).
-        """
-        # Fetch the feed data.
-        data = feedparser.parse(url)
+        entries.append({
+            'url': eurl,
+            'html': html,
+            'text': trim(sanitize(html)),
+            'author': entry.author,
+            'published': entry.published
+        })
 
-        # Build the entry dicts.
-        entries = []
-        for entry in data.entries:
+    return entries
 
-            # URL for this entry.
-            eurl = entry.links[0].href
 
-            # Complete HTML content for this entry.
-            html = self._fetch_full_text(eurl)
+def find_feed(url):
+    """
+    Find the RSS feed url for a site.
 
-            entries.append({
-                'url': eurl,
-                'html': html,
-                'text': trim(sanitize(html)),
-                'author': entry.author,
-                'published': entry.published
-            })
+    Args:
+        | url (str)    -- the url of the site to search.
 
-        return entries
+    Returns:
+        | str -- the discovered feed url.
+    """
+    return feedfinder.feed(url)
 
-    def find_feed(self, url):
-        """
-        Find the RSS feed url for a site.
 
-        Args:
-            | url (str)    -- the url of the site to search.
+def fetch_full_text(url):
+    """
+    Fetch the full content for a feed entry url.
 
-        Returns:
-            | str -- the discovered feed url.
-        """
-        return feedfinder.feed(url)
+    Args:
+        | url (str)    -- the url of the entry.
 
-    def _fetch_full_text(self, url):
-        """
-        Fetch the full content for a feed entry url.
-
-        Args:
-            | url (str)    -- the url of the entry.
-
-        Returns:
-            | str -- the full text, including html.
-        """
-        html = urllib.urlopen(url).read()
-        return Document(html).summary()
+    Returns:
+        | str -- the full text, including html.
+    """
+    html = urllib.urlopen(url).read()
+    return Document(html).summary()

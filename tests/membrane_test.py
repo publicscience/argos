@@ -1,16 +1,13 @@
 import unittest
-from membrane.feed import Feed
+import membrane.feed as feed
 import membrane.feedfinder as feedfinder
 
 class FeedTest(unittest.TestCase):
     def setUp(self):
-        self.f = Feed()
+        pass
 
     def tearDown(self):
-        self.f = None
-
-    def test_instance(self):
-        self.assertIsInstance(self.f, Feed)
+        pass
 
 
 class FeedFinderTest(unittest.TestCase):
