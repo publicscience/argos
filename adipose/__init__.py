@@ -9,6 +9,7 @@ Uses MongoDB, but can be modified.
 import pymongo
 import config
 import sys
+import pickle, bson
 from pymongo.errors import InvalidDocument
 
 # Maximum MongoDB message size, in bytes.
@@ -153,4 +154,18 @@ class Adipose:
         Close the connection.
         """
         self.client.close()
+
+
+    def pickle(self, obj):
+        """
+        Helper for properly pickling/encoding for the database.
+        """
+        return bson.binary.Binary(pickle.dumps(obj))
+
+
+    def unpickle(self, obj):
+        """
+        Helper for properly unpickling from the database.
+        """
+        return pickle.loads(obj)
 
