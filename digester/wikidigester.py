@@ -19,11 +19,6 @@ from itertools import chain
 from mwlib import parser
 from mwlib.refine.compat import parse_txt
 
-# Asynchronous distributed task queue.
-from celery.contrib.methods import task_method
-from celery import chord, Task
-from cluster.tasks import celery, workers, notify
-
 # Serializing lxml Elements.
 from lxml.etree import tostring, fromstring
 
@@ -42,7 +37,7 @@ class WikiDigester(Digester):
     Subclass of Digester.
     """
 
-    def __init__(self, file, namespace=NAMESPACE, db=DATABASE, url=None):
+    def __init__(self, file, namespace=NAMESPACE, db=DATABASE, url=None, silent=True):
         """
         Initialize the WikiDigester with a file and a namespace.
 
@@ -51,6 +46,7 @@ class WikiDigester(Digester):
             | namespace (str)   -- namespace of the file. Defaults to MediaWiki namespace.
             | db (str)          -- the name of the database to save to.
             | url (str)         -- the url from where the dump can be fetched.
+            | silent (bool)     -- whether or not to send an email upon digestion completion.
         """
 
         # Python 2.7 support.
@@ -62,6 +58,7 @@ class WikiDigester(Digester):
         self.database = db
         self._db = None
         self.url = url
+        self.silent = silent
 
         # Keep track of number of docs.
         # Necessary for performing TF-IDF processing.
@@ -99,14 +96,36 @@ class WikiDigester(Digester):
 
         logger.info('Beginning digestion of pages.')
 
-        docs = [self._process_page(elem) for elem in self._parse_pages()]
+        # Process pages and collect their text content ("docs").
+        docs = [self._process_page(elem) for elem in self._iterate_pages()]
+
+        logger.info('Vectorizing the page documents...')
+        # Vectorize the docs.
+        doc_vecs = brain.vectorize(docs)
+
+        # Testing
+        #outfile = open('/Users/ftseng/Desktop/test.pickle', 'wb')
+        #import pickle
+        #pickle.dump(doc_vecs, outfile)
+
+        # Pickle the docs to save to Mongo.
+        #_doc_vecs = self.db().pickle(doc_vecs)
+        #processed_name = self.url if self.url else self.file
+        #self.db().add({'dump': processed_name, 'docs': _doc_vecs})
+        #self.db().close()
 
         # Generate TF-IDF representation
         # of all docs upon completion.
-        self._generate_tfidf(docs)
+        #self._generate_tfidf(docs)
+
+        logger.info('Digestion complete!')
+
+        if not self.silent:
+            processed_name = self.url if self.url else self.file
+            notify('TF-IDF calculations complete for %s!' % processed_name)
 
 
-    def _parse_pages(self):
+    def _iterate_pages(self):
         """
         Parses out and yields pages from the dump.
         Only yields pages that are in
@@ -131,9 +150,9 @@ class WikiDigester(Digester):
         """
 
         # Get the text we need.
-        id          = int(self._find(elem, 'id').text)
+        #id          = int(self._find(elem, 'id').text)
         title       = self._find(elem, 'title').text
-        datetime    = self._find(elem, 'revision', 'timestamp').text
+        #datetime    = self._find(elem, 'revision', 'timestamp').text
         text        = self._find(elem, 'revision', 'text').text
         redirect    = self._find(elem, 'redirect')
 
@@ -157,32 +176,33 @@ class WikiDigester(Digester):
 
         # Build the bag of words representation of the document.
         clean_text = self._clean(text)
-        bag_of_words = brain.bag_of_words(clean_text)
+        return clean_text
+        #bag_of_words = brain.bag_of_words(clean_text)
 
         # Convert the bag of words to a 'sparse vector' representation.
         # Not a true sparse vector – it's really a list of (token_id, count) tuples,
         # but this works for now.
         # I'd prefer to keep it as dict, but integers as keys is invalid BSON,
         # so MongoDB rejects it.
-        sparse_bag_of_words = list(bag_of_words.items())
+        #sparse_bag_of_words = list(bag_of_words.items())
 
         # Assemble the doc.
-        doc = {
-                'title': title,
-                'datetime': datetime,
-                'freqs': sparse_bag_of_words,
-                'categories': categories,
-                'pagelinks': pagelinks
-        }
+        #doc = {
+                #'title': title,
+                #'datetime': datetime,
+                #'freqs': sparse_bag_of_words,
+                #'categories': categories,
+                #'pagelinks': pagelinks
+        #}
 
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
-        self.db().update({'_id': id}, {'$set': doc})
-        self.db().close()
+        #self.db().update({'_id': id}, {'$set': doc})
+        #self.db().close()
 
         # Return the doc id and its data.
-        return id, list(bag_of_words.keys())
+        #return id, list(bag_of_words.keys())
 
 
     def _generate_tfidf(self, docs):
@@ -298,95 +318,3 @@ class WikiDigester(Digester):
         for this dump.
         """
         self.db().empty()
-
-
-class WikiDigesterDistributed(WikiDigester):
-    """
-    A distributed version of WikiDigester.
-
-    Distributed digestion uses Celery to asynchronously distribute the processing of the pages.
-
-    See the WikiDigester methods for more comprehensive commenting and documentation.
-    """
-
-    def __init__(self, *args, silent=False, **kwargs):
-        """
-        See WikiDigester for all the args.
-
-        Args:
-            | silent (bool)        -- whether or not to send an email on digestion completion.
-        """
-
-        # Python 2.7 support.
-        try:
-            super().__init__(*args, **kwargs)
-        except TypeError:
-            WikiDigester.__init__(self, *args, **kwargs)
-
-        self.silent = silent
-
-
-    def digest(self):
-        """
-        Will process this instance's dump as a distributed,
-        asynchronous set of tasks.
-        """
-
-        # Check if the specified file exists.
-        if not exists(self.file):
-            logger.info('Specified file %s not found, fetching...' % self.file)
-            self.fetch_dump()
-
-        logger.info('Beginning distributed digestion of pages.')
-
-        # Check to see that there are workers available for distributed tasks.
-        if not workers():
-            logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
-            return
-
-        # Create async Celery tasks to
-        # process pages in parallel.
-        # ===
-        # The tasks are in a chord, so that
-        # after all tasks have been completed,
-        # generate TF-IDF representation of all docs.
-        # ===
-        # `_generate_tfidf` has to have `self` manually
-        # passed, and is a bit weird. See its definition below.
-        logger.info('Creating jobs for the pages...')
-        chord(self._handle_page.s(tostring(elem))
-                  for elem in self._parse_pages())(self._handle_tfidf.s(self, ))
-
-
-    @celery.task(filter=task_method)
-    def _handle_page(self, elem):
-        """
-        Celery task for asynchronously handling and processing a page.
-        """
-        # Get the element from the cached db in the Celery task.
-        return self._process_page(fromstring(elem))
-
-
-    @celery.task(filter=task_method)
-    def _handle_tfidf(corpus, self):
-        """
-        The positional argument ordering here is weird,
-        with `self` coming last, because of the way
-        Celery passes parameters to a class method subtask.
-        The *first* argument is the results of the chord's task group,
-        and any arguments you pass in manually come *afterwards*.
-        """
-        self._generate_tfidf(corpus)
-
-        # Notify of completion!
-        if not self.silent:
-            processed_name = self.url if self.url else self.file
-            notify('TF-IDF calculations complete for %s!' % processed_name)
-
-
-    def db(self):
-        """
-        Returns an interface for this digester's database.
-        Can't 'cache' the db client since it cannot properly be serialized.
-        """
-        return Adipose(self.database, 'pages')

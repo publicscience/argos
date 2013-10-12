@@ -5,10 +5,11 @@ Digest
 Digest the full dump, distributed.
 The digestion occurs in parts, rather
 than processing the entirety the dump as
-a single file.
+a single file. Each worker processes a part.
 """
 
-from digester.wikidigester import WikiDigesterDistributed
+from digester.wikidigester import WikiDigester
+from cluster.tasks import celery, workers, notify
 
 # For collecting dump links.
 import re
@@ -21,22 +22,36 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    if not workers():
+        logger.error('Can\'t start distributed digestion, no workers available or MQ server is not available.')
+        return
 
     # Get a list of all the page dump parts.
+    parts = get_parts_urls()
+
+    # Download and digest each part individually.
+    for idx, part in enumerate(parts):
+        logger.info('Digesting pages dump part %s (%s/%s)' % (part, idx, len(parts)))
+        wikidigest.s(url, part)
+
+
+@celery.task
+def wikidigest(url, part):
+    w = WikiDigester('/tmp/%s' % part, db='wikidump', url=url+part, silent=False)
+    w.digest()
+
+def get_parts_urls():
+    """
+    Extracts urls for the dump parts
+    from Wikimedia's dumps page.
+    """
     url = 'http://dumps.wikimedia.org/enwiki/latest/'
     req = request.Request(url)
     resp = request.urlopen(req)
     parser = DumpPageParser()
     parser.feed(resp.read().decode('utf-8'))
     parts = parser.get_data()
-
-    # Download and digest each part individually.
-    for idx, part in enumerate(parts):
-        logger.info('Digesting pages dump part %s (%s/%s)' % (part, idx, len(parts)))
-        w = WikiDigesterDistributed('/tmp/%s' % part, db='wikidump', url=url+part)
-
-        # Digest.
-        w.digest()
+    return parts
 
 
 class DumpPageParser(HTMLParser):
