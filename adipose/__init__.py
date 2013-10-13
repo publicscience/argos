@@ -89,6 +89,16 @@ class Adipose:
         self.collection.update(query, data, upsert=True)
 
 
+    def remove(self, query):
+        """
+        Removes a record.
+
+        Args:
+            | query (dict) -- query to locate record to update.
+        """
+        self.collection.remove(query)
+
+
     def index(self, key='_id', enforce_uniqueness=False):
         """
         Indexes the data by the specified key.
