@@ -47,10 +47,14 @@ def entries(url):
 
         entries.append({
             'url': eurl,
+            'source': url,
             'html': html,
             'text': trim(sanitize(html)),
             'author': entry.author,
-            'published': entry.published
+            'tags': entry.tags,
+            'title': entry.title,
+            'published': entry.published,
+            'updated': entry.updated
         })
 
     return entries
