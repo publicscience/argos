@@ -52,6 +52,9 @@ class FeedTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_feed_error(self):
+        self.assertRaises(Exception, feed.entries, 'foo')
+
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):

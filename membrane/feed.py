@@ -35,6 +35,11 @@ def entries(url):
     # Fetch the feed data.
     data = feedparser.parse(url)
 
+    # If the `bozo` value is anything
+    # but 0, something was wrong with the feed.
+    if data.bozo:
+        raise Exception('Error parsing feed.')
+
     # Build the entry dicts.
     entries = []
     for entry in data.entries:
