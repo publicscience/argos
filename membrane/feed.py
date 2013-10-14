@@ -56,7 +56,7 @@ def entries(url):
             'html': html,
             'text': trim(sanitize(html)),
             'author': entry.author,
-            'tags': entry.tags,
+            'tags': extract_tags(entry),
             'title': entry.title,
             'published': entry.published,
             'updated': entry.updated
@@ -64,6 +64,23 @@ def entries(url):
 
     return entries
 
+def extract_tags(entry):
+    """
+    Extract tags from a feed's entry,
+    returning it in a simpler format (a list of strings).
+
+    This operates assuming the tags are formatted like so::
+
+        [{'label': None,
+             'scheme': 'http://www.foreignpolicy.com/category/topic/military',
+             'term': 'Military'},
+        {'label': None,
+             'scheme': 'http://www.foreignpolicy.com/category/topic/national_security',
+             'term': 'National Security'}]
+
+    This seems to be the standard.
+    """
+    return [tag['term'] for tag in entry['tags']]
 
 def find_feed(url):
     """

@@ -56,6 +56,22 @@ class FeedTest(unittest.TestCase):
     def test_feed_error(self):
         self.assertRaises(Exception, feed.entries, 'foo')
 
+    def test_extract_tags(self):
+
+        entry = {
+            'tags': [
+                {'label': None,
+                 'scheme': 'http://www.foreignpolicy.com/category/topic/military',
+                 'term': 'Military'},
+                {'label': None,
+                 'scheme': 'http://www.foreignpolicy.com/category/topic/national_security',
+                 'term': 'National Security'}
+            ]
+        }
+
+        tags = feed.extract_tags(entry)
+        self.assertEqual(tags, ['Military', 'National Security'])
+
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
