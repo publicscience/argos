@@ -18,6 +18,10 @@ class RequiresMocks(unittest.TestCase):
         return thing
 
 class RequiresDB(RequiresMocks):
+    """
+    This class will setup a database server
+    for the duration of its tests.
+    """
     @classmethod
     def setUpClass(cls):
         cls.setup_db()
@@ -85,6 +89,10 @@ class RequiresDB(RequiresMocks):
 
 
 class RequiresWorkers(RequiresDB):
+    """
+    This class will setup a RabbitMQ server
+    and a Celery worker for the duration of its tests.
+    """
     @classmethod
     def setupClass(cls):
         cls.setup_db()
