@@ -8,16 +8,11 @@ class BrainTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_bag_of_words(self):
-        data = "hey there buddy, hey"
-        wbag = brain.bag_of_words(data)
-
-        # 'there' is filtered out as a stopword.
-        expected = {
-                41812295: 2,
-                103809561: 1
-        }
-        self.assertEqual(wbag, expected)
+    def test_tokenize(self):
+        data = "hey there buddy, hey Says, say"
+        tokens = brain.tokenize(data)
+        expected = ['hey', 'buddy', 'hey', 'say', 'say']
+        self.assertEqual(tokens,expected)
 
     def test_entity_recognition(self):
         with open('tests/data/sample.txt', 'r') as f:

@@ -19,42 +19,28 @@ try:
 except ImportError:
     from HTMLParser import HTMLParser
 
+from sklearn.feature_extraction.text import HashingVectorizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tag import pos_tag
 from nltk.chunk import batch_ne_chunk
 import string
-import zlib
 
-MAX_INT = 2147483647
 
-def bag_of_words(doc, id_limit=MAX_INT, hash_func=zlib.adler32):
+def tokenize(doc, **kwargs):
     """
-    Tokenize, stem, and then
-    count the word frequency
-    distribution of a document,
-    using the hashing trick,
-    to build a bag of words representation
-    of the document.
-
-    Lemmatizing may be too slow, perhaps
-    Porter Stemming should be used as a faster,
-    albeit less accurate, alternative?
+    Tokenizes a document, using a lemmatizer.
 
     Args:
-        | doc (str)         -- the text document to process.
-        | id_limit (int)    -- the maximum amount of token ids this dictionary can hold. Defaults to int32 max (2147483647), it is recommended you scale that back if you don't need that much.
-        | hash_func (func)  -- the hashing function to use for generating token ids.
+        | doc (str)                 -- the text document to process.
 
     Returns:
-        | dict              -- the bag of words; i.e. dict of {token_id: count}
+        | list                      -- the list of tokens.
     """
 
-    # Bag of words
-    wbag = {}
-
-    lemmr = WordNetLemmatizer()
+    tokens = []
+    lemmr = kwargs.get('lemmr', WordNetLemmatizer())
     stops = set(list(string.punctuation) + stopwords.words('english'))
 
     # Tokenize
@@ -67,14 +53,33 @@ def bag_of_words(doc, id_limit=MAX_INT, hash_func=zlib.adler32):
 
             # Lemmatize
             lemma = lemmr.lemmatize(token.lower())
+            tokens.append(lemma)
+    return tokens
 
-            # Hash token into its token id.
-            token_id = hash_func( token.encode('utf-8') ) % MAX_INT
 
-            # Increment count for this token id.
-            wbag[token_id] = wbag.get(token_id, 0) + 1
+class Tokenizer():
+    """
+    Custom tokenizer for vectorization.
+    Uses Lemmatization.
+    """
+    def __init__(self):
+        self.lemmr = WordNetLemmatizer()
+    def __call__(self, doc):
+        return tokenize(doc, lemmr=self.lemmr)
 
-    return wbag
+
+def vectorize(docs):
+    """
+    Vectorizes a list of documents.
+
+    Args:
+        | docs (list)       -- the documents to vectorize.
+
+    Returns:
+        | scipy sparse matrix (CSR/Compressed Sparse Row format)
+    """
+    h = HashingVectorizer(input='content', stop_words='english', norm='l1', tokenizer=Tokenizer())
+    return h.transform(docs)
 
 
 def recognize(doc):
@@ -116,10 +121,6 @@ def _extract_entities(tree):
             for child in tree:
                 entities.extend(_extract_entities(child))
     return entities
-
-
-def compare(docA, docB):
-    pass
 
 
 def trim(text):
