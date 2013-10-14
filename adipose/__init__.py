@@ -44,15 +44,15 @@ class Adipose:
         self.collection = self.db[collection]
 
 
-    def add(self, data):
+    def add(self, doc):
         """
-        Add data to the db.
+        Add doc to the db.
         If bulk inserting (i.e. passing in a list),
         will automatically break the list into smaller lists if it exceeds Mongo's maximum message size.
 
         Args:
-            | data (dict) -- the data to be saved.
-            | data (list) -- list of dicts to be saved.
+            | doc (dict) -- the doc to be saved.
+            | doc (list) -- list of docs to be saved.
 
         Example::
 
@@ -60,33 +60,57 @@ class Adipose:
         """
 
         # Check size of message, if bulk inserting.
-        if isinstance(data, list) and sys.getsizeof(data) > MAX_MESSAGE_SIZE:
+        if isinstance(doc, list) and sys.getsizeof(doc) > MAX_MESSAGE_SIZE:
             # If there's only one doc and it's still too large,
             # then the doc is just too large.
-            if len(data) == 1:
+            if len(doc) == 1:
                 raise InvalidDocument('Document exceeds maximum message size (%s)' % MAX_MESSAGE_SIZE)
 
             # If it is too large, recursively split in half until each message is an appropriate size.
-            midpoint = int(len(data)/2)
-            self.add(data[:midpoint])
-            self.add(data[midpoint:])
+            midpoint = int(len(doc)/2)
+            self.add(doc[:midpoint])
+            self.add(doc[midpoint:])
         else:
-            self.collection.insert(data)
+            self.collection.insert(doc)
 
 
     def update(self, query, data):
         """
         Updates or creates a new record.
+        This is different than `save` in that you query the record,
+        and then pass in only the data you want to update (not the entire doc).
+
+        An example use case is if you want to only change part
+        of a doc, rather than get the whole thing.
 
         Args:
             | query (dict) -- query to locate record to update.
-            | data (dict)  -- updated data.
+            | data (dict)  -- updated data (optional)
 
         Example::
 
             adipose.update({'title': 'foo'}, {'category': 'bar'})
         """
         self.collection.update(query, data, upsert=True)
+
+
+    def save(self, doc):
+        """
+        Saves or creates a new record.
+        This is different than `update` in that you pass in
+        an entire document, rather than a query and a partial document.
+
+        An example use case is if you fetch an entire record,
+        then manipulate it locally, and want to save the entire thing.
+
+        Args:
+            | doc (dict)  -- the doc to save.
+
+        Example::
+
+            adipose.save({'title': 'foo', 'category': 'bar'})
+        """
+        self.collection.save(doc)
 
 
     def remove(self, query):
