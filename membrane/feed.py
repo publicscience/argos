@@ -63,6 +63,7 @@ def entries(url):
 def find_feed(url):
     """
     Find the RSS feed url for a site.
+    Returns the first eligible feed.
 
     Args:
         | url (str)    -- the url of the site to search.
@@ -71,6 +72,20 @@ def find_feed(url):
         | str -- the discovered feed url.
     """
     return feedfinder.feed(url)
+
+
+def find_feeds(url):
+    """
+    Find the RSS feed urls for a site.
+    Returns all eligible feeds.
+
+    Args:
+        | url (str)    -- the url of the site to search.
+
+    Returns:
+        | list -- a list of the feed urls.
+    """
+    return feedfinder.feeds(url)
 
 
 def fetch_full_text(url):
