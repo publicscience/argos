@@ -1,5 +1,5 @@
 """
-Corpuser
+Collector
 ==============
 
 A corpus builder, for the sake of collecting
@@ -8,36 +8,40 @@ articles for training and/or testing.
 
 from membrane import feed
 from adipose import Adipose
-import zlib.adler32 as hash
+from zlib import adler32 as hash
 
 def fetch():
     """
     Fetch entries from the sources,
     and save (or update) to db.
     """
-    db = Adipose('corpus', 'articles')
-
-    # Load sources.
-    sources = sources()
+    articles_db = _articles_db()
+    sources_db = _sources_db()
 
     # Fetch entries for each source
-    for source in sources:
-        articles = feed.entries(source['url'])
+    for source in sources():
+        try:
+            articles = feed.entries(source['url'])
 
-        # Create (unique-ish) ids
-        # for each article,
-        # then save (or update).
-        for article in articles:
-            id = hash((article.title + article.published).encode('utf-8'))
-            db.update({'_id': id}, {'$set': article})
-    articles.close()
+            # Create (unique-ish) ids for each article,
+            # then save (or update).
+            for article in articles:
+                id = hash((article['title'] + article['published']).encode('utf-8'))
+                articles_db.update({'_id': id}, {'$set': article})
+        except Exception as e:
+            # Error with the feed, make a note.
+            source['errors'] = source.get('errors', 0) + 1
+            sources_db.save(source)
+
+    articles_db.close()
+    sources_db.close()
 
 
 def sources():
     """
     Get the feed sources data.
     """
-    sources = Adipose('corpus', 'sources')
+    sources = _sources_db()
     return [source for source in sources.all()]
 
 
@@ -49,7 +53,7 @@ def add_source(url):
         | url (str)     -- where to look for the feed,
                            or the feed itself.
     """
-    sources = Adipose('corpus', 'sources')
+    sources = _sources_db()
     feed_url = feed.find_feed(url)
     sources.add({'url': feed_url})
     sources.close()
@@ -65,7 +69,7 @@ def remove_source(url, delete_articles=False):
         | delete_articles (bool)    -- whether or not to delete articles
                                        from this source.
     """
-    sources = Adipose('corpus', 'sources')
+    sources = _sources_db()
     feed_url = feed.find_feed(url)
     sources.remove({'url': feed_url})
     sources.close()
@@ -73,8 +77,14 @@ def remove_source(url, delete_articles=False):
     # If specified, delete articles associated with
     # this source.
     if delete_articles:
-        articles = Adipose('corpus', 'articles')
+        articles = _articles_db()
         articles.remove({'source': feed_url})
     articles.close()
 
+
+def _sources_db():
+    return Adipose('corpus', 'sources')
+
+def _articles_db():
+    return Adipose('corpus', 'articles')
 

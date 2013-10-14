@@ -3,6 +3,7 @@ from unittest.mock import patch
 import time, socket, subprocess, tempfile
 from cluster.tasks import workers
 import time
+from adipose import Adipose
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):
@@ -86,6 +87,15 @@ class RequiresDB(RequiresMocks):
             | cmds (list)   -- list of command args
         """
         return subprocess.Popen(cmds, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def _test_db(self, name):
+        """
+        Helper for creating an empty
+        test database.
+        """
+        db = Adipose('test', name)
+        db.empty()
+        return db
 
 
 class RequiresWorkers(RequiresDB):
