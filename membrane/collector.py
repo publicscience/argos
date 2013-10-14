@@ -10,6 +10,10 @@ from membrane import feed
 from adipose import Adipose
 from zlib import adler32 as hash
 
+# Logging.
+from logger import logger
+logger = logger(__name__)
+
 def fetch():
     """
     Fetch entries from the sources,
@@ -18,20 +22,28 @@ def fetch():
     articles_db = _articles_db()
     sources_db = _sources_db()
 
+    logger.info('Fetching articles...')
+
     # Fetch entries for each source
     for source in sources():
+        feed_url = source['url']
         try:
-            articles = feed.entries(source['url'])
+            logger.info('Fetching from %s...' % feed_url)
+            articles = feed.entries(feed_url)
 
             # Create (unique-ish) ids for each article,
             # then save (or update).
+            logger.info('Fetched %s articles.' % len(articles))
             for article in articles:
                 id = hash((article['title'] + article['published']).encode('utf-8'))
                 articles_db.update({'_id': id}, {'$set': article})
         except Exception as e:
             # Error with the feed, make a note.
+            logger.info('Error fetching from %s.' % feed_url)
             source['errors'] = source.get('errors', 0) + 1
             sources_db.save(source)
+
+    logger.info('Finished fetching articles.')
 
     articles_db.close()
     sources_db.close()
