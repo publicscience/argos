@@ -123,10 +123,6 @@ def _extract_entities(tree):
     return entities
 
 
-def compare(docA, docB):
-    pass
-
-
 def trim(text):
     """
     Compresses and trims extra whitespace.
