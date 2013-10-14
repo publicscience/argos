@@ -104,5 +104,18 @@ class AdiposeTest(RequiresDB):
         result = self.a.find(updated)
         self.assertEquals(result['title'], 'bar')
 
+    def test_save(self):
+        data = {'title': 'foo'}
+        updated = {'title': 'bar'}
+
+        self.a.add(data)
+        doc = self.a.find(data)
+        doc['title'] = updated['title']
+        self.a.save(doc)
+
+        result = self.a.find(updated)
+        self.assertEquals(result['title'], 'bar')
+
+
 if __name__ == '__main__':
 	unittest.main()
