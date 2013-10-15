@@ -36,9 +36,9 @@ class WikiDigesterTest(RequiresDB):
     def test_instance(self):
         self.assertIsInstance(self.w, WikiDigester)
 
-    def test_counts_docs(self):
-        self._digest()
-        self.assertEqual(self.w.num_docs, 1)
+    #def test_counts_docs(self):
+        #self._digest()
+        #self.assertEqual(self.w.num_docs, 1)
 
     #def test_digest(self):
         #self._digest()
