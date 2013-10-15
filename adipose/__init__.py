@@ -150,10 +150,14 @@ class Adipose:
         return self.collection.find_one(query)
 
 
-    def all(self):
+    def all(self, query=None):
         """
-        Returns an iterable for all records
+        Returns an iterable for all records,
+        or all records for a query,
         in the collection.
+
+        Args:
+            | query (dict) -- the query to be searched. Optional, defaults to None, which returns ALL records.
 
         Example::
 
@@ -163,7 +167,10 @@ class Adipose:
         Returns:
             | iterable -- cursor to iterate over all docs with.
         """
-        return self.collection.find()
+        if query:
+            return self.collection.find(query)
+        else:
+            return self.collection.find()
 
 
     def empty(self):
