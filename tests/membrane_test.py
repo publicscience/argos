@@ -129,6 +129,9 @@ class CollectorTest(RequiresDB):
         # Mock entries.
         self.mock_entries = self.create_patch('membrane.feed.entries')
 
+        # Mock finding feeds.
+        self.mock_find_feed = self.create_patch('membrane.feed.find_feed')
+
     def tearDown(self):
         pass
 
@@ -155,4 +158,15 @@ class CollectorTest(RequiresDB):
 
         source_ = self.sources_db.find(self.source)
         self.assertEquals(source_['errors'], 1)
+
+    def test_add_source(self):
+        url = 'foo'
+        self.mock_find_feed.return_value = 'foo'
+
+        collector.add_source(url)
+        self.assertEquals(self.sources_db.count(), 1)
+
+        # Ensure duplicates aren't added.
+        collector.add_source(url)
+        self.assertEquals(self.sources_db.count(), 1)
 

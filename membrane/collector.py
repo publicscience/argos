@@ -67,7 +67,8 @@ def add_source(url):
     """
     sources = _sources_db()
     feed_url = feed.find_feed(url)
-    sources.add({'url': feed_url})
+    doc = {'url': feed_url}
+    sources.update(doc, {'$set': doc})
     sources.close()
 
 
@@ -91,7 +92,20 @@ def remove_source(url, delete_articles=False):
     if delete_articles:
         articles = _articles_db()
         articles.remove({'source': feed_url})
-    articles.close()
+        articles.close()
+
+
+def collect_sources(url):
+    """
+    Collects feed sources from the specified url,
+    and adds them.
+
+    Args:
+        | url (str)     -- where to look for feeds.
+    """
+    feeds = feed.find_feeds(url)
+    for feed in feeds:
+        add_source(feed)
 
 
 def _sources_db():
