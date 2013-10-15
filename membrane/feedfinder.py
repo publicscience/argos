@@ -102,7 +102,8 @@ def feeds(url):
             feed_links.extend(_filter_feed_links(links))
             feed_links.extend(_filter_feedish_links(links))
 
-    return feed_links
+    # Filter out duplicates.
+    return list(set(feed_links))
 
 
 def feed(url):

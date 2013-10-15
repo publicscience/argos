@@ -104,8 +104,8 @@ def collect_sources(url):
         | url (str)     -- where to look for feeds.
     """
     feeds = feed.find_feeds(url)
-    for feed in feeds:
-        add_source(feed)
+    for f in feeds:
+        add_source(f)
 
 
 def _sources_db():
