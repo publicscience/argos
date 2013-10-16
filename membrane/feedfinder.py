@@ -40,6 +40,7 @@ except ImportError:
     import urlparse as parse
 
 import lxml.html
+import chardet
 
 def feeds(url):
     """
@@ -47,7 +48,7 @@ def feeds(url):
     for a given URL.
     """
 
-    url = _full_url(url).lower()
+    url = _full_url(url)
     data = _get(url)
 
     # Check if the url is a feed.
@@ -101,7 +102,8 @@ def feeds(url):
             feed_links.extend(_filter_feed_links(links))
             feed_links.extend(_filter_feedish_links(links))
 
-    return feed_links
+    # Filter out duplicates.
+    return list(set(feed_links))
 
 
 def feed(url):
@@ -229,12 +231,18 @@ def _get(url):
 
     try:
         resp = request.urlopen(req)
-        data = resp.read().decode('utf-8').lower()
-        return data
+        body = resp.read()
+
+        # Use Chardet to determine the encoding.
+        encoding = chardet.detect(body)['encoding']
+        return body.decode(encoding)
 
     except request.HTTPError as e:
         print('HTTP Error:', e.code, url)
         return ''
     except request.URLError as e:
         print('URL Error:', e.reason, url)
+        return ''
+    except ConnectionResetError as e:
+        print('Connection Error:', e.reason, url)
         return ''

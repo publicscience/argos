@@ -1,7 +1,8 @@
 import unittest
-from tests import RequiresMocks
+from tests import RequiresMocks, RequiresDB
 import membrane.feed as feed
 import membrane.feedfinder as feedfinder
+import membrane.collector as collector
 
 # Some testing data.
 mock_page = """
@@ -52,6 +53,25 @@ class FeedTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_feed_error(self):
+        self.assertRaises(Exception, feed.entries, 'foo')
+
+    def test_extract_tags(self):
+
+        entry = {
+            'tags': [
+                {'label': None,
+                 'scheme': 'http://www.foreignpolicy.com/category/topic/military',
+                 'term': 'Military'},
+                {'label': None,
+                 'scheme': 'http://www.foreignpolicy.com/category/topic/national_security',
+                 'term': 'National Security'}
+            ]
+        }
+
+        tags = feed.extract_tags(entry)
+        self.assertEqual(tags, ['Military', 'National Security'])
+
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
@@ -89,4 +109,64 @@ class FeedFinderTest(RequiresMocks):
     def test_is_not_feed(self):
         self.mock_get.return_value = mock_page
         self.assertFalse(feedfinder._is_feed('http://test.com/'))
+
+
+class CollectorTest(RequiresDB):
+    def setUp(self):
+        self.source = {'url': 'foo'}
+
+        # Mock the databases.
+        self.sources_db = self._test_db('sources')
+        self.articles_db = self._test_db('articles')
+
+        self.mock_sources_db = self.create_patch('membrane.collector._sources_db')
+        self.mock_sources_db.return_value = self.sources_db
+        self.sources_db.add(self.source)
+
+        self.mock_articles_db = self.create_patch('membrane.collector._articles_db')
+        self.mock_articles_db.return_value = self.articles_db
+
+        # Mock entries.
+        self.mock_entries = self.create_patch('membrane.feed.entries')
+
+        # Mock finding feeds.
+        self.mock_find_feed = self.create_patch('membrane.feed.find_feed')
+
+    def tearDown(self):
+        pass
+
+    def test_fetch(self):
+        expected_id = 2617640942
+        self.mock_entries.return_value = [{'title': 'Foo', 'published': 'Fri, 11 Oct 2013 23:55:00 +0000'}]
+
+        self.assertEquals(self.articles_db.count(), 0)
+
+        collector.fetch()
+
+        self.assertEquals(self.articles_db.count(), 1)
+
+        article = self.articles_db.find({'_id': expected_id})
+        self.assertEquals(article['title'], 'Foo')
+
+    def test_fetch_error(self):
+        source_ = self.sources_db.find(self.source)
+        self.assertEquals(source_.get('errors', 0), 0)
+
+        self.mock_entries.side_effect = Exception()
+
+        collector.fetch()
+
+        source_ = self.sources_db.find(self.source)
+        self.assertEquals(source_['errors'], 1)
+
+    def test_add_source(self):
+        url = 'foo'
+        self.mock_find_feed.return_value = 'foo'
+
+        collector.add_source(url)
+        self.assertEquals(self.sources_db.count(), 1)
+
+        # Ensure duplicates aren't added.
+        collector.add_source(url)
+        self.assertEquals(self.sources_db.count(), 1)
 

@@ -17,8 +17,11 @@ import feedparser
 from urllib import request
 from http.cookiejar import CookieJar
 from . import feedfinder
-from brain import trim, sanitize
+from brain import trim, sanitize, recognize
 from readability.readability import Document
+
+# For feedparser exceptions.
+from xml.sax._exceptions import SAXParseException
 
 
 def entries(url):
@@ -34,6 +37,13 @@ def entries(url):
     """
     # Fetch the feed data.
     data = feedparser.parse(url)
+
+    # If the `bozo` value is anything
+    # but 0, there was an error parsing (or connecting) to the feed.
+    if data.bozo:
+        # Some errors are ok.
+        if not isinstance(data.bozo_exception, feedparser.CharacterEncodingOverride):
+            raise data.bozo_exception
 
     # Build the entry dicts.
     entries = []
@@ -51,7 +61,7 @@ def entries(url):
             'html': html,
             'text': trim(sanitize(html)),
             'author': entry.author,
-            'tags': entry.tags,
+            'tags': extract_tags(entry),
             'title': entry.title,
             'published': entry.published,
             'updated': entry.updated
@@ -59,10 +69,38 @@ def entries(url):
 
     return entries
 
+def extract_tags(entry):
+    """
+    Extract tags from a feed's entry,
+    returning it in a simpler format (a list of strings).
+
+    This operates assuming the tags are formatted like so::
+
+        [{'label': None,
+             'scheme': 'http://www.foreignpolicy.com/category/topic/military',
+             'term': 'Military'},
+        {'label': None,
+             'scheme': 'http://www.foreignpolicy.com/category/topic/national_security',
+             'term': 'National Security'}]
+
+    This seems to be the standard.
+
+    But there is a fallback if these tags are not supplied.
+    Named Entity Recognition is used as a rough approximation of tags.
+    """
+    # If tags are supplied, use them.
+    if 'tags' in entry:
+        return [tag['term'] for tag in entry['tags']]
+
+    # Otherwise, try to extract some.
+    else:
+        sample = ' '.join([entry['title'], entry['summary']])
+        return recognize(sample)
 
 def find_feed(url):
     """
     Find the RSS feed url for a site.
+    Returns the first eligible feed.
 
     Args:
         | url (str)    -- the url of the site to search.
@@ -71,6 +109,20 @@ def find_feed(url):
         | str -- the discovered feed url.
     """
     return feedfinder.feed(url)
+
+
+def find_feeds(url):
+    """
+    Find the RSS feed urls for a site.
+    Returns all eligible feeds.
+
+    Args:
+        | url (str)    -- the url of the site to search.
+
+    Returns:
+        | list -- a list of the feed urls.
+    """
+    return feedfinder.feeds(url)
 
 
 def fetch_full_text(url):
