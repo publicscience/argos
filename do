@@ -72,6 +72,13 @@ function setup_nltk {
     rm ~/nltk_data/taggers/maxent_treebank_pos_tagger.zip
 }
 
+function setup_ner {
+    wget -O ner.zip 'http://nlp.stanford.edu/software/stanford-ner-2013-06-20.zip'
+    unzip -o ner.zip
+    mv 'stanford-ner-2013-06-20' ner
+    rm ner.zip
+}
+
 function setup_doc {
     source dev-env/bin/activate
     cd doc
@@ -90,6 +97,13 @@ then
 elif [[ $1 == 'mongo' ]]
 then
     mongod --dbpath db
+
+
+# Start the Stanford NER server.
+elif [[ $1 == 'ner' ]]
+then
+    cd ner
+    java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 8080 -outputFormat inlineXML
 
 
 # Run tests.
@@ -115,12 +129,6 @@ then
     celery worker --loglevel=info --config=cluster.celery_config
 
 
-elif [[ $1 == 'digest' ]]
-then
-    source dev-env/bin/activate
-    python digest.py
-
-
 # Start RabbitMQ server.
 elif [[ $1 == 'mq' ]]
 then
@@ -136,34 +144,9 @@ then
 # Setup some stuff.
 elif [[ $1 == 'setup' ]]
 then
-
-    # Set up a new development
-    # or master environment.
-    if [[ $2 == 'all' ]]
-    then
-        setup_dependencies
-        setup_virtualenv
-        setup_nltk
-        setup_doc
-
-    # Set up a minion/worker environment.
-    elif [[ $2 == 'worker' ]]
-    then
-        setup_dependencies
-        setup_virtualenv
-        setup_nltk
-
-    elif [[ $2 == 'deps' ]]
-    then
-        setup_dependencies
-
-    elif [[ $2 == 'venv' ]]
-    then
-        setup_virtualenv
-
-    elif [[ $2 == 'nltk' ]]
-    then
-        setup_nltk
-
-    fi
+    setup_dependencies
+    setup_virtualenv
+    setup_nltk
+    setup_ner
+    setup_doc
 fi

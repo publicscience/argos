@@ -19,3 +19,4 @@ id_rsa
 id_rsa.pub
 config.py
 celery_config.py
+ner/
