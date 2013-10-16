@@ -103,7 +103,7 @@ then
 elif [[ $1 == 'ner' ]]
 then
     cd ner
-    java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 8080 -outputFormat inlineXML
+    java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.conll.4class.distsim.crf.ser.gz -port 8080 -outputFormat inlineXML
 
 
 # Run tests.
