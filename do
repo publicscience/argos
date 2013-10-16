@@ -141,6 +141,11 @@ then
     screen -S shallowthought -c .screen
 
 
+elif [[ $1 == 'nltk' ]]
+then
+    setup_nltk
+
+
 # Setup some stuff.
 elif [[ $1 == 'setup' ]]
 then

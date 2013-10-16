@@ -55,7 +55,7 @@ digester:
 app-nltk-data:
     cmd.run:
         - cwd: /var/app/digester/
-        - name: /var/app/digester/do setup nltk
+        - name: /var/app/digester/do nltk
         - require:
             - virtualenv: venv
 
