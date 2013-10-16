@@ -33,11 +33,10 @@ def fetch():
 
             # Create (unique-ish) ids for each article,
             # then save (or update).
-            logger.info('Fetched %s articles.' % len(articles))
             for article in articles:
                 id = hash((article['title'] + article['published']).encode('utf-8'))
                 articles_db.update({'_id': id}, {'$set': article})
-        except Exception as e:
+        except feed.SAXParseException as e:
             # Error with the feed, make a note.
             logger.info('Error fetching from %s.' % feed_url)
             source['errors'] = source.get('errors', 0) + 1

@@ -17,8 +17,11 @@ import feedparser
 from urllib import request
 from http.cookiejar import CookieJar
 from . import feedfinder
-from brain import trim, sanitize
+from brain import trim, sanitize, recognize
 from readability.readability import Document
+
+# For feedparser exceptions.
+from xml.sax._exceptions import SAXParseException
 
 
 def entries(url):
@@ -36,9 +39,11 @@ def entries(url):
     data = feedparser.parse(url)
 
     # If the `bozo` value is anything
-    # but 0, something was wrong with the feed.
+    # but 0, there was an error parsing (or connecting) to the feed.
     if data.bozo:
-        raise Exception('Error parsing feed.')
+        # Some errors are ok.
+        if not isinstance(data.bozo_exception, feedparser.CharacterEncodingOverride):
+            raise data.bozo_exception
 
     # Build the entry dicts.
     entries = []
@@ -79,8 +84,18 @@ def extract_tags(entry):
              'term': 'National Security'}]
 
     This seems to be the standard.
+
+    But there is a fallback if these tags are not supplied.
+    Named Entity Recognition is used as a rough approximation of tags.
     """
-    return [tag['term'] for tag in entry['tags']]
+    # If tags are supplied, use them.
+    if 'tags' in entry:
+        return [tag['term'] for tag in entry['tags']]
+
+    # Otherwise, try to extract some.
+    else:
+        sample = ' '.join([entry['title'], entry['summary']])
+        return recognize(sample)
 
 def find_feed(url):
     """
