@@ -17,7 +17,7 @@ import feedparser
 from urllib import request
 from http.cookiejar import CookieJar
 from . import feedfinder
-from brain import trim, sanitize, recognize
+from brain import trim, sanitize, entities
 from readability.readability import Document
 
 # For feedparser exceptions.
@@ -54,17 +54,18 @@ def entries(url):
 
         # Complete HTML content for this entry.
         html = fetch_full_text(eurl)
+        entry['fulltext'] = trim(sanitize(html))
 
         entries.append({
             'url': eurl,
             'source': url,
             'html': html,
-            'text': trim(sanitize(html)),
-            'author': entry.author,
+            'text': entry['fulltext'],
+            'author': entry.get('author', None),
             'tags': extract_tags(entry),
             'title': entry.title,
             'published': entry.published,
-            'updated': entry.updated
+            'updated': entry.get('updated', entry.published)
         })
 
     return entries
@@ -73,6 +74,9 @@ def extract_tags(entry):
     """
     Extract tags from a feed's entry,
     returning it in a simpler format (a list of strings).
+
+    Args:
+        | entry (dict)   -- the entry dict with (or without tags)
 
     This operates assuming the tags are formatted like so::
 
@@ -94,8 +98,9 @@ def extract_tags(entry):
 
     # Otherwise, try to extract some.
     else:
-        sample = ' '.join([entry['title'], entry['summary']])
-        return recognize(sample)
+        #sample = '. '.join([entry['title'], entry['summary']])
+        sample = entry['fulltext']
+        return entities(sample)
 
 def find_feed(url):
     """
