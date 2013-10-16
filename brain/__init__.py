@@ -23,8 +23,7 @@ from sklearn.feature_extraction.text import HashingVectorizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
-from nltk.tag import pos_tag
-from nltk.chunk import batch_ne_chunk
+import ner
 import string
 
 
@@ -82,10 +81,13 @@ def vectorize(docs):
     return h.transform(docs)
 
 
-def recognize(doc):
+def entities(doc):
     """
     Named entity recognition on
     a text document.
+
+    Requires that a Stanford NER server is
+    running on localhost:8080.
 
     Args:
         | doc (str)     -- the document to process.
@@ -94,33 +96,16 @@ def recognize(doc):
         | set           -- set of unique entity names.
     """
 
-    sents     = sent_tokenize(doc)
-    tokenized = [word_tokenize(sent) for sent in sents]
-    tagged    = [pos_tag(sent) for sent in tokenized]
-    chunked   = batch_ne_chunk(tagged, binary=True)
+    tagger = ner.SocketNER(host='localhost', port=8080)
+    entities = tagger.get_entities(doc)
 
-    entities = []
-    for tree in chunked:
-        entities.extend(_extract_entities(tree))
+    # We're only interested in the entity names,
+    # not their tags.
+    names = [entities[key] for key in entities]
 
-    return set(entities)
+    # Flatten the list of lists, return only unique values.
+    return list({name for sublist in names for name in sublist})
 
-
-def _extract_entities(tree):
-    """
-    Extract entities from a tree.
-
-    Args:
-        | tree (Tree) -- the tree to extract from.
-    """
-    entities = []
-    if hasattr(tree, 'node') and tree.node:
-        if tree.node == 'NE':
-            entities.append(' '.join([child[0] for child in tree]))
-        else:
-            for child in tree:
-                entities.extend(_extract_entities(child))
-    return entities
 
 
 def trim(text):

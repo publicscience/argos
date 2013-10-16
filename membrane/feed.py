@@ -17,7 +17,7 @@ import feedparser
 from urllib import request
 from http.cookiejar import CookieJar
 from . import feedfinder
-from brain import trim, sanitize, recognize
+from brain import trim, sanitize, entities
 from readability.readability import Document
 
 # For feedparser exceptions.
@@ -94,8 +94,8 @@ def extract_tags(entry):
 
     # Otherwise, try to extract some.
     else:
-        sample = ' '.join([entry['title'], entry['summary']])
-        return recognize(sample)
+        sample = '. '.join([entry['title'], entry['summary']])
+        return entities(sample)
 
 def find_feed(url):
     """
