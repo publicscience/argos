@@ -14,7 +14,7 @@ Example::
 """
 
 import feedparser
-from urllib import request
+from urllib import request, error
 from http.cookiejar import CookieJar
 from . import feedfinder
 from brain import trim, sanitize, entities
@@ -28,6 +28,9 @@ def entries(url):
     """
     Parse a feed from the specified url,
     gathering the latest entries.
+
+    The minimum length of an entry is
+    500 characters. Anything under will be ignored.
 
     Args:
         | url (str)    -- the url of the feed.
@@ -55,6 +58,10 @@ def entries(url):
         # Complete HTML content for this entry.
         html = fetch_full_text(eurl)
         entry['fulltext'] = trim(sanitize(html))
+
+        # Skip over entries that are too short.
+        if len(entry['fulltext']) < 500:
+            continue
 
         entries.append({
             'url': eurl,
@@ -146,5 +153,10 @@ def fetch_full_text(url):
     # Without cookies, you get thrown into an infinite loop.
     cookies = CookieJar()
     opener = request.build_opener(request.HTTPCookieProcessor(cookies))
-    html = opener.open(url).read()
+
+    # Spoof a user agent.
+    # This can help get around 403 (forbidden) errors.
+    req = request.Request(url, headers={'User-Agent': 'Chrome'})
+
+    html = opener.open(req).read()
     return Document(html).summary()
