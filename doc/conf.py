@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Shallow Thought documentation build configuration file, created by
+# Argos documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul 16 10:03:33 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Shallow Thought'
+project = u'Argos'
 copyright = u'2013, Francis Tseng'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -167,7 +167,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ShallowThoughtdoc'
+htmlhelp_basename = 'Argosdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -186,7 +186,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'ShallowThought.tex', u'Shallow Thought Documentation',
+  ('index', 'Argos.tex', u'Argos Documentation',
    u'Francis Tseng', 'manual'),
 ]
 
@@ -216,7 +216,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'shallowthought', u'Shallow Thought Documentation',
+    ('index', 'argos', u'Argos Documentation',
      [u'Francis Tseng'], 1)
 ]
 
@@ -230,8 +230,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'ShallowThought', u'Shallow Thought Documentation',
-   u'Francis Tseng', 'ShallowThought', 'One line description of project.',
+  ('index', 'Argos', u'Argos Documentation',
+   u'Francis Tseng', 'Argos', 'One line description of project.',
    'Miscellaneous'),
 ]
 

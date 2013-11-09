@@ -138,7 +138,7 @@ then
 # Start screen session with everything setup.
 elif [[ $1 == 'go' ]]
 then
-    screen -S shallowthought -c .screen
+    screen -S development -c .screen
 
 
 elif [[ $1 == 'nltk' ]]

@@ -1,14 +1,14 @@
-Shallow Thought
+Argos
 ===============
 
 Please consult the
-[wiki](https://github.com/publicscience/shallowthought/wiki) for detailed information.
+[wiki](https://github.com/publicscience/argos/wiki) for detailed information.
 
 # Quick Setup
 
-The setup process for Shallow Thought is fairly complex, but some scripts vastly simplify it.
+The setup process for Argos is fairly complex, but some scripts vastly simplify it.
 
-Shallow Thought is built in Python 3.3, so make sure you have `pip3` and `virtualenv-3.3`:
+Argos is built in Python 3.3, so make sure you have `pip3` and `virtualenv-3.3`:
 ```bash
 # OSX
 $ brew install python3 # (also installs pip3)
@@ -47,4 +47,4 @@ This command will startup a `screen` session with four windows running:
 # AWS Setup
 You will also need to set up Amazon Web Services to adminster and use
 clusters. See [AWS
-Setup](https://github.com/publicscience/shallowthought/wiki/AWS-Setup)
+Setup](https://github.com/publicscience/argos/wiki/AWS-Setup)
