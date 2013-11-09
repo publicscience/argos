@@ -14,11 +14,19 @@ from zlib import adler32 as hash
 from logger import logger
 logger = logger(__name__)
 
+def collect():
+    """
+    Fetches entries and processes them.
+    """
+    articles = fetch()
+    docs = [article.text for article in articles]
+
 def fetch():
     """
     Fetch entries from the sources,
     and save (or update) to db.
     """
+    results = []
     articles_db = _articles_db()
     sources_db = _sources_db()
 
@@ -36,6 +44,10 @@ def fetch():
             for article in articles:
                 id = hash((article['title'] + article['published']).encode('utf-8'))
                 articles_db.update({'_id': id}, {'$set': article})
+
+                article['_id'] = id
+                results.append(article)
+
         except feed.SAXParseException as e:
             # Error with the feed, make a note.
             logger.info('Error fetching from %s.' % feed_url)
@@ -46,6 +58,8 @@ def fetch():
 
     articles_db.close()
     sources_db.close()
+
+    return results
 
 
 def sources():
