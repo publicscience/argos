@@ -19,7 +19,9 @@ try:
 except ImportError:
     from HTMLParser import HTMLParser
 
-from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer, TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+from sklearn.cluster import DBSCAN
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
@@ -77,8 +79,21 @@ def vectorize(docs):
     Returns:
         | scipy sparse matrix (CSR/Compressed Sparse Row format)
     """
-    h = HashingVectorizer(input='content', stop_words='english', norm='l1', tokenizer=Tokenizer())
+    h = HashingVectorizer(input='content', stop_words='english', norm=None, tokenizer=Tokenizer())
     return h.transform(docs)
+
+
+def cluster(docs):
+    """
+    Clusters a list of documents.
+    """
+    t = TfidfVectorizer(input='content', stop_words='english', tokenizer=Tokenizer())
+    lsa = TruncatedSVD(n_components=100)
+    db = DBSCAN(eps=0.3, min_samples=10)
+
+    vecs = t.fit_transform(docs)
+    #vecs = lsa.fit_transform(vecs)
+    results = db.fit(vecs)
 
 
 def entities(doc):
