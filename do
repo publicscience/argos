@@ -24,6 +24,9 @@ function setup_dependencies {
         # Bzr, for python-dateutil
         brew install bzr
 
+        # gfortran, for building scipy
+        brew install gfortran
+
     # Otherwise, assume Linux...
     else 
         sudo apt-get install screen -y
