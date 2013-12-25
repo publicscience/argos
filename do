@@ -43,6 +43,9 @@ function setup_dependencies {
         # MongoDB
         sudo apt-get install mongodb -y
 
+        # Redis
+        sudo apt-get install redis -y
+
         # Bzr, for python-dateutil
         sudo apt-get install bzr -y
     fi
@@ -52,6 +55,7 @@ function setup_virtualenv {
     # Setup the Python 3.3 virtualenv.
     virtualenv-3.3 dev-env --no-site-packages
     source dev-env/bin/activate
+    pip install numpy
     pip install -r requirements.txt
 }
 
@@ -143,6 +147,11 @@ elif [[ $1 == 'mq' ]]
 then
     rabbitmq-server
 
+# Start redis server.
+elif [[ $1 == 'redis' ]]
+then
+    redis-server
+
 
 # Start screen session with everything setup.
 elif [[ $1 == 'go' ]]
@@ -160,7 +169,7 @@ elif [[ $1 == 'setup' ]]
 then
     setup_dependencies
     setup_virtualenv
-    setup_nltk
     setup_ner
+    setup_nltk
     setup_doc
 fi

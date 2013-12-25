@@ -14,5 +14,6 @@ zombie qr
 screen -t mongo ./do mongo
 screen -t worker ./do worker
 screen -t rabbit ./do mq
+screen -t redis ./do redis
 screen -t ner ./do ner
 screen -t bash
