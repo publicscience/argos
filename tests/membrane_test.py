@@ -152,7 +152,7 @@ class CollectorTest(RequiresDB):
         source_ = self.sources_db.find(self.source)
         self.assertEquals(source_.get('errors', 0), 0)
 
-        self.mock_entries.side_effect = Exception()
+        self.mock_entries.side_effect = feed.SAXException('', None)
 
         collector.fetch()
 

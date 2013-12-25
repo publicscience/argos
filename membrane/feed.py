@@ -21,7 +21,7 @@ from brain import trim, sanitize, entities
 from readability.readability import Document
 
 # For feedparser exceptions.
-from xml.sax._exceptions import SAXParseException
+from xml.sax._exceptions import SAXException
 
 
 def entries(url):

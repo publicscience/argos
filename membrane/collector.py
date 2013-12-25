@@ -48,7 +48,7 @@ def fetch():
                 article['_id'] = id
                 results.append(article)
 
-        except feed.SAXParseException as e:
+        except feed.SAXException as e:
             # Error with the feed, make a note.
             logger.info('Error fetching from %s.' % feed_url)
             source['errors'] = source.get('errors', 0) + 1

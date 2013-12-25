@@ -17,32 +17,32 @@ class BrainTest(unittest.TestCase):
     def test_entity_recognition(self):
         with open('tests/data/sample.txt', 'r') as f:
             sample = f.read()
-        results = brain.recognize(sample)
+        results = brain.entities(sample)
 
         expected = {
-                'Trinity',
-                'Julius Robert Oppenheimer',
-                'California',
-                'New Mexico',
-                'American',
-                'Berkeley',
-                'Advanced Study',
-                'Enrico Fermi',
-                'Soviet Union',
-                'Princeton',
-                'Johnson',
-                'Oppenheimer',
-                'Bhagavad Gita',
-                'United States Atomic Energy Commission',
-                'Lyndon',
-                'Manhattan Project',
-                'Enrico Fermi Award',
-                'Second Red Scare',
-                'University',
-                'John'
-        }
-
-        self.assertEqual(results, expected)
+                 'Enrico Fermi Award', 
+                 'Trinity', 
+                 'Soviet Union', 
+                 'Julius Robert Oppenheimer', 
+                 'Enrico Fermi', 
+                 'Second Red Scare', 
+                 'Berkeley', 
+                 'Phillips', 
+                 'Born', 
+                 'American', 
+                 'University of California', 
+                 'Bhagavad Gita', 
+                 'Oppenheimer', 
+                 'John F. Kennedy', 
+                 'New Mexico', 
+                 'World War II', 
+                 'Institute for Advanced Study in Princeton', 
+                 'Lyndon B. Johnson', 
+                 'United States Atomic Energy Commission', 
+                 'Manhattan Project'
+        } 
+  
+        self.assertEqual(set(results), expected)
 
     def test_trim(self):
         data = '  hey      there           neighbor   '
