@@ -172,4 +172,15 @@ then
     setup_ner
     setup_nltk
     setup_doc
+
+    # Rename configs if necessary.
+    if [ ! -f config.py ]; then
+        mv config-sample.py config.py
+    fi
+    if [ ! -f cluster/config.ini ]; then
+        mv cluster/config-sample.ini cluster/config.ini
+    fi
+    if [ ! -f cluster/celery_config.py ]; then
+        mv cluster/celery_config-sample.py cluster/celery_config.py
+    fi
 fi
