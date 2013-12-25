@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch
 import time, socket, subprocess, tempfile
 from cluster.tasks import workers
-import time
 from adipose import Adipose
 
 class RequiresMocks(unittest.TestCase):
