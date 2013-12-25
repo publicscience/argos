@@ -64,9 +64,16 @@ function setup_nltk {
     source dev-env/bin/activate
 
     # Tokenizing and lemmatization.
-    python -m nltk.downloader punkt
     python -m nltk.downloader wordnet
     python -m nltk.downloader stopwords
+
+    # Punkt download has been hanging for me.
+    # Temporarily handle this way.
+    #python -m nltk.downloader punkt
+    sudo wget -O punkt.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/tokenizers/punkt.zip?raw=true
+    mkdir -p ~/nltk_data/tokenizers
+    sudo unzip -o punkt.zip -d ~/nltk_data/tokenizers
+    sudo rm punkt.zip
 
     # Named Entity Recognition
     python -m nltk.downloader words
