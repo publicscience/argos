@@ -21,6 +21,9 @@ function setup_dependencies {
         # Redis
         brew install redis
 
+        # Bzr, for python-dateutil
+        brew install bzr
+
     # Otherwise, assume Linux...
     else 
         sudo apt-get install screen -y
@@ -36,6 +39,9 @@ function setup_dependencies {
 
         # MongoDB
         sudo apt-get install mongodb -y
+
+        # Bzr, for python-dateutil
+        sudo apt-get install bzr -y
     fi
 }
 
