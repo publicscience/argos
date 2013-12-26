@@ -9,6 +9,9 @@ The code...
 .. automodule:: digester.gullet
    :members:
 
+.. automodule:: digester.wikidigester
+   :members:
+
 .. automodule:: adipose
    :members:
 
@@ -21,5 +24,5 @@ The code...
 .. automodule:: brain
    :members:
 
-.. automodule:: wikidigester
+.. automodule:: cluster
    :members:
