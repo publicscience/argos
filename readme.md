@@ -28,9 +28,6 @@ This will install any necessary system dependencies, setup the
 virtualenv, setup NLTK with the necessary data, download and setup
 MongoDB, download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download), and generate the documentation.
 
-*Note: You may run into trouble installing the `pytz` package. If you
-do, install it like so: `easy_install pytz` while `dev-env` is activated.*
-
 ### Running & Development
 And then when you're ready to start developing/testing, run:
 ```bash
@@ -38,12 +35,12 @@ $ ./go &
 ```
 This command will startup the Argos environment as a background process.
 It will tell you its `pid`, keep note of that so you can kill it later.
+The environment runs:
 * MongoDB
 * A Celery worker
 * RabbitMQ
 * Redis
 * Stanford NER
-* Bash
 
 Then when you're done, kill it with:
 ```bash

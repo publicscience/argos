@@ -107,6 +107,7 @@ function setup_doc {
     cd doc
     make clean
     make html
+    cd ..
 }
 
 
