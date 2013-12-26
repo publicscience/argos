@@ -64,11 +64,19 @@ function setup_nltk {
     source dev-env/bin/activate
 
     # Tokenizing and lemmatization.
-    python -m nltk.downloader wordnet
-    python -m nltk.downloader stopwords
+    #   nltk data downloads have been hanging for me.
+    #   Temporarily handle this way.
+    #python -m nltk.downloader wordnet
+    sudo wget -O wordnet.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/wordnet.zip?raw=true
+    mkdir -p ~/nltk_data/corpora
+    sudo unzip -o wordnet.zip -d ~/nltk_data/corpora
+    sudo rm wordnet.zip
 
-    # Punkt download has been hanging for me.
-    # Temporarily handle this way.
+    #python -m nltk.downloader stopwords
+    sudo wget -O stopwords.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/stopwords.zip?raw=true
+    sudo unzip -o stopwords.zip -d ~/nltk_data/corpora
+    sudo rm stopwords.zip
+
     #python -m nltk.downloader punkt
     sudo wget -O punkt.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/tokenizers/punkt.zip?raw=true
     mkdir -p ~/nltk_data/tokenizers
