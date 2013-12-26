@@ -67,21 +67,21 @@ function setup_nltk {
     #   nltk data downloads have been hanging for me.
     #   Temporarily handle this way.
     #python -m nltk.downloader wordnet
-    sudo wget -O wordnet.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/wordnet.zip?raw=true
+    wget -O wordnet.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/wordnet.zip?raw=true
     mkdir -p ~/nltk_data/corpora
-    sudo unzip -o wordnet.zip -d ~/nltk_data/corpora
-    sudo rm wordnet.zip
+    unzip -o wordnet.zip -d ~/nltk_data/corpora
+    rm wordnet.zip
 
     #python -m nltk.downloader stopwords
-    sudo wget -O stopwords.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/stopwords.zip?raw=true
-    sudo unzip -o stopwords.zip -d ~/nltk_data/corpora
-    sudo rm stopwords.zip
+    wget -O stopwords.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/stopwords.zip?raw=true
+    unzip -o stopwords.zip -d ~/nltk_data/corpora
+    rm stopwords.zip
 
     #python -m nltk.downloader punkt
-    sudo wget -O punkt.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/tokenizers/punkt.zip?raw=true
+    wget -O punkt.zip https://github.com/nltk/nltk_data/blob/gh-pages/packages/tokenizers/punkt.zip?raw=true
     mkdir -p ~/nltk_data/tokenizers
-    sudo unzip -o punkt.zip -d ~/nltk_data/tokenizers
-    sudo rm punkt.zip
+    unzip -o punkt.zip -d ~/nltk_data/tokenizers
+    rm punkt.zip
 
     # Named Entity Recognition
     python -m nltk.downloader words
