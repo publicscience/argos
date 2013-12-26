@@ -6,6 +6,9 @@ Logger!
 """
 
 import logging
+from os import path
+
+log_path = path.join(path.dirname(__file__), 'logs/log.log')
 
 def logger(name):
     # Create the logger.
@@ -16,7 +19,7 @@ def logger(name):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # Output to file.
-    fh = logging.FileHandler('logger/logs/log.log')
+    fh = logging.FileHandler(log_path)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
