@@ -35,12 +35,12 @@ $ ./go &
 ```
 This command will startup the Argos environment as a background process.
 It will tell you its `pid`, keep note of that so you can kill it later.
-The environment runs:
-* MongoDB
+The environment runs, with the following ports:
+* MongoDB (27107)
+* Redis (6379)
+* Stanford NER (8080)
+* RabbitMQ (5672)
 * A Celery worker
-* RabbitMQ
-* Redis
-* Stanford NER
 
 Then when you're done, kill it with:
 ```bash
