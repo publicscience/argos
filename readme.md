@@ -20,9 +20,9 @@ $ sudo apt-get install python3-pip
 $ pip-3.3 install virtualenv
 ```
 
-Then, the easiest way to set things up is to just run the `do` script:
+Then, the easiest way to set things up is to just run the `setup` script:
 ```bash
-./do setup
+$ ./setup
 ```
 This will install any necessary system dependencies, setup the
 virtualenv, setup NLTK with the necessary data, download and setup
@@ -34,14 +34,21 @@ do, install it like so: `easy_install pytz` while `dev-env` is activated.*
 ### Running & Development
 And then when you're ready to start developing/testing, run:
 ```bash
-./do go
+$ ./go &
 ```
-This command will startup a `screen` session with four windows running:
+This command will startup the Argos environment as a background process.
+It will tell you its `pid`, keep note of that so you can kill it later.
 * MongoDB
 * A Celery worker
 * RabbitMQ
+* Redis
 * Stanford NER
 * Bash
+
+Then when you're done, kill it with:
+```bash
+$ kill <pid>
+```
 
 
 # AWS Setup

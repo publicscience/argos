@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# These are various shortcuts for commonly-used commands.
-# Usage: ./do <command>
-
 function setup_dependencies {
     # Check if OSX.
     if [[ "$OSTYPE" =~ ^darwin ]]
     then
-        brew install screen
         brew install rabbitmq
         brew install wget
 
@@ -29,7 +25,6 @@ function setup_dependencies {
 
     # Otherwise, assume Linux...
     else 
-        sudo apt-get install screen -y
         sudo apt-get install rabbitmq-server -y
         sudo apt-get install unzip -y
 
@@ -115,87 +110,31 @@ function setup_doc {
 }
 
 
-# Build documentation.
-if [[ $1 == 'doc' ]]
-then
-    setup_doc
+echo -e "\n\n\n\n\n"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "$(tput setaf 6)Welcome to $(tput setaf 3)Argos$(tput setaf 6)!$(tput sgr0)"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "\n\n\n\n\n"
 
+setup_dependencies
+setup_virtualenv
+setup_ner
+setup_nltk
+setup_doc
 
-# Start MongoDB server.
-elif [[ $1 == 'mongo' ]]
-then
-    mongod --dbpath db
-
-
-# Start the Stanford NER server.
-elif [[ $1 == 'ner' ]]
-then
-    cd ner
-    java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.conll.4class.distsim.crf.ser.gz -port 8080 -outputFormat inlineXML
-
-
-# Run tests.
-elif [[ $1 == 'test' ]]
-then
-    source dev-env/bin/activate
-    nosetests
-
-
-# Run profiler.
-elif [[ $1 == 'profile' ]]
-then
-    source dev-env/bin/activate
-    python profiler.py
-
-
-# Start a local Celery worker.
-elif [[ $1 == 'worker' ]]
-then
-    src_dir=`dirname $0`
-    cd $src_dir
-    source dev-env/bin/activate
-    celery worker --loglevel=info --config=cluster.celery_config
-
-
-# Start RabbitMQ server.
-elif [[ $1 == 'mq' ]]
-then
-    rabbitmq-server
-
-# Start redis server.
-elif [[ $1 == 'redis' ]]
-then
-    redis-server
-
-
-# Start screen session with everything setup.
-elif [[ $1 == 'go' ]]
-then
-    screen -S development -c .screen
-
-
-elif [[ $1 == 'nltk' ]]
-then
-    setup_nltk
-
-
-# Setup some stuff.
-elif [[ $1 == 'setup' ]]
-then
-    setup_dependencies
-    setup_virtualenv
-    setup_ner
-    setup_nltk
-    setup_doc
-
-    # Rename configs if necessary.
-    if [ ! -f config.py ]; then
-        mv config-sample.py config.py
-    fi
-    if [ ! -f cluster/config.ini ]; then
-        mv cluster/config-sample.ini cluster/config.ini
-    fi
-    if [ ! -f cluster/celery_config.py ]; then
-        mv cluster/celery_config-sample.py cluster/celery_config.py
-    fi
+# Rename configs if necessary.
+if [ ! -f config.py ]; then
+    mv config-sample.py config.py
 fi
+if [ ! -f cluster/config.ini ]; then
+    mv cluster/config-sample.ini cluster/config.ini
+fi
+if [ ! -f cluster/celery_config.py ]; then
+    mv cluster/celery_config-sample.py cluster/celery_config.py
+fi
+
+echo -e "\n\n\n\n\n"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "$(tput setaf 6)Finished setting up $(tput setaf 3)Argos$(tput setaf 6)!$(tput sgr0)"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "\n\n\n\n\n"
