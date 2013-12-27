@@ -1,6 +1,10 @@
 #!/bin/bash
 
 function setup_dependencies {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Installing dependencies...$(tput sgr0)"
+    echo -e "\n\n\n"
+
     # Check if OSX.
     if [[ "$OSTYPE" =~ ^darwin ]]
     then
@@ -25,6 +29,9 @@ function setup_dependencies {
 
     # Otherwise, assume Linux...
     else 
+        # Various python deps and also scipy deps.
+        sudo apt-get -y install python3 python3-dev python3-setuptools build-essential zlib1g-dev libssl-dev libreadline-dev libyaml-dev libcurl4-openssl-dev curl git-core python-software-properties python-pip python-dev
+
         sudo apt-get install rabbitmq-server -y
         sudo apt-get install unzip -y
 
@@ -47,6 +54,10 @@ function setup_dependencies {
 }
 
 function setup_virtualenv {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Setting up virtual environment...$(tput sgr0)"
+    echo -e "\n\n\n"
+
     # Setup the Python 3.3 virtualenv.
     virtualenv-3.3 dev-env --no-site-packages
     source dev-env/bin/activate
@@ -55,6 +66,10 @@ function setup_virtualenv {
 }
 
 function setup_nltk {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Gathering NLTK data...$(tput sgr0)"
+    echo -e "\n\n\n"
+
     # Download NLTK (Python 3) data.
     source dev-env/bin/activate
 
@@ -96,6 +111,10 @@ function setup_nltk {
 }
 
 function setup_ner {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Setting up Stanford NER...$(tput sgr0)"
+    echo -e "\n\n\n"
+
     wget -O ner.zip 'http://nlp.stanford.edu/software/stanford-ner-2013-06-20.zip'
     unzip -o ner.zip
     mv 'stanford-ner-2013-06-20' ner
@@ -103,6 +122,10 @@ function setup_ner {
 }
 
 function setup_doc {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Building documentation...$(tput sgr0)"
+    echo -e "\n\n\n"
+
     source dev-env/bin/activate
     cd doc
     make clean
@@ -121,7 +144,6 @@ setup_dependencies
 setup_virtualenv
 setup_ner
 setup_nltk
-setup_doc
 
 # Rename configs if necessary.
 if [ ! -f config.py ]; then
@@ -133,6 +155,8 @@ fi
 if [ ! -f cluster/celery_config.py ]; then
     mv cluster/celery_config-sample.py cluster/celery_config.py
 fi
+
+setup_doc
 
 echo -e "\n\n\n\n\n"
 echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
