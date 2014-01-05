@@ -1,0 +1,25 @@
+{
+    "title_detail": {
+        "base": "http://rss.csmonitor.com/feeds/politics", 
+        "value": "Teachers union chief offers four steps to boost US results on PISA test", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://www.csmonitor.com/USA/Politics/monitor_breakfast/2013/1204/Teachers-union-chief-offers-four-steps-to-boost-US-results-on-PISA-test", 
+    "summary": "<p>At a Monitor-hosted breakfast, Randi Weingarten, president of the 1.5-million-member American Federation of Teachers, said the US could look to other countries for ways to&nbsp;improve the lackluster performance on the PISA test.</p><img src=\"http://feeds.feedburner.com/~r/feeds/politics/~4/h7sz16MiRb0\" height=\"1\" width=\"1\"/>", 
+    "summary_detail": {
+        "base": "http://rss.csmonitor.com/feeds/politics", 
+        "value": "<p>At a Monitor-hosted breakfast, Randi Weingarten, president of the 1.5-million-member American Federation of Teachers, said the US could look to other countries for ways to&nbsp;improve the lackluster performance on the PISA test.</p><img src=\"http://feeds.feedburner.com/~r/feeds/politics/~4/h7sz16MiRb0\" height=\"1\" width=\"1\"/>", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "id": "http://www.csmonitor.com/USA/Politics/monitor_breakfast/2013/1204/Teachers-union-chief-offers-four-steps-to-boost-US-results-on-PISA-test", 
+    "title": "Teachers union chief offers four steps to boost US results on PISA test", 
+    "links": [
+        {
+            "href": "http://www.csmonitor.com/USA/Politics/monitor_breakfast/2013/1204/Teachers-union-chief-offers-four-steps-to-boost-US-results-on-PISA-test", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "guidislink": false, 
+    "title_detail": {
+        "base": "http://www.economist.com/feeds/print-sections/74/international.xml", 
+        "value": "Government budgets and development: Transparent money", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "title": "Government budgets and development: Transparent money", 
+    "published": "Thu, 31 October 2013 15:59:22 GMT", 
+    "published_parsed": [
+        2013, 
+        10, 
+        31, 
+        15, 
+        59, 
+        22, 
+        3, 
+        304, 
+        0
+    ], 
+    "link": "http://www.economist.com/news/international/21588888-clarity-about-public-spending-can-make-poor-countries-richer-transparent-money?fsrc=rss|int", 
+    "summary_detail": {
+        "base": "http://www.economist.com/feeds/print-sections/74/international.xml", 
+        "value": "<p>WHETHER you are a farmer in Mexico, a student in Nigeria or an IMF official, openness about government expenditure matters. In the run-up to this week\u2019s summit in London of the Open Government Partnership, a slow-moving international effort to promote transparency, clarity about budgets is a bit of a bright spot.Until 2008 the Liberian government provided scant information on its spending. It now puts budget documents online, and in January erected an electronic billboard outside the Ministry of Finance in Monrovia, the capital, to provide fiscal news to passers-by. Meanwhile, Morocco and Kyrgyzstan publish their budgets on downloadable spreadsheets.Openness need not be costly. Of the African states surveyed by the International Budget Partnership (IBP), a pressure group, 24 turned out already to produce 58 of the budgetary documents needed. But these were private\u2014either for donors or for internal purposes. Warren Krafchik of the IBP says political will, not technical capacity, is the main brake on openness.Once details are published, citizens can lobby for different spending priorities. BudgiT, a Nigerian group, turns the numbers into easily understood infographics. It shows that $144 billion from oil revenues could pay the university costs of 1.5m students, or provide fertiliser for 14m farmers. Fundar, a Mexican think-tank, created a website showing that richer states...</p>", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "id": "http://www.economist.com/news/international/21588888-clarity-about-public-spending-can-make-poor-countries-richer-transparent-money", 
+    "summary": "<p>WHETHER you are a farmer in Mexico, a student in Nigeria or an IMF official, openness about government expenditure matters. In the run-up to this week\u2019s summit in London of the Open Government Partnership, a slow-moving international effort to promote transparency, clarity about budgets is a bit of a bright spot.Until 2008 the Liberian government provided scant information on its spending. It now puts budget documents online, and in January erected an electronic billboard outside the Ministry of Finance in Monrovia, the capital, to provide fiscal news to passers-by. Meanwhile, Morocco and Kyrgyzstan publish their budgets on downloadable spreadsheets.Openness need not be costly. Of the African states surveyed by the International Budget Partnership (IBP), a pressure group, 24 turned out already to produce 58 of the budgetary documents needed. But these were private\u2014either for donors or for internal purposes. Warren Krafchik of the IBP says political will, not technical capacity, is the main brake on openness.Once details are published, citizens can lobby for different spending priorities. BudgiT, a Nigerian group, turns the numbers into easily understood infographics. It shows that $144 billion from oil revenues could pay the university costs of 1.5m students, or provide fertiliser for 14m farmers. Fundar, a Mexican think-tank, created a website showing that richer states...</p>", 
+    "links": [
+        {
+            "href": "http://www.economist.com/news/international/21588888-clarity-about-public-spending-can-make-poor-countries-richer-transparent-money?fsrc=rss|int", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ]
+}   }
+    ]
+}

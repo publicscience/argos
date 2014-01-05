@@ -20,28 +20,28 @@ class BrainTest(unittest.TestCase):
         results = brain.entities(sample)
 
         expected = {
-                 'Enrico Fermi Award', 
-                 'Trinity', 
-                 'Soviet Union', 
-                 'Julius Robert Oppenheimer', 
-                 'Enrico Fermi', 
-                 'Second Red Scare', 
-                 'Berkeley', 
-                 'Phillips', 
-                 'Born', 
-                 'American', 
-                 'University of California', 
-                 'Bhagavad Gita', 
-                 'Oppenheimer', 
-                 'John F. Kennedy', 
-                 'New Mexico', 
-                 'World War II', 
-                 'Institute for Advanced Study in Princeton', 
-                 'Lyndon B. Johnson', 
-                 'United States Atomic Energy Commission', 
+                 'Enrico Fermi Award',
+                 'Trinity',
+                 'Soviet Union',
+                 'Julius Robert Oppenheimer',
+                 'Enrico Fermi',
+                 'Second Red Scare',
+                 'Berkeley',
+                 'Phillips',
+                 'Born',
+                 'American',
+                 'University of California',
+                 'Bhagavad Gita',
+                 'Oppenheimer',
+                 'John F. Kennedy',
+                 'New Mexico',
+                 'World War II',
+                 'Institute for Advanced Study in Princeton',
+                 'Lyndon B. Johnson',
+                 'United States Atomic Energy Commission',
                  'Manhattan Project'
-        } 
-  
+        }
+
         self.assertEqual(set(results), expected)
 
     def test_trim(self):

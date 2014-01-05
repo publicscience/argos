@@ -227,7 +227,8 @@ def _get(url):
     and return its data.
     """
 
-    req = request.Request(url)
+    # Spoof the user-agent to avoid 403 errors.
+    req = request.Request(url,  headers={'User-Agent': 'Mozilla/5.0'})
 
     try:
         resp = request.urlopen(req)

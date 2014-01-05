@@ -1,0 +1,63 @@
+{
+    "content": [
+        {
+            "base": "http://www.spiegel.de/international/index.rss", 
+            "value": "<img src=\"http://www.spiegel.de/images/image-583262-thumbsmall-kgxx.jpg\" hspace=\"5\" align=\"left\" >", 
+            "type": "text/html", 
+            "language": null
+        }
+    ], 
+    "title_detail": {
+        "base": "http://www.spiegel.de/international/index.rss", 
+        "value": "Picture This: Santa in the Holy Land", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://www.spiegel.de/international/a-940735.html#ref=rss", 
+    "published": "Mon, 23 Dec 2013 17:14:05 +0100", 
+    "published_parsed": [
+        2013, 
+        12, 
+        23, 
+        16, 
+        14, 
+        5, 
+        0, 
+        357, 
+        0
+    ], 
+    "guidislink": false, 
+    "summary": "<img src=\"http://www.spiegel.de/images/image-583262-thumbsmall-kgxx.jpg\" hspace=\"5\" align=\"left\" >", 
+    "id": "http://www.spiegel.de/international/a-940735.html", 
+    "title": "Picture This: Santa in the Holy Land", 
+    "links": [
+        {
+            "href": "http://www.spiegel.de/international/a-940735.html#ref=rss", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }, 
+        {
+            "href": "http://www.spiegel.de/images/image-583262-thumbsmall-kgxx.jpg", 
+            "type": "image/jpeg", 
+            "rel": "enclosure"
+        }
+    ]
+}ding art collection recently discovered in a Munich apartment, was more deeply involved in the trade of looted artworks than had been previously assumed. He also profited from Nazi injustices after the war.", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "id": "http://www.spiegel.de/international/germany/hildebrand-gurlitt-and-his-dubious-dealings-with-nazi-looted-art-a-940625.html", 
+    "summary": "Hildebrand Gurlitt, the man who assembled the astounding art collection recently discovered in a Munich apartment, was more deeply involved in the trade of looted artworks than had been previously assumed. He also profited from Nazi injustices after the war.", 
+    "links": [
+        {
+            "href": "http://www.spiegel.de/international/germany/hildebrand-gurlitt-and-his-dubious-dealings-with-nazi-looted-art-a-940625.html#ref=rss", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }, 
+        {
+            "href": "http://www.spiegel.de/images/image-583407-thumbsmall-vtwy.jpg", 
+            "type": "image/jpeg", 
+            "rel": "enclosure"
+        }
+    ]
+}

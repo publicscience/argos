@@ -1,0 +1,137 @@
+{
+    "links": [
+        {
+            "href": "http://blogs.wsj.com/emergingeurope/2013/12/13/hungary-central-bank-to-extend-cheap-loans-to-real-estate-construction/?mod=WSJBlog", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ], 
+    "summary_detail": {
+        "base": "http://blogs.wsj.com/emergingeurope/feed/", 
+        "value": "Hungary's central bank will expand its cheap, subsidized loan program from January to help finance the construction of real estate and thus boost feeble growth, a National Bank of Hungary official said on radio.", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "tags": [
+        {
+            "scheme": null, 
+            "term": "Business", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Economics", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Emerging Europe", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Forex", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Hungary", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "News", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Dan Bucsa", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "FGS", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Funding for Growth Scheme", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Hungary central bank", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Hungary construction", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Hungary home construction", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "Marton Nagy", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "National Bank of Hungary", 
+            "label": null
+        }
+    ], 
+    "published": "Fri, 13 Dec 2013 14:08:54 +0000", 
+    "comments": "http://blogs.wsj.com/emergingeurope/2013/12/13/hungary-central-bank-to-extend-cheap-loans-to-real-estate-construction/#comments", 
+    "media_content": [
+        {
+            "url": "http://s.wsj.net/public/resources/images/BN-AT851_cons5_A_20131213090341.jpg", 
+            "medium": "image", 
+            "type": "image/jpg"
+        }, 
+        {
+            "url": "http://s.wsj.net/public/resources/images/BN-AT851_cons5_CV_20131213090341.jpg", 
+            "medium": "image", 
+            "type": "image/jpg"
+        }, 
+        {
+            "url": "http://s.wsj.net/public/resources/images/BN-AT851_cons5_DV_20131213090341.jpg", 
+            "medium": "image", 
+            "type": "image/jpg"
+        }
+    ], 
+    "published_parsed": [
+        2013, 
+        12, 
+        13, 
+        14, 
+        8, 
+        54, 
+        4, 
+        347, 
+        0
+    ], 
+    "id": "http://blogs.wsj.com/emergingeurope/?p=7285", 
+    "authors": [
+        {}
+    ], 
+    "wfw_commentrss": "http://blogs.wsj.com/emergingeurope/2013/12/13/hungary-central-bank-to-extend-cheap-loans-to-real-estate-construction/feed/", 
+    "title_detail": {
+        "base": "http://blogs.wsj.com/emergingeurope/feed/", 
+        "value": "Hungary Central Bank to Extend Cheap Loans to Real Estate Construction", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://blogs.wsj.com/emergingeurope/2013/12/13/hungary-central-bank-to-extend-cheap-loans-to-real-estate-construction/?mod=WSJBlog", 
+    "slash_comments": "4", 
+    "guidislink": false, 
+    "summary": "Hungary's central bank will expand its cheap, subsidized loan program from January to help finance the construction of real estate and thus boost feeble growth, a National Bank of Hungary official said on radio.", 
+    "title": "Hungary Central Bank to Extend Cheap Loans to Real Estate Construction", 
+    "author_detail": {
+        "name": "Margit Feher"
+    }, 
+    "author": "Margit Feher"
+}

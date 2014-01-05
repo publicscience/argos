@@ -1,0 +1,52 @@
+{
+    "links": [
+        {
+            "href": "http://www.bbc.co.uk/news/magazine-25588234#sa-ns_mchannel=rss&ns_source=PublicRSS20-sa", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ], 
+    "published": "Sun, 05 Jan 2014 01:20:57 GMT", 
+    "published_parsed": [
+        2014, 
+        1, 
+        5, 
+        1, 
+        20, 
+        57, 
+        6, 
+        5, 
+        0
+    ], 
+    "id": "http://www.bbc.co.uk/news/magazine-25588234", 
+    "media_thumbnail": [
+        {
+            "width": "66", 
+            "url": "http://news.bbcimg.co.uk/media/images/72063000/jpg/_72063792_brandon624.jpg", 
+            "height": "49"
+        }, 
+        {
+            "width": "144", 
+            "url": "http://news.bbcimg.co.uk/media/images/72063000/jpg/_72063793_brandon624.jpg", 
+            "height": "81"
+        }
+    ], 
+    "title_detail": {
+        "base": "http://feeds.bbci.co.uk/news/world/rss.xml", 
+        "value": "The escorts who want to rebrand male prostitution", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://www.bbc.co.uk/news/magazine-25588234#sa-ns_mchannel=rss&ns_source=PublicRSS20-sa", 
+    "guidislink": false, 
+    "summary": "The escorts who want to rebrand male prostitution", 
+    "href": "", 
+    "summary_detail": {
+        "base": "http://feeds.bbci.co.uk/news/world/rss.xml", 
+        "value": "The escorts who want to rebrand male prostitution", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "title": "The escorts who want to rebrand male prostitution"
+}re homes abroad"
+}

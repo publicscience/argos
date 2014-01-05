@@ -67,6 +67,12 @@ pip rolled back the installs of everything else. Check your pip logs at
 `~/.pip/pip.log`. I'd wager it is `scipy` which ran into a missing
 dependency.*
 
+You can optionally setup the default ~436 sources for collecting
+articles by doing (make sure MongoDB is running):
+```bash
+$ ./resources/load_sources
+```
+
 
 # AWS Setup
 You will also need to set up Amazon Web Services to adminster and use

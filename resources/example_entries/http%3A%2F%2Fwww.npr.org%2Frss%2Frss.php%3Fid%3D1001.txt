@@ -1,0 +1,48 @@
+{
+    "guidislink": false, 
+    "title_detail": {
+        "base": "http://www.npr.org/rss/rss.php?id=1001", 
+        "value": "Controversial Since Day 1, Bowl Championship Series To End", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "content": [
+        {
+            "base": "http://www.npr.org/rss/rss.php?id=1001", 
+            "value": "<p>On Monday, the BCS National Championship featuring Florida State and Auburn University will mark the end of the confusing and controversial Bowl Championship Series. Dennis Dodd from CBS Sports speaks with NPR's Arun Rath about what this means for the future of NCAA football.</p><p><a href=\"http://www.npr.org/templates/email/emailAFriend.php?storyId=259752887\">&raquo; E-Mail This</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href=\"http://del.icio.us/post?url=http%3A%2F%2Fwww.npr.org%2Ftemplates%2Fstory%2Fstory.php%3FstoryId%3D259752887\">&raquo; Add to Del.icio.us</a></p>", 
+            "type": "text/html", 
+            "language": null
+        }
+    ], 
+    "title": "Controversial Since Day 1, Bowl Championship Series To End", 
+    "published": "Sat, 04 Jan 2014 17:08:00 -0500", 
+    "published_parsed": [
+        2014, 
+        1, 
+        4, 
+        22, 
+        8, 
+        0, 
+        5, 
+        4, 
+        0
+    ], 
+    "link": "http://www.npr.org/2014/01/04/259752887/controversial-since-day-1-bowl-championship-series-to-end?ft=1&f=1001", 
+    "summary_detail": {
+        "base": "http://www.npr.org/rss/rss.php?id=1001", 
+        "value": "On Monday, the BCS National Championship featuring Florida State and Auburn University will mark the end of the confusing and controversial Bowl Championship Series. Dennis Dodd from CBS Sports speaks with NPR's Arun Rath about what this means for the future of NCAA football.", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "id": "http://www.npr.org/2014/01/04/259752887/controversial-since-day-1-bowl-championship-series-to-end?ft=1&f=1001", 
+    "summary": "On Monday, the BCS National Championship featuring Florida State and Auburn University will mark the end of the confusing and controversial Bowl Championship Series. Dennis Dodd from CBS Sports speaks with NPR's Arun Rath about what this means for the future of NCAA football.", 
+    "links": [
+        {
+            "href": "http://www.npr.org/2014/01/04/259752887/controversial-since-day-1-bowl-championship-series-to-end?ft=1&f=1001", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ]
+}      }
+    ]
+}

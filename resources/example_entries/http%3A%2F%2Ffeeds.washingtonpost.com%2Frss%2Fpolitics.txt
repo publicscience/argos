@@ -1,0 +1,52 @@
+{
+    "author_detail": {
+        "name": "Christopher Federico"
+    }, 
+    "published": "Fri, 03 Jan 2014 20:12:42 GMT", 
+    "tags": [
+        {
+            "scheme": null, 
+            "term": "The Week in One Song", 
+            "label": null
+        }
+    ], 
+    "published_parsed": [
+        2014, 
+        1, 
+        3, 
+        20, 
+        12, 
+        42, 
+        4, 
+        3, 
+        0
+    ], 
+    "id": "http://www.washingtonpost.com/blogs/monkey-cage/post/sweet-leaf-the-week-in-one-song/2014/01/03/748be472-74b3-11e3-bc6b-712d770c3715_blog.html?wprss=rss_politics", 
+    "links": [
+        {
+            "href": "http://feeds.washingtonpost.com/c/34656/f/636655/s/35796484/sc/38/l/0L0Swashingtonpost0N0Cblogs0Cmonkey0Ecage0Cpost0Csweet0Eleaf0Ethe0Eweek0Ein0Eone0Esong0C20A140C0A10C0A30C748be4720E74b30E11e30Ebc6b0E712d770Ac37150Iblog0Bhtml0Dwprss0Frss0Ipolitics/story01.htm", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ], 
+    "title_detail": {
+        "base": "http://feeds.washingtonpost.com/rss/politics", 
+        "value": "Monkey Cage: \u2018Sweet Leaf\u2019: The week in one song", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://feeds.washingtonpost.com/c/34656/f/636655/s/35796484/sc/38/l/0L0Swashingtonpost0N0Cblogs0Cmonkey0Ecage0Cpost0Csweet0Eleaf0Ethe0Eweek0Ein0Eone0Esong0C20A140C0A10C0A30C748be4720E74b30E11e30Ebc6b0E712d770Ac37150Iblog0Bhtml0Dwprss0Frss0Ipolitics/story01.htm", 
+    "authors": [
+        {}
+    ], 
+    "guidislink": false, 
+    "summary": "<p>Meanwhile, in Colorado </p> <a href=\"http://www.washingtonpost.com/blogs/monkey-cage/post/sweet-leaf-the-week-in-one-song/2014/01/03/748be472-74b3-11e3-bc6b-712d770c3715_blog.html?wprss=rss_politics\">Read full article &#62;&#62;</a><img width='1' height='1' src='http://feeds.washingtonpost.com/c/34656/f/636655/s/35796484/sc/38/mf.gif' border='0'/><br clear='all'/><div class='mf-viral'><table border='0'><tr><td valign='middle'><a href=\"http://share.feedsportal.com/share/twitter/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/twitter.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/facebook/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/facebook.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/linkedin/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/linkedin.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/gplus/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/googleplus.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/email/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/email.png\" border=\"0\" /></a></td></tr></table></div><br/><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/1/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/1/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/2/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/2/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/3/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/3/rc.img\" border=\"0\"/></a><br/><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/a2.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/a2.img\" border=\"0\"/></a><img width=\"1\" height=\"1\" src=\"http://pi.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/a2t.img\" border=\"0\"/>", 
+    "summary_detail": {
+        "base": "http://feeds.washingtonpost.com/rss/politics", 
+        "value": "<p>Meanwhile, in Colorado </p> <a href=\"http://www.washingtonpost.com/blogs/monkey-cage/post/sweet-leaf-the-week-in-one-song/2014/01/03/748be472-74b3-11e3-bc6b-712d770c3715_blog.html?wprss=rss_politics\">Read full article &#62;&#62;</a><img width='1' height='1' src='http://feeds.washingtonpost.com/c/34656/f/636655/s/35796484/sc/38/mf.gif' border='0'/><br clear='all'/><div class='mf-viral'><table border='0'><tr><td valign='middle'><a href=\"http://share.feedsportal.com/share/twitter/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/twitter.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/facebook/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/facebook.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/linkedin/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/linkedin.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/gplus/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/googleplus.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/email/?u=http%3A%2F%2Fwww.washingtonpost.com%2Fblogs%2Fmonkey-cage%2Fpost%2Fsweet-leaf-the-week-in-one-song%2F2014%2F01%2F03%2F748be472-74b3-11e3-bc6b-712d770c3715_blog.html%3Fwprss%3Drss_politics&t=Monkey+Cage%3A+%E2%80%98Sweet+Leaf%E2%80%99%3A+The+week+in+one+song\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/email.png\" border=\"0\" /></a></td></tr></table></div><br/><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/1/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/1/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/2/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/2/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/3/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/sc/38/rc/3/rc.img\" border=\"0\"/></a><br/><br/><a href=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/a2.htm\"><img src=\"http://da.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/a2.img\" border=\"0\"/></a><img width=\"1\" height=\"1\" src=\"http://pi.feedsportal.com/r/184842519681/u/57/f/636655/c/34656/s/35796484/a2t.img\" border=\"0\"/>", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "title": "Monkey Cage: \u2018Sweet Leaf\u2019: The week in one song", 
+    "author": "Christopher Federico"
+}

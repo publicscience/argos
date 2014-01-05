@@ -1,0 +1,100 @@
+{
+    "author_detail": {
+        "name": "By BEN HUBBARD and HWAIDA SAAD"
+    }, 
+    "published": "Sat, 04 Jan 2014 20:14:38 GMT", 
+    "tags": [
+        {
+            "scheme": "http://www.nytimes.com/namespaces/keywords/nyt_org_all", 
+            "term": "Al Qaeda", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.nytimes.com/namespaces/keywords/nyt_per", 
+            "term": "Majid, Majid bin Muhammad al-", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.nytimes.com/namespaces/keywords/des", 
+            "term": "Deaths (Fatalities)", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.nytimes.com/namespaces/keywords/nyt_geo", 
+            "term": "Lebanon", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.nytimes.com/namespaces/keywords/nyt_org_all", 
+            "term": "Abdullah Azzam Brigades", 
+            "label": null
+        }
+    ], 
+    "published_parsed": [
+        2014, 
+        1, 
+        4, 
+        20, 
+        14, 
+        38, 
+        5, 
+        4, 
+        0
+    ], 
+    "id": "http://www.nytimes.com/2014/01/05/world/middleeast/top-militant-said-to-die-after-arrest-in-lebanon.html", 
+    "media_credit": [
+        {
+            "content": "Saudi Interior Ministry, via Agence France-Presse \u2014 Getty Images", 
+            "scheme": "urn:ebu"
+        }
+    ], 
+    "links": [
+        {
+            "href": "http://www.nytimes.com/2014/01/05/world/middleeast/top-militant-said-to-die-after-arrest-in-lebanon.html?partner=rss&emc=rss", 
+            "type": "text/html", 
+            "rel": "standout"
+        }, 
+        {
+            "href": "http://www.nytimes.com/2014/01/05/world/middleeast/top-militant-said-to-die-after-arrest-in-lebanon.html?partner=rss&emc=rss", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ], 
+    "credit": "Saudi Interior Ministry, via Agence France-Presse \u2014 Getty Images", 
+    "content": [
+        {
+            "base": "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", 
+            "value": "Majid bin Muhammad al-Majid", 
+            "type": "text/plain", 
+            "language": null
+        }
+    ], 
+    "title_detail": {
+        "base": "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", 
+        "value": "Militant Tied to Bombings in Lebanon Dies in Jail", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://www.nytimes.com/2014/01/05/world/middleeast/top-militant-said-to-die-after-arrest-in-lebanon.html?partner=rss&emc=rss", 
+    "authors": [
+        {}
+    ], 
+    "guidislink": false, 
+    "summary": "Majid bin Muhammad al-Majid, the leader of a Lebanon-based affiliate of Al Qaeda who was arrested recently, died Saturday while in custody in Lebanon, officials said.<img width='1' height='1' src='http://rss.nytimes.com/c/34625/f/640350/s/357f655a/sc/11/mf.gif' border='0'/><br clear='all'/><div class='mf-viral'><table border='0'><tr><td valign='middle'><a href=\"http://share.feedsportal.com/share/twitter/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/twitter.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/facebook/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/facebook.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/linkedin/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/linkedin.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/gplus/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/googleplus.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/email/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/email.png\" border=\"0\" /></a></td></tr></table></div><br/><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/1/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/1/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/2/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/2/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/3/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/3/rc.img\" border=\"0\"/></a><br/><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/a2.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/a2.img\" border=\"0\"/></a><img width=\"1\" height=\"1\" src=\"http://pi.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/a2t.img\" border=\"0\"/>", 
+    "media_content": [
+        {
+            "width": "151", 
+            "lang": "", 
+            "height": "151", 
+            "url": "http://graphics8.nytimes.com/images/2014/01/05/world/lebanon/lebanon-moth.jpg"
+        }
+    ], 
+    "summary_detail": {
+        "base": "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", 
+        "value": "Majid bin Muhammad al-Majid, the leader of a Lebanon-based affiliate of Al Qaeda who was arrested recently, died Saturday while in custody in Lebanon, officials said.<img width='1' height='1' src='http://rss.nytimes.com/c/34625/f/640350/s/357f655a/sc/11/mf.gif' border='0'/><br clear='all'/><div class='mf-viral'><table border='0'><tr><td valign='middle'><a href=\"http://share.feedsportal.com/share/twitter/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/twitter.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/facebook/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/facebook.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/linkedin/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/linkedin.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/gplus/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/googleplus.png\" border=\"0\" /></a>&nbsp;<a href=\"http://share.feedsportal.com/share/email/?u=http%3A%2F%2Fwww.nytimes.com%2F2014%2F01%2F05%2Fworld%2Fmiddleeast%2Ftop-militant-said-to-die-after-arrest-in-lebanon.html%3Fpartner%3Drss%26emc%3Drss&t=Militant+Tied+to+Bombings+in+Lebanon+Dies+in+Jail\" target=\"_blank\"><img src=\"http://res3.feedsportal.com/social/email.png\" border=\"0\" /></a></td></tr></table></div><br/><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/1/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/1/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/2/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/2/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/3/rc.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/sc/11/rc/3/rc.img\" border=\"0\"/></a><br/><br/><a href=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/a2.htm\"><img src=\"http://da.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/a2.img\" border=\"0\"/></a><img width=\"1\" height=\"1\" src=\"http://pi.feedsportal.com/r/184842806847/u/57/f/640350/c/34625/s/357f655a/a2t.img\" border=\"0\"/>", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "title": "Militant Tied to Bombings in Lebanon Dies in Jail", 
+    "author": "By BEN HUBBARD and HWAIDA SAAD"
+}

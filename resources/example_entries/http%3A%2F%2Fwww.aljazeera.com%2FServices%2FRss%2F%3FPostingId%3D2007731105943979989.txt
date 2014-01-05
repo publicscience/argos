@@ -1,0 +1,38 @@
+{
+    "guidislink": false, 
+    "title_detail": {
+        "base": "http://www.aljazeera.com/Services/Rss/?PostingId=2007731105943979989", 
+        "value": "Al Jazeera team still detained in Egypt", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "title": "Al Jazeera team still detained in Egypt", 
+    "published": "Sun, 05 Jan 2014 17:41:02 GMT", 
+    "published_parsed": [
+        2014, 
+        1, 
+        5, 
+        17, 
+        41, 
+        2, 
+        6, 
+        5, 
+        0
+    ], 
+    "link": "http://www.aljazeera.com/news/middleeast/2014/01/al-jazeera-team-still-detained-egypt-201414123120185478.html", 
+    "summary_detail": {
+        "base": "http://www.aljazeera.com/Services/Rss/?PostingId=2007731105943979989", 
+        "value": "Three Al Jazeera journalists, detained for eight days, are accused of joining a terrorist organisation.", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "id": "201414123120185478", 
+    "summary": "Three Al Jazeera journalists, detained for eight days, are accused of joining a terrorist organisation.", 
+    "links": [
+        {
+            "href": "http://www.aljazeera.com/news/middleeast/2014/01/al-jazeera-team-still-detained-egypt-201414123120185478.html", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ]
+}

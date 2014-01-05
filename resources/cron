@@ -1,0 +1,4 @@
+# do: `crontab -e` and paste these lines in. you may need to adjust the paths.
+
+# Every hour
+0 * * * *  cd /srv/www/argos/; /srv/www/argos/env/bin/python -m membrane.collector.consider

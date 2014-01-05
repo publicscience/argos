@@ -1,0 +1,173 @@
+{
+    "dc_identifier": "426240343", 
+    "updated_parsed": [
+        2014, 
+        1, 
+        5, 
+        18, 
+        30, 
+        0, 
+        6, 
+        5, 
+        0
+    ], 
+    "tags": [
+        {
+            "scheme": "http://www.theguardian.com/publication", 
+            "term": "The Guardian", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/tone", 
+            "term": "Blogposts", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/music", 
+            "term": "Music", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/tone", 
+            "term": "News", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/media", 
+            "term": "Media", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/football", 
+            "term": "Sir Alex Ferguson", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/media", 
+            "term": "Piers Morgan", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/world", 
+            "term": "Edward Snowden", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/music", 
+            "term": "Pussy Riot", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/tone", 
+            "term": "Features", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/uk-news", 
+            "term": "UK news", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/film", 
+            "term": "Film", 
+            "label": null
+        }, 
+        {
+            "scheme": "http://www.theguardian.com/film", 
+            "term": "Kate Winslet", 
+            "label": null
+        }, 
+        {
+            "scheme": null, 
+            "term": "UK news", 
+            "label": null
+        }
+    ], 
+    "id": "http://www.theguardian.com/uk-news/shortcuts/2014/jan/05/odd-news-kate-winslet-baby-bear", 
+    "updated": "2014-01-05T18:30:00Z", 
+    "dc_type": "Article", 
+    "credit": "Public Domain", 
+    "content": [
+        {
+            "base": "http://feeds.theguardian.com/theguardian/world/rss", 
+            "value": "Anna Wintour threw out her 'messy' tree before Christmas and her daughter posted a picture of their tree-less presents to Instagram.", 
+            "type": "text/plain", 
+            "language": null
+        }, 
+        {
+            "base": "http://feeds.theguardian.com/theguardian/world/rss", 
+            "value": "Anna Wintour threw out her 'messy' tree before Christmas. Her daughter posted a picture of the space where it used to be on Instagram.", 
+            "type": "text/plain", 
+            "language": null
+        }
+    ], 
+    "title_detail": {
+        "base": "http://feeds.theguardian.com/theguardian/world/rss", 
+        "value": "Bizarre news stories to ease you back into work", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://feeds.theguardian.com/c/34708/f/663879/s/35876dfd/sc/38/l/0L0Stheguardian0N0Cuk0Enews0Cshortcuts0C20A140Cjan0C0A50Codd0Enews0Ekate0Ewinslet0Ebaby0Ebear/story01.htm", 
+    "summary_detail": {
+        "base": "http://feeds.theguardian.com/theguardian/world/rss", 
+        "value": "<div class=\"track\"><img alt=\"\" src=\"http://hits.theguardian.com/b/ss/guardiangu-feeds/1/H.25.5/57056?ns=guardian&pageName=Article%3Aodd-news-kate-winslet-baby-bear%3A2020965&ch=UK+news&c3=G2&c4=UK+news%2CPiers+Morgan+%28Media%29%2CMedia%2CKate+Winslet+%28Film%29%2CFilm%2CPussy+Riot+%28Music%29%2CMusic%2CAlex+Ferguson%2CEdward+Snowden&c5=Unclassified%2CNot+commercially+useful%2CMedia+Weekly%2CFilm+Reviews%2CPremier+League&c6=Tom+Meltzer&c7=2014%2F01%2F05+06%3A30&c8=2020965&c9=Blog&c10=Feature%2CBlogpost%2CNews&c13=&c19=GUK&c25=Shortcuts&c47=UK&c64=UK&c65=Bizarre+news+stories+to+ease+you+back+into+work&c66=News&c67=nextgen-compatible&c72=&c73=&c74=&c75=&h2=GU%2FNews%2FUK+news%2FPiers+Morgan\" width=\"1\" height=\"1\" /></div><p class=\"standfirst\">If you missed the one about Kate Winslet calling her baby 'Bear', or Alex Ferguson as the bad guy in Sherlock Holmes, read on \u2026</p><p>There's no phrase for it, so&nbsp;let's call it \"nightmarish return to reality Monday\". The first full week of work of 2014 is upon us, and it's a pain. On the plus side, this year's festive period has given us some cracking workplace conversation starters \u2026</p><p></p><p><strong>Piers Morgan was </strong><a href=\"http://www.dailymail.co.uk/news/article-2530594/Piers-Morgan-tweets-picture-cricketing-wound.html\" title=\"\"><strong>pelted with a&nbsp;cricket ball</strong> <strong>and injured</strong></a><strong> in Melbourne while hundreds of people laughed and cheered. </strong>After Morgan questioned the courage of English batsmen at the Ashes, former Australia fast bowler Brett Lee challenged him to stand in for an over. Morgan, to his credit, obliged. And, in front of an unsympathetic crowd, the CNN presenter, with crumbling bravado, took several balls to his body, and broke a rib.</p><p></p><p><strong>Kate Winslet had a baby</strong> <strong>and named it \"Bear\". </strong>To be fair, since her husband willingly changed his name to Ned RocknRoll, any hopes the kid might live a normal life were already quite forlorn.</p><p></p><p><strong>Pussy Riot told us that paranoid Putin believes \"</strong><a href=\"http://www.telegraph.co.uk/news/worldnews/europe/russia/10539248/Pussy-Riot-Khodorkovsky-should-replace-Putin-as-president.html\" title=\"\"><strong>that houses walk&nbsp;on chicken legs</strong></a><strong>\". </strong>The punk band used their first public conference after spending nearly two years in&nbsp;prison to pick up where they left off: criticising the&nbsp;Russian president. Nadezhda Tolokonnikova told reporters his Russia was a \"terrifying fairytale\" of delusions.</p><p></p><p><strong>A surgeon in Worcestershire was suspended for allegedly burning his initials on to a patient's liver. </strong>A spokesperson for Patient Concern told the Telegraph: \"<a href=\"http://www.telegraph.co.uk/health/nhs/10536883/Surgeon-suspended-over-claims-he-branded-a-patients-liver.html\" title=\"\">This&nbsp;is a patient we are talking about, not an autograph book</a>.\"</p><p></p><p><strong>The Doctor Who Christmas episode baffled everyone who saw it \u2013 but still somehow made them cry. </strong>The words \"<a href=\"http://www.theguardian.com/tv-and-radio/2013/dec/26/doctor-who-downton-abbey-tv-review\" title=\"\">Raggedy man, goodbye</a>,\" brought tears to viewers' eyes. The rest of the episode just made people feel a bit drunk.</p><p></p><p><strong>Actor Shia LaBeouf </strong><a href=\"http://www.vulture.com/2013/12/shia-labeouf-plagiarizes-more-apologies.html\" title=\"\"><strong>plagiarised a series of apologies</strong></a><strong> for plagiarising dialogue in his short film from a graphic novel.</strong> File this one under: \"pretentious misdirection\" and \"aggressive contrition\".</p><p></p><p><strong>The Christmas No 1 was a song </strong><a href=\"http://www.lyricsontop.com/sam-bailey-songs/skyscraper-lyrics.html\" title=\"\"><strong>about urban renewal from the point of view of a building</strong></a><strong>.</strong> Fans of The X Factor winner Sam Bailey's Skyscraper can bandy the word \"metaphor\" about all they like. The rest of us know the truth.</p><p></p><p><strong>Vogue editor-in-chief Anna Wintour threw out her family's Christmas tree before Christmas Day because it looked \"too messy\". </strong>Her daughter <a href=\"http://instagram.com/p/iWo1QGAMfS/\" title=\"\">posted a&nbsp;picture to Instagram</a> of their presents piled against a wall. It looked as festive as a grave.</p><p></p><p><strong>Sir Alex Ferguson turned up as the new bad guy in Sherlock.</strong> We only glimpsed the villain's eyes, but the resemblance was so striking that hundreds of viewers took to Twitter and message boards to see if anyone thought the same. They did. We all did.</p><p></p><p><strong>Edward Snowden told us a child born today would never have an \"unrecorded, unanalysed thought\".</strong> The whistleblower made the claim in his alternative to the Queen's speech, <a href=\"http://www.channel4.com/news/edward-snowden-nsa-gchq-whistleblower-surveillance-spying\" title=\"\">broadcast on Channel 4 on Christmas Day</a>. It was a bit of a festive buzzkill, if we're honest.</p><div class=\"related\" style=\"float: left; margin-right: 10px; margin-bottom: 10px;\"><ul><li><a href=\"http://www.theguardian.com/media/piersmorgan\">Piers Morgan</a></li><li><a href=\"http://www.theguardian.com/film/katewinslet\">Kate Winslet</a></li><li><a href=\"http://www.theguardian.com/music/pussy-riot\">Pussy Riot</a></li><li><a href=\"http://www.theguardian.com/football/sir-alex-ferguson\">Sir Alex Ferguson</a></li><li><a href=\"http://www.theguardian.com/world/edward-snowden\">Edward Snowden</a></li></ul></div><div class=\"author\"><a href=\"http://www.theguardian.com/profile/tom-meltzer\">Tom Meltzer</a></div><br/><div class=\"terms\"><a href=\"http://www.theguardian.com\">theguardian.com</a> &copy; 2014 Guardian News and Media Limited or its affiliated companies. All rights reserved. | Use of this content is subject to our <a href=\"http://www.theguardian.com/help/terms-of-service\">Terms & Conditions</a> | <a href=\"http://www.theguardian.com/help/feeds\">More Feeds</a></div><p style=\"clear:both\" /><img width='1' height='1' src='http://feeds.theguardian.com/c/34708/f/663879/s/35876dfd/sc/38/mf.gif' border='0'/><br clear='all'/><br/><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/1/rc.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/1/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/2/rc.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/2/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/3/rc.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/3/rc.img\" border=\"0\"/></a><br/><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/a2.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/a2.img\" border=\"0\"/></a><img width=\"1\" height=\"1\" src=\"http://pi.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/a2t.img\" border=\"0\"/>", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "author": "Tom Meltzer", 
+    "media_keywords": "UK news, Piers Morgan, Media, Kate Winslet, Film, Pussy Riot, Music, Sir Alex Ferguson, Edward Snowden", 
+    "authors": [
+        {}
+    ], 
+    "published": "Sun, 05 Jan 2014 18:30:00 GMT", 
+    "published_parsed": [
+        2014, 
+        1, 
+        5, 
+        18, 
+        30, 
+        0, 
+        6, 
+        5, 
+        0
+    ], 
+    "media_credit": [
+        {
+            "content": "Public Domain", 
+            "scheme": "urn:ebu"
+        }, 
+        {
+            "content": "Public Domain", 
+            "scheme": "urn:ebu"
+        }
+    ], 
+    "links": [
+        {
+            "href": "http://feeds.theguardian.com/c/34708/f/663879/s/35876dfd/sc/38/l/0L0Stheguardian0N0Cuk0Enews0Cshortcuts0C20A140Cjan0C0A50Codd0Enews0Ekate0Ewinslet0Ebaby0Ebear/story01.htm", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ], 
+    "title": "Bizarre news stories to ease you back into work", 
+    "guidislink": false, 
+    "media_content": [
+        {
+            "width": "140", 
+            "lang": "", 
+            "type": "image/jpeg", 
+            "height": "84", 
+            "url": "http://static.guim.co.uk/sys-images/Guardian/About/General/2014/1/3/1388772753179/Anna-Wintours-tree-less-C-006.jpg"
+        }, 
+        {
+            "width": "460", 
+            "lang": "", 
+            "type": "image/jpeg", 
+            "height": "276", 
+            "url": "http://static.guim.co.uk/sys-images/Guardian/About/General/2014/1/3/1388772759753/Anna-Wintours-tree-less-C-011.jpg"
+        }
+    ], 
+    "author_detail": {
+        "name": "Tom Meltzer"
+    }, 
+    "summary": "<div class=\"track\"><img alt=\"\" src=\"http://hits.theguardian.com/b/ss/guardiangu-feeds/1/H.25.5/57056?ns=guardian&pageName=Article%3Aodd-news-kate-winslet-baby-bear%3A2020965&ch=UK+news&c3=G2&c4=UK+news%2CPiers+Morgan+%28Media%29%2CMedia%2CKate+Winslet+%28Film%29%2CFilm%2CPussy+Riot+%28Music%29%2CMusic%2CAlex+Ferguson%2CEdward+Snowden&c5=Unclassified%2CNot+commercially+useful%2CMedia+Weekly%2CFilm+Reviews%2CPremier+League&c6=Tom+Meltzer&c7=2014%2F01%2F05+06%3A30&c8=2020965&c9=Blog&c10=Feature%2CBlogpost%2CNews&c13=&c19=GUK&c25=Shortcuts&c47=UK&c64=UK&c65=Bizarre+news+stories+to+ease+you+back+into+work&c66=News&c67=nextgen-compatible&c72=&c73=&c74=&c75=&h2=GU%2FNews%2FUK+news%2FPiers+Morgan\" width=\"1\" height=\"1\" /></div><p class=\"standfirst\">If you missed the one about Kate Winslet calling her baby 'Bear', or Alex Ferguson as the bad guy in Sherlock Holmes, read on \u2026</p><p>There's no phrase for it, so&nbsp;let's call it \"nightmarish return to reality Monday\". The first full week of work of 2014 is upon us, and it's a pain. On the plus side, this year's festive period has given us some cracking workplace conversation starters \u2026</p><p></p><p><strong>Piers Morgan was </strong><a href=\"http://www.dailymail.co.uk/news/article-2530594/Piers-Morgan-tweets-picture-cricketing-wound.html\" title=\"\"><strong>pelted with a&nbsp;cricket ball</strong> <strong>and injured</strong></a><strong> in Melbourne while hundreds of people laughed and cheered. </strong>After Morgan questioned the courage of English batsmen at the Ashes, former Australia fast bowler Brett Lee challenged him to stand in for an over. Morgan, to his credit, obliged. And, in front of an unsympathetic crowd, the CNN presenter, with crumbling bravado, took several balls to his body, and broke a rib.</p><p></p><p><strong>Kate Winslet had a baby</strong> <strong>and named it \"Bear\". </strong>To be fair, since her husband willingly changed his name to Ned RocknRoll, any hopes the kid might live a normal life were already quite forlorn.</p><p></p><p><strong>Pussy Riot told us that paranoid Putin believes \"</strong><a href=\"http://www.telegraph.co.uk/news/worldnews/europe/russia/10539248/Pussy-Riot-Khodorkovsky-should-replace-Putin-as-president.html\" title=\"\"><strong>that houses walk&nbsp;on chicken legs</strong></a><strong>\". </strong>The punk band used their first public conference after spending nearly two years in&nbsp;prison to pick up where they left off: criticising the&nbsp;Russian president. Nadezhda Tolokonnikova told reporters his Russia was a \"terrifying fairytale\" of delusions.</p><p></p><p><strong>A surgeon in Worcestershire was suspended for allegedly burning his initials on to a patient's liver. </strong>A spokesperson for Patient Concern told the Telegraph: \"<a href=\"http://www.telegraph.co.uk/health/nhs/10536883/Surgeon-suspended-over-claims-he-branded-a-patients-liver.html\" title=\"\">This&nbsp;is a patient we are talking about, not an autograph book</a>.\"</p><p></p><p><strong>The Doctor Who Christmas episode baffled everyone who saw it \u2013 but still somehow made them cry. </strong>The words \"<a href=\"http://www.theguardian.com/tv-and-radio/2013/dec/26/doctor-who-downton-abbey-tv-review\" title=\"\">Raggedy man, goodbye</a>,\" brought tears to viewers' eyes. The rest of the episode just made people feel a bit drunk.</p><p></p><p><strong>Actor Shia LaBeouf </strong><a href=\"http://www.vulture.com/2013/12/shia-labeouf-plagiarizes-more-apologies.html\" title=\"\"><strong>plagiarised a series of apologies</strong></a><strong> for plagiarising dialogue in his short film from a graphic novel.</strong> File this one under: \"pretentious misdirection\" and \"aggressive contrition\".</p><p></p><p><strong>The Christmas No 1 was a song </strong><a href=\"http://www.lyricsontop.com/sam-bailey-songs/skyscraper-lyrics.html\" title=\"\"><strong>about urban renewal from the point of view of a building</strong></a><strong>.</strong> Fans of The X Factor winner Sam Bailey's Skyscraper can bandy the word \"metaphor\" about all they like. The rest of us know the truth.</p><p></p><p><strong>Vogue editor-in-chief Anna Wintour threw out her family's Christmas tree before Christmas Day because it looked \"too messy\". </strong>Her daughter <a href=\"http://instagram.com/p/iWo1QGAMfS/\" title=\"\">posted a&nbsp;picture to Instagram</a> of their presents piled against a wall. It looked as festive as a grave.</p><p></p><p><strong>Sir Alex Ferguson turned up as the new bad guy in Sherlock.</strong> We only glimpsed the villain's eyes, but the resemblance was so striking that hundreds of viewers took to Twitter and message boards to see if anyone thought the same. They did. We all did.</p><p></p><p><strong>Edward Snowden told us a child born today would never have an \"unrecorded, unanalysed thought\".</strong> The whistleblower made the claim in his alternative to the Queen's speech, <a href=\"http://www.channel4.com/news/edward-snowden-nsa-gchq-whistleblower-surveillance-spying\" title=\"\">broadcast on Channel 4 on Christmas Day</a>. It was a bit of a festive buzzkill, if we're honest.</p><div class=\"related\" style=\"float: left; margin-right: 10px; margin-bottom: 10px;\"><ul><li><a href=\"http://www.theguardian.com/media/piersmorgan\">Piers Morgan</a></li><li><a href=\"http://www.theguardian.com/film/katewinslet\">Kate Winslet</a></li><li><a href=\"http://www.theguardian.com/music/pussy-riot\">Pussy Riot</a></li><li><a href=\"http://www.theguardian.com/football/sir-alex-ferguson\">Sir Alex Ferguson</a></li><li><a href=\"http://www.theguardian.com/world/edward-snowden\">Edward Snowden</a></li></ul></div><div class=\"author\"><a href=\"http://www.theguardian.com/profile/tom-meltzer\">Tom Meltzer</a></div><br/><div class=\"terms\"><a href=\"http://www.theguardian.com\">theguardian.com</a> &copy; 2014 Guardian News and Media Limited or its affiliated companies. All rights reserved. | Use of this content is subject to our <a href=\"http://www.theguardian.com/help/terms-of-service\">Terms & Conditions</a> | <a href=\"http://www.theguardian.com/help/feeds\">More Feeds</a></div><p style=\"clear:both\" /><img width='1' height='1' src='http://feeds.theguardian.com/c/34708/f/663879/s/35876dfd/sc/38/mf.gif' border='0'/><br clear='all'/><br/><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/1/rc.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/1/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/2/rc.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/2/rc.img\" border=\"0\"/></a><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/3/rc.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/sc/38/rc/3/rc.img\" border=\"0\"/></a><br/><br/><a href=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/a2.htm\"><img src=\"http://da.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/a2.img\" border=\"0\"/></a><img width=\"1\" height=\"1\" src=\"http://pi.feedsportal.com/r/186528180133/u/57/f/663879/c/34708/s/35876dfd/a2t.img\" border=\"0\"/>"
+}

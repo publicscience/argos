@@ -43,7 +43,7 @@ def fetch():
             # then save (or update).
             for article in articles:
                 id = hash((article['title'] + article['published']).encode('utf-8'))
-                articles_db.update({'_id': id}, {'$set': article})
+                articles_db.update({'_id': id}, article)
 
                 article['_id'] = id
                 results.append(article)
@@ -81,7 +81,7 @@ def add_source(url):
     sources = _sources_db()
     feed_url = feed.find_feed(url)
     doc = {'url': feed_url}
-    sources.update(doc, {'$set': doc})
+    sources.update(doc, doc)
     sources.close()
 
 
@@ -119,6 +119,17 @@ def collect_sources(url):
     feeds = feed.find_feeds(url)
     for f in feeds:
         add_source(f)
+
+
+def load_sources_from_file(filepath='resources/sources.txt'):
+    """
+    Load feeds from a text file.
+    Each line should be the url to the source
+    you want to add.
+    """
+    logger.info('Loading sources from file. This may take awhile...')
+    for line in open(filepath, 'r'):
+        add_source(line)
 
 
 def _sources_db():

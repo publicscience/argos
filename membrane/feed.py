@@ -15,6 +15,7 @@ Example::
 
 import feedparser
 from urllib import request, error
+from http.client import IncompleteRead
 from http.cookiejar import CookieJar
 from . import feedfinder
 from brain import trim, sanitize, entities
@@ -32,6 +33,13 @@ def entries(url):
     The minimum length of an entry is
     500 characters. Anything under will be ignored.
 
+    This will silently skip entries for which the full text
+    can't be retrieved (i.e. if it returns 404).
+
+    Some feeds, for whatever reason, do not include a `published`
+    date in their entry data. In which case, it is left as an
+    empty string.
+
     Args:
         | url (str)    -- the url of the feed.
 
@@ -45,7 +53,7 @@ def entries(url):
     # but 0, there was an error parsing (or connecting) to the feed.
     if data.bozo:
         # Some errors are ok.
-        if not isinstance(data.bozo_exception, feedparser.CharacterEncodingOverride):
+        if not isinstance(data.bozo_exception, feedparser.CharacterEncodingOverride) and not isinstance(data.bozo_exception, feedparser.NonXMLContentType):
             raise data.bozo_exception
 
     # Build the entry dicts.
@@ -56,8 +64,14 @@ def entries(url):
         eurl = entry.links[0].href
 
         # Complete HTML content for this entry.
-        html = fetch_full_text(eurl)
-        entry['fulltext'] = trim(sanitize(html))
+        try:
+            html = fetch_full_text(eurl)
+            entry['fulltext'] = trim(sanitize(html))
+        except error.HTTPError as e:
+            if e.code == 404:
+                continue
+            else:
+                raise e
 
         # Skip over entries that are too short.
         if len(entry['fulltext']) < 500:
@@ -71,8 +85,8 @@ def entries(url):
             'author': entry.get('author', None),
             'tags': extract_tags(entry),
             'title': entry.title,
-            'published': entry.published,
-            'updated': entry.get('updated', entry.published)
+            'published': entry.get('published', ''),
+            'updated': entry.get('updated', entry.get('published', ''))
         })
 
     return entries
@@ -158,5 +172,8 @@ def fetch_full_text(url):
     # This can help get around 403 (forbidden) errors.
     req = request.Request(url, headers={'User-Agent': 'Chrome'})
 
-    html = opener.open(req).read()
+    try:
+        html = opener.open(req).read()
+    except IncompleteRead as e:
+        html = e.partial
     return Document(html).summary()

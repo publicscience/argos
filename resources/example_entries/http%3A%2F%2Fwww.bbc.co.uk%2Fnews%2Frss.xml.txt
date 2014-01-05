@@ -1,0 +1,51 @@
+{
+    "links": [
+        {
+            "href": "http://www.bbc.co.uk/news/blogs-magazine-monitor-25593684#sa-ns_mchannel=rss&ns_source=PublicRSS20-sa", 
+            "type": "text/html", 
+            "rel": "alternate"
+        }
+    ], 
+    "published": "Fri, 03 Jan 2014 16:40:05 GMT", 
+    "published_parsed": [
+        2014, 
+        1, 
+        3, 
+        16, 
+        40, 
+        5, 
+        4, 
+        3, 
+        0
+    ], 
+    "id": "http://www.bbc.co.uk/news/blogs-magazine-monitor-25593684", 
+    "media_thumbnail": [
+        {
+            "width": "66", 
+            "url": "http://news.bbcimg.co.uk/media/images/72069000/jpg/_72069932_460616925.jpg", 
+            "height": "49"
+        }, 
+        {
+            "width": "144", 
+            "url": "http://news.bbcimg.co.uk/media/images/72069000/jpg/_72069933_460616925.jpg", 
+            "height": "81"
+        }
+    ], 
+    "title_detail": {
+        "base": "http://www.bbc.co.uk/news/rss.xml", 
+        "value": "The Loop: Far, far away", 
+        "type": "text/plain", 
+        "language": null
+    }, 
+    "link": "http://www.bbc.co.uk/news/blogs-magazine-monitor-25593684#sa-ns_mchannel=rss&ns_source=PublicRSS20-sa", 
+    "guidislink": false, 
+    "summary": "Readers' respond to this week's stories in the Magazine", 
+    "href": "", 
+    "summary_detail": {
+        "base": "http://www.bbc.co.uk/news/rss.xml", 
+        "value": "Readers' respond to this week's stories in the Magazine", 
+        "type": "text/html", 
+        "language": null
+    }, 
+    "title": "The Loop: Far, far away"
+}

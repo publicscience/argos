@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo -e "\n\n\n"
+echo -e "$(tput setaf 3)Loading default sources to the database. This may take awhile...$(tput sgr0)"
+echo -e "\n\n\n"
+dev-env/bin/python -c 'import membrane.collector as c; c.load_sources_from_file()'
