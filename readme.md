@@ -43,6 +43,7 @@ The environment runs:
 * Stanford NER (8080)
 * RabbitMQ (5672)
 * A Celery worker
+
 *Note: If you're running this on Ubuntu, some of these processes may
 fail, but it is because they are already running as services. Don't
 worry about it.*
