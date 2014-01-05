@@ -91,7 +91,7 @@ class Adipose:
 
             adipose.update({'title': 'foo'}, {'category': 'bar'})
         """
-        self.collection.update(query, data, upsert=True)
+        self.collection.update(query, {'$set': data}, upsert=True)
 
 
     def save(self, doc):

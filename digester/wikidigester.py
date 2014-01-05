@@ -198,7 +198,7 @@ class WikiDigester(Digester):
         # Save the doc
         # If it exists, update the existing doc.
         # If not, create it.
-        #self.db().update({'_id': id}, {'$set': doc})
+        #self.db().update({'_id': id}, doc)
         #self.db().close()
 
         # Return the doc id and its data.
@@ -277,7 +277,7 @@ class WikiDigester(Digester):
         # Need to convert to a list of tuples,
         # since the db won't take a dict.
         tfidf_doc = list(tfidf_dict.items())
-        db.update({'_id': doc['_id']}, {'$set': {'doc': tfidf_doc }})
+        db.update({'_id': doc['_id']}, {'doc': tfidf_doc })
 
         db.close()
 
