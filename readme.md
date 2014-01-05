@@ -4,7 +4,10 @@ Argos
 Please consult the
 [wiki](https://github.com/publicscience/argos/wiki) for detailed information.
 
-# Quick Setup
+# 0 to Argos
+
+*Note: In addition to this initial setup, you will need to [[configure
+AWS|AWS-Setup]] so that distributed processing works.*
 
 The setup process for Argos is fairly complex, but some scripts vastly simplify it.
 
@@ -15,9 +18,8 @@ $ brew install python3 # (also installs pip3)
 $ pip3 install virtualenv
 
 # Ubuntu
-$ sudo apt-get install python3.3
-$ sudo apt-get install python3-pip
-$ pip-3.3 install virtualenv
+$ sudo apt-get install python3.3 python3-pip -y
+$ sudo pip3 install virtualenv
 ```
 
 Then, the easiest way to set things up is to just run the `setup` script:
@@ -35,17 +37,34 @@ $ ./go &
 ```
 This command will startup the Argos environment as a background process.
 It will tell you its `pid`, keep note of that so you can kill it later.
-The environment runs, with the following ports:
+The environment runs:
 * MongoDB (27107)
 * Redis (6379)
 * Stanford NER (8080)
 * RabbitMQ (5672)
 * A Celery worker
+*Note: If you're running this on Ubuntu, some of these processes may
+fail, but it is because they are already running as services. Don't
+worry about it.*
 
 Then when you're done, kill it with:
 ```bash
 $ kill <pid>
 ```
+
+### Tests
+When you get everything setup it's worth running the tests to ensure
+that things have installed correctly:
+```
+$ source dev-env/bin/activate
+$ nosetests tests
+```
+
+*Note: If you are having import errors or the packages seem to be
+missing, fear not ~ it may be because some package failed to install and
+pip rolled back the installs of everything else. Check your pip logs at
+`~/.pip/pip.log`. I'd wager it is `scipy` which ran into a missing
+dependency.*
 
 
 # AWS Setup
