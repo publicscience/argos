@@ -28,6 +28,10 @@ from nltk.corpus import stopwords
 import ner
 import string
 
+# For prototyping/experimentation purposes,
+# using the AlchemyAPI
+from brain import alchemy
+
 
 def tokenize(doc, **kwargs):
     """
@@ -96,6 +100,13 @@ def cluster(docs):
     results = db.fit(vecs)
 
 
+def concepts(docs):
+    """
+    Extracts concepts for a list of documents.
+    """
+    return [alchemy.concepts(doc) for doc in docs]
+
+
 def entities(doc):
     """
     Named entity recognition on
@@ -116,6 +127,7 @@ def entities(doc):
 
     # We're only interested in the entity names,
     # not their tags.
+    print(entities)
     names = [entities[key] for key in entities]
 
     # Flatten the list of lists, return only unique values.
