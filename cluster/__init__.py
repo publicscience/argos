@@ -122,7 +122,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     db_bdm = manage.create_block_device(size=500, delete=False)
     db_init_script = load_script('scripts/setup_db.sh')
 
-    db_instance = _create_instance(
+    db_instance = create_instance(
             name=names['DB'],
             instance_type=database_instance_type,
             init_script=db_init_script,
@@ -140,7 +140,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     mq_bdm = manage.create_block_device(size=150, delete=True)
     mq_init_script = load_script('scripts/setup_mq.sh')
 
-    mq_instance = _create_instance(
+    mq_instance = create_instance(
             name=names['MQ'],
             instance_type=broker_instance_type,
             init_script=mq_init_script,
@@ -161,7 +161,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
             db_dns=db_instance.private_dns_name,
             mq_dns=mq_instance.private_dns_name
     )
-    master_instance = _create_instance(
+    master_instance = create_instance(
             name=names['MASTER'],
             instance_type=master_instance_type,
             init_script=master_init_script,
@@ -670,7 +670,7 @@ def _transfer_salt(host, user, keyfile):
         ])
 
 
-def _create_instance(name=None, instance_type='m1.medium', block_device_map=None, init_script=None):
+def create_instance(name=None, instance_type='m1.medium', block_device_map=None, init_script=None):
     """
     Convenience method for creating a new instance.
     """

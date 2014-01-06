@@ -177,35 +177,35 @@ class CollectorTest(RequiresDB):
     def tearDown(self):
         pass
 
-    def test_fetch(self):
+    def test_collect(self):
         expected_id = 2617640942
         self.mock_entries.return_value = [{'title': 'Foo', 'published': 'Fri, 11 Oct 2013 23:55:00 +0000'}]
 
         self.assertEquals(self.articles_db.count(), 0)
 
-        collector.fetch()
+        collector.collect()
 
         self.assertEquals(self.articles_db.count(), 1)
 
         article = self.articles_db.find({'_id': expected_id})
         self.assertEquals(article['title'], 'Foo')
 
-    def test_fetch_updates_existing(self):
+    def test_collect_updates_existing(self):
         expected_id = 2617640942
         self.mock_entries.return_value = [{'title': 'Foo', 'published': 'Fri, 11 Oct 2013 23:55:00 +0000'}]
 
-        collector.fetch()
-        collector.fetch()
+        collector.collect()
+        collector.collect()
 
         self.assertEquals(self.articles_db.count(), 1)
 
-    def test_fetch_error(self):
+    def test_collect_error(self):
         source_ = self.sources_db.find(self.source)
         self.assertEquals(source_.get('errors', 0), 0)
 
         self.mock_entries.side_effect = feed.SAXException('', None)
 
-        collector.fetch()
+        collector.collect()
 
         source_ = self.sources_db.find(self.source)
         self.assertEquals(source_['errors'], 1)

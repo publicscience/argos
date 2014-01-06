@@ -16,12 +16,6 @@ logger = logger(__name__)
 
 def collect():
     """
-    Fetches entries and processes them.
-    """
-    fetch()
-
-def fetch():
-    """
     Fetch entries from the sources,
     and save (or update) to db.
     """
