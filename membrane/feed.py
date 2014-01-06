@@ -61,7 +61,7 @@ def entries(url):
     for entry in data.entries:
 
         # URL for this entry.
-        eurl = entry.links[0].href
+        eurl = entry['links'][0]['href']
 
         # Complete HTML content for this entry.
         try:
@@ -71,10 +71,10 @@ def entries(url):
             if e.code == 404:
                 continue
             else:
-                raise e
+                raise
 
         # Skip over entries that are too short.
-        if len(entry['fulltext']) < 500:
+        if len(entry['fulltext']) < 400:
             continue
 
         entries.append({
@@ -84,7 +84,7 @@ def entries(url):
             'text': entry['fulltext'],
             'author': entry.get('author', None),
             'tags': extract_tags(entry),
-            'title': entry.title,
+            'title': entry['title'],
             'published': entry.get('published', ''),
             'updated': entry.get('updated', entry.get('published', ''))
         })
@@ -119,7 +119,6 @@ def extract_tags(entry):
 
     # Otherwise, try to extract some.
     else:
-        #sample = '. '.join([entry['title'], entry['summary']])
         sample = entry['fulltext']
         return entities(sample)
 

@@ -18,8 +18,7 @@ def collect():
     """
     Fetches entries and processes them.
     """
-    articles = fetch()
-    docs = [article.text for article in articles]
+    fetch()
 
 def fetch():
     """
@@ -43,6 +42,7 @@ def fetch():
             # then save (or update).
             for article in articles:
                 id = hash((article['title'] + article['published']).encode('utf-8'))
+                article.pop('_id', None) # To prevent id conflicts.
                 articles_db.update({'_id': id}, article)
 
                 article['_id'] = id

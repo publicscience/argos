@@ -46,9 +46,20 @@ mock_feed = """
 """
 
 
-class FeedTest(unittest.TestCase):
+class FeedTest(RequiresMocks):
     def setUp(self):
-        pass
+        from unittest.mock import MagicMock
+        entry = {
+                'links': [{'href': 'some url'}],
+                'title': 'some title',
+                'published': 'some published date',
+                'updated': 'some updated date'
+        }
+        data = MagicMock(
+                    entries=[entry],
+                    bozo=False
+               )
+        self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
     def tearDown(self):
         pass
@@ -57,7 +68,6 @@ class FeedTest(unittest.TestCase):
         self.assertRaises(Exception, feed.entries, 'foo')
 
     def test_extract_tags(self):
-
         entry = {
             'tags': [
                 {'label': None,
@@ -72,6 +82,38 @@ class FeedTest(unittest.TestCase):
         tags = feed.extract_tags(entry)
         self.assertEqual(tags, ['Military', 'National Security'])
 
+    def test_entries(self):
+        self.create_patch('membrane.feed.fetch_full_text', return_value='''
+            We have an infinite amount to learn both from nature and from each other
+            The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+            Curious that we spend more time congratulating people who have succeeded than encouraging people who have not.
+            There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.
+            We want to explore. We’re curious people. Look back over history, people have put their lives at stake to go out and explore … We believe in what we’re doing. Now it’s time to go.
+            Here men from the planet Earth first set foot upon the Moon. July 1969 AD. We came in peace for all mankind.
+            There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.
+            Where ignorance lurks, so too do the frontiers of discovery and imagination.
+            Problems look mighty small from 150 miles up.
+            I don't know what you could say about a day in which you have seen four beautiful sunsets.
+            As we got further and further away, it [the Earth] diminished in size. Finally it shrank to the size of a marble, the most beautiful you can imagine. That beautiful, warm, living object looked so fragile, so delicate, that if you touched it with a finger it would crumble and fall apart. Seeing this has to change a man.
+            Spaceflights cannot be stopped. This is not the work of any one man or even a group of men. It is a historical process which mankind is carrying out in accordance with the natural laws of human development.
+            Space, the final frontier. These are the voyages of the Starship Enterprise. Its five-year mission: to explore strange new worlds, to seek out new life and new civilizations, to boldly go where no man has gone before.
+            NASA is not about the ‘Adventure of Human Space Exploration’…We won’t be doing it just to get out there in space – we’ll be doing it because the things we learn out there will be making life better for a lot of people who won’t be able to go.
+            I don't know what you could say about a day in which you have seen four beautiful sunsets.
+        ''')
+        entries = feed.entries('foo')
+        self.assertEquals(len(entries), 1)
+
+    def test_entries_skips_short_entries(self):
+        self.create_patch('membrane.feed.fetch_full_text', return_value='some full text')
+        entries = feed.entries('foo')
+
+        self.assertEquals(len(entries), 0)
+
+    def test_entries_skips_404_entries(self):
+        from urllib import error
+        self.create_patch('membrane.feed.fetch_full_text', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        entries = feed.entries('foo')
+        self.assertEquals(len(entries), 0)
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
@@ -147,6 +189,15 @@ class CollectorTest(RequiresDB):
 
         article = self.articles_db.find({'_id': expected_id})
         self.assertEquals(article['title'], 'Foo')
+
+    def test_fetch_updates_existing(self):
+        expected_id = 2617640942
+        self.mock_entries.return_value = [{'title': 'Foo', 'published': 'Fri, 11 Oct 2013 23:55:00 +0000'}]
+
+        collector.fetch()
+        collector.fetch()
+
+        self.assertEquals(self.articles_db.count(), 1)
 
     def test_fetch_error(self):
         source_ = self.sources_db.find(self.source)
