@@ -14,6 +14,7 @@ Example::
 """
 
 import feedparser
+import time
 from urllib import request, error
 from http.client import IncompleteRead
 from http.cookiejar import CookieJar
@@ -67,8 +68,8 @@ def entries(url):
         try:
             html = fetch_full_text(eurl)
             entry['fulltext'] = trim(sanitize(html))
-        except error.HTTPError as e:
-            if e.code == 404:
+        except (error.HTTPError, error.URLError) as e:
+            if e.code == 404 or type(e) == error.URLError:
                 continue
             else:
                 raise
