@@ -115,6 +115,12 @@ class FeedTest(RequiresMocks):
         entries = feed.entries('foo')
         self.assertEquals(len(entries), 0)
 
+    def test_entries_skips_unreachable_entries(self):
+        from urllib import error
+        self.create_patch('membrane.feed.fetch_full_text', side_effect=error.URLError('unreachable'))
+        entries = feed.entries('foo')
+        self.assertEquals(len(entries), 0)
+
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
         self.mock_get = self.create_patch('membrane.feedfinder._get')

@@ -69,7 +69,7 @@ def entries(url):
             html = fetch_full_text(eurl)
             entry['fulltext'] = trim(sanitize(html))
         except (error.HTTPError, error.URLError) as e:
-            if e.code == 404 or type(e) == error.URLError:
+            if type(e) == error.URLError or e.code == 404:
                 continue
             else:
                 raise
