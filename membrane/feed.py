@@ -117,10 +117,12 @@ def extract_tags(entry):
     if 'tags' in entry:
         return [tag['term'] for tag in entry['tags']]
 
+    # DISABLING FOR NOW. Easier to run through all entries and add
+    # these entities later.
     # Otherwise, try to extract some.
-    else:
-        sample = entry['fulltext']
-        return entities(sample)
+    #else:
+        #sample = entry['fulltext']
+        #return entities(sample)
 
 def find_feed(url):
     """
