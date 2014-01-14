@@ -1,7 +1,7 @@
 Argos
 ===============
 
-[[https://raw.github.com/wiki/publicscience/argos/img/argos.png]]
+![Argos](https://raw.github.com/wiki/publicscience/argos/img/argos.png)
 
 Please consult the
 [wiki](https://github.com/publicscience/argos/wiki) for detailed information.
