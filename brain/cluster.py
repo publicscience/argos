@@ -4,18 +4,6 @@ Cluster
 
 Clusters text documents.
 
-A cluster looks like::
-
-    {
-        'id': *,
-        'title': str,
-        'articles': list,
-        'entities': list,
-        'active': bool,
-        'summary' : str,
-        'updated_at': datetime,
-        'created_at': datetime
-    }
 """
 
 from brain import vectorize, entities
@@ -52,7 +40,7 @@ def cluster(articles, threshold=0.7):
 
         # Select candidate clusters,
         # i.e. active clusters which share at least one entity with this article.
-        candidate_clusters = [c for c in active_clusters if set(ents).intersection(c.entities)]
+        candidate_clusters = [c for c in active_clusters if set(ents).intersection(c.features)]
 
         # Keep tracking of qualifying clusters
         # and their avg sim with this article.
@@ -61,7 +49,7 @@ def cluster(articles, threshold=0.7):
 
         # Compare the article with the candidate clusters.
         for cluster in candidate_clusters:
-            avg_sim = cluster.similarity(vector)
+            avg_sim = cluster.similarity_with_vector(vector)
             if avg_sim > threshold:
                 qualifying_clusters.append((cluster, avg_sim))
 
@@ -81,14 +69,14 @@ def cluster(articles, threshold=0.7):
 
         else:
             # Create a new cluster.
-            active_clusters.append( Cluster({'articles': [article]}) )
+            active_clusters.append( Cluster({'members': [article]}) )
 
     for cluster in active_clusters:
         # Mark expired clusters inactive.
         if (now - cluster.updated_at).days > 3:
             cluster.active = False
         else:
-            cluster.update()
+            cluster.update(save=False)
         cluster.save()
 
 
@@ -107,15 +95,34 @@ def database():
 
 class Cluster():
     """
-    TO DO WRITE THIS
+    A cluster.
     """
     def __init__(self, data={}):
+        """
+        Initialize the cluster with some data.
+
+        Args:
+            | data (dict)   -- optional, the data to initialize the cluster with.
+
+        Cluster data looks like::
+
+            {
+                'id': *,
+                'title': str,
+                'members': list,
+                'features': list,
+                'active': bool,
+                'summary' : str,
+                'updated_at': datetime,
+                'created_at': datetime
+            }
+        """
         # Defaults
         self.defaults = {
             'active': True,
             'title': '',
-            'articles': [],
-            'entities': [],
+            'members': [],
+            'features': [],
             'summary': '',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow()
@@ -128,20 +135,52 @@ class Cluster():
             setattr(self, key, data[key])
 
     def summarize(self):
+        """
+        Generate a summary for this cluster.
+        """
+        # something like:
+        # self.summary = summarize([m['text'] for m in self.members])
         pass
 
     def titleize(self):
-        pass
+        """
+        Generate a title for this cluster.
 
-    def entitize(self):
-        pass
+        Looks for the cluster member that is most similar to the others,
+        and then uses the title of that member.
+        """
+        max_member = (None, 0)
+        for member in self.members:
+            v = self.vectorize_member(member)
+            avg_sim = self.similarity_with_vector(v)
+            if avg_sim > max_member[1]:
+                max_member = (member, avg_sim)
+        self.title = max_member[0]['title']
 
-    def update(self):
+    def featurize(self):
+        """
+        Update (weighted) features for this cluster.
+
+        In this implemention, entities = features.
+        """
+        self.features = entities([m['text'] for m in self.members])
+
+    def update(self, save=True):
+        """
+        Update the cluster's attributes,
+        optionally saving (saves by default).
+        """
         self.titleize()
         self.summarize()
-        self.entitize()
+        self.featurize()
+
+        if save:
+            self.save()
 
     def save(self):
+        """
+        Persist the cluster's data to the database.
+        """
         db = database()
 
         # Assemble the data to save.
@@ -155,17 +194,50 @@ class Cluster():
         # Set the id from the saved record.
         self._id = db.save(data)
 
-    def add(self, article):
-        self.articles.append(article)
+    def add(self, member):
+        """
+        Add an member to the cluster.
+        """
+        self.members.append(member)
 
-    def similarity(self, vector):
+    def vectorize_member(self, member):
+        """
+        Vectorize/represent a cluster member.
+        """
+        return vectorize(member['text'])
+
+    def vectorize_members(self):
+        """
+        Vectorize all members in a cluster
+        into a 1D array.
+        """
+        return vectorize([m['text'] for m in self.members]).toarray().flatten()
+
+    def similarity_with_vector(self, vector):
+        """
+        Calculate the similarity of this vector
+        against each member of the cluster.
+        """
         sims = []
-        # Calculate the similarity of this article
-        # against each article in the cluster.
-        for article in self.articles:
-            vector_ = vectorize(article['text'])
-            sims.append(1 - jaccard(vector, vector_))
+        for member in self.members:
+            v = self.vectorize_member(member)
+            sims.append(1 - jaccard(vector, v))
 
         # Calculate average similarity.
         return sum(sims)/len(sims)
 
+    def similarity_with_cluster(self, cluster):
+        """
+        Calculate the average similarity of each
+        member to each member of the other cluster.
+        """
+        avg_sims = []
+        vs = self.vectorize_members()
+        vs_ = cluster.vectorize_members()
+        return 1 - jaccard(vs, vs_)
+
+def evaluate():
+    """
+    Evaluate the clustering algorithm.
+    """
+    pass

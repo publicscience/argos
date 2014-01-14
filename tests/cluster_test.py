@@ -9,19 +9,22 @@ class ClusterTest(RequiresDB):
         self.faux_cluster = {
             'active': True,
             'title': 'I are cluster',
-            'articles': [{
+            'members': [{
+                'title': 'Dinosaurs',
                 'text': 'dinosaurs are cool, Clinton',
                 'published': datetime.utcnow()
             }, {
+                'title': 'Robots',
                 'text': 'robots are nice, Clinton',
                 'published': datetime.utcnow()
             }],
-            'entities': ['Clinton'],
+            'features': ['Clinton'],
             'summary': 'This is a summary',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow()
         }
         self.faux_article = {
+                'title': 'Dinosaurs',
                 # Expected extracted entity is "Clinton"
                 'text': 'dinosaurs are cool, Clinton',
                 'published': datetime.utcnow()
@@ -44,19 +47,37 @@ class ClusterTest(RequiresDB):
         c = cluster.Cluster()
         self.assertEqual(c.active, True)
 
-    def test_cluster_similarity_different(self):
+    def test_cluster_similarity_with_vector_different(self):
         v = vectorize('dinosaurs are cool')
         c = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity(v)
+        avg_sim = c.similarity_with_vector(v)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
 
-    def test_cluster_similarity_duplicates(self):
+    def test_cluster_similarity_with_vector_duplicates(self):
         v = vectorize('dinosaurs are cool, Clinton')
-        self.faux_cluster['articles'][1]['text'] = 'dinosaurs are cool, Clinton'
+        self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
         c = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity(v)
+        avg_sim = c.similarity_with_vector(v)
         self.assertEqual(avg_sim, 1.0)
+
+    def test_cluster_similarity_with_cluster_duplicates(self):
+        c = cluster.Cluster(self.faux_cluster)
+        c_ = cluster.Cluster(self.faux_cluster)
+        avg_sim = c.similarity_with_cluster(c_)
+        self.assertEqual(avg_sim, 1.0)
+
+    def test_cluster_similarity_with_cluster_different(self):
+        from copy import deepcopy
+        alt_cluster = deepcopy(self.faux_cluster)
+        alt_cluster['members'][1]['text'] = 'papa was a rodeo, Clinton'
+
+        c = cluster.Cluster(self.faux_cluster)
+        c_ = cluster.Cluster(alt_cluster)
+
+        avg_sim = c.similarity_with_cluster(c_)
+        self.assertNotEqual(avg_sim, 1.0)
+        self.assertNotEqual(avg_sim, 0.0)
 
     def test_cluster_save(self):
         c = cluster.Cluster(self.faux_cluster)
@@ -81,29 +102,29 @@ class ClusterTest(RequiresDB):
         self.assertFalse(c.active)
 
     def test_cluster_clusters_similar(self):
-        self.faux_cluster['articles'][1]['text'] = 'dinosaurs are cool, Clinton'
+        self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
         c = cluster.Cluster(self.faux_cluster)
         self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
         cluster.cluster([self.faux_article])
-        self.assertEqual(len(c.articles), 3)
+        self.assertEqual(len(c.members), 3)
 
     def test_cluster_does_not_cluster_if_no_shared_entities(self):
-        self.faux_cluster['articles'][1]['text'] = 'dinosaurs are cool, Clinton'
-        self.faux_cluster['entities'] = ['Reagan']
+        self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
+        self.faux_cluster['features'] = ['Reagan']
         c = cluster.Cluster(self.faux_cluster)
         self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
         cluster.cluster([self.faux_article])
-        self.assertEqual(len(c.articles), 2)
+        self.assertEqual(len(c.members), 2)
 
     def test_cluster_does_not_cluster_not_similar(self):
-        self.faux_article['text'] = 'skyscrapers can be enormous, Clinton'
+        self.faux_article['text'] = 'superstars are awesome, Clinton'
         c = cluster.Cluster(self.faux_cluster)
         self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
         cluster.cluster([self.faux_article])
-        self.assertEqual(len(c.articles), 2)
+        self.assertEqual(len(c.members), 2)
 
     def test_cluster_no_clustering_creates_new_cluster(self):
-        self.faux_article['text'] = 'skyscrapers can be enormous, Clinton'
+        self.faux_article['text'] = 'superstars are awesome, Clinton'
         c = cluster.Cluster(self.faux_cluster)
         self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
         cluster.cluster([self.faux_article])
@@ -113,4 +134,4 @@ class ClusterTest(RequiresDB):
         self.assertEqual(self.mock_db.save.call_count, 2)
 
         # Check it was called with the expected article.
-        self.assertEqual(self.mock_db.save.call_args_list[-1][0][0]['articles'], [self.faux_article])
+        self.assertEqual(self.mock_db.save.call_args_list[-1][0][0]['members'], [self.faux_article])

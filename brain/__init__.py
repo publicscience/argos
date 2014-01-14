@@ -88,7 +88,7 @@ def vectorize(docs):
 
     if type(docs) is str:
         # Extract and return the vector for the single document.
-        return h.transform(docs).toarray()[0]
+        return h.transform([docs]).toarray()[0]
     else:
         return h.transform(docs)
 
@@ -99,15 +99,23 @@ def concepts(docs):
     return [alchemy.concepts(doc) for doc in docs]
 
 
-def entities(doc):
+def entities(docs):
     """
     Named entity recognition on
-    a text document.
+    a text document or documents.
+
+    Returns the extracted entities with their
+    normalized, frequency-based weights.
+
+    If multiple documents are passed,
+    the entity count and weights for the entire
+    set is returned.
 
     Requires that a Stanford NER server is
     running on localhost:8080.
 
     Args:
+        | docs (list)   -- the documents to process.
         | doc (str)     -- the document to process.
 
     Returns:
@@ -115,19 +123,26 @@ def entities(doc):
     """
 
     tagger = ner.SocketNER(host='localhost', port=8080)
-    entities = tagger.get_entities(doc)
 
-    # We're only interested in the entity names,
-    # not their tags.
-    names = [entities[key] for key in entities]
+    if type(docs) is str:
+        docs = [docs]
 
-    # Flatten the list of lists.
-    names = [name for sublist in names for name in sublist]
+    all_names = []
+    for doc in docs:
+        entities = tagger.get_entities(doc)
+        # We're only interested in the entity names,
+        # not their tags.
+        names = [entities[key] for key in entities]
+
+        # Flatten the list of lists.
+        names = [name for sublist in names for name in sublist]
+
+        all_names += names
 
     # Calculate (rough, naive) normalized weights for the entities.
     # Will likely want to find ways to recognize congruent entities which
-    # may not necessarily be consistently mentioned, i.e. "Bill Clinton" and "Clinton".
-    counts = Counter(names)
+    # may not necessarily be consistently mentioned, i.e. "Bill Clinton" and "Clinton" (not yet implemented).
+    counts = Counter(all_names)
     if len(counts):
         top_count = counts.most_common(1)[0][1]
     results = []
