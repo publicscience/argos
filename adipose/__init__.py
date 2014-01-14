@@ -106,11 +106,14 @@ class Adipose:
         Args:
             | doc (dict)  -- the doc to save.
 
+        Returns:
+            | id of saved document
+
         Example::
 
             adipose.save({'title': 'foo', 'category': 'bar'})
         """
-        self.collection.save(doc)
+        return self.collection.save(doc)
 
 
     def remove(self, query):

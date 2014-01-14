@@ -21,12 +21,12 @@ except ImportError:
 
 from sklearn.feature_extraction.text import HashingVectorizer, TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
-from sklearn.cluster import DBSCAN
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 import ner
 import string
+from collections import Counter
 
 # For prototyping/experimentation purposes,
 # using the AlchemyAPI
@@ -79,26 +79,18 @@ def vectorize(docs):
 
     Args:
         | docs (list)       -- the documents to vectorize.
+        | docs (str)        -- a single document to vectorize.
 
     Returns:
         | scipy sparse matrix (CSR/Compressed Sparse Row format)
     """
     h = HashingVectorizer(input='content', stop_words='english', norm=None, tokenizer=Tokenizer())
-    return h.transform(docs)
 
-
-def cluster(docs):
-    """
-    Clusters a list of documents.
-    """
-    t = TfidfVectorizer(input='content', stop_words='english', tokenizer=Tokenizer())
-    lsa = TruncatedSVD(n_components=100)
-    db = DBSCAN(eps=0.3, min_samples=10)
-
-    vecs = t.fit_transform(docs)
-    #vecs = lsa.fit_transform(vecs)
-    results = db.fit(vecs)
-
+    if type(docs) is str:
+        # Extract and return the vector for the single document.
+        return h.transform(docs).toarray()[0]
+    else:
+        return h.transform(docs)
 
 def concepts(docs):
     """
@@ -119,7 +111,7 @@ def entities(doc):
         | doc (str)     -- the document to process.
 
     Returns:
-        | set           -- set of unique entity names.
+        | list          -- list of (entity, weight)
     """
 
     tagger = ner.SocketNER(host='localhost', port=8080)
@@ -127,11 +119,22 @@ def entities(doc):
 
     # We're only interested in the entity names,
     # not their tags.
-    print(entities)
     names = [entities[key] for key in entities]
 
-    # Flatten the list of lists, return only unique values.
-    return list({name for sublist in names for name in sublist})
+    # Flatten the list of lists.
+    names = [name for sublist in names for name in sublist]
+
+    # Calculate (rough, naive) normalized weights for the entities.
+    # Will likely want to find ways to recognize congruent entities which
+    # may not necessarily be consistently mentioned, i.e. "Bill Clinton" and "Clinton".
+    counts = Counter(names)
+    if len(counts):
+        top_count = counts.most_common(1)[0][1]
+    results = []
+    for entity, count in counts.items():
+        results.append((entity, count/top_count))
+
+    return results
 
 
 

@@ -19,30 +19,30 @@ class BrainTest(unittest.TestCase):
             sample = f.read()
         results = brain.entities(sample)
 
-        expected = {
-                 'Enrico Fermi Award',
-                 'Trinity',
-                 'Soviet Union',
-                 'Julius Robert Oppenheimer',
-                 'Enrico Fermi',
-                 'Second Red Scare',
-                 'Berkeley',
-                 'Phillips',
-                 'Born',
-                 'American',
-                 'University of California',
-                 'Bhagavad Gita',
-                 'Oppenheimer',
-                 'John F. Kennedy',
-                 'New Mexico',
-                 'World War II',
-                 'Institute for Advanced Study in Princeton',
-                 'Lyndon B. Johnson',
-                 'United States Atomic Energy Commission',
-                 'Manhattan Project'
-        }
+        expected = [
+            ('Phillips', 0.3333333333333333),
+            ('Bhagavad Gita', 0.3333333333333333),
+            ('Oppenheimer', 1.0),
+            ('Institute for Advanced Study in Princeton', 0.3333333333333333),
+            ('Second Red Scare', 0.3333333333333333),
+            ('Enrico Fermi', 0.3333333333333333),
+            ('Berkeley', 0.3333333333333333),
+            ('World War II', 0.6666666666666666),
+            ('American', 0.6666666666666666),
+            ('Soviet Union', 0.3333333333333333),
+            ('Manhattan Project', 0.3333333333333333),
+            ('Lyndon B. Johnson', 0.3333333333333333),
+            ('John F. Kennedy', 0.3333333333333333),
+            ('Born', 0.3333333333333333),
+            ('Julius Robert Oppenheimer', 0.3333333333333333),
+            ('Trinity', 0.3333333333333333),
+            ('New Mexico', 0.3333333333333333),
+            ('University of California', 0.3333333333333333),
+            ('Enrico Fermi Award', 0.3333333333333333),
+            ('United States Atomic Energy Commission', 0.3333333333333333)
+        ]
 
-        self.assertEqual(set(results), expected)
+        self.assertEqual(set(results), set(expected))
 
     def test_trim(self):
         data = '  hey      there           neighbor   '
