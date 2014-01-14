@@ -11,10 +11,13 @@ from adipose import Adipose
 from scipy.spatial.distance import jaccard
 from datetime import datetime
 
+# Logging.
+from logger import logger
+
 DATABASE = 'brain'
 COLLECTION = 'clusters'
 
-def cluster(articles, threshold=0.7):
+def cluster(articles, threshold=0.7, debug=False):
     """
     Clusters a set of articles
     into existing clusters.
@@ -24,11 +27,21 @@ def cluster(articles, threshold=0.7):
         | threshold (float) -- the similarity threshold for qualifying a cluster
     """
 
+    log = logger('clustering')
+    if debug:
+        log.setLevel('DEBUG')
+    else:
+        log.setLevel('ERROR')
+
+    log.debug('Threshold is set to %s.' % threshold)
+
     active_clusters = clusters()
+
     now = datetime.utcnow()
 
     # TO DO: BIAS CLOSER PUBLICATION DATES
     for article in articles:
+        log.debug('There are %s active clusters.' % len(active_clusters))
         text = article['text']
 
         # Build bag-of-words vector representation.
@@ -40,7 +53,14 @@ def cluster(articles, threshold=0.7):
 
         # Select candidate clusters,
         # i.e. active clusters which share at least one entity with this article.
-        candidate_clusters = [c for c in active_clusters if set(ents).intersection(c.features)]
+        log.debug('Found %s entities.' % len(ents))
+
+        candidate_clusters = []
+        for cluster in active_clusters:
+            c_ents = [e[0] for e in cluster.features]
+            if set(ents).intersection(c_ents):
+                candidate_clusters.append(cluster)
+        log.debug('Found %s candidate clusters.' % len(candidate_clusters))
 
         # Keep tracking of qualifying clusters
         # and their avg sim with this article.
@@ -50,17 +70,21 @@ def cluster(articles, threshold=0.7):
         # Compare the article with the candidate clusters.
         for cluster in candidate_clusters:
             avg_sim = cluster.similarity_with_vector(vector)
+            log.debug('Average similarity was %s.' % avg_sim)
             if avg_sim > threshold:
                 qualifying_clusters.append((cluster, avg_sim))
 
         num_qualified = len(qualifying_clusters)
+        log.debug('Found %s qualifying clusters.' % num_qualified)
 
         if num_qualified == 1:
             # Grab the only cluster and add the article.
+            log.debug('Only one qualifying cluster, adding article to it.')
             qualifying_clusters[0][0].add(article)
 
         elif num_qualified > 1:
             # Get the most similar cluster and add the article.
+            log.debug('Multiple qualifying clusters found, adding article to the most similar one.')
             max_cluster = (None, 0)
             for cluster in qualifying_clusters:
                 if cluster[1] > max_cluster[1]:
@@ -69,7 +93,10 @@ def cluster(articles, threshold=0.7):
 
         else:
             # Create a new cluster.
-            active_clusters.append( Cluster({'members': [article]}) )
+            log.debug('No qualifying clusters found, creating a new cluster.')
+            new_cluster = Cluster({'members': [article]})
+            new_cluster.update(save=False)
+            active_clusters.append(new_cluster)
 
     for cluster in active_clusters:
         # Mark expired clusters inactive.
@@ -79,6 +106,8 @@ def cluster(articles, threshold=0.7):
             cluster.update(save=False)
         cluster.save()
 
+    return active_clusters
+
 
 def clusters(active=True):
     """
@@ -86,7 +115,7 @@ def clusters(active=True):
     create Clusters.
     """
     db = database()
-    return [Cluster(c) for c in db.find({'active': active})]
+    return [Cluster(c) for c in db.all({'active': active})]
 
 
 def database():
@@ -235,9 +264,3 @@ class Cluster():
         vs = self.vectorize_members()
         vs_ = cluster.vectorize_members()
         return 1 - jaccard(vs, vs_)
-
-def evaluate():
-    """
-    Evaluate the clustering algorithm.
-    """
-    pass

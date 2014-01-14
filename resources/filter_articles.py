@@ -4,7 +4,7 @@ Filter down collected articles to a a couple specific domains.
 
 import json
 
-dump = open('/Users/ftseng/Desktop/articles.json', 'rb')
+dump = open('/Users/ftseng/Desktop/articles.json', 'r')
 articles = json.load(dump)
 
 #tagged = [article for article in articles if article['tags']]
@@ -33,7 +33,7 @@ srcs = [
 ]
 
 articles_ = [a for a in articles if a['source'] in srcs]
-a = articles_[:100]
+a = articles_[:200]
 for article in a:
     #print(json.dumps(article, sort_keys=True, indent=4))
     f = open('/Users/ftseng/Desktop/articles/%s.txt' % article['title'], 'wb')
