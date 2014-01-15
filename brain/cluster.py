@@ -118,7 +118,7 @@ def database():
     return Adipose(DATABASE, COLLECTION)
 
 
-class Cluster():
+class Cluster:
     """
     A cluster.
     """
@@ -274,28 +274,11 @@ class Cluster():
         member to each member of the other cluster.
         """
         avg_sims = []
-        vs = self._vectorize_members()
-        vs_ = cluster._vectorize_members()
+        vs = self.vectorize()
+        vs_ = cluster.vectorize()
         return 1 - jaccard(vs, vs_)
 
-    def _vectorize_member(self, member):
-        """
-        Vectorize/represent a cluster member.
-        Caches vectors on the member.
-
-        May return a list of vectors if multiple
-        vector representations are used.
-        """
-        if not member.get('vector'):
-            # Members are represented both by a:
-            # – bag of words vector
-            # – entities vector
-            bow_vec = vectorize(member['text'])
-            ent_vec = vectorize(' '.join(entities(member['text'])))
-            member['vector'] = [bow_vec, ent_vec]
-        return member['vector']
-
-    def _vectorize_members(self):
+    def vectorize(self):
         """
         Vectorize all members in a cluster
         into a 1D array.
