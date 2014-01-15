@@ -11,6 +11,8 @@ from adipose import Adipose
 from scipy.spatial.distance import jaccard
 from datetime import datetime
 
+from numpy import ndarray
+
 # Logging.
 from logger import logger
 
@@ -44,22 +46,16 @@ def cluster(articles, threshold=0.7, debug=False):
         log.debug('There are %s active clusters.' % len(active_clusters))
         text = article['text']
 
-        # Build bag-of-words vector representation.
-        vector = vectorize(text)
+        # Extract entities to use as another representation.
+        ents = entities(text)
+        log.debug('Found %s entities.' % len(ents))
 
-        # Extract entities as another representation.
-        ents_w_weights = entities(text)
-        ents = [e[0] for e in ents_w_weights]
+        # Build bag-of-words vector representation.
+        article['vector'] = [vectorize(text), vectorize(' '.join(ents))]
 
         # Select candidate clusters,
         # i.e. active clusters which share at least one entity with this article.
-        log.debug('Found %s entities.' % len(ents))
-
-        candidate_clusters = []
-        for cluster in active_clusters:
-            c_ents = [e[0] for e in cluster.features]
-            if set(ents).intersection(c_ents):
-                candidate_clusters.append(cluster)
+        candidate_clusters = [c for c in active_clusters if set(ents).intersection(c.features)]
         log.debug('Found %s candidate clusters.' % len(candidate_clusters))
 
         # Keep tracking of qualifying clusters
@@ -69,7 +65,7 @@ def cluster(articles, threshold=0.7, debug=False):
 
         # Compare the article with the candidate clusters.
         for cluster in candidate_clusters:
-            avg_sim = cluster.similarity_with_vector(vector)
+            avg_sim = cluster.similarity_with_object(article)
             log.debug('Average similarity was %s.' % avg_sim)
             if avg_sim > threshold:
                 qualifying_clusters.append((cluster, avg_sim))
@@ -163,6 +159,16 @@ class Cluster():
         for key in data:
             setattr(self, key, data[key])
 
+        # Need to handle pickled vector data specially.
+        # Looking for a better way!
+        for member in self.members:
+            unpickled_vecs = []
+            for vec in member.get('vector', []):
+                if type(vec) is not ndarray:
+                    vec = unpickle(vec)
+                unpickled_vecs.append(vec)
+            member['vector'] = unpickled_vecs
+
     def summarize(self):
         """
         Generate a summary for this cluster.
@@ -180,8 +186,7 @@ class Cluster():
         """
         max_member = (None, 0)
         for member in self.members:
-            v = self.vectorize_member(member)
-            avg_sim = self.similarity_with_vector(v)
+            avg_sim = self.similarity_with_object(member)
             if avg_sim > max_member[1]:
                 max_member = (member, avg_sim)
         self.title = max_member[0]['title']
@@ -220,6 +225,15 @@ class Cluster():
         if hasattr(self, '_id'):
             data['_id'] = getattr(self, '_id')
 
+        # Need to handle member vector data properly.
+        # Ideally this is only a temporary solution;
+        # I imagine there are better approaches.
+        for member in data['members']:
+            pickled_vecs = []
+            for vec in member.get('vector', []):
+                pickled_vecs.append(db.pickle(vec))
+            member['vector'] = pickled_vecs
+
         # Set the id from the saved record.
         self._id = db.save(data)
 
@@ -229,28 +243,27 @@ class Cluster():
         """
         self.members.append(member)
 
-    def vectorize_member(self, member):
+    def similarity_with_object(self, obj):
         """
-        Vectorize/represent a cluster member.
-        """
-        return vectorize(member['text'])
-
-    def vectorize_members(self):
-        """
-        Vectorize all members in a cluster
-        into a 1D array.
-        """
-        return vectorize([m['text'] for m in self.members]).toarray().flatten()
-
-    def similarity_with_vector(self, vector):
-        """
-        Calculate the similarity of this vector
+        Calculate the similarity of this object
         against each member of the cluster.
         """
         sims = []
         for member in self.members:
-            v = self.vectorize_member(member)
-            sims.append(1 - jaccard(vector, v))
+            v_m = self._vectorize_member(member)
+            v_o = self._vectorize_member(obj)
+
+            # Linearly combine the similarity values,
+            # weighing them according to these coefficients.
+            coefs = [2, 1]
+            sim = 0
+            for i, v in enumerate(v_m):
+                s = 1 - jaccard(v_o[i], v_m[i])
+                sim += (coefs[i] * s)
+
+            # Normalize back to [0, 1] and save.
+            sim = sim/sum(coefs)
+            sims.append(sim)
 
         # Calculate average similarity.
         return sum(sims)/len(sims)
@@ -261,6 +274,30 @@ class Cluster():
         member to each member of the other cluster.
         """
         avg_sims = []
-        vs = self.vectorize_members()
-        vs_ = cluster.vectorize_members()
+        vs = self._vectorize_members()
+        vs_ = cluster._vectorize_members()
         return 1 - jaccard(vs, vs_)
+
+    def _vectorize_member(self, member):
+        """
+        Vectorize/represent a cluster member.
+        Caches vectors on the member.
+
+        May return a list of vectors if multiple
+        vector representations are used.
+        """
+        if not member.get('vector'):
+            # Members are represented both by a:
+            # – bag of words vector
+            # – entities vector
+            bow_vec = vectorize(member['text'])
+            ent_vec = vectorize(' '.join(entities(member['text'])))
+            member['vector'] = [bow_vec, ent_vec]
+        return member['vector']
+
+    def _vectorize_members(self):
+        """
+        Vectorize all members in a cluster
+        into a 1D array.
+        """
+        return vectorize([m['text'] for m in self.members]).toarray().flatten()

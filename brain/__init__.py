@@ -104,13 +104,6 @@ def entities(docs):
     Named entity recognition on
     a text document or documents.
 
-    Returns the extracted entities with their
-    normalized, frequency-based weights.
-
-    If multiple documents are passed,
-    the entity count and weights for the entire
-    set is returned.
-
     Requires that a Stanford NER server is
     running on localhost:8080.
 
@@ -119,7 +112,7 @@ def entities(docs):
         | doc (str)     -- the document to process.
 
     Returns:
-        | list          -- list of (entity, weight)
+        | list          -- list of all entity mentions
     """
 
     tagger = ner.SocketNER(host='localhost', port=8080)
@@ -139,17 +132,19 @@ def entities(docs):
 
         all_names += names
 
+    # TEMPORARILY REMOVED, THIS PART IS HANDLED EXTERNALLY BY A VECTORIZER.
     # Calculate (rough, naive) normalized weights for the entities.
     # Will likely want to find ways to recognize congruent entities which
     # may not necessarily be consistently mentioned, i.e. "Bill Clinton" and "Clinton" (not yet implemented).
-    counts = Counter(all_names)
-    if len(counts):
-        top_count = counts.most_common(1)[0][1]
-    results = []
-    for entity, count in counts.items():
-        results.append((entity, count/top_count))
+    #counts = Counter(all_names)
+    #if len(counts):
+        #top_count = counts.most_common(1)[0][1]
+    #results = []
+    #for entity, count in counts.items():
+        #results.append((entity, count/top_count))
+    #return results
+    return all_names
 
-    return results
 
 
 

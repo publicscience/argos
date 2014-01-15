@@ -47,18 +47,16 @@ class ClusterTest(RequiresDB):
         c = cluster.Cluster()
         self.assertEqual(c.active, True)
 
-    def test_cluster_similarity_with_vector_different(self):
-        v = vectorize('dinosaurs are cool')
+    def test_cluster_similarity_with_object_different(self):
         c = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity_with_vector(v)
+        avg_sim = c.similarity_with_object(self.faux_article)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
 
-    def test_cluster_similarity_with_vector_duplicates(self):
-        v = vectorize('dinosaurs are cool, Clinton')
+    def test_cluster_similarity_with_object_duplicates(self):
         self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
         c = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity_with_vector(v)
+        avg_sim = c.similarity_with_object(self.faux_article)
         self.assertEqual(avg_sim, 1.0)
 
     def test_cluster_similarity_with_cluster_duplicates(self):
