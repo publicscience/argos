@@ -12,6 +12,14 @@ elif [ $1 == 'test' ]
 then
     FLASK_ENV=TESTING nosetests
 
+elif [ $1 == 'evaluate' ]
+then
+    FLASK_ENV=TESTING python -c "from resources.evaluate import evaluate; evaluate()"
+
+elif [ $1 == 'profile' ]
+then
+    FLASK_ENV=TESTING python -c "from resources.profile import profile; profile()"
+
 elif [ $1 == 'db:create' ]
 then
     # Create user if it doesn't exist.

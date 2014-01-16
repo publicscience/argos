@@ -1,20 +1,18 @@
 import os
 import cProfile, pstats
+from app import db
 from brain import cluster
+from models import Cluster, Article
 
 # Logging.
 from logger import logger
 logger = logger(__name__)
 
-cluster.DATABASE = 'evaluate'
 
 def evaluate_clustering():
     """
     Evaluate the clustering algorithm.
     """
-
-    logger.info('Emptying evaluation database...')
-    cluster.database().empty()
 
     logger.info('Constructing expected clusters and articles...')
     expected_clusters = {}
@@ -26,10 +24,10 @@ def evaluate_clustering():
             if ext == '.txt':
                 category = dir.split('/')[-1]
                 f = open(filepath, 'r')
-                article = {
-                    'text': f.read(),
-                    'title': name.split('/')[-1]
-                }
+                article = Article(
+                        text=f.read(),
+                        title=name.split('/')[-1]
+                )
                 expected_clusters.setdefault(category, []).append(article)
                 articles.append(article)
 
@@ -45,15 +43,21 @@ def evaluate_clustering():
 
     logger.info('Cluster composition is as follows...')
     for c in clusters:
-        logger.info([m['title'] for m in c.members])
+        logger.info([m.title for m in c.members])
 
     logger.info('Profiling statistics from the clustering...')
     ps = pstats.Stats(p)
     ps.sort_stats('time').print_stats(10)
 
-def main():
-    evaluate_clustering()
+def evaluate():
+    if os.environ.get('FLASK_ENV') == 'TESTING':
+        logger.info('Preparing evaluation database...')
+        db.create_all()
 
+        evaluate_clustering()
 
-if __name__ == '__main__':
-    main()
+        logger.info('Cleaning up evaluation database...')
+        db.session.remove()
+        db.drop_all()
+    else:
+        logger.error('This function must be run with FLASK_ENV=TESTING.')
