@@ -2,14 +2,14 @@
 Manage
 ==============
 
-Manage various aspects of a cluster.
+Manage various aspects of a cloud.
 """
 
 import time
 
 from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType
 from boto.exception import EC2ResponseError
-from cluster import connect
+from cloud import connect
 
 import logging
 logger = logging.getLogger(__name__)

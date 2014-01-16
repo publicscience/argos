@@ -7,7 +7,7 @@ distributed task processing.
 """
 
 from celery import Celery
-from cluster import celery_config, config
+from cloud import celery_config, config
 
 # For sending mail.
 import smtplib
@@ -73,7 +73,7 @@ def notify(body):
     # Construct the message.
     msg = MIMEMultipart()
     msg['From'] = from_addr
-    msg['Subject'] = 'Hello from your cluster!'
+    msg['Subject'] = 'Hello from your cloud!'
     msg.attach(MIMEText(body, 'plain'))
 
     # Connect to the mail server.

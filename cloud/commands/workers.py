@@ -1,4 +1,4 @@
-from cluster import tasks
+from cloud import tasks
 
 def main():
     tasks.workers()

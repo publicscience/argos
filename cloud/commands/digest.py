@@ -9,7 +9,7 @@ a single file. Each worker processes a part.
 """
 
 from digester.wikidigester import WikiDigester
-from cluster.tasks import celery, workers, notify
+from cloud.tasks import celery, workers, notify
 
 # For collecting dump links.
 import re

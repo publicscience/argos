@@ -1,8 +1,8 @@
 """
-Cluster
+Cloud
 ==============
 
-Setup and manage an autoscaling cluster.
+Setup and manage an autoscaling cloud.
 
 Here, an EC2 AutoScale Group is used.
 
@@ -25,19 +25,19 @@ from boto.ec2.cloudwatch import MetricAlarm
 from boto.exception import EC2ResponseError
 
 import os, time, subprocess, base64
-from cluster.util import get_filepath, load_script
-from cluster import manage, connect, command, config
+from cloud.util import get_filepath, load_script
+from cloud import manage, connect, command, config
 
 # Logging
 from logger import logger
 logger = logger(__name__)
 
-# Cluster logging.
+# Cloud logging.
 import logging
-logging.basicConfig(filename='logger/logs/cluster.log', level=logging.DEBUG)
+logging.basicConfig(filename='logger/logs/cloud.log', level=logging.DEBUG)
 
-c = config.load('cluster')
-names = config.cluster_names()
+c = config.load('cloud')
+names = config.cloud_names()
 
 DB_PORT = c['DB_PORT']
 INSTANCE_USER = c['INSTANCE_USER']
@@ -51,23 +51,23 @@ WORKER_AMI_ID = c.get('WORKER_AMI_ID', BASE_AMI_ID)
 
 def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m1.medium', master_instance_type='m1.medium', database_instance_type='m1.medium', broker_instance_type='m1.medium', ssh=False):
     """
-    Setup a new cluster.
+    Setup a new cloud.
 
     Args:
         | use_existing_image (bool)     -- whether or not to try
                                            using an existing image.
-        | min_size (int)                -- the minimum size of the cluster
-        | max_size (int)                -- the maximum size of the cluster
-        | instance_type (str)           -- the type of instance to use in the cluster.
+        | min_size (int)                -- the minimum size of the cloud
+        | max_size (int)                -- the maximum size of the cloud
+        | instance_type (str)           -- the type of instance to use in the cloud.
                                            See: https://aws.amazon.com/ec2/instance-types/instance-details/
-        | master_instance_type (str)    -- the type of master instance to use for the cluster.
+        | master_instance_type (str)    -- the type of master instance to use for the cloud.
                                            Recommended that it has at least a few GB of memory.
-        | database_instance_type (str)  -- the type of database instance to use for the cluster.
-        | broker_instance_type (str)    -- the type of broker (message queue) instance to use for the cluster.
-        | ssh (bool)                    -- whether or not to enable SSH access on the cluster.
+        | database_instance_type (str)  -- the type of database instance to use for the cloud.
+        | broker_instance_type (str)    -- the type of broker (message queue) instance to use for the cloud.
+        | ssh (bool)                    -- whether or not to enable SSH access on the cloud.
     """
 
-    logger.info('Commissioning new cluster...')
+    logger.info('Commissioning new cloud...')
 
     # Check to see if the AutoScale Group already exists.
     if group_exists():
@@ -109,7 +109,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     if ssh:
         logger.info('SSH is enabled!')
         ports.append(22)
-    sec_group = manage.security_group(names['SG'], 'The cluster security group.', ports=ports)
+    sec_group = manage.security_group(names['SG'], 'The cloud security group.', ports=ports)
 
     logger.info('Using AMI %s' % WORKER_AMI_ID)
 
@@ -196,7 +196,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Create the launch configuration.
     logger.info('Creating the launch configuration (%s)...' % names['LC'])
-    logger.info('Cluster is composed of %s instances.' % instance_type)
+    logger.info('Cloud is composed of %s instances.' % instance_type)
     launch_config = LaunchConfiguration(
                         name=names['LC'],
                         image_id=WORKER_AMI_ID,         # AMI ID for autoscaling instances.
@@ -303,14 +303,14 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
 def decommission(preserve_image=True):
     """
-    Dismantle the cluster.
+    Dismantle the cloud.
 
     Args:
         | preserve_image (bool)     -- whether or not to keep
                                        the worker image.
     """
 
-    logger.info('Decommissioning the cluster...')
+    logger.info('Decommissioning the cloud...')
 
     asg = connect.asg()
     ec2 = connect.ec2()
@@ -627,10 +627,10 @@ def _transfer_salt(host, user, keyfile):
 
     # Copy over config files into the Salt state tree.
     logger.info('Copying config files to the Salt state tree...')
-    cluster_config = get_filepath('config.ini')
+    cloud_config = get_filepath('config.ini')
     app_config = get_filepath('../config.py')
     celery_config = get_filepath('celery_config.py')
-    configs = [cluster_config, app_config, celery_config]
+    configs = [cloud_config, app_config, celery_config]
     for config in configs:
         subprocess.Popen([
             'cp',

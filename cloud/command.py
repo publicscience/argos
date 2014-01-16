@@ -2,21 +2,21 @@
 Command
 ==============
 
-Interface for commanding the cluster.
+Interface for commanding the cloud.
 """
 
 import subprocess, time
 from os.path import join
-from cluster.util import get_filepath, load_script
-from cluster.manage import get_security_group
+from cloud.util import get_filepath, load_script
+from cloud.manage import get_security_group
 
 import logging
 logger = logging.getLogger(__name__)
 
-# Import cluster config
-from cluster import config
-c = config.load('cluster')
-names = config.cluster_names()
+# Import cloud config
+from cloud import config
+c = config.load('cloud')
+names = config.cloud_names()
 
 host, user, key = c['MASTER_PUBLIC_DNS'], c['INSTANCE_USER'], get_filepath(c['PATH_TO_KEY'])
 app_path = '/var/app/digester'
@@ -58,7 +58,7 @@ def remote(func):
 @remote
 def wikidigest():
     """
-    Command the cluster to begin WikiDigestion.
+    Command the cloud to begin WikiDigestion.
     """
     _command('digest')
 
@@ -73,7 +73,7 @@ def digest_check():
 def systems_check():
     """
     Check that distributed processing is working ok
-    on a newly commissioned cluster.
+    on a newly commissioned cloud.
     """
     _command('workers')
 
@@ -83,9 +83,9 @@ def _command(command):
     Convenience method for calling a command on master.
 
     Will look something like:
-        $ python -c 'import cluster.commands as cmd; cmd.workers()'
+        $ python -c 'import cloud.commands as cmd; cmd.workers()'
     """
-    ssh(['cd', '%s;' % app_path, 'sudo', py_path, '-c', '"import cluster.commands as cmd; cmd.%s()"', command],
+    ssh(['cd', '%s;' % app_path, 'sudo', py_path, '-c', '"import cloud.commands as cmd; cmd.%s()"', command],
             host=host, user=user, key=key)
 
 
