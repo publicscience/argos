@@ -6,9 +6,9 @@ A corpus builder, for the sake of collecting
 articles for training and/or testing.
 """
 
+from app import db
+from models import Source, Article
 from membrane import feed
-from adipose import Adipose
-from zlib import adler32 as hash
 
 # Logging.
 from logger import logger
@@ -16,52 +16,36 @@ logger = logger(__name__)
 
 def collect():
     """
-    Fetch entries from the sources,
+    Fetch articles from the sources,
     and save (or update) to db.
     """
     results = []
-    articles_db = _articles_db()
-    sources_db = _sources_db()
 
     logger.info('Fetching articles...')
+    print('collecting')
 
     # Fetch entries for each source
-    for source in sources():
-        feed_url = source['url']
+    for source in Source.query.all():
         try:
-            logger.info('Fetching from %s...' % feed_url)
-            articles = feed.entries(feed_url)
+            logger.info('Fetching from %s...' % source.url)
+            articles = feed.articles(source)
 
-            # Create (unique-ish) ids for each article,
-            # then save (or update).
+            # Check for existing copy.
             for article in articles:
-                id = hash((article['title'] + article['published']).encode('utf-8'))
-                article.pop('_id', None) # To prevent id conflicts.
-                articles_db.update({'_id': id}, article)
-
-                article['_id'] = id
+                if not Article.query.filter_by(url=article.url).count():
+                    db.session.add(article)
                 results.append(article)
 
         except feed.SAXException as e:
             # Error with the feed, make a note.
-            logger.info('Error fetching from %s.' % feed_url)
-            source['errors'] = source.get('errors', 0) + 1
-            sources_db.save(source)
+            logger.info('Error fetching from %s.' % source.url)
+            source.errors += 1
 
     logger.info('Finished fetching articles.')
 
-    articles_db.close()
-    sources_db.close()
+    db.session.commit()
 
     return results
-
-
-def sources():
-    """
-    Get the feed sources data.
-    """
-    sources = _sources_db()
-    return [source for source in sources.all()]
 
 
 def add_source(url):
@@ -72,11 +56,26 @@ def add_source(url):
         | url (str)     -- where to look for the feed,
                            or the feed itself.
     """
-    sources = _sources_db()
     feed_url = feed.find_feed(url)
-    doc = {'url': feed_url}
-    sources.update(doc, doc)
-    sources.close()
+    if not Source.query.filter_by(url=feed_url).count():
+        source = Source(feed_url)
+        db.session.add(source)
+        db.session.commit()
+
+
+def add_sources(urls):
+    """
+    Add multiple sources.
+
+    Args:
+        | urls (list)   -- list of urls to look for feeds, or
+                           the feed urls themselves.
+    """
+    for url in urls:
+        feed_url = feed.find_feed(url)
+        source = Source(feed_url)
+        db.session.add(source)
+    db.session.commit()
 
 
 def remove_source(url, delete_articles=False):
@@ -89,17 +88,19 @@ def remove_source(url, delete_articles=False):
         | delete_articles (bool)    -- whether or not to delete articles
                                        from this source.
     """
-    sources = _sources_db()
     feed_url = feed.find_feed(url)
-    sources.remove({'url': feed_url})
-    sources.close()
+    source = Source.query.filter_by(url=feed_url).first()
 
-    # If specified, delete articles associated with
-    # this source.
-    if delete_articles:
-        articles = _articles_db()
-        articles.remove({'source': feed_url})
-        articles.close()
+    if source:
+        # If specified, delete articles associated with
+        # this source.
+        if delete_articles:
+            for article in source.articles:
+                db.session.delete(article)
+
+        db.session.delete(source)
+
+        db.session.commit()
 
 
 def collect_sources(url):
@@ -111,8 +112,7 @@ def collect_sources(url):
         | url (str)     -- where to look for feeds.
     """
     feeds = feed.find_feeds(url)
-    for f in feeds:
-        add_source(f)
+    add_sources([f for f in feeds])
 
 
 def load_sources_from_file(filepath='resources/sources.txt'):
@@ -122,13 +122,4 @@ def load_sources_from_file(filepath='resources/sources.txt'):
     you want to add.
     """
     logger.info('Loading sources from file. This may take awhile...')
-    for line in open(filepath, 'r'):
-        add_source(line)
-
-
-def _sources_db():
-    return Adipose('corpus', 'sources')
-
-def _articles_db():
-    return Adipose('corpus', 'articles')
-
+    add_sources([line for line in open(filepath, 'r')])

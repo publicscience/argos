@@ -1,5 +1,6 @@
-import unittest
-from tests import RequiresMocks, RequiresDB
+from tests import RequiresMocks, RequiresApp
+from models import Source, Article
+from datetime import datetime
 import membrane.feed as feed
 import membrane.feedfinder as feedfinder
 import membrane.collector as collector
@@ -49,26 +50,29 @@ mock_feed = """
 class FeedTest(RequiresMocks):
     def setUp(self):
         from unittest.mock import MagicMock
-        entry = {
+        article = {
                 'links': [{'href': 'some url'}],
                 'title': 'some title',
                 'published': 'some published date',
                 'updated': 'some updated date'
         }
         data = MagicMock(
-                    entries=[entry],
+                    entries=[article],
                     bozo=False
                )
         self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
+        self.source = MagicMock()
+        self.source.url = 'foo'
+
     def tearDown(self):
         pass
 
-    def test_feed_error(self):
-        self.assertRaises(Exception, feed.entries, 'foo')
+    def test_feed_error_if_no_full_text(self):
+        self.assertRaises(Exception, feed.articles, self.source)
 
     def test_extract_tags(self):
-        entry = {
+        article = {
             'tags': [
                 {'label': None,
                  'scheme': 'http://www.foreignpolicy.com/category/topic/military',
@@ -79,10 +83,10 @@ class FeedTest(RequiresMocks):
             ]
         }
 
-        tags = feed.extract_tags(entry)
+        tags = feed.extract_tags(article)
         self.assertEqual(tags, ['Military', 'National Security'])
 
-    def test_entries(self):
+    def test_articles(self):
         self.create_patch('membrane.feed.fetch_full_text', return_value='''
             We have an infinite amount to learn both from nature and from each other
             The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
@@ -100,26 +104,25 @@ class FeedTest(RequiresMocks):
             NASA is not about the ‘Adventure of Human Space Exploration’…We won’t be doing it just to get out there in space – we’ll be doing it because the things we learn out there will be making life better for a lot of people who won’t be able to go.
             I don't know what you could say about a day in which you have seen four beautiful sunsets.
         ''')
-        entries = feed.entries('foo')
-        self.assertEquals(len(entries), 1)
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 1)
 
-    def test_entries_skips_short_entries(self):
+    def test_articles_skips_short_articles(self):
         self.create_patch('membrane.feed.fetch_full_text', return_value='some full text')
-        entries = feed.entries('foo')
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 0)
 
-        self.assertEquals(len(entries), 0)
-
-    def test_entries_skips_404_entries(self):
+    def test_articles_skips_404_articles(self):
         from urllib import error
         self.create_patch('membrane.feed.fetch_full_text', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
-        entries = feed.entries('foo')
-        self.assertEquals(len(entries), 0)
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 0)
 
-    def test_entries_skips_unreachable_entries(self):
+    def test_articles_skips_unreachable_articles(self):
         from urllib import error
         self.create_patch('membrane.feed.fetch_full_text', side_effect=error.URLError('unreachable'))
-        entries = feed.entries('foo')
-        self.assertEquals(len(entries), 0)
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 0)
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
@@ -159,71 +162,74 @@ class FeedFinderTest(RequiresMocks):
         self.assertFalse(feedfinder._is_feed('http://test.com/'))
 
 
-class CollectorTest(RequiresDB):
+class CollectorTest(RequiresApp):
     def setUp(self):
-        self.source = {'url': 'foo'}
+        self.setup_app()
 
-        # Mock the databases.
-        self.sources_db = self._test_db('sources')
-        self.articles_db = self._test_db('articles')
+        # Add a fake source to work with.
+        self.source = Source('foo')
+        self.db.session.add(self.source)
+        self.db.session.commit()
 
-        self.mock_sources_db = self.create_patch('membrane.collector._sources_db')
-        self.mock_sources_db.return_value = self.sources_db
-        self.sources_db.add(self.source)
-
-        self.mock_articles_db = self.create_patch('membrane.collector._articles_db')
-        self.mock_articles_db.return_value = self.articles_db
-
-        # Mock entries.
-        self.mock_entries = self.create_patch('membrane.feed.entries')
+        # Mock articles.
+        self.mock_articles = self.create_patch('membrane.feed.articles')
 
         # Mock finding feeds.
         self.mock_find_feed = self.create_patch('membrane.feed.find_feed')
 
     def tearDown(self):
-        pass
+        self.teardown_app()
 
     def test_collect(self):
-        expected_id = 2617640942
-        self.mock_entries.return_value = [{'title': 'Foo', 'published': 'Fri, 11 Oct 2013 23:55:00 +0000'}]
+        self.mock_articles.return_value = [
+            Article(
+                title='Foo',
+                published=datetime.utcnow(),
+                url='foo.com'
+            )
+        ]
 
-        self.assertEquals(self.articles_db.count(), 0)
-
-        collector.collect()
-
-        self.assertEquals(self.articles_db.count(), 1)
-
-        article = self.articles_db.find({'_id': expected_id})
-        self.assertEquals(article['title'], 'Foo')
-
-    def test_collect_updates_existing(self):
-        expected_id = 2617640942
-        self.mock_entries.return_value = [{'title': 'Foo', 'published': 'Fri, 11 Oct 2013 23:55:00 +0000'}]
+        self.assertEquals(Article.query.count(), 0)
 
         collector.collect()
+
+        self.assertEquals(Article.query.count(), 1)
+
+        article = Article.query.first()
+        self.assertEquals(article.title, 'Foo')
+
+    def test_collect_ignores_existing(self):
+        self.mock_articles.return_value = [
+            Article(
+                title='Foo',
+                published=datetime.utcnow(),
+                url='foo.com'
+            )
+        ]
+
+        collector.collect()
         collector.collect()
 
-        self.assertEquals(self.articles_db.count(), 1)
+        self.assertEquals(Article.query.count(), 1)
 
     def test_collect_error(self):
-        source_ = self.sources_db.find(self.source)
-        self.assertEquals(source_.get('errors', 0), 0)
+        self.assertEquals(self.source.errors, 0)
 
-        self.mock_entries.side_effect = feed.SAXException('', None)
+        self.mock_articles.side_effect = feed.SAXException('', None)
 
         collector.collect()
 
-        source_ = self.sources_db.find(self.source)
-        self.assertEquals(source_['errors'], 1)
+        self.assertEquals(self.source.errors, 1)
 
     def test_add_source(self):
-        url = 'foo'
-        self.mock_find_feed.return_value = 'foo'
+        url = 'sup'
+        self.mock_find_feed.return_value = url
 
+        # 2 because the default test source has been added.
         collector.add_source(url)
-        self.assertEquals(self.sources_db.count(), 1)
+        self.assertEquals(Source.query.count(), 2)
 
         # Ensure duplicates aren't added.
         collector.add_source(url)
-        self.assertEquals(self.sources_db.count(), 1)
+        self.assertEquals(Source.query.count(), 2)
 

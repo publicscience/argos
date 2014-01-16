@@ -9,7 +9,7 @@ BROKER_CONNECTION_MAX_RETRIES = None
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # What modules to import on start.
-CELERY_IMPORTS = ('tests.tasks_test', 'cluster', 'digester.wikidigester',)
+CELERY_IMPORTS = ('tests.tasks_test', 'cloud', 'digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True

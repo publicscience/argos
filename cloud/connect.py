@@ -2,7 +2,7 @@
 Connect
 ==============
 
-Connect to cluster services.
+Connect to cloud services.
 """
 
 from boto.ec2.autoscale import AutoScaleConnection
@@ -10,8 +10,8 @@ from boto.ec2 import connect_to_region
 from boto.ec2.cloudwatch import connect_to_region as cw_connect_to_region
 
 # Load configuration.
-from cluster import config
-c = config.load('cluster')
+from cloud import config
+c = config.load('cloud')
 
 REGION = c['REGION']
 ACCESS_KEY = c['AWS_ACCESS_KEY']

@@ -146,8 +146,6 @@ def entities(docs):
     return all_names
 
 
-
-
 def trim(text):
     """
     Compresses and trims extra whitespace.

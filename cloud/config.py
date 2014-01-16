@@ -6,7 +6,7 @@ Handles loading configurations.
 """
 
 from configparser import ConfigParser
-from cluster.util import get_filepath
+from cloud.util import get_filepath
 
 config = ConfigParser()
 config_file = get_filepath('config.ini')
@@ -22,12 +22,12 @@ def load(name):
     return config[name]
 
 
-def cluster_names():
+def cloud_names():
     """
-    Loads the names for the cluster's components.
+    Loads the names for the cloud's components.
     """
 
-    name = config['cluster']['CLUSTER_NAME']
+    name = config['cloud']['CLOUD_NAME']
 
     names = {
             'LC': '%s-launchconfig' % name,

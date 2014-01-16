@@ -7,14 +7,16 @@ accessing RSS feeds.
 
 Example::
 
-    # Print entries from a feed.
+    # Print articles from a feed.
     site = 'http://www.polygon.com/'
     feed_url = find_feed(site)
-    print(entries(feed_url))
+    source = Source(feed_url)
+    print(articles(source))
 """
 
 import feedparser
 import time
+from models import Article
 from urllib import request, error
 from http.client import IncompleteRead
 from http.cookiejar import CookieJar
@@ -26,15 +28,15 @@ from readability.readability import Document
 from xml.sax._exceptions import SAXException
 
 
-def entries(url):
+def articles(source):
     """
-    Parse a feed from the specified url,
-    gathering the latest entries.
+    Parse a feed from the specified source,
+    gathering the latest articles.
 
     The minimum length of an entry is
     500 characters. Anything under will be ignored.
 
-    This will silently skip entries for which the full text
+    This will silently skip articles for which the full text
     can't be retrieved (i.e. if it returns 404).
 
     Some feeds, for whatever reason, do not include a `published`
@@ -42,13 +44,13 @@ def entries(url):
     empty string.
 
     Args:
-        | url (str)    -- the url of the feed.
+        | source (Source)    -- the source to fetch from.
 
     Returns:
-        | list -- list of processed latest entries (as dicts).
+        | list -- list of processed latest articles (as dicts).
     """
     # Fetch the feed data.
-    data = feedparser.parse(url)
+    data = feedparser.parse(source.url)
 
     # If the `bozo` value is anything
     # but 0, there was an error parsing (or connecting) to the feed.
@@ -58,15 +60,15 @@ def entries(url):
             raise data.bozo_exception
 
     # Build the entry dicts.
-    entries = []
+    articles = []
     for entry in data.entries:
 
         # URL for this entry.
-        eurl = entry['links'][0]['href']
+        url = entry['links'][0]['href']
 
         # Complete HTML content for this entry.
         try:
-            html = fetch_full_text(eurl)
+            html = fetch_full_text(url)
             entry['fulltext'] = trim(sanitize(html))
         except (error.HTTPError, error.URLError) as e:
             if type(e) == error.URLError or e.code == 404:
@@ -74,31 +76,32 @@ def entries(url):
             else:
                 raise
 
+
         # Skip over entries that are too short.
         if len(entry['fulltext']) < 400:
             continue
 
-        entries.append({
-            'url': eurl,
-            'source': url,
-            'html': html,
-            'text': entry['fulltext'],
-            'author': entry.get('author', None),
-            'tags': extract_tags(entry),
-            'title': entry['title'],
-            'published': entry.get('published', ''),
-            'updated': entry.get('updated', entry.get('published', ''))
-        })
+        articles.append(Article(
+            url=url,
+            source=source,
+            html=html,
+            text=entry['fulltext'],
+            authors=[entry.get('author', None)], # NEED BETTER HANDLING OF THIS
+            tags=extract_tags(entry),
+            title=entry['title'],
+            published=entry.get('published', ''),
+            updated=entry.get('updated', entry.get('published', ''))
+       ))
 
-    return entries
+    return articles
 
-def extract_tags(entry):
+def extract_tags(article):
     """
-    Extract tags from a feed's entry,
+    Extract tags from a feed's article,
     returning it in a simpler format (a list of strings).
 
     Args:
-        | entry (dict)   -- the entry dict with (or without tags)
+        | article (Article)   -- the article
 
     This operates assuming the tags are formatted like so::
 
@@ -115,14 +118,14 @@ def extract_tags(entry):
     Named Entity Recognition is used as a rough approximation of tags.
     """
     # If tags are supplied, use them.
-    if 'tags' in entry:
-        return [tag['term'] for tag in entry['tags']]
+    if 'tags' in article:
+        return [tag['term'] for tag in article['tags']]
 
     # DISABLING FOR NOW. Easier to run through all entries and add
     # these entities later.
     # Otherwise, try to extract some.
     #else:
-        #sample = entry['fulltext']
+        #sample = article['fulltext']
         #return entities(sample)
 
 def find_feed(url):

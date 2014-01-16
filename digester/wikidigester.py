@@ -6,7 +6,6 @@ Handles Wikipedia dump processing.
 """
 
 from . import Digester
-from adipose import Adipose
 import brain
 
 # Goodies
@@ -265,21 +264,22 @@ class WikiDigester(Digester):
         Or, more verbosely:
             tfidf weight of term i in doc j = freq of term i in doc j * log_2(num of docs in corpus/how many docs term i appears in)
         """
-        db = self.db()
-        tfidf_dict = {}
-        doc = db.find({'_id': doc_id})
+        # NEEDS TO BE UPDATED TO WORK WITH SQLALCHEMY
+        #db = self.db()
+        #tfidf_dict = {}
+        #doc = db.find({'_id': doc_id})
 
         # Convert each token's count to its tf-idf value.
-        for token_id, token_count in doc['freqs']:
-            tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
+        #for token_id, token_count in doc['freqs']:
+            #tfidf_dict[token_id] = token_count * log((self.num_docs/corpus_counts[token_id]), 2)
 
         # Update the record's `doc` value to the tf-idf representation.
         # Need to convert to a list of tuples,
         # since the db won't take a dict.
-        tfidf_doc = list(tfidf_dict.items())
-        db.update({'_id': doc['_id']}, {'doc': tfidf_doc })
+        #tfidf_doc = list(tfidf_dict.items())
+        #db.update({'_id': doc['_id']}, {'doc': tfidf_doc })
 
-        db.close()
+        #db.close()
 
 
     def _clean(self, text):
@@ -308,7 +308,8 @@ class WikiDigester(Digester):
         This will "cache" the db client so that there aren't too many.
         """
         if self._db is None:
-            self._db = Adipose(self.database, 'pages')
+            pass
+            #self._db = Adipose(self.database, 'pages')
         return self._db
 
 

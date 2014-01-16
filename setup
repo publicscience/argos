@@ -15,9 +15,6 @@ function setup_dependencies {
         brew install libevent
         brew install re2c
 
-        # MongoDB
-        brew install mongodb
-
         # Redis
         brew install redis
 
@@ -26,6 +23,9 @@ function setup_dependencies {
 
         # gfortran, for building scipy
         brew install gfortran
+
+        # PostgreSQL
+        brew install postgres
 
     # Otherwise, assume Linux...
     else
@@ -49,14 +49,14 @@ function setup_dependencies {
         # Required by lxml.
         sudo apt-get install libxml2-dev libxslt1-dev python-dev lib32z1-dev -y
 
-        # MongoDB
-        sudo apt-get install mongodb -y
-
         # Redis
         sudo apt-get install redis-server -y
 
         # Bzr, for python-dateutil
         sudo apt-get install bzr -y
+
+        # PostgreSQL
+        sudo apt-get install postgresql -y
 
         sudo pip3 install virtualenv
     fi
@@ -136,8 +136,8 @@ if [ ! -f cluster/celery_config.py ]; then
     mv cluster/celery_config-sample.py cluster/celery_config.py
 fi
 
-# Create database directory.
-sudo mkdir db
+# Create databases.
+./manage db:create
 
 setup_doc
 

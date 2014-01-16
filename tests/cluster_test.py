@@ -1,135 +1,98 @@
-import unittest
-from unittest.mock import MagicMock
-from tests import RequiresDB
+from tests import RequiresApp
+from copy import deepcopy
 from datetime import datetime, timedelta
 from brain import cluster, vectorize
+from models import Cluster, Article
 
-class ClusterTest(RequiresDB):
+class ClusterTest(RequiresApp):
     def setUp(self):
-        self.faux_cluster = {
-            'active': True,
-            'title': 'I are cluster',
-            'members': [{
-                'title': 'Dinosaurs',
-                'text': 'dinosaurs are cool, Clinton',
-                'published': datetime.utcnow()
-            }, {
-                'title': 'Robots',
-                'text': 'robots are nice, Clinton',
-                'published': datetime.utcnow()
-            }],
-            'features': ['Clinton'],
-            'summary': 'This is a summary',
-            'created_at': datetime.utcnow(),
-            'updated_at': datetime.utcnow()
-        }
-        self.faux_article = {
-                'title': 'Dinosaurs',
-                # Expected extracted entity is "Clinton"
-                'text': 'dinosaurs are cool, Clinton',
-                'published': datetime.utcnow()
-        }
+        self.setup_app()
+        self.members = [
+                Article(
+                    title='Dinosaurs',
+                    text='dinosaurs are cool, Clinton'
+                ),
+                Article(
+                    title='Robots',
+                    text='robots are nice, Clinton'
+                )
+        ]
+        # Using a copy of the members so identical clusters
+        # can be made without messing up references.
+        self.cluster = Cluster(deepcopy(self.members))
+        self.article = Article(
+            title='Dinosaurs',
+            text='dinosaurs are cool, Clinton'
+        )
 
-        self.mock_database = self.create_patch('brain.cluster.database')
-        self.mock_db = MagicMock()
-        self.mock_database.return_value = self.mock_db
+        self.db.session.add(self.cluster)
+        self.db.session.commit()
 
     def tearDown(self):
-        pass
-
-    def test_create_cluster(self):
-        c = cluster.Cluster(self.faux_cluster)
-        self.assertEqual(c.title, 'I are cluster')
-        self.assertEqual(c.summary, 'This is a summary')
-        self.assertEqual(c.active, True)
-
-    def test_create_cluster_defaults(self):
-        c = cluster.Cluster()
-        self.assertEqual(c.active, True)
+        self.teardown_app()
 
     def test_cluster_similarity_with_object_different(self):
-        c = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity_with_object(self.faux_article)
+        avg_sim = self.cluster.similarity_with_object(self.article)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
 
     def test_cluster_similarity_with_object_duplicates(self):
-        self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
-        c = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity_with_object(self.faux_article)
+        members = [self.members[0], self.members[0]]
+        c = Cluster(members)
+        avg_sim = c.similarity_with_object(self.article)
         self.assertEqual(avg_sim, 1.0)
 
     def test_cluster_similarity_with_cluster_duplicates(self):
-        c = cluster.Cluster(self.faux_cluster)
-        c_ = cluster.Cluster(self.faux_cluster)
-        avg_sim = c.similarity_with_cluster(c_)
+        c = Cluster(deepcopy(self.members))
+        avg_sim = self.cluster.similarity_with_cluster(c)
         self.assertEqual(avg_sim, 1.0)
 
     def test_cluster_similarity_with_cluster_different(self):
-        from copy import deepcopy
-        alt_cluster = deepcopy(self.faux_cluster)
-        alt_cluster['members'][1]['text'] = 'papa was a rodeo, Clinton'
+        members = [deepcopy(self.members[0]), Article(title='Robots',text='papa was a rodeo, Clinton')]
+        c = Cluster(members)
 
-        c = cluster.Cluster(self.faux_cluster)
-        c_ = cluster.Cluster(alt_cluster)
-
-        avg_sim = c.similarity_with_cluster(c_)
+        avg_sim = self.cluster.similarity_with_cluster(c)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
 
-    def test_cluster_save(self):
-        c = cluster.Cluster(self.faux_cluster)
-        c.title = 'foo bar'
-        c.save()
-
-        expected = self.faux_cluster
-        expected['title'] = 'foo bar'
-        self.mock_db.save.assert_called_with(expected)
-
-    def test_cluster_not_expired_kept_active(self):
-        c = cluster.Cluster(self.faux_cluster)
-        self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
-        cluster.cluster([self.faux_article])
-        self.assertTrue(c.active)
-
     def test_cluster_expired_made_inactive(self):
-        self.faux_cluster['updated_at'] = datetime.utcnow() - timedelta(days=4)
-        c = cluster.Cluster(self.faux_cluster)
-        self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
-        cluster.cluster([self.faux_article])
-        self.assertFalse(c.active)
+        self.cluster.updated_at = datetime.utcnow() - timedelta(days=4)
+        cluster.cluster([self.article])
+        self.assertFalse(self.cluster.active)
 
     def test_cluster_clusters_similar(self):
-        self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
-        c = cluster.Cluster(self.faux_cluster)
-        self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
-        cluster.cluster([self.faux_article])
-        self.assertEqual(len(c.members), 3)
+        # Create a cluster of identical articles,
+        # to ensure greatest similarity.
+        members = [self.members[0], deepcopy(self.members[0])]
+        self.cluster.members = members
+
+        cluster.cluster([self.article])
+        self.assertEqual(len(self.cluster.members), 3)
 
     def test_cluster_does_not_cluster_if_no_shared_entities(self):
-        self.faux_cluster['members'][1]['text'] = 'dinosaurs are cool, Clinton'
-        self.faux_cluster['features'] = ['Reagan']
-        c = cluster.Cluster(self.faux_cluster)
-        self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
-        cluster.cluster([self.faux_article])
-        self.assertEqual(len(c.members), 2)
+        members = [Article(
+            title='Robots',
+            text='dinosaurs are cool, Reagan'
+        )]
+        self.cluster.members = members
+
+        cluster.cluster([self.article])
+        self.assertEqual(len(self.cluster.members), 1)
 
     def test_cluster_does_not_cluster_not_similar(self):
-        self.faux_article['text'] = 'superstars are awesome, Clinton'
-        c = cluster.Cluster(self.faux_cluster)
-        self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
-        cluster.cluster([self.faux_article])
-        self.assertEqual(len(c.members), 2)
+        article = Article(
+                title='Superstars',
+                text='superstars are awesome, Clinton'
+        )
+        cluster.cluster([article])
+        self.assertEqual(len(self.cluster.members), 2)
 
     def test_cluster_no_clustering_creates_new_cluster(self):
-        self.faux_article['text'] = 'superstars are awesome, Clinton'
-        c = cluster.Cluster(self.faux_cluster)
-        self.mock_clusters = self.create_patch('brain.cluster.clusters', return_value=[c])
-        cluster.cluster([self.faux_article])
+        article = Article(
+                title='Superstars',
+                text='superstars are awesome, Clinton'
+        )
+        cluster.cluster([article])
 
-        # If this is called twice, that means a new cluster has been created
-        # (since we only started with one)
-        self.assertEqual(self.mock_db.save.call_count, 2)
-
-        # Check it was called with the expected article.
-        self.assertEqual(self.mock_db.save.call_args_list[-1][0][0]['members'], [self.faux_article])
+        # Check for 2 since we only started with one.
+        self.assertEqual(Cluster.query.count(), 2)

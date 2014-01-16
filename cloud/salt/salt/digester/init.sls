@@ -106,17 +106,17 @@ salt-minion:
 {% endif %}
 
 {% if 'database' in grains.get('roles', []) %}
-mongodb:
+postgresql:
     service.running:
         - enable: True
         - require:
-            - pkg: mongodb
+            - pkg: postgresql
     pkg.installed:
-        - name: mongodb-10gen
+        - name: postgresql
         - require:
-            - cmd: mongodb
+            - cmd: postgresql
     cmd.script:
-        - source: salt://scripts/install-mongodb.sh
+        - source: salt://scripts/install-database.sh
 {% endif %}
 
 {% if 'broker' in grains.get('roles', []) %}
