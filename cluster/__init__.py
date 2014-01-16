@@ -39,6 +39,7 @@ logging.basicConfig(filename='logger/logs/cluster.log', level=logging.DEBUG)
 c = config.load('cluster')
 names = config.cluster_names()
 
+DB_PORT = c['DB_PORT']
 INSTANCE_USER = c['INSTANCE_USER']
 KEYPAIR_NAME = c['KEYPAIR_NAME']
 PATH_TO_KEY = get_filepath(c['PATH_TO_KEY'])
@@ -102,9 +103,9 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     zones = [zone.name for zone in ec2.get_all_zones()]
 
     # Create a new security group.
-    # Authorize HTTP and MongoDB ports.
+    # Authorize HTTP and database ports.
     logger.info('Creating the security group (%s)...' % names['SG'])
-    ports = [80, 27017]
+    ports = [80, DB_PORT]
     if ssh:
         logger.info('SSH is enabled!')
         ports.append(22)
@@ -117,7 +118,6 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Create an EBS (block storage) for the image.
     # Size is in GB.
-    # Need a lot of space for the Wiki dump on MongoDB.
     # Do NOT delete this volume on termination, since it will have our processed data.
     db_bdm = manage.create_block_device(size=500, delete=False)
     db_init_script = load_script('scripts/setup_db.sh')
