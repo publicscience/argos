@@ -6,7 +6,7 @@ app = Flask(__name__, static_folder='static', static_url_path='')
 app.config.from_object('config')
 
 if environ.get('FLASK_ENV') == 'TESTING':
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost:5432/argos_test'
 
 db = SQLAlchemy(app)
 

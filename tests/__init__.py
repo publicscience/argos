@@ -1,6 +1,3 @@
-from os import environ
-environ['FLASK_ENV'] = 'TESTING'
-
 import unittest
 from unittest.mock import patch
 import time, socket, subprocess, tempfile

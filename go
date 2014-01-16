@@ -11,9 +11,6 @@ echo -e "\n\n\n\n\n"
 # Run everything in the background,
 # but remember their process IDs.
 
-mongod --dbpath db &
-MONGO_PID=$!
-
 redis-server &
 REDIS_PID=$!
 
@@ -40,7 +37,6 @@ then
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo -e "\n\n\n\n\n"
 
-    kill $MONGO_PID
     kill $REDIS_PID
     kill $RABMQ_PID
     kill $NERSV_PID
