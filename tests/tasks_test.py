@@ -1,5 +1,4 @@
 import unittest
-from adipose import Adipose
 from tests import RequiresWorkers
 
 import math, time
