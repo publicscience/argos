@@ -22,12 +22,18 @@ then
 
 elif [ $1 == 'db:create' ]
 then
+    if [[ ! "$OSTYPE" =~ ^darwin ]]
+    then
+        # On Ubuntu, need to run these commands as the postgres user.
+        PREFIX='sudo -u postgres'
+    fi
+
     # Create user if it doesn't exist.
-    user_exists=`psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'"`
+    user_exists=`$PREFIX psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'"`
     if [[ $user_exists != 1 ]]
     then
         echo -e "Creating database user $(tput setaf 3)$DB_USER$(tput sgr0)..."
-        createuser -U postgres $DB_USER
+        $PREFIX createuser -U postgres $DB_USER
     else
         echo -e "Database user $(tput setaf 3)$DB_USER$(tput sgr0) already exists, moving on..."
     fi
@@ -35,10 +41,10 @@ then
     # Create databases if they don't exist.
     for DB_NAME in $DEV_DB $TEST_DB
     do
-        if [[ `psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'"` != 1 ]]
+        if [[ `$PREFIX psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'"` != 1 ]]
         then
             echo -e "Creating database $(tput setaf 3)$DB_NAME$(tput sgr0)..."
-            createdb -U postgres -E utf8 -O $DB_USER $DB_NAME -T template0
+            $PREFIX createdb -U postgres -E utf8 -O $DB_USER $DB_NAME -T template0
         else
             echo -e "Database $(tput setaf 3)$DB_NAME$(tput sgr0) already exists, moving on..."
         fi
@@ -48,10 +54,10 @@ elif [ $1 == 'db:drop' ]
 then
     for DB_NAME in $DEV_DB $TEST_DB
     do
-        if [[ `psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'"` == 1 ]]
+        if [[ `$PREFIX psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'"` == 1 ]]
         then
             echo -e "Dropping database $(tput setaf 3)$DB_NAME$(tput sgr0)..."
-            dropdb $DB_NAME
+            $PREFIX dropdb $DB_NAME
         else
             echo -e "Database $(tput setaf 3)$DB_NAME$(tput sgr0) doesn't exist, moving on..."
         fi

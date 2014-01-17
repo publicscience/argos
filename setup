@@ -56,7 +56,7 @@ function setup_dependencies {
         sudo apt-get install bzr -y
 
         # PostgreSQL
-        sudo apt-get install postgresql -y
+        sudo apt-get install postgresql postgresql-server-dev-9.1 -y
 
         sudo pip3 install virtualenv
     fi
