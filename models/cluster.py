@@ -2,25 +2,69 @@ from app import db
 from brain import vectorize, entities
 from scipy.spatial.distance import jaccard
 from datetime import datetime
+from itertools import chain
 
-class Cluster(db.Model):
+cluster_entities = db.Table('cluster_entities',
+        db.Column('entity_id', db.Integer, db.ForeignKey('entity.id')),
+        db.Column('cluster_id', db.Integer, db.ForeignKey('cluster.id'))
+)
+
+cluster_clusterables = db.Table('cluster_clusterables',
+        db.Column('cluster_id', db.Integer, db.ForeignKey('cluster.id'), primary_key=True),
+        db.Column('clusterable_id', db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
+)
+
+class Clusterable(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    type        = db.Column('type', db.String(50))
+    __mapper_args__ = {'polymorphic_on': 'type'}
+
+    def vectorize(self):
+        raise Exception('Not implemented!')
+
+    def similarity(self):
+        raise Exception('Not implemented!')
+
+
+class Cluster(Clusterable):
     """
     A cluster.
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    active = db.Column(db.Boolean, default=True)
-    members = db.relationship('Article', backref='cluster', lazy='select')
-    features = db.Column(db.PickleType)
-    title = db.Column(db.Unicode)
-    summary = db.Column(db.UnicodeText)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, members):
+    A Cluster is capable of clustering Clusterables.
+
+    Note: A Cluster itself is a Clusterable; i.e. clusters
+    can cluster clusters :)
+    """
+    __tablename__ = 'cluster'
+    id          = db.Column(db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    active      = db.Column(db.Boolean, default=True)
+    title       = db.Column(db.Unicode)
+    summary     = db.Column(db.UnicodeText)
+    tag         = db.Column(db.String(50))
+    entities    = db.relationship('Entity',
+                    secondary=cluster_entities,
+                    backref=db.backref('clusters', lazy='dynamic')
+                )
+    members     = db.relationship('Clusterable',
+                    secondary=cluster_clusterables,
+                    backref=db.backref('clusters')
+                )
+
+    __mapper_args__ = {
+            'polymorphic_identity': 'cluster',
+            'inherit_condition': (id == Clusterable.id)
+    }
+
+    def __init__(self, members, tag=''):
         """
-        Initialize a cluster with some members.
+        Initialize a cluster with some members and a tag.
+
+        Tags are used to keep track of "levels" or "kinds" of clusters.
         """
         self.members = members
+        self.tag = tag
         self.update()
 
     def summarize(self):
@@ -40,22 +84,16 @@ class Cluster(db.Model):
         """
         max_member = (None, 0)
         for member in self.members:
-            avg_sim = self.similarity_with_object(member)
-            if avg_sim > max_member[1]:
+            avg_sim = self.similarity(member)
+            if avg_sim >= max_member[1]:
                 max_member = (member, avg_sim)
         self.title = max_member[0].title
 
-    def featurize(self):
+    def entitize(self):
         """
-        Update (weighted) feature vector for this cluster.
-
-        In this implemention, entities = features.
+        Update entities for this cluster.
         """
-        self.features = vectorize(' '.join(entities([m.text for m in self.members])))
-
-    def feature_overlap(self, article):
-        #a_ents = article.vectorize()[1]
-        pass
+        self.entities = list(set(chain.from_iterable([member.entities for member in self.members])))
 
     def update(self):
         """
@@ -64,7 +102,7 @@ class Cluster(db.Model):
         """
         self.titleize()
         self.summarize()
-        self.featurize()
+        self.entitize()
         self.updated_at = datetime.utcnow()
         self.created_at = datetime.utcnow()
 
@@ -74,31 +112,29 @@ class Cluster(db.Model):
         """
         self.members.append(member)
 
-    def similarity_with_object(self, obj):
+    def similarity(self, obj):
         """
-        Calculate the similarity of this object
-        against each member of the cluster.
+        Calculate the similarity of an object with this cluster,
+        or the similarity between another cluster and this cluster.
+        If it is an object, that object must have a `similarity` method implemented.
         """
-        sims = []
-        for member in self.members:
-            v_m = member.vectorize()
-            v_o = obj.vectorize()
 
-            # Linearly combine the similarity values,
-            # weighing them according to these coefficients.
-            coefs = [2, 1]
-            sim = 0
-            for i, v in enumerate(v_m):
-                s = 1 - jaccard(v_o[i], v_m[i])
-                sim += (coefs[i] * s)
+        # Check if the obj has members,
+        # to support cluster-cluster similarity calculations.
+        #if obj.hasattr('members'):
+            # Recursion™
+            #sims += [self.similarity(obj_member) for obj_member in obj.members]
 
-            # Normalize back to [0, 1] and save.
-            sim = sim/sum(coefs)
-            sims.append(sim)
+        # Otherwise, treat as a single obj.
+        #else:
+
+        sims = [obj.similarity(member) for member in self.members]
 
         # Calculate average similarity.
         return sum(sims)/len(sims)
 
+
+    # May not be necessary.
     def similarity_with_cluster(self, cluster):
         """
         Calculate the average similarity of each
@@ -109,6 +145,7 @@ class Cluster(db.Model):
         vs_ = cluster.vectorize()
         return 1 - jaccard(vs, vs_)
 
+    # May not be necessary.
     def vectorize(self):
         """
         Vectorize all members in a cluster

@@ -47,9 +47,10 @@ mock_feed = """
 """
 
 
-class FeedTest(RequiresMocks):
+class FeedTest(RequiresApp):
     def setUp(self):
         from unittest.mock import MagicMock
+        self.setup_app()
         article = {
                 'links': [{'href': 'some url'}],
                 'title': 'some title',
@@ -66,7 +67,7 @@ class FeedTest(RequiresMocks):
         self.source.url = 'foo'
 
     def tearDown(self):
-        pass
+        self.teardown_app()
 
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, feed.articles, self.source)

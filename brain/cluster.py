@@ -14,7 +14,7 @@ from datetime import datetime
 # Logging.
 from logger import logger
 
-def cluster(articles, threshold=0.7, debug=False):
+def cluster(articles, threshold=0.7, tag='', debug=False):
     """
     Clusters a set of articles
     into existing clusters.
@@ -22,6 +22,7 @@ def cluster(articles, threshold=0.7, debug=False):
     Args:
         | articles (list)   -- the articles to classify (a list of article dicts)
         | threshold (float) -- the similarity threshold for qualifying a cluster
+        | tag (str)         -- the tag of the clusters to look through
     """
 
     log = logger('clustering')
@@ -32,7 +33,7 @@ def cluster(articles, threshold=0.7, debug=False):
 
     log.debug('Threshold is set to %s.' % threshold)
 
-    active_clusters = Cluster.query.filter_by(active=True).all()
+    active_clusters = Cluster.query.filter_by(active=True, tag=tag).all()
 
     now = datetime.utcnow()
 
@@ -42,8 +43,12 @@ def cluster(articles, threshold=0.7, debug=False):
 
         # Select candidate clusters,
         # i.e. active clusters which share at least one entity with this article.
-        a_ents = article.vectorize()[1]
-        candidate_clusters = [c for c in active_clusters if set(a_ents).intersection(c.features)]
+        a_ents = [entity.id for entity in article.entities]
+        candidate_clusters = []
+        for c in active_clusters:
+            c_ents = [entity.id for entity in c.entities]
+            if set(c_ents).intersection(a_ents):
+                candidate_clusters.append(c)
         log.debug('Found %s candidate clusters.' % len(candidate_clusters))
 
         # Keep tracking of qualifying clusters
@@ -53,7 +58,7 @@ def cluster(articles, threshold=0.7, debug=False):
 
         # Compare the article with the candidate clusters.
         for cluster in candidate_clusters:
-            avg_sim = cluster.similarity_with_object(article)
+            avg_sim = cluster.similarity(article)
             log.debug('Average similarity was %s.' % avg_sim)
             if avg_sim > threshold:
                 qualifying_clusters.append((cluster, avg_sim))
@@ -78,7 +83,7 @@ def cluster(articles, threshold=0.7, debug=False):
         else:
             # Create a new cluster.
             log.debug('No qualifying clusters found, creating a new cluster.')
-            new_cluster = Cluster([article])
+            new_cluster = Cluster([article], tag=tag)
             db.session.add(new_cluster)
             active_clusters.append(new_cluster)
 
