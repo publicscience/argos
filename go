@@ -23,7 +23,7 @@ NERSV_PID=$!
 cd ..
 
 source dev-env/bin/activate
-celery worker --loglevel=info --config=cluster.celery_config &
+celery worker --loglevel=info --config=cloud.celery_config &
 WORKR_PID=$!
 
 wait

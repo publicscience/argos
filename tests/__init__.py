@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 import time, socket, subprocess, tempfile
-from cluster.tasks import workers
+from cloud.tasks import workers
 from app import app, db
 
 
@@ -53,7 +53,7 @@ class RequiresWorkers(RequiresApp):
         if not workers():
             cls.mq = cls._run_process(['rabbitmq-server'])
             cls.backend = cls._run_process('redis-server')
-            cls.worker = cls._run_process(['celery', 'worker', '--config=cluster.celery_config', '--loglevel=INFO', '--logfile=logger/logs/celery.log'])
+            cls.worker = cls._run_process(['celery', 'worker', '--config=cloud.celery_config', '--loglevel=INFO', '--logfile=logger/logs/celery.log'])
             # Wait for everything...(need to implement a better checker here)
             time.sleep(5)
 
