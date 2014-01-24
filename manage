@@ -10,7 +10,12 @@ then
 
 elif [ $1 == 'test' ]
 then
-    FLASK_ENV=TESTING nosetests
+    if [ -z $2 ]
+    then
+        FLASK_ENV=TESTING nosetests
+    else
+        FLASK_ENV=TESTING nosetests $2
+    fi
 
 elif [ $1 == 'evaluate' ]
 then
