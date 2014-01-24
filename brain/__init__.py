@@ -62,6 +62,13 @@ def tokenize(doc, **kwargs):
     return tokens
 
 
+def sentences(doc):
+    """
+    Extracts sentences from a document.
+    """
+    return sent_tokenize(doc)
+
+
 class Tokenizer():
     """
     Custom tokenizer for vectorization.
