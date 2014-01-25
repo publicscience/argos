@@ -7,12 +7,7 @@ from models import Cluster, Article
 class ClusterTest(RequiresApp):
     def setUp(self):
         self.setup_app()
-
-        self.cluster = Cluster(self.prepare_articles())
         self.article = self.prepare_articles()[0]
-
-        self.db.session.add(self.cluster)
-        self.db.session.commit()
 
     def tearDown(self):
         self.teardown_app()
@@ -37,7 +32,13 @@ class ClusterTest(RequiresApp):
 
         return articles
 
+    def prepare_cluster(self):
+        self.cluster = Cluster(self.prepare_articles())
+        self.db.session.add(self.cluster)
+        self.db.session.commit()
+
     def test_cluster_similarity_with_object_different(self):
+        self.prepare_cluster()
         avg_sim = self.cluster.similarity(self.article)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
@@ -49,6 +50,7 @@ class ClusterTest(RequiresApp):
         self.assertEqual(avg_sim, 1.0)
 
     def test_cluster_similarity_with_cluster_duplicates(self):
+        self.prepare_cluster()
         members = (self.prepare_articles())
         c = Cluster(members)
         avg_sim = self.cluster.similarity(c)
@@ -61,6 +63,7 @@ class ClusterTest(RequiresApp):
         self.assertAlmostEqual(avg_sim, 0.733333333)
 
     def test_cluster_similarity_with_cluster_different(self):
+        self.prepare_cluster()
         members = self.prepare_articles(type='different')
         c = Cluster(members)
 
@@ -69,11 +72,13 @@ class ClusterTest(RequiresApp):
         self.assertNotEqual(avg_sim, 0.0)
 
     def test_cluster_expired_made_inactive(self):
+        self.prepare_cluster()
         self.cluster.updated_at = datetime.utcnow() - timedelta(days=4)
         cluster.cluster([self.article])
         self.assertFalse(self.cluster.active)
 
     def test_cluster_clusters_similar(self):
+        self.prepare_cluster()
         members = self.prepare_articles(type='duplicate')
         self.cluster.members = members
 
@@ -81,6 +86,7 @@ class ClusterTest(RequiresApp):
         self.assertEqual(len(self.cluster.members), 3)
 
     def test_cluster_does_not_cluster_if_no_shared_entities(self):
+        self.prepare_cluster()
         members = [Article(
             title='Robots',
             text='dinosaurs are cool, Reagan'
@@ -91,6 +97,7 @@ class ClusterTest(RequiresApp):
         self.assertEqual(len(self.cluster.members), 1)
 
     def test_cluster_does_not_cluster_not_similar(self):
+        self.prepare_cluster()
         article = Article(
                 title='Superstars',
                 text='superstars are awesome, Clinton'
@@ -98,15 +105,14 @@ class ClusterTest(RequiresApp):
         cluster.cluster([article])
         self.assertEqual(len(self.cluster.members), 2)
 
-    def test_cluster_no_clustering_creates_new_cluster(self):
+    def test_cluster_no_matching_cluster_creates_new_cluster(self):
         article = Article(
                 title='Superstars',
                 text='superstars are awesome, Clinton'
         )
         cluster.cluster([article])
 
-        # Check for 2 since we only started with one.
-        self.assertEqual(Cluster.query.count(), 2)
+        self.assertEqual(Cluster.query.count(), 1)
 
     def test_cluster_entitize(self):
         members = [Article(
@@ -129,6 +135,18 @@ class ClusterTest(RequiresApp):
         )] + self.prepare_articles(type='duplicate')
         self.cluster = Cluster(members)
         self.assertEqual(self.cluster.title, 'Dinosaurs')
+
+    def test_cluster_timespan(self):
+        text = 'the worldly philosophers today cautious optimism is based to a large extent on technological breakthroughs'
+        members = [
+                Article(title='A', text=text, created_at=datetime(2014, 1, 20, 1, 1, 1, 111111)),
+                Article(title='B', text=text, created_at=datetime(2014, 1, 22, 1, 1, 1, 111111)),
+                Article(title='C', text=text, created_at=datetime(2014, 1, 24, 1, 1, 1, 111111))
+        ]
+        self.cluster = Cluster(members)
+        results = self.cluster.timespan(datetime(2014, 1, 21, 1, 1, 1, 111111))
+        self.assertEqual(len(results), 2)
+        self.assertEqual({r.title for r in results}, {'B', 'C'})
 
     def test_nested_clusters_entitize(self):
         members_a = self.prepare_articles()

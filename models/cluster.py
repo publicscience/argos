@@ -45,12 +45,10 @@ class Cluster(Clusterable):
     tag         = db.Column(db.String(50))
     entities    = db.relationship('Entity',
                     secondary=cluster_entities,
-                    backref=db.backref('clusters', lazy='dynamic')
-                )
+                    backref=db.backref('clusters', lazy='dynamic'))
     members     = db.relationship('Clusterable',
                     secondary=cluster_clusterables,
-                    backref=db.backref('clusters')
-                )
+                    backref=db.backref('clusters'))
 
     __mapper_args__ = {
             'polymorphic_identity': 'cluster',
@@ -118,20 +116,22 @@ class Cluster(Clusterable):
         or the similarity between another cluster and this cluster.
         If it is an object, that object must have a `similarity` method implemented.
         """
-
-        # Check if the obj has members,
-        # to support cluster-cluster similarity calculations.
-        #if obj.hasattr('members'):
-            # Recursion™
-            #sims += [self.similarity(obj_member) for obj_member in obj.members]
-
-        # Otherwise, treat as a single obj.
-        #else:
-
         sims = [obj.similarity(member) for member in self.members]
 
         # Calculate average similarity.
         return sum(sims)/len(sims)
+
+    def timespan(self, start, end=None):
+        """
+        Get cluster members within a certain (date)timespan.
+
+        Args:
+            | start (datetime)
+            | end (datetime)    -- default is now (UTC)
+        """
+        if end is None:
+            end = datetime.utcnow()
+        return [member for member in self.members if start < member.created_at < end]
 
 
     # May not be necessary.

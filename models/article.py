@@ -3,6 +3,13 @@ from models.entity import Entity
 from models.cluster import Clusterable
 from brain import vectorize, entities
 from scipy.spatial.distance import jaccard
+from math import isnan
+
+# Ignore the invalid numpy warning,
+# which comes up when jaccard uses
+# empty vectors.
+import numpy
+numpy.seterr(invalid='ignore')
 
 # Helper table for many-to-many.
 authors = db.Table('authors',
@@ -20,17 +27,21 @@ class Article(Clusterable):
     An article.
     """
     __tablename__ = 'article'
-    id = db.Column(db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
-    vectors = db.Column(db.PickleType)
-    title = db.Column(db.Unicode)
-    text = db.Column(db.UnicodeText)
-    html = db.Column(db.UnicodeText)
-    url = db.Column(db.Unicode)
-    published = db.Column(db.DateTime)
-    updated = db.Column(db.DateTime)
-    source_id = db.Column(db.Integer, db.ForeignKey('source.id'))
-    entities = db.relationship('Entity', secondary=article_entities, backref=db.backref('articles', lazy='dynamic'))
-    authors = db.relationship('Author', secondary=authors, backref=db.backref('articles', lazy='dynamic'))
+    id          = db.Column(db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
+    vectors     = db.Column(db.PickleType)
+    title       = db.Column(db.Unicode)
+    text        = db.Column(db.UnicodeText)
+    html        = db.Column(db.UnicodeText)
+    url         = db.Column(db.Unicode)
+    created_at  = db.Column(db.DateTime)
+    updated_at  = db.Column(db.DateTime)
+    source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
+    entities    = db.relationship('Entity',
+                    secondary=article_entities,
+                    backref=db.backref('articles', lazy='dynamic'))
+    authors     = db.relationship('Author',
+                    secondary=authors,
+                    backref=db.backref('articles', lazy='dynamic'))
     __mapper_args__ = {'polymorphic_identity': 'article'}
 
     def __init__(self, **kwargs):
@@ -80,7 +91,16 @@ class Article(Clusterable):
         coefs = [2, 1]
         sim = 0
         for i, vec in enumerate(v):
-            s = 1 - jaccard(v_[i], v[i])
+            dist = jaccard(v_[i], v[i])
+
+            # Two empty vectors returns a jaccard distance of NaN.
+            # Set it to be 1, i.e. consider them completely different
+            # (or, put more clearly, they have nothing in common)
+            # FYI if jaccard runs on empty vectors, it will throw a warning.
+            if isnan(dist):
+                dist = 1
+            s = 1 - dist
+            print(s)
             sim += (coefs[i] * s)
 
         # Normalize back to [0, 1].

@@ -89,8 +89,8 @@ def articles(source):
             authors=[entry.get('author', None)], # NEED BETTER HANDLING OF THIS
             tags=extract_tags(entry),
             title=entry['title'],
-            published=entry.get('published', ''),
-            updated=entry.get('updated', entry.get('published', ''))
+            created_at=entry.get('published', ''),
+            updated_at=entry.get('updated', entry.get('published', ''))
        ))
 
     return articles
