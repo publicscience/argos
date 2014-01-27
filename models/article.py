@@ -33,8 +33,6 @@ class Article(Clusterable):
     text        = db.Column(db.UnicodeText)
     html        = db.Column(db.UnicodeText)
     url         = db.Column(db.Unicode)
-    created_at  = db.Column(db.DateTime)
-    updated_at  = db.Column(db.DateTime)
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
     entities    = db.relationship('Entity',
                     secondary=article_entities,
@@ -100,7 +98,6 @@ class Article(Clusterable):
             if isnan(dist):
                 dist = 1
             s = 1 - dist
-            print(s)
             sim += (coefs[i] * s)
 
         # Normalize back to [0, 1].

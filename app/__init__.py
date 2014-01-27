@@ -11,3 +11,6 @@ if environ.get('FLASK_ENV') == 'TESTING':
 db = SQLAlchemy(app)
 
 from app import routes
+import models
+
+db.create_all()

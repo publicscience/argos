@@ -1,4 +1,5 @@
 from app import db
+from slugify import slugify
 
 class Entity(db.Model):
     """
@@ -8,6 +9,8 @@ class Entity(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.UnicodeText)
+    slug = db.Column(db.String(255))
 
     def __init__(self, name):
         self.name = name
+        self.slug = slugify(self.name)
