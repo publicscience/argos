@@ -19,11 +19,15 @@ then
 
 elif [ $1 == 'evaluate' ]
 then
-    FLASK_ENV=TESTING python -c "from resources.evaluate import evaluate; evaluate()"
+    FLASK_ENV=TESTING python -c "from manage.evaluate import evaluate; evaluate()"
 
 elif [ $1 == 'profile' ]
 then
-    FLASK_ENV=TESTING python -c "from resources.profile import profile; profile()"
+    FLASK_ENV=TESTING python -c "from manage.profile import profile; profile()"
+
+elif [ $1 == 'db:seed' ]
+then
+    python -c "from manage.seed import seed; seed()"
 
 elif [ $1 == 'db:create' ]
 then
