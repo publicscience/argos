@@ -1,8 +1,9 @@
 from tests import RequiresApp
+import tests.factories as fac
 from json import loads
 from models import Entity, Article, Cluster
 
-class ApiTest(RequiresApp):
+class APITest(RequiresApp):
     def setUp(self):
         self.setup_app()
 
@@ -21,41 +22,35 @@ class ApiTest(RequiresApp):
         self.assertEquals(r.status_code, 404)
 
     def test_GET_entity(self):
-        entity = Entity(name='Horse')
-        self.db.session.add(entity)
-        self.db.session.commit()
-        r = self.app.get('/entities/horse')
+        entity = fac.entity()
+        r = self.app.get('/entities/%s' % entity.slug)
         expected = {
-                'name': 'Horse',
-                'slug': 'horse'
+                'name': entity.name,
+                'slug': entity.slug
         }
         self.assertEqual(self.data(r), expected)
 
     def test_GET_event(self):
-        members = [
-            Article(title='Horses', text='Horses are really neat, Santa'),
-            Article(title='Mudcrabs', text='Mudcrabs are everywhere, Bond')
-        ]
-        event = Cluster(members, tag='event')
-        for i in members + [event]:
-            self.db.session.add(i)
-        self.db.session.commit()
+        event = fac.event()
 
-        expected_members = [{
-            'type': 'article',
-            'title': member.title,
-            'id': member.id,
-            'url': member.url,
-            'created_at': member.created_at.isoformat()
-        } for member in members]
+        expected_members = []
+        entities = []
+        for member in event.members:
+            expected_members.append({
+                'type': 'article',
+                'title': member.title,
+                'id': member.id,
+                'url': member.url,
+                'created_at': member.created_at.isoformat()
+            })
+            for entity in member.entities:
+                entities.append({
+                    'name': entity.name,
+                    'url': '/entities/%s' % entity.slug
+                })
 
-        expected_entities = [{
-            'name': 'Santa',
-            'url': '/entities/santa'
-        }, {
-            'name': 'Bond',
-            'url': '/entities/bond'
-        }]
+        # Filter down to unique entities.
+        expected_entities = list({v['url']:v for v in entities}.values())
 
         expected = {
                 'id': event.id,
@@ -73,32 +68,26 @@ class ApiTest(RequiresApp):
         self.assertEqual(self.data(r), expected)
 
     def test_GET_story(self):
-        members = [
-            Article(title='Horses', text='Horses are really neat, Santa'),
-            Article(title='Mudcrabs', text='Mudcrabs are everywhere, Bond')
-        ]
-        event = Cluster(members, tag='event')
-        story = Cluster([event], tag='story')
+        story = fac.story()
 
-        for i in members + [event, story]:
-            self.db.session.add(i)
-        self.db.session.commit()
+        expected_members = []
+        entities = []
+        for member in story.members:
+            expected_members.append({
+                'type': 'cluster',
+                'title': member.title,
+                'id': member.id,
+                'url': '/events/%s' % member.id,
+                'created_at': member.created_at.isoformat()
+            })
+            for entity in member.entities:
+                entities.append({
+                    'name': entity.name,
+                    'url': '/entities/%s' % entity.slug
+                })
 
-        expected_members = [{
-            'type': 'cluster',
-            'title': event.title,
-            'id': event.id,
-            'url': '/events/%s' % event.id,
-            'created_at': event.created_at.isoformat()
-        }]
-
-        expected_entities = [{
-            'name': 'Santa',
-            'url': '/entities/santa'
-        }, {
-            'name': 'Bond',
-            'url': '/entities/bond'
-        }]
+        # Filter down to unique entities.
+        expected_entities = list({v['url']:v for v in entities}.values())
 
         expected = {
                 'id': story.id,
