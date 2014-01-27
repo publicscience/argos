@@ -54,8 +54,8 @@ class FeedTest(RequiresApp):
         article = {
                 'links': [{'href': 'some url'}],
                 'title': 'some title',
-                'published': 'some published date',
-                'updated': 'some updated date'
+                'published': 'Thu, 09 Jan 2014 14:00:00 GMT',
+                'updated': 'Thu, 09 Jan 2014 14:00:00 GMT'
         }
         data = MagicMock(
                     entries=[article],

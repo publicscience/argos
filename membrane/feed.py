@@ -16,6 +16,7 @@ Example::
 
 import feedparser
 import time
+from dateutil.parser import parse
 from models import Article
 from urllib import request, error
 from http.client import IncompleteRead
@@ -89,8 +90,8 @@ def articles(source):
             authors=[entry.get('author', None)], # NEED BETTER HANDLING OF THIS
             tags=extract_tags(entry),
             title=entry['title'],
-            created_at=entry.get('published', ''),
-            updated_at=entry.get('updated', entry.get('published', ''))
+            created_at=parse(entry.get('published', '')),
+            updated_at=parse(entry.get('updated', entry.get('published', '')))
        ))
 
     return articles
