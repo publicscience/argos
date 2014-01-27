@@ -1,4 +1,4 @@
-from models import Entity, Article, Cluster
+from models import Entity, Article, Cluster, Source
 from app import db
 
 def entity(num=1):
@@ -14,6 +14,20 @@ def entity(num=1):
     if len(e_s) is 1:
         return e_s[0]
     return e_s
+
+def source(num=1):
+    args = [
+        {'url': 'foo'},
+        {'url': 'bar'},
+        {'url': 'sup'}
+    ]
+    s_s = [Source(**args[i]) for i in range(num)]
+
+    save(s_s)
+
+    if len(s_s) is 1:
+        return s_s[0]
+    return s_s
 
 def article(num=1, **kwargs):
     args = [

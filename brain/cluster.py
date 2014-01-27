@@ -43,10 +43,10 @@ def cluster(articles, threshold=0.7, tag='', debug=False):
 
         # Select candidate clusters,
         # i.e. active clusters which share at least one entity with this article.
-        a_ents = [entity.id for entity in article.entities]
+        a_ents = [entity.slug for entity in article.entities]
         candidate_clusters = []
         for c in active_clusters:
-            c_ents = [entity.id for entity in c.entities]
+            c_ents = [entity.slug for entity in c.entities]
             if set(c_ents).intersection(a_ents):
                 candidate_clusters.append(c)
         log.debug('Found %s candidate clusters.' % len(candidate_clusters))
