@@ -59,21 +59,21 @@ When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
 ```
 $ source dev-env/bin/activate
-$ ./manage test
+$ ./run test
 ```
 
 You can also profile some of the more intensive parts to identify
 bottlenecks:
 ```
 $ source dev-env/bin/activate
-$ ./manage profile
+$ ./run profile
 ```
 
 You can also evaluate the quality of some of the algorithms, such as
 clustering:
 ```
 $ source dev-env/bin/activate
-$ ./manage evaluate
+$ ./run evaluate
 ```
 
 *Note: If you are having import errors or the packages seem to be
