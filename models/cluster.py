@@ -5,7 +5,7 @@ from datetime import datetime
 from itertools import chain
 
 cluster_entities = db.Table('cluster_entities',
-        db.Column('entity_id', db.Integer, db.ForeignKey('entity.id')),
+        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
         db.Column('cluster_id', db.Integer, db.ForeignKey('cluster.id'))
 )
 
@@ -17,6 +17,8 @@ cluster_clusterables = db.Table('cluster_clusterables',
 class Clusterable(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
     type        = db.Column('type', db.String(50))
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
     __mapper_args__ = {'polymorphic_on': 'type'}
 
     def vectorize(self):
@@ -37,8 +39,6 @@ class Cluster(Clusterable):
     """
     __tablename__ = 'cluster'
     id          = db.Column(db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
     active      = db.Column(db.Boolean, default=True)
     title       = db.Column(db.Unicode)
     summary     = db.Column(db.UnicodeText)

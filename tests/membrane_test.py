@@ -63,8 +63,7 @@ class FeedTest(RequiresApp):
                )
         self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
-        self.source = MagicMock()
-        self.source.url = 'foo'
+        self.source = Source('foo')
 
     def tearDown(self):
         self.teardown_app()
