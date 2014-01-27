@@ -59,14 +59,14 @@ def cluster_fields(members={}, custom={}):
 class Event(Resource):
     @marshal_with(cluster_fields())
     def get(self, id):
-        result = models.Cluster.query.filter_by(tag='event', id=id).first()
+        result = models.Cluster.query.get(id)
         return result or not_found()
 api.add_resource(Event, '/events/<int:id>')
 
 class Story(Resource):
     @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
     def get(self, id):
-        result = models.Cluster.query.filter_by(tag='story', id=id).first()
+        result = models.Cluster.query.get(id)
         return result or not_found()
 api.add_resource(Story, '/stories/<int:id>')
 
@@ -76,6 +76,6 @@ class Entity(Resource):
         'slug': fields.String
     })
     def get(self, slug):
-        result = models.Entity.query.filter_by(slug=slug).first()
+        result = models.Entity.query.get(slug)
         return result or not_found()
 api.add_resource(Entity, '/entities/<string:slug>')

@@ -4,6 +4,7 @@ from models.cluster import Clusterable
 from brain import vectorize, entities
 from scipy.spatial.distance import jaccard
 from math import isnan
+from slugify import slugify
 
 # Ignore the invalid numpy warning,
 # which comes up when jaccard uses
@@ -18,7 +19,7 @@ authors = db.Table('authors',
 )
 
 article_entities = db.Table('article_entities',
-        db.Column('entity_id', db.Integer, db.ForeignKey('entity.id')),
+        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
@@ -69,10 +70,17 @@ class Article(Clusterable):
         """
         ents = []
         for e_name in entities(self.text):
-            # Need to find a way of getting canonical name.
-            e = Entity.query.filter_by(name=e_name).first()
+            # TO DO: Need to find a way of getting canonical name.
+
+            # Search for the entity.
+            slug = slugify(e_name)
+            e = Entity.query.get(slug)
+
+            # If one doesn't exist, create a new one.
             if not e:
                 e = Entity(e_name)
+                db.session.add(e)
+                db.session.commit()
             ents.append(e)
         self.entities = ents
 

@@ -5,7 +5,7 @@ from datetime import datetime
 from itertools import chain
 
 cluster_entities = db.Table('cluster_entities',
-        db.Column('entity_id', db.Integer, db.ForeignKey('entity.id')),
+        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
         db.Column('cluster_id', db.Integer, db.ForeignKey('cluster.id'))
 )
 
