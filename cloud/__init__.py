@@ -84,7 +84,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
         if images:
             WORKER_AMI_ID = images[0].id
 
-            logger.info('Existing worker image found. (%s)' % WORKER_AMI_ID)
+            logger.info('Existing worker image found. ({0})'.format(WORKER_AMI_ID))
 
             # Update config.
             c['WORKER_AMI_ID'] = WORKER_AMI_ID
@@ -104,17 +104,17 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Create a new security group.
     # Authorize HTTP and database ports.
-    logger.info('Creating the security group (%s)...' % names['SG'])
+    logger.info('Creating the security group ({0})...'.format(names['SG']))
     ports = [80, DB_PORT]
     if ssh:
         logger.info('SSH is enabled!')
         ports.append(22)
     sec_group = manage.security_group(names['SG'], 'The cloud security group.', ports=ports)
 
-    logger.info('Using AMI %s' % WORKER_AMI_ID)
+    logger.info('Using AMI {0}'.format(WORKER_AMI_ID))
 
     # Create the database instance.
-    logger.info('Creating the database instance (%s)...' % names['DB'])
+    logger.info('Creating the database instance ({0})...'.format(names['DB']))
 
     # Create an EBS (block storage) for the image.
     # Size is in GB.
@@ -135,7 +135,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
 
     # Create the broker/message queue instance (RabbitMQ and Redis).
-    logger.info('Creating the broker (message queue) instance (%s)...' % names['MQ'])
+    logger.info('Creating the broker (message queue) instance ({0})...'.format(names['MQ']))
 
     mq_bdm = manage.create_block_device(size=150, delete=True)
     mq_init_script = load_script('scripts/setup_mq.sh')
@@ -154,7 +154,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
 
     # Create the Salt Master instance.
     # The Master instance is a souped-up worker, so we use the worker image.
-    logger.info('Creating the master instance (%s)...' % names['MASTER'])
+    logger.info('Creating the master instance ({0})...'.format(names['MASTER']))
 
     master_bdm = manage.create_block_device(size=150, delete=True)
     master_init_script = load_script('scripts/setup_master.sh',
@@ -195,8 +195,8 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     )
 
     # Create the launch configuration.
-    logger.info('Creating the launch configuration (%s)...' % names['LC'])
-    logger.info('Cloud is composed of %s instances.' % instance_type)
+    logger.info('Creating the launch configuration ({0})...'.format(names['LC']))
+    logger.info('Cloud is composed of {0} instances.'.format(instance_type))
     launch_config = LaunchConfiguration(
                         name=names['LC'],
                         image_id=WORKER_AMI_ID,         # AMI ID for autoscaling instances.
@@ -211,7 +211,7 @@ def commission(use_existing_image=True, min_size=1, max_size=4, instance_type='m
     asg.create_launch_configuration(launch_config)
 
     # Create the autoscaling group.
-    logger.info('Creating autoscaling group (%s)...' % names['AG'])
+    logger.info('Creating autoscaling group ({0})...'.format(names['AG']))
     autoscaling_group = AutoScalingGroup(
                             group_name=names['AG'],
                             availability_zones=zones,
@@ -322,7 +322,7 @@ def decommission(preserve_image=True):
 
     # Shutdown and delete autoscaling groups.
     # This also deletes the groups' scaling policies.
-    logger.info('Deleting the autoscaling group (%s)...' % names['AG'])
+    logger.info('Deleting the autoscaling group ({0})...'.format(names['AG']))
     groups = asg.get_all_groups(names=[names['AG']])
     for group in groups:
         group_instance_ids = [i.instance_id for i in group.instances]
@@ -349,13 +349,13 @@ def decommission(preserve_image=True):
         group.delete()
 
     # Delete launch configs.
-    logger.info('Deleting the launch configuration (%s)...' % names['LC'])
+    logger.info('Deleting the launch configuration ({0})...'.format(names['LC']))
     launch_configs = asg.get_all_launch_configurations(names=[names['LC']])
     for lc in launch_configs:
         lc.delete()
 
     # Delete the master instance(s).
-    logger.info('Deleting the master instance (%s)...' % names['MASTER'])
+    logger.info('Deleting the master instance ({0})...'.format(names['MASTER']))
     master_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['MASTER']})
     for reservation in master_instances:
         for i in reservation.instances:
@@ -363,7 +363,7 @@ def decommission(preserve_image=True):
         manage.wait_until_terminated(reservation.instances)
 
     # Delete the broker/message queue instance(s).
-    logger.info('Deleting the broker (message queue) instance (%s)...' % names['MQ'])
+    logger.info('Deleting the broker (message queue) instance ({0})...'.format(names['MQ']))
     mq_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['MQ']})
     for reservation in mq_instances:
         for i in reservation.instances:
@@ -371,7 +371,7 @@ def decommission(preserve_image=True):
         manage.wait_until_terminated(reservation.instances)
 
     # Delete the database instance(s).
-    logger.info('Deleting the database instance (%s)...' % names['DB'])
+    logger.info('Deleting the database instance ({0})...'.format(names['DB']))
     db_instances = ec2.get_all_instances(filters={'tag-key': 'name', 'tag-value': names['DB']})
     for reservation in db_instances:
         for i in reservation.instances:
@@ -379,7 +379,7 @@ def decommission(preserve_image=True):
         manage.wait_until_terminated(reservation.instances)
 
     # Delete the security group.
-    logger.info('Deleting the security group (%s)...' % names['SG'])
+    logger.info('Deleting the security group ({0})...'.format(names['SG']))
     manage.delete_security_group(names['SG'])
 
     # Delete the worker image.
@@ -439,7 +439,7 @@ def create_worker_base():
         # Wait until the instance is ready.
         logger.info('Waiting for base instance to launch...')
         manage.wait_until_ready(instance)
-        logger.info('Base instance has launched at %s. Configuring...' % instance.public_dns_name)
+        logger.info('Base instance has launched at {0}. Configuring...'.format(instance.public_dns_name))
 
         # Tag the instance with a name so we can find it later.
         instance.add_tag('name', names['WORKER_IMAGE'])
@@ -525,12 +525,12 @@ def create_worker_image(use_existing_base=True):
         # Wait until worker is ready.
         worker_image = ec2.get_all_images([WORKER_AMI_ID])[0]
         manage.wait_until_ready(worker_image)
-        logger.info('Created worker image with id %s' % WORKER_AMI_ID)
+        logger.info('Created worker image with id {0}'.format(WORKER_AMI_ID))
 
         # Clean up the worker image infrastructure.
         delete_worker_base()
 
-        logger.info('AMI creation complete. (%s)' % WORKER_AMI_ID)
+        logger.info('AMI creation complete. ({0})'.format(WORKER_AMI_ID))
 
         return WORKER_AMI_ID
 
@@ -575,7 +575,7 @@ def delete_worker_image():
     images = ec2.get_all_images(filters={'name': names['WORKER_IMAGE']})
     for image in images:
         image_id = image.id
-        logger.info('Deleting worker image with id %s' % image_id)
+        logger.info('Deleting worker image with id {0}'.format(image_id))
         try:
             try:
                 ec2.deregister_image(image_id, delete_snapshot=True)
@@ -686,9 +686,9 @@ def create_instance(name=None, instance_type='m1.medium', block_device_map=None,
                    )
     instance = reservations.instances[0]
 
-    logger.info('Waiting for instance %s to launch...' % name)
+    logger.info('Waiting for instance {0} to launch...'.format(name))
     manage.wait_until_ready(instance)
-    logger.info('Instance %s has launched at %s' % (name, instance.public_dns_name))
+    logger.info('Instance {0} has launched at {1}'.format(name, instance.public_dns_name))
 
     # Tag the instance with a name so we can find it later.
     instance.add_tag('name', name)

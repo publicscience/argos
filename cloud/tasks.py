@@ -42,7 +42,7 @@ def workers():
         logger.error('Error connecting to MQ. Check that it is running.')
         return False
 
-    logger.info('There are %s workers available.' % len(workers))
+    logger.info('There are {0} workers available.'.format(len(workers)))
     return workers
 
 
@@ -59,7 +59,7 @@ def active():
         logger.error('Error connecting to MQ. Check that it is running.')
         return False
 
-    logger.info('There are %s executing tasks.' % len(active_tasks))
+    logger.info('There are {0} executing tasks.'.format(len(active_tasks)))
     return active_tasks
 
 @celery.task

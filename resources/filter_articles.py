@@ -36,5 +36,5 @@ articles_ = [a for a in articles if a['source'] in srcs]
 a = articles_[:200]
 for article in a:
     #print(json.dumps(article, sort_keys=True, indent=4))
-    f = open('/Users/ftseng/Desktop/articles/%s.txt' % article['title'], 'wb')
+    f = open('/Users/ftseng/Desktop/articles/{0}.txt'.format(article['title'], 'wb'))
     f.write(article['text'].encode('utf-8'))

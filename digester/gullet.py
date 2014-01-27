@@ -36,7 +36,7 @@ def download(url, save_path, progress=False):
     # Strip trailing slash, if there is one.
     save_path = save_path.rstrip('\/')
     filename = url.split('/').pop()
-    file = '%s/%s' % (save_path, filename)
+    file = '{0}/{1}'.format(save_path, filename)
 
     existing_size = 0
 
@@ -50,7 +50,7 @@ def download(url, save_path, progress=False):
         existing_size = outfile.tell()
 
         # Setup request for only the remaining bytes.
-        headers = {'Range': 'bytes=%s-' % (existing_size)}
+        headers = {'Range': 'bytes={0}-'.format(existing_size)}
         req = request.Request(url, headers=headers)
 
     # Otherwise, create a new/overwrite existing file.
@@ -141,7 +141,7 @@ def _progress(percent):
     Show a progress bar.
     """
     width = 100
-    sys.stdout.write('[%s] %s' % (' ' * width, '{:8.4f}'.format(percent)))
+    sys.stdout.write('[{0}] {1}'.format(' ' * width, '{:8.4f}'.format(percent)))
     sys.stdout.flush()
     sys.stdout.write('\b' * (width+10))
 

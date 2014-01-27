@@ -41,7 +41,7 @@ class Digester:
             | namespace (str)   -- namespace of the file.
         """
         self.file = file
-        self.namespace = '{%s}' % namespace
+        self.namespace = '{{0}}'.format(namespace)
 
 
     def iterate(self, tag):
@@ -67,7 +67,7 @@ class Digester:
 
 
         # Create the iterparse context
-        context = etree.iterparse(file, events=('end',), tag='%s%s' % (self.namespace, tag))
+        context = etree.iterparse(file, events=('end',), tag='{0}{1}'.format(self.namespace, tag))
 
         # Iterate
         # http://ibm.co/17rvZ
@@ -109,10 +109,10 @@ class Digester:
         This method is meant to replace chaining calls
         like this::
 
-            text_el = elem.find('{%s}revision' % NAMESPACE).find('{%s}text' % NAMESPACE)
+            text_el = elem.find('{{0}}revision'.format(NAMESPACE)).find('{{0}}text'.format(NAMESPACE))
         """
         for tag in tags:
-            elem = elem.find('%s%s' % (self.namespace, tag))
+            elem = elem.find('{0}{1}'.format(self.namespace, tag))
         return elem
 
 

@@ -122,9 +122,9 @@ def _full_url(url):
 
     url = url.strip()
     for x in ['http', 'https']:
-        if url.startswith('%s://' % x):
+        if url.startswith('{0}://'.format(x)):
             return url
-    return 'http://%s' % url
+    return 'http://{0}'.format(url)
 
 
 def _get_feed_links(data, url):

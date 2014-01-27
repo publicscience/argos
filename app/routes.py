@@ -15,7 +15,7 @@ def internal_error(error):
     return jsonify(status=500, message='Internal server error.'), 500
 
 def not_found():
-    return abort(404, message='The resource you requested, %s, was not found.' % request.path, status=404)
+    return abort(404, message='The resource you requested, {0}, was not found.'.format(request.path), status=404)
 
 class DateTimeField(fields.Raw):
     """

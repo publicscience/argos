@@ -47,7 +47,7 @@ class GulletTest(RequiresMocks):
 
         # Setup file paths and urls.
         self.save_path, self.file = os.path.split(tmpfile.name)
-        self.url = 'http://foo.com/%s' % self.file
+        self.url = 'http://foo.com/{0}'.format(self.file)
 
         return tmpfile
 

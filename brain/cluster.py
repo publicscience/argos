@@ -31,7 +31,7 @@ def cluster(articles, threshold=0.7, tag='', debug=False):
     else:
         log.setLevel('ERROR')
 
-    log.debug('Threshold is set to %s.' % threshold)
+    log.debug('Threshold is set to {0}.'.format(threshold))
 
     active_clusters = Cluster.query.filter_by(active=True, tag=tag).all()
 
@@ -39,7 +39,7 @@ def cluster(articles, threshold=0.7, tag='', debug=False):
 
     # TO DO: BIAS CLOSER PUBLICATION DATES
     for article in articles:
-        log.debug('There are %s active clusters.' % len(active_clusters))
+        log.debug('There are {0} active clusters.'.format(len(active_clusters)))
 
         # Select candidate clusters,
         # i.e. active clusters which share at least one entity with this article.
@@ -49,7 +49,7 @@ def cluster(articles, threshold=0.7, tag='', debug=False):
             c_ents = [entity.slug for entity in c.entities]
             if set(c_ents).intersection(a_ents):
                 candidate_clusters.append(c)
-        log.debug('Found %s candidate clusters.' % len(candidate_clusters))
+        log.debug('Found {0} candidate clusters.'.format(len(candidate_clusters)))
 
         # Keep tracking of qualifying clusters
         # and their avg sim with this article.
@@ -59,12 +59,12 @@ def cluster(articles, threshold=0.7, tag='', debug=False):
         # Compare the article with the candidate clusters.
         for cluster in candidate_clusters:
             avg_sim = cluster.similarity(article)
-            log.debug('Average similarity was %s.' % avg_sim)
+            log.debug('Average similarity was {0}.'.format(avg_sim))
             if avg_sim > threshold:
                 qualifying_clusters.append((cluster, avg_sim))
 
         num_qualified = len(qualifying_clusters)
-        log.debug('Found %s qualifying clusters.' % num_qualified)
+        log.debug('Found {0} qualifying clusters.'.format(num_qualified))
 
         if num_qualified == 1:
             # Grab the only cluster and add the article.

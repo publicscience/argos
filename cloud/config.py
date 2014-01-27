@@ -30,13 +30,13 @@ def cloud_names():
     name = config['cloud']['CLOUD_NAME']
 
     names = {
-            'LC': '%s-launchconfig' % name,
-            'AG': '%s-autoscale' % name,
-            'SG': '%s-security' % name,
-            'DB': '%s-database' % name,
-            'MQ': '%s-broker' % name,
-            'MASTER': '%s-master' % name,
-            'WORKER_IMAGE': '%s-worker-image' % name
+            'LC': '{0}-launchconfig'.format(name),
+            'AG': '{0}-autoscale'.format(name),
+            'SG': '{0}-security'.format(name),
+            'DB': '{0}-database'.format(name),
+            'MQ': '{0}-broker'.format(name),
+            'MASTER': '{0}-master'.format(name),
+            'WORKER_IMAGE': '{0}-worker-image'.format(name)
     }
     return names
 

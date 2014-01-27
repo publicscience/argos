@@ -31,13 +31,13 @@ def main():
 
     # Download and digest each part individually.
     for idx, part in enumerate(parts):
-        logger.info('Digesting pages dump part %s (%s/%s)' % (part, idx, len(parts)))
+        logger.info('Digesting pages dump part {0} ({1}/{2})'.format(part, idx, len(parts)))
         wikidigest.s(url, part)
 
 
 @celery.task
 def wikidigest(url, part):
-    w = WikiDigester('/tmp/%s' % part, db='wikidump', url=url+part, silent=False)
+    w = WikiDigester('/tmp/{0}'.format(part), db='wikidump', url=url+part, silent=False)
     w.digest()
 
 def get_parts_urls():

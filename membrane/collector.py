@@ -27,7 +27,7 @@ def collect():
     # Fetch entries for each source
     for source in Source.query.all():
         try:
-            logger.info('Fetching from %s...' % source.url)
+            logger.info('Fetching from {0}...'.format(source.url))
             articles = feed.articles(source)
 
             # Check for existing copy.
@@ -38,7 +38,7 @@ def collect():
 
         except feed.SAXException as e:
             # Error with the feed, make a note.
-            logger.info('Error fetching from %s.' % source.url)
+            logger.info('Error fetching from {0}.'.format(source.url))
             source.errors += 1
 
     logger.info('Finished fetching articles.')

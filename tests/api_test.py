@@ -23,7 +23,7 @@ class APITest(RequiresApp):
 
     def test_GET_entity(self):
         entity = fac.entity()
-        r = self.app.get('/entities/%s' % entity.slug)
+        r = self.app.get('/entities/{0}'.format(entity.slug))
         expected = {
                 'name': entity.name,
                 'slug': entity.slug
@@ -46,7 +46,7 @@ class APITest(RequiresApp):
             for entity in member.entities:
                 entities.append({
                     'name': entity.name,
-                    'url': '/entities/%s' % entity.slug
+                    'url': '/entities/{0}'.format(entity.slug)
                 })
 
         # Filter down to unique entities.
@@ -63,7 +63,7 @@ class APITest(RequiresApp):
                 'entities': expected_entities
         }
 
-        r = self.app.get('/events/%s' % event.id)
+        r = self.app.get('/events/{0}'.format(event.id))
 
         self.assertEqual(self.data(r), expected)
 
@@ -77,13 +77,13 @@ class APITest(RequiresApp):
                 'type': 'cluster',
                 'title': member.title,
                 'id': member.id,
-                'url': '/events/%s' % member.id,
+                'url': '/events/{0}'.format(member.id),
                 'created_at': member.created_at.isoformat()
             })
             for entity in member.entities:
                 entities.append({
                     'name': entity.name,
-                    'url': '/entities/%s' % entity.slug
+                    'url': '/entities/{0}'.format(entity.slug)
                 })
 
         # Filter down to unique entities.
@@ -100,6 +100,6 @@ class APITest(RequiresApp):
                 'entities': expected_entities
         }
 
-        r = self.app.get('/stories/%s' % story.id)
+        r = self.app.get('/stories/{0}'.format(story.id))
 
         self.assertEqual(self.data(r), expected)

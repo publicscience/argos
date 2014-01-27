@@ -76,10 +76,10 @@ class WikiDigester(Digester):
 
         # Build a default url if one is not specified.
         if not self.url:
-            self.url = '%s%s' % (base, pages)
+            self.url = '{0}{1}'.format(base, pages)
 
         # Download!
-        logger.info('Fetching pages dump from %s' % (self.url))
+        logger.info('Fetching pages dump from {0}'.format(self.url))
         self.download(self.url)
 
 
@@ -90,7 +90,7 @@ class WikiDigester(Digester):
 
         # Check if the specified file exists.
         if not exists(self.file):
-            logger.info('Specified file %s not found, fetching...' % self.file)
+            logger.info('Specified file {0} not found, fetching...'.format(self.file))
             self.fetch_dump()
 
         logger.info('Beginning digestion of pages.')
@@ -121,7 +121,7 @@ class WikiDigester(Digester):
 
         if not self.silent:
             processed_name = self.url if self.url else self.file
-            notify('TF-IDF calculations complete for %s!' % processed_name)
+            notify('TF-IDF calculations complete for {0}!'.format(processed_name))
 
 
     def _iterate_pages(self):
@@ -139,7 +139,7 @@ class WikiDigester(Digester):
                 self.num_docs += 1
                 yield elem
 
-        logger.info('There are %s docs in this dump.' % self.num_docs)
+        logger.info('There are {0} docs in this dump.'.format(self.num_docs))
 
 
     def _process_page(self, elem):

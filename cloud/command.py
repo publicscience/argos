@@ -85,7 +85,7 @@ def _command(command):
     Will look something like:
         $ python -c 'import cloud.commands as cmd; cmd.workers()'
     """
-    ssh(['cd', '%s;' % app_path, 'sudo', py_path, '-c', '"import cloud.commands as cmd; cmd.%s()"', command],
+    ssh(['cd', '{0};'.format(app_path), 'sudo', py_path, '-c', '"import cloud.commands as cmd; cmd.{0}()"'.format(command)],
             host=host, user=user, key=key)
 
 
@@ -107,7 +107,7 @@ def ssh(cmd, host=None, user=None, key=None):
         key,
         '-o',
         'StrictHostKeyChecking=no',
-        '%s@%s' % (user, host)
+        '{0}@{1}'.format(user, host)
     ]
     return _call_remote_process(ssh + cmd)
 
@@ -131,7 +131,7 @@ def scp(local, remote, host=None, user=None, key=None):
             '-i',
             key,
             local,
-            '%s@%s:%s' % (user, host, remote)
+            '{0}@{1}:{2}'.format(user, host, remote)
     ]
     return _call_remote_process(scp)
 

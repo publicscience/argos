@@ -31,15 +31,15 @@ def evaluate_clustering():
                 expected_clusters.setdefault(category, []).append(article)
                 articles.append(article)
 
-    logger.info('Will cluster %s articles.' % len(articles))
-    logger.info('Expecting %s clusters.' % len(expected_clusters.keys()))
+    logger.info('Will cluster {0} articles.'.format(len(articles)))
+    logger.info('Expecting {0} clusters.'.format(len(expected_clusters.keys())))
 
     logger.info('Clustering...')
     p = cProfile.Profile()
     #clusters = cluster.cluster(articles, debug=True, threshold=0.04)
     clusters = p.runcall(cluster.cluster, articles, debug=True, threshold=0.04)
 
-    logger.info('Created %s clusters.' % len(clusters))
+    logger.info('Created {0} clusters.'.format(len(clusters)))
 
     logger.info('Cluster composition is as follows...')
     for c in clusters:
