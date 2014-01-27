@@ -115,7 +115,7 @@ def collect_sources(url):
     add_sources([f for f in feeds])
 
 
-def load_sources_from_file(filepath='resources/sources.txt'):
+def load_sources_from_file(filepath='manage/sources.txt'):
     """
     Load feeds from a text file.
     Each line should be the url to the source

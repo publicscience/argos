@@ -17,7 +17,7 @@ def evaluate_clustering():
     logger.info('Constructing expected clusters and articles...')
     expected_clusters = {}
     articles = []
-    for dir, subdir, files in os.walk('resources/cluster_evaluation/organized_articles'):
+    for dir, subdir, files in os.walk('manage/cluster_evaluation/organized_articles'):
         for file in files:
             filepath = os.path.join(dir, file)
             name, ext = os.path.splitext(filepath)

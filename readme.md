@@ -85,7 +85,7 @@ dependency.*
 You can optionally setup the default ~436 sources for collecting
 articles by doing (make sure Postgres is running):
 ```bash
-$ ./resources/load_sources
+$ ./manage/load_sources
 ```
 
 
