@@ -1,9 +1,13 @@
 from flask import jsonify, request
-from flask.ext.restful import Api, Resource, abort, marshal_with, fields
+from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse, marshal
 from app import app
 import models
 
 api = Api(app)
+
+# Whitelist of allowed request parameters.
+parser = reqparse.RequestParser()
+parser.add_argument('page', type=int, default=1)
 
 @app.errorhandler(404)
 def internal_error(error):
@@ -31,15 +35,6 @@ def cluster_fields(members={}, custom={}):
     """
     The default fields for any Cluster-like resource.
     """
-    members_ = {
-        'type': fields.String,
-        'title': fields.String,
-        'url': fields.String,
-        'id': fields.Integer,
-        'created_at': DateTimeField
-    }
-    members_.update(members)
-
     fields_ = {
         'id': fields.Integer,
         'title': fields.String,
@@ -47,12 +42,24 @@ def cluster_fields(members={}, custom={}):
         'tag': fields.String,
         'updated_at': DateTimeField,
         'created_at': DateTimeField,
-        'members': fields.Nested(members_),
         'entities': fields.Nested({
             'name': fields.String,
             'url': fields.Url('entity')
         })
     }
+
+    if members is not None:
+        members_ = {
+            'type': fields.String,
+            'title': fields.String,
+            'url': fields.String,
+            'id': fields.Integer,
+            'created_at': DateTimeField
+        }
+        members_.update(members)
+
+        fields_['members'] = fields.Nested(members_)
+
     fields_.update(custom)
     return fields_
 
@@ -61,14 +68,30 @@ class Event(Resource):
     def get(self, id):
         result = models.Cluster.query.get(id)
         return result or not_found()
+class EventList(Resource):
+    # Doesn't need to return members, i.e. individual articles.
+    # That slows it down by a lot, and they aren't necessary here.
+    @marshal_with(cluster_fields(members=None))
+    def get(self):
+        args = parser.parse_args()
+        results = models.Cluster.query.filter_by(tag='event').paginate(args['page']).items
+        return results or not_found()
 api.add_resource(Event, '/events/<int:id>')
+api.add_resource(EventList, '/events')
 
 class Story(Resource):
     @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
     def get(self, id):
         result = models.Cluster.query.get(id)
         return result or not_found()
+class StoryList(Resource):
+    @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
+    def get(self):
+        args = parser.parse_args()
+        results = models.Cluster.query.filter_by(tag='story').paginate(args['page']).items
+        return results or not_found()
 api.add_resource(Story, '/stories/<int:id>')
+api.add_resource(StoryList, '/stories')
 
 class Entity(Resource):
     @marshal_with({
