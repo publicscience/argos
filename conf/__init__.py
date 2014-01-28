@@ -20,8 +20,9 @@ def load_conf_module(name, key=None, env=None):
   for (k, v) in inspect.getmembers(module):
     if k.isupper():
       if isinstance(v, str):
-        v.format(**globals())
-      namespace[k] = v
+        namespace[k] = v.format(**globals())
+      else:
+        namespace[k] = v
 
 """
 File names for configuration files.
