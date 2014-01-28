@@ -63,7 +63,9 @@ paginate_parser.add_argument('page', type=int, location='args', default=1)
 paginate_parser.add_argument('per_page', type=int, location='args', default=DEFAULT_PER_PAGE)
 
 class ListResource(Resource):
-   
+    """
+    A paginated list resource.
+    """
     _fields = {
         'results': fields.Integer,
         'page': fields.Integer,
@@ -76,6 +78,7 @@ class ListResource(Resource):
         return ListResource._fields
 
     def get_page(self, page, per_page):
+        """ Must be overridden and must return a Pagination object. """
         raise NotImplementedError 
 
     def get(self): 
@@ -86,7 +89,7 @@ class ListResource(Resource):
             'results': len(result.items),
             'page': result.page,
             'per_page': result.per_page,
-            'max_pages': result.pages
+            'max_page': result.pages
         }, self.fields())
 
 class EventList(ListResource):
@@ -104,7 +107,10 @@ class StoryList(ListResource):
 
 class EntityList(ListResource):
     def fields(self):
-        return { 'name': fields.String, 'slug': fields.String }
+        nfields = ListResource._fields
+        nfields.update(items=
+                fields.Nested({'name': fields.String, 'slug': fields.String}))
+        return nfields
     def get_page(self, page, per_page):
         return models.Entity.query.paginate(page, per_page)
 
