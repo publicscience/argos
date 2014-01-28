@@ -3,6 +3,7 @@ import cProfile, pstats
 from app import db
 from brain import cluster
 from models import Cluster, Article
+from manage import progress
 
 # Logging.
 from logger import logger
@@ -17,19 +18,28 @@ def evaluate_clustering():
     logger.info('Constructing expected clusters and articles...')
     expected_clusters = {}
     articles = []
-    for dir, subdir, files in os.walk('manage/cluster_evaluation/organized_articles'):
+    all_files = []
+
+    # Collect all appropriate files.
+    for dir, subdir, files in os.walk('manage/evaluate/organized_articles'):
         for file in files:
             filepath = os.path.join(dir, file)
             name, ext = os.path.splitext(filepath)
             if ext == '.txt':
-                category = dir.split('/')[-1]
-                f = open(filepath, 'r')
-                article = Article(
-                        text=f.read(),
-                        title=name.split('/')[-1]
-                )
-                expected_clusters.setdefault(category, []).append(article)
-                articles.append(article)
+                all_files.append((dir, name, filepath))
+
+    # Create articles for appropriate files.
+    for dir, name, filepath in all_files:
+        category = dir.split('/')[-1]
+        f = open(filepath, 'r')
+        article = Article(
+                text=f.read(),
+                title=name.split('/')[-1]
+        )
+        expected_clusters.setdefault(category, []).append(article)
+        articles.append(article)
+        progress(len(articles)/len(all_files) * 100)
+    print('\n')
 
     logger.info('Will cluster {0} articles.'.format(len(articles)))
     logger.info('Expecting {0} clusters.'.format(len(expected_clusters.keys())))
@@ -48,6 +58,7 @@ def evaluate_clustering():
     logger.info('Profiling statistics from the clustering...')
     ps = pstats.Stats(p)
     ps.sort_stats('time').print_stats(10)
+
 
 def evaluate():
     if os.environ.get('FLASK_ENV') == 'TESTING':

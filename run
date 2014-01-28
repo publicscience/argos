@@ -21,6 +21,19 @@ elif [ $1 == 'evaluate' ]
 then
     FLASK_ENV=TESTING python -c "from manage.evaluate import evaluate; evaluate()"
 
+elif [ $1 == 'evaluate:generate' ]
+then
+    if [ -z $2 ]
+    then
+        echo -e "Please specify some keywords to filter on."
+    else
+        # Assemble the Python array.
+        keywords="["
+        for var in "${@:2}"; do keywords+=\'$var\'; done
+        keywords+="]"
+        python -c "from manage.evaluate.generate import generate; generate($keywords)"
+    fi
+
 elif [ $1 == 'profile' ]
 then
     FLASK_ENV=TESTING python -c "from manage.profile import profile; profile()"

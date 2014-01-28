@@ -6,16 +6,17 @@ Create some seed data.
 """
 
 from app import db
+from manage import progress
 from models import Entity, Article, Cluster, Source
 from brain.cluster import cluster
-import os, json, sys
+import os, json
 from datetime import datetime
 from dateutil.parser import parse
 
 def seed(debug=False):
     this_dir = os.path.dirname(__file__)
-    seeds = open(os.path.join(this_dir, 'seed/seed.json'), 'r')
-    sources = open(os.path.join(this_dir, 'seed/seed_sources.json'), 'r')
+    seeds = open(os.path.join(this_dir, 'seed.json'), 'r')
+    sources = open(os.path.join(this_dir, 'seed_sources.json'), 'r')
 
     print('Resetting the database...')
     db.drop_all()
@@ -54,7 +55,7 @@ def seed(debug=False):
         articles.append(a)
         db.session.add(a)
 
-        _progress(len(articles) / len(entries) * 100)
+        progress(len(articles) / len(entries) * 100)
 
     db.session.commit()
 
@@ -79,16 +80,3 @@ def seed(debug=False):
     print('==============================================\n\n')
 
 
-def _progress(percent):
-    """
-    Show a progress bar.
-    """
-    width = 100
-    sys.stdout.write('[{0}] {1}'.format(' ' * width, '{:8.4f}'.format(percent)))
-    sys.stdout.flush()
-    sys.stdout.write('\b' * (width+10))
-
-    for i in range(int(percent)):
-        sys.stdout.write('=')
-        sys.stdout.flush()
-    sys.stdout.write('\b' * (width+10))
