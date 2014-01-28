@@ -8,7 +8,6 @@ Clusters text documents.
 from app import db
 from brain import vectorize, entities
 from models import Cluster
-from scipy.spatial.distance import jaccard
 from datetime import datetime
 
 # Logging.
