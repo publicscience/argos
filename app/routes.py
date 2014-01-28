@@ -1,7 +1,9 @@
 from flask import jsonify, request
-from flask.ext.restful import Api, Resource, abort, marshal_with, fields
+from flask.ext.restful import Api, Resource, abort, marshal_with, marshal, fields, reqparse
 from app import app
 import models
+
+DEFAULT_PER_PAGE = 15
 
 api = Api(app)
 
@@ -55,6 +57,66 @@ def cluster_fields(members={}, custom={}):
     }
     fields_.update(custom)
     return fields_
+
+paginate_parser = reqparse.RequestParser()
+paginate_parser.add_argument('page', type=int, location='args', default=1)
+paginate_parser.add_argument('per_page', type=int, location='args', default=DEFAULT_PER_PAGE)
+
+class ListResource(Resource):
+    """
+    A paginated list resource.
+    """
+    _fields = {
+        'results': fields.Integer,
+        'page': fields.Integer,
+        'per_page': fields.Integer,
+        'max_page': fields.Integer,
+        'items': fields.Nested(cluster_fields())
+    }
+
+    def fields(self):
+        return ListResource._fields
+
+    def get_page(self, page, per_page):
+        """ Must be overridden and must return a Pagination object. """
+        raise NotImplementedError 
+
+    def get(self): 
+        args = paginate_parser.parse_args()
+        result = self.get_page(args['page'], args['per_page']) 
+        return marshal({
+            'items': result.items,
+            'results': len(result.items),
+            'page': result.page,
+            'per_page': result.per_page,
+            'max_page': result.pages
+        }, self.fields())
+
+class EventList(ListResource):
+    def get_page(self, page, per_page):
+        return models.Cluster.query.paginate(page, per_page)
+
+class StoryList(ListResource):
+    def fields(self):
+        nfields = ListResource._fields
+        nfields.update(items=
+                fields.Nested(cluster_fields(members={'url': fields.Url('event')})))
+        return nfields 
+    def get_page(self, page, per_page):
+        return models.Cluster.query.paginate(page, per_page)
+
+class EntityList(ListResource):
+    def fields(self):
+        nfields = ListResource._fields
+        nfields.update(items=
+                fields.Nested({'name': fields.String, 'slug': fields.String}))
+        return nfields
+    def get_page(self, page, per_page):
+        return models.Entity.query.paginate(page, per_page)
+
+api.add_resource(EventList, '/events')
+api.add_resource(StoryList, '/stories')
+api.add_resource(EntityList, '/entities')
 
 class Event(Resource):
     @marshal_with(cluster_fields())
