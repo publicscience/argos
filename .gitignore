@@ -13,12 +13,9 @@ doc/_build
 doc/_static
 doc/_templates
 dumps/
-cloud/config.ini
 logger/logs/*.log
-id_rsa
-id_rsa.pub
 config.py
-!cloud/config.py
 celery_config.py
+mail_config.py
 ner/
 *.rdb
