@@ -3,7 +3,7 @@ from tests import RequiresWorkers
 
 import math, time
 from celery import chord
-from cloud.tasks import celery, workers
+from jobs import celery, workers
 
 class TasksTest(RequiresWorkers):
     def test_chord(self):
