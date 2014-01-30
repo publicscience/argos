@@ -6,12 +6,12 @@ Interface to AlchemyAPI
 (for prototyping purposes).
 """
 
-import config
 import json
 from urllib.request import urlopen
 from urllib.parse import urlencode
+from conf import ALCHEMY_KEY
 
-API_KEY = config.ALCHEMY_KEY
+API_KEY = ALCHEMY_KEY 
 BASE_URL = 'https://access.alchemyapi.com/'
 
 def entities(text):
