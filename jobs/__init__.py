@@ -7,7 +7,7 @@ distributed task processing.
 """
 
 from celery import Celery
-from jobs import celery_config
+from conf import CELERY
 
 # For sending mail.
 import smtplib
@@ -18,7 +18,7 @@ from logger import logger
 logger = logger(__name__)
 
 celery = Celery()
-celery.config_from_object(celery_config)
+celery.config_from_object(CELERY)
 
 def workers():
     """
@@ -67,7 +67,7 @@ def notify(body):
     """
     Send an e-mail notification.
     """
-    from_addr = celery_config.EMAIL_HOST_USER
+    from_addr = CELERY.EMAIL_HOST_USER
 
     # Construct the message.
     msg = MIMEMultipart()
@@ -76,11 +76,11 @@ def notify(body):
     msg.attach(MIMEText(body, 'plain'))
 
     # Connect to the mail server.
-    server = smtplib.SMTP(celery_config.EMAIL_HOST, celery_config.EMAIL_PORT)
+    server = smtplib.SMTP(CELERY.EMAIL_HOST, CELERY.EMAIL_PORT)
     server.starttls()
-    server.login(from_addr, celery_config.EMAIL_HOST_PASSWORD)
+    server.login(from_addr, CELERY.EMAIL_HOST_PASSWORD)
 
-    for target in celery_config.ADMINS:
+    for target in CELERY.ADMINS:
         msg['To'] = target[1]
         server.sendmail(from_addr, target[1], msg.as_string())
 

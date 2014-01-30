@@ -34,7 +34,6 @@ Configuration files should be of the format:
 
 NAMES = [
   'celery',
-  'aws',
   'app'
 ]
 

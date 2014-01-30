@@ -9,7 +9,7 @@ BROKER_CONNECTION_MAX_RETRIES = None
 CELERY_RESULT_BACKEND = 'DATABASE[redis][TYPE]://DATABASE[redis][HOST]:DATABASE[redis][PORT]/DATABASE[redis][NAME]'
 
 # What modules to import on start.
-CELERY_IMPORTS = ('tests.tasks_test', 'cloud', 'digester.wikidigester',)
+CELERY_IMPORTS = ('tests.tasks_test', 'jobs', 'digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
@@ -27,3 +27,7 @@ ADMINS = (
 )
 
 SERVER_EMAIL = 'argos.bot@gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'argos.bot@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-pass'
