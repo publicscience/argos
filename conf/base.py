@@ -19,12 +19,6 @@ DATABASE = {
         'HOST': 'localhost',
         'PORT': 5432,
         'NAME': 'argos_dev'
-    },
-    'celery': {
-        'TYPE': 'redis',
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'NAME': '0'
     }
 }
 

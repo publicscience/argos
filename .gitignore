@@ -15,7 +15,5 @@ doc/_templates
 dumps/
 logger/logs/*.log
 config.py
-celery_config.py
-mail_config.py
 ner/
 *.rdb
