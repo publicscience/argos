@@ -11,6 +11,8 @@ echo -e "\n\n\n\n\n"
 # Run everything in the background,
 # but remember their process IDs.
 
+ARGOS_ENV=development
+
 redis-server &
 REDIS_PID=$!
 
@@ -23,7 +25,7 @@ NERSV_PID=$!
 cd ..
 
 source dev-env/bin/activate
-celery worker --loglevel=info --config=conf.development-celery &
+celery worker --loglevel=info --config=conf.$ARGOS_ENV-celery &
 WORKR_PID=$!
 
 wait
