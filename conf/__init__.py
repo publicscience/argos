@@ -13,7 +13,7 @@ def load_conf_module(name, key=None, env=None):
     namespace = globals()
 
   if env:
-    module = importlib.import_module("%s.%s-%s" % (PACKAGE, env, name))
+    module = importlib.import_module("%s.%s_%s" % (PACKAGE, env, name))
   else:
     module = importlib.import_module("%s.%s" % (PACKAGE, name))
   

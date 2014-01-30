@@ -7,6 +7,7 @@ BROKER_CONNECTION_MAX_RETRIES = None
 
 # Result backend.
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+#CELERY_RESULT_BACKEND = '{DATABASE[celery][TYPE]}://{DATABASE[celery][HOST]}:{DATABASE[celery][PORT]}/{DATABASE[celery][NAME]}'
 
 # What modules to import on start.
 CELERY_IMPORTS = ('tests.tasks_test', 'jobs', 'digester.wikidigester',)
