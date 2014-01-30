@@ -106,7 +106,7 @@ def concepts(docs):
     return [alchemy.concepts(doc) for doc in docs]
 
 
-def entities(docs):
+def entities(docs, strategy='stanford'):
     """
     Named entity recognition on
     a text document or documents.
@@ -115,42 +115,60 @@ def entities(docs):
     running on localhost:8080.
 
     Args:
-        | docs (list)   -- the documents to process.
-        | doc (str)     -- the document to process.
+        | docs (list)       -- the documents to process.
+        | doc (str)         -- the document to process.
+        | strategy (str)    -- the strategy to use, default is stanford.
 
     Returns:
-        | list          -- list of all entity mentions
+        | list              -- list of all entity mentions
     """
-
-    tagger = ner.SocketNER(host='localhost', port=8080)
-
     if type(docs) is str:
         docs = [docs]
 
-    all_names = []
-    for doc in docs:
-        entities = tagger.get_entities(doc)
-        # We're only interested in the entity names,
-        # not their tags.
-        names = [entities[key] for key in entities]
+    entities = []
 
-        # Flatten the list of lists.
-        names = [name for sublist in names for name in sublist]
+    if strategy == 'stanford':
+        tagger = ner.SocketNER(host='localhost', port=8080)
 
-        all_names += names
+        for doc in docs:
+            ents = tagger.get_entities(doc)
+            # We're only interested in the entity names,
+            # not their tags.
+            names = [ents[key] for key in ents]
 
-    # TEMPORARILY REMOVED, THIS PART IS HANDLED EXTERNALLY BY A VECTORIZER.
-    # Calculate (rough, naive) normalized weights for the entities.
-    # Will likely want to find ways to recognize congruent entities which
-    # may not necessarily be consistently mentioned, i.e. "Bill Clinton" and "Clinton" (not yet implemented).
-    #counts = Counter(all_names)
-    #if len(counts):
-        #top_count = counts.most_common(1)[0][1]
-    #results = []
-    #for entity, count in counts.items():
-        #results.append((entity, count/top_count))
-    #return results
-    return all_names
+            # Flatten the list of lists.
+            names = [name for sublist in names for name in sublist]
+
+            entities += names
+
+        # TEMPORARILY REMOVED, THIS PART IS HANDLED EXTERNALLY BY A VECTORIZER.
+        # Calculate (rough, naive) normalized weights for the entities.
+        # Will likely want to find ways to recognize congruent entities which
+        # may not necessarily be consistently mentioned, i.e. "Bill Clinton" and "Clinton" (not yet implemented).
+        #counts = Counter(entities)
+        #if len(counts):
+            #top_count = counts.most_common(1)[0][1]
+        #results = []
+        #for entity, count in counts.items():
+            #results.append((entity, count/top_count))
+        #return results
+        return entities
+
+    elif strategy == 'nltk':
+        from nltk.tag import pos_tag
+        from nltk.chunk import batch_ne_chunk
+        for doc in docs:
+            sentences = sent_tokenize(doc)
+            tokenized_sentences = [word_tokenize(sent) for sent in sentences]
+            tagged = [pos_tag(sent) for sent in tokenized_sentences]
+            chunked = batch_ne_chunk(tagged, binary=True) # binary=False will tag entities as ORGANIZATION, etc.
+
+            for tree in chunked:
+                entities.extend(_extract_entities(tree))
+            return entities
+
+    else:
+        raise Exception('Unknown strategy specified.')
 
 
 def trim(text):
@@ -201,3 +219,14 @@ class Sanitizer(HTMLParser):
         self.fed.append(d)
     def get_data(self):
         return ''.join(self.fed)
+
+
+def _extract_entities(tree):
+    entities = []
+    if hasattr(tree, 'node') and tree.node:
+        if tree.node == 'NE':
+            entities.append(' '.join([child[0] for child in tree]))
+        else:
+            for child in tree:
+                entities.extend(_extract_entities(child))
+    return entities
