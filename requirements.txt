@@ -1,6 +1,7 @@
 Cython==0.19.1
 Flask==0.10.1
 Flask-RESTful==0.2.11
+Flask-OAuthlib==0.4.2
 Flask-SQLAlchemy==1.0
 Jinja2==2.7.1
 MarkupSafe==0.18
