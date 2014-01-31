@@ -47,15 +47,16 @@ def get_facebook_token():
 def get_google_token():
     return session.get('google_oauth')
 
-@app.route('/login/authorized/twitter')
+@app.route('/login/auth/twitter')
 @twitter.authorized_handler
 def twitter_authorized(resp):
     if resp is None:
         return jsonify(status=401, message='Access denied - did you deny the request?')
     else:
         session['twitter_oauth'] = resp
+        me = twitter.get('account/verify_credentials')
 
-@app.route('/login/authorized/facebook')
+@app.route('/login/auth/facebook')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None:
@@ -64,7 +65,7 @@ def facebook_authorized(resp):
         session['facebook_oauth'] = (resp['access_token'], '')
         me = facebook.get('/me')
 
-@app.route('/login/authorized/google')
+@app.route('/login/auth/google')
 @google.authorized_handler
 def google_authorized(resp):
     if resp is None:
