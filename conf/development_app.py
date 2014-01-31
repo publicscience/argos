@@ -2,6 +2,7 @@ from conf.base_security import *
 
 # App config
 SECRET_KEY = 'development'
+DEBUG = True
 SQLALCHEMY_DATABASE_URI = "{DATABASE[default][TYPE]}://{DATABASE[default][HOST]}:{DATABASE[default][PORT]}/{DATABASE[default][NAME]}"
 
 TWITTER = {
@@ -33,6 +34,7 @@ FACEBOOK = {
     'authorize_url':        'https://www.facebook.com/dialog/oauth',
     'request_token_params': {'scope': 'email'}
 }
+
 
 
 # Security Config
