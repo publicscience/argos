@@ -1,4 +1,4 @@
-from database.datastore import db
+from database.datastore import db, Model
 
 from flask.ext.security import Security, UserMixin, RoleMixin
 
@@ -7,7 +7,7 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
-class Role(db.Model, RoleMixin):
+class Role(Model, RoleMixin):
     """
     A user's Role
 
@@ -22,7 +22,7 @@ class Role(db.Model, RoleMixin):
     description     = db.Column(db.String(255))
 
 
-class Auth(db.Model):
+class Auth(Model):
     """
     Represents a third-party authentication.
     """
@@ -50,7 +50,7 @@ class Auth(db.Model):
         return hash(provider + provider_id)
 
 
-class User(db.Model, UserMixin):
+class User(Model, UserMixin):
     """
     A user
 

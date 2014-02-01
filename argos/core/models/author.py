@@ -1,6 +1,6 @@
-from app import db
+from database.datastore import db, Model
 
-class Author(db.Model):
+class Author(Model):
     """
     An author.
     """

@@ -1,6 +1,9 @@
-from app import db
-from brain import vectorize, entities
+from database.datastore import db, Model
+
+from core.brain import vectorize, entities
+
 from scipy.spatial.distance import jaccard
+
 from datetime import datetime
 from itertools import chain
 
@@ -14,7 +17,7 @@ cluster_clusterables = db.Table('cluster_clusterables',
         db.Column('clusterable_id', db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
 )
 
-class Clusterable(db.Model):
+class Clusterable(Model):
     id          = db.Column(db.Integer, primary_key=True)
     type        = db.Column('type', db.String(50))
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
@@ -26,7 +29,6 @@ class Clusterable(db.Model):
 
     def similarity(self):
         raise Exception('Not implemented!')
-
 
 class Cluster(Clusterable):
     """

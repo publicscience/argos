@@ -1,6 +1,6 @@
-from app import db
+from database.datastore import db, Model
 
-class Source(db.Model):
+class Source(Model):
     """
     A feed source.
     """

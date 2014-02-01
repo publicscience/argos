@@ -1,6 +1,6 @@
 from web.app import app
 
-import database.models as models
+import web.models as models
 
 from flask import request
 from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse, marshal
@@ -75,7 +75,6 @@ class Events(Resource):
         return results or not_found()
 api.add_resource(Event, '/events/<int:id>')
 api.add_resource(Events, '/events')
-
 
 class Story(Resource):
     @marshal_with(cluster_fields(members={'url': fields.Url('event')}))

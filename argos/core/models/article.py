@@ -1,8 +1,12 @@
-from app import db
-from models.entity import Entity
-from models.cluster import Clusterable
-from brain import vectorize, entities
+from database.datastore import db, Model
+
+from core.models.entity import Entity
+from core.models.cluster import Clusterable
+
+from core.brain import vectorize, entities
+
 from scipy.spatial.distance import jaccard
+
 from math import isnan
 from slugify import slugify
 
@@ -12,7 +16,6 @@ from slugify import slugify
 import numpy
 numpy.seterr(invalid='ignore')
 
-# Helper table for many-to-many.
 authors = db.Table('authors',
         db.Column('author_id', db.Integer, db.ForeignKey('author.id')),
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))

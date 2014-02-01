@@ -1,7 +1,8 @@
-from app import db
+from database.datastore import db, Model
+
 from slugify import slugify
 
-class Entity(db.Model):
+class Entity(Model):
     """
     An entity,
     which could be a place, person,

@@ -12,8 +12,8 @@ Which is based off of TextTeaser:
 This currently only supports single document summarization.
 """
 
-from brain import tokenize, sentences, stopwords
-from models import Article
+from core.brain import tokenize, sentences, stopwords
+from core.models import Article
 from collections import Counter
 from re import sub
 from math import fabs

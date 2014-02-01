@@ -1,31 +1,31 @@
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import SQLAlchemyUserDatastore, Security
-
 """
-An `init_db` function should be called to 
+The `init_db` function should be called to 
 initialize this value to be used.
 """
 db = None
 
-def init_db_flask(app):
+"""
+The `init_model` function should be called to
+initialize this value to be used.
+"""
+Model = None
+
+def init_db(_db):
     """ 
-    Initialize the database with a 
-    Flask application.
+    Initialize a database 
     """
     global db 
     
-    db = SQLAlchemy(app)
+    db = _db 
 
-    import database.models as models
+    return db
 
-    # Create object for Flask-Security
-    user_db = SQLAlchemyUserDatastore(db, models.User, models.Role)
-    Security(app, user_db)
-
-    db.create_all()
-
-def init_db():
+def init_model(_Model):
     """
-    Initialize a database
+    Initialize the declarative Base
     """
-    pass
+    global Model
+
+    Model = _Model
+
+    return Model
