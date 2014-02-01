@@ -21,11 +21,12 @@ class Role(db.Model, RoleMixin):
     name            = db.Column(db.String(80), unique=True)
     description     = db.Column(db.String(255))
 
+
 class Auth(db.Model):
     """
     Represents a third-party authentication.
     """
-    id              = db.Column(db.Integer(), primary_key=True)
+    id              = db.Column(db.BigInteger(), primary_key=True)
     provider        = db.Column(db.String(255))
     provider_id     = db.Column(db.String(255))
     access_token    = db.Column(db.String(255))
@@ -37,7 +38,17 @@ class Auth(db.Model):
         self.access_token = access_token
 
         # Generate a unique id for this auth based on the provider and the provider id.
-        self.id = hash(provider + provider_id)
+        self.id = Auth.make_id(provider, provider_id)
+
+    @staticmethod
+    def find_by_provider(provider_id, provider):
+        id = Auth.make_id(provider, provider_id)
+        return Auth.query.get(id)
+
+    @staticmethod
+    def make_id(provider_id, provider):
+        return hash(provider + provider_id)
+
 
 class User(db.Model, UserMixin):
     """
@@ -68,9 +79,9 @@ class User(db.Model, UserMixin):
             setattr(self, key, kwargs[key])
 
     @staticmethod
-    def create_or_update(provider_id, provider, access_token=None, **userdata):
+    def create_or_update(provider_id, provider, access_token, **userdata):
         # Try to find existing auth.
-        id = hash(provider + provider_id)
+        id = Auth.make_id(provider, provider_id)
         auth = Auth.query.get(id)
 
         if auth:
