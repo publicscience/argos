@@ -1,4 +1,5 @@
 from web import app
+from database.models import User
 
 from flask import session, request, url_for, jsonify
 from flask_oauthlib.client import OAuth
@@ -48,15 +49,22 @@ def get_facebook_token():
 def get_google_token():
     return session.get('google_oauth')
 
-@app.route('/login/authorized/twitter')
+@app.route('/login/auth/twitter')
 @twitter.authorized_handler
 def twitter_authorized(resp):
     if resp is None:
         return jsonify(status=401, message='Access denied - did you deny the request?')
     else:
         session['twitter_oauth'] = resp
+        me = twitter.get('account/verify_credentials.json')
+        data = {
+                'name': me['name'],
+                'email': None, # twitter doesn't allow access to a user's email.
+                'image': me['profile_image_url_https']
+        }
+        user = User.create_or_update(me['id_str'], 'twitter', resp['access_token'], **data)
 
-@app.route('/login/authorized/facebook')
+@app.route('/login/auth/facebook')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None:
@@ -64,8 +72,14 @@ def facebook_authorized(resp):
     else:
         session['facebook_oauth'] = (resp['access_token'], '')
         me = facebook.get('/me')
+        data = {
+            'name': me['name'],
+            'email': me['email'],
+            'image': 'https://graph.facebook.com/{0}/picture'.format(id),
+        }
+        user = User.create_or_update(me['id'], 'facebook', resp['access_token'], **data)
 
-@app.route('/login/authorized/google')
+@app.route('/login/auth/google')
 @google.authorized_handler
 def google_authorized(resp):
     if resp is None:
@@ -73,3 +87,10 @@ def google_authorized(resp):
     else:
         session['google_oauth'] = (resp['access_token'], '')
         me = google.get('userinfo')
+        data = {
+                'name': me['name'],
+                'email': me['email'],
+                'image': me['picture']
+        }
+        user = User.create_or_update(me['id'], 'google', resp['access_token'], **data)
+

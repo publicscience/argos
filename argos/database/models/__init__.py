@@ -3,4 +3,4 @@ from .author import Author
 from .cluster import Cluster
 from .entity import Entity
 from .source import Source
-from .user import User, Role
+from .user import Role, User, Auth
