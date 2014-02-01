@@ -1,4 +1,5 @@
-from web import app
+from web.app import app
+
 from database import models
 
 from flask import jsonify, request

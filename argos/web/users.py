@@ -1,6 +1,7 @@
+from web import app
+
 from flask import session, request, url_for, jsonify
 from flask_oauthlib.client import OAuth
-from app import app
 
 oauth = OAuth(app)
 
