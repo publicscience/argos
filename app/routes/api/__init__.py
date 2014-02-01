@@ -1,18 +1,20 @@
 from flask import request
-from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse, marshal
-from flask_security.core import current_user
+from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse
 from app import app
 import models
 
 api = Api(app)
 
 # Whitelist of allowed request parameters.
-parser = reqparse.RequestParser()
-parser.add_argument('page', type=int, default=1)
+page_parser = reqparse.RequestParser()
+page_parser.add_argument('page', type=int, default=1)
 
 
 def not_found():
     return abort(404, message='The resource you requested, {0}, was not found.'.format(request.path), status=404)
+
+def unauthorized():
+    return abort(401, message='You are not authorized to access {0}. Have you authenticated?'.format(request.path), status=401)
 
 
 class DateTimeField(fields.Raw):
@@ -68,7 +70,7 @@ class Events(Resource):
     # That slows it down by a lot, and they aren't necessary here.
     @marshal_with(cluster_fields(members=None))
     def get(self):
-        args = parser.parse_args()
+        args = page_parser.parse_args()
         results = models.Cluster.query.filter_by(tag='event').paginate(args['page']).items
         return results or not_found()
 api.add_resource(Event, '/events/<int:id>')
@@ -83,7 +85,7 @@ class Story(Resource):
 class Stories(Resource):
     @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
     def get(self):
-        args = parser.parse_args()
+        args = page_parser.parse_args()
         results = models.Cluster.query.filter_by(tag='story').paginate(args['page']).items
         return results or not_found()
 api.add_resource(Story, '/stories/<int:id>')
@@ -100,35 +102,4 @@ class Entity(Resource):
         return result or not_found()
 api.add_resource(Entity, '/entities/<string:slug>')
 
-
-class CurrentUser(Resource):
-    @marshal_with({
-        'id': fields.Integer,
-        'image': fields.String,
-        'name': fields.String
-    })
-    def get(self):
-        return current_user or not_found()
-    def patch(self):
-        pass
-api.add_resource(CurrentUser, '/user')
-
-class User(Resource):
-    @marshal_with({
-        'id': fields.Integer,
-        'image': fields.String,
-        'name': fields.String
-    })
-    def get(self, id):
-        result = models.User.query.get(id)
-        return result or not_found()
-api.add_resource(User, '/users/<int:id>')
-
-class Users(Resource):
-    def get(self):
-        args = parser.parse_args()
-        results = models.User.query.paginate(args['page']).items
-        return results or not_found()
-api.add_resource(Users, '/users')
-
-
+from . import user

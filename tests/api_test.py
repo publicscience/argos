@@ -1,6 +1,5 @@
 from tests import RequiresApp
 import tests.factories as fac
-from json import loads
 from models import Entity, Article, Cluster
 
 class APITest(RequiresApp):
@@ -9,12 +8,6 @@ class APITest(RequiresApp):
 
     def tearDown(self):
         self.teardown_app()
-
-    def data(self, resp):
-        """
-        Load response data into json.
-        """
-        return loads(resp.data.decode('utf-8'))
 
     def test_404(self):
         r = self.app.get('/does_not_exist')

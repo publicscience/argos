@@ -3,6 +3,7 @@ from unittest.mock import patch
 import time, socket, subprocess, tempfile
 from jobs import workers
 from app import app, db
+from json import loads
 
 
 class RequiresMocks(unittest.TestCase):
@@ -25,12 +26,19 @@ class RequiresApp(RequiresMocks):
     """
     def setup_app(self):
         self.app = app.test_client()
+        self.app_context = app.test_request_context
         self.db = db
         db.create_all()
 
     def teardown_app(self):
         db.session.remove()
         db.drop_all()
+
+    def data(self, resp):
+        """
+        Load response data into json.
+        """
+        return loads(resp.data.decode('utf-8'))
 
 
 class RequiresWorkers(RequiresApp):
