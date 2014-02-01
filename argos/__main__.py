@@ -1,10 +1,13 @@
 from web.app import app
-from web import routes
 
-from database.datastore import init_with_flask
+from database.datastore import init_db_flask
 
 # Initialize the database
-init_with_flask(app)
+init_db_flask(app)
+
+# Import routes (which depend on 
+# the database)
+from web import routes
 
 # Run!
 app.run(debug=True)

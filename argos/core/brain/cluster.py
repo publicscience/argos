@@ -5,10 +5,12 @@ Cluster
 Clusters text documents.
 """
 
-from app import db
-from brain import vectorize, entities
-from models import Cluster
 from datetime import datetime
+
+from database.datastore import db
+
+from core.brain import vectorize, entities
+from core.models import Cluster
 
 # Logging.
 from logger import logger
