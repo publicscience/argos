@@ -29,7 +29,7 @@ GOOGLE = {
 FACEBOOK = {
     'consumer_key':         env.get('ARGOS_FACEBOOK_CONSUMER_KEY'),
     'consumer_secret':      env.get('ARGOS_FACEBOOK_CONSUMER_SECRET'),
-    'base_url':             'https://graph.facebook.com',
+    'base_url':             'https://graph.facebook.com/',
     'request_token_url':    None,
     'access_token_url':     '/oauth/access_token',
     'authorize_url':        'https://www.facebook.com/dialog/oauth',

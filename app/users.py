@@ -54,7 +54,11 @@ def twitter_authorized(resp):
         return jsonify(status=401, message='Access denied - did you deny the request?')
     else:
         session['twitter_oauth'] = resp
-        me = twitter.get('account/verify_credentials')
+        me = twitter.get('account/verify_credentials.json')
+        name = me['name']
+        id = me['id_str']
+        pic = me['profile_image_url_https']
+        email = None # twitter doesn't allow access to a user's email.
 
 @app.route('/login/auth/facebook')
 @facebook.authorized_handler
@@ -64,6 +68,10 @@ def facebook_authorized(resp):
     else:
         session['facebook_oauth'] = (resp['access_token'], '')
         me = facebook.get('/me')
+        name = me['name']
+        id = me['id']
+        pic = 'https://graph.facebook.com/{0}/picture'.format(id)
+        email = me['email']
 
 @app.route('/login/auth/google')
 @google.authorized_handler
@@ -73,3 +81,8 @@ def google_authorized(resp):
     else:
         session['google_oauth'] = (resp['access_token'], '')
         me = google.get('userinfo')
+        name = me['name']
+        id = me['id']
+        pic = me['picture']
+        email = me['email']
+
