@@ -1,7 +1,8 @@
+from web import app
+from database import models
+
 from flask import jsonify, request
 from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse, marshal
-from app import app
-import models
 
 api = Api(app)
 

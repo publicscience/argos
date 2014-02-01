@@ -32,7 +32,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    for token in ['twitter', 'faebook', 'google']:
+    for token in ['twitter', 'facebook', 'google']:
         session.pop('{0}_oauth'.format(token), None)
 
 @twitter.tokengetter
