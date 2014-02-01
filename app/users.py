@@ -1,6 +1,7 @@
 from flask import session, request, url_for, jsonify
 from flask_oauthlib.client import OAuth
 from app import app
+from models import User
 
 oauth = OAuth(app)
 
@@ -55,10 +56,14 @@ def twitter_authorized(resp):
     else:
         session['twitter_oauth'] = resp
         me = twitter.get('account/verify_credentials.json')
-        name = me['name']
-        id = me['id_str']
-        pic = me['profile_image_url_https']
-        email = None # twitter doesn't allow access to a user's email.
+        data = {
+                'provider': 'twitter',
+                'id': me['id_str'],
+                'name': me['name'],
+                'email': None, # twitter doesn't allow access to a user's email.
+                'image': me['profile_image_url_https']
+        }
+        user = User.create_or_update(me['id_str'], 'twitter', resp['access_token'], **data)
 
 @app.route('/login/auth/facebook')
 @facebook.authorized_handler
@@ -68,10 +73,14 @@ def facebook_authorized(resp):
     else:
         session['facebook_oauth'] = (resp['access_token'], '')
         me = facebook.get('/me')
-        name = me['name']
-        id = me['id']
-        pic = 'https://graph.facebook.com/{0}/picture'.format(id)
-        email = me['email']
+        data = {
+            'provider': 'facebook',
+            'id': me['id'],
+            'name': me['name'],
+            'email': me['email'],
+            'image': 'https://graph.facebook.com/{0}/picture'.format(id),
+        }
+        user = User.create_or_update(me['id'], 'facebook', resp['access_token'], **data)
 
 @app.route('/login/auth/google')
 @google.authorized_handler
@@ -81,8 +90,12 @@ def google_authorized(resp):
     else:
         session['google_oauth'] = (resp['access_token'], '')
         me = google.get('userinfo')
-        name = me['name']
-        id = me['id']
-        pic = me['picture']
-        email = me['email']
+        data = {
+                'provider': 'google',
+                'id': me['id'],
+                'name': me['name'],
+                'email': me['email'],
+                'image': me['picture']
+        }
+        user = User.create_or_update(me['id'], 'google', resp['access_token'], **data)
 
