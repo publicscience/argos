@@ -57,8 +57,6 @@ def twitter_authorized(resp):
         session['twitter_oauth'] = resp
         me = twitter.get('account/verify_credentials.json')
         data = {
-                'provider': 'twitter',
-                'id': me['id_str'],
                 'name': me['name'],
                 'email': None, # twitter doesn't allow access to a user's email.
                 'image': me['profile_image_url_https']
@@ -74,8 +72,6 @@ def facebook_authorized(resp):
         session['facebook_oauth'] = (resp['access_token'], '')
         me = facebook.get('/me')
         data = {
-            'provider': 'facebook',
-            'id': me['id'],
             'name': me['name'],
             'email': me['email'],
             'image': 'https://graph.facebook.com/{0}/picture'.format(id),
@@ -91,8 +87,6 @@ def google_authorized(resp):
         session['google_oauth'] = (resp['access_token'], '')
         me = google.get('userinfo')
         data = {
-                'provider': 'google',
-                'id': me['id'],
                 'name': me['name'],
                 'email': me['email'],
                 'image': me['picture']
