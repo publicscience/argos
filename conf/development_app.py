@@ -23,7 +23,8 @@ GOOGLE = {
     'access_token_url':     'https://accounts.google.com/o/oauth2/token',
     'authorize_url':        'https://accounts.google.com/o/oauth2/auth',
     'request_token_params': {
-        'scope': 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
+        'scope': 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+        'access_type': 'offline'    # to get a refresh token
     }
 }
 FACEBOOK = {
