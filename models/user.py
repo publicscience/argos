@@ -31,7 +31,7 @@ class Auth(db.Model):
     access_token    = db.Column(db.String(255))
     user_id         = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(provider_id, provider, access_token):
+    def __init__(self, provider_id, provider, access_token):
         self.provider_id = provider_id
         self.provider = provider
         self.access_token = access_token
@@ -67,7 +67,7 @@ class User(db.Model, UserMixin):
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
-    @classmethod
+    @staticmethod
     def create_or_update(provider_id, provider, access_token=None, **userdata):
         # Try to find existing auth.
         id = hash(provider + provider_id)

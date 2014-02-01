@@ -17,7 +17,7 @@ Example::
 import feedparser
 import time
 from dateutil.parser import parse
-from models import Article
+from models import Article, Author
 from urllib import request, error
 from http.client import IncompleteRead
 from http.cookiejar import CookieJar
@@ -87,7 +87,7 @@ def articles(source):
             source=source,
             html=html,
             text=entry['fulltext'],
-            authors=[entry.get('author', None)], # NEED BETTER HANDLING OF THIS
+            authors=extract_authors(entry),
             tags=extract_tags(entry),
             title=entry['title'],
             created_at=parse(entry.get('published', '')),
@@ -96,13 +96,13 @@ def articles(source):
 
     return articles
 
-def extract_tags(article):
+def extract_tags(entry):
     """
-    Extract tags from a feed's article,
+    Extract tags from a feed's entry,
     returning it in a simpler format (a list of strings).
 
     Args:
-        | article (Article)   -- the article
+        | entry (dict)   -- the entry
 
     This operates assuming the tags are formatted like so::
 
@@ -117,17 +117,81 @@ def extract_tags(article):
 
     But there is a fallback if these tags are not supplied.
     Named Entity Recognition is used as a rough approximation of tags.
+    (not currently enabled)
     """
     # If tags are supplied, use them.
-    if 'tags' in article:
-        return [tag['term'] for tag in article['tags']]
+    if 'tags' in entry:
+        return [tag['term'] for tag in entry['tags']]
 
     # DISABLING FOR NOW. Easier to run through all entries and add
     # these entities later.
     # Otherwise, try to extract some.
     #else:
-        #sample = article['fulltext']
+        #sample = entry['fulltext']
         #return entities(sample)
+
+def extract_authors(entry):
+    """
+    Extracts authors from an entry,
+    creating those that don't exist.
+
+    Args:
+        | entry (dict)   -- the entry
+
+    There isn't a consistent way authors are specified
+    in feed entries::
+
+        # Seems to be the most common
+        "author_detail": {
+            "name": "John Heimer"
+        }
+
+        # Seems to always come with author_detail, i.e. redundant
+        "author": "John Heimer"
+
+        # Have only seen this empty...so ignoring it for now.
+        "authors": [
+            {}
+        ]
+
+        # Sometimes the name is in all caps:
+        "author_detail": {
+            "name": "JOHN HEIMER"
+        }
+
+        # Sometimes authors are combined into a single string,
+        # with extra words.
+        "author_detail" :{
+            "name": "By BEN HUBBARD and HWAIDA SAAD"
+        }
+
+    In fact, some feeds use multiple forms!
+    """
+    names = entry.get('author_detail', {}).get('name') or entry.get('author')
+
+    authors = []
+
+    if names is not None:
+        # Parse out the author names.
+        names = names.lower()
+
+        # Remove 'by' if its present.
+        if names[0:3] == "by ":
+            names = names[3:]
+
+        # Split on commas and 'and'.
+        names = names.split(',')
+        if ' and ' in names[-1]:
+            names += names.pop().split(' and ')
+
+        # Remove emptry strings.
+        names = list(filter(None, names))
+
+        for name in names:
+            name = name.strip().title()
+            author = Author.find_or_create(name=name)
+            authors.append(author)
+    return authors
 
 def find_feed(url):
     """

@@ -1,5 +1,5 @@
 from tests import RequiresMocks, RequiresApp
-from models import Source, Article
+from models import Source, Article, Author
 from datetime import datetime
 import membrane.feed as feed
 import membrane.feedfinder as feedfinder
@@ -85,6 +85,62 @@ class FeedTest(RequiresApp):
 
         tags = feed.extract_tags(article)
         self.assertEqual(tags, ['Military', 'National Security'])
+
+    def test_extract_single_authors(self):
+        articles = [{
+                'author': 'John Heimer'
+            },{
+                'author_detail': {
+                    'name': 'John Heimer'
+                }
+            }, {
+                'author_detail': {
+                    'name': 'By John Heimer'
+                }
+            }, {
+                'author_detail': {
+                    'name': 'BY JOHN HEIMER'
+                }
+            }
+        ]
+        for article in articles:
+            authors = feed.extract_authors(article)
+            self.assertEqual(authors[0].name, 'John Heimer')
+            self.assertEqual(Author.query.count(), 1)
+
+    def test_extract_multiple_authors_and(self):
+        article = {
+            'author_detail': {
+                'name': 'BY JOHN HEIMER and BEN HUBBARD'
+            }
+        }
+        authors = feed.extract_authors(article)
+        author_names = [author.name for author in authors]
+        self.assertEqual(author_names, ['John Heimer', 'Ben Hubbard'])
+        self.assertEqual(Author.query.count(), 2)
+
+    def test_extract_multiple_authors_comma(self):
+        article = {
+            'author_detail': {
+                'name': 'BY JOHN HEIMER, HWAIDA SAAD, and BEN HUBBARD'
+            }
+        }
+        authors = feed.extract_authors(article)
+        author_names = [author.name for author in authors]
+        self.assertEqual(author_names, ['John Heimer', 'Hwaida Saad', 'Ben Hubbard'])
+        self.assertEqual(Author.query.count(), 3)
+
+    def test_extract_multiple_authors_no_oxford_comma(self):
+        article = {
+            'author_detail': {
+                'name': 'BY JOHN HEIMER, HWAIDA SAAD and BEN HUBBARD'
+            }
+        }
+        authors = feed.extract_authors(article)
+        author_names = [author.name for author in authors]
+        self.assertEqual(author_names, ['John Heimer', 'Hwaida Saad', 'Ben Hubbard'])
+        self.assertEqual(Author.query.count(), 3)
+
 
     def test_articles(self):
         self.create_patch('membrane.feed.fetch_full_text', return_value='''
