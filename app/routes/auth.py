@@ -1,8 +1,8 @@
-from web import app
-from database.models import User
-
-from flask import session, request, url_for, jsonify
+from flask import session, request, url_for, jsonify, g
 from flask_oauthlib.client import OAuth
+from flask_security.utils import logout_user
+from app import app
+from models import User
 
 oauth = OAuth(app)
 
@@ -10,7 +10,7 @@ twitter = oauth.remote_app('twitter', app_key='TWITTER')
 facebook = oauth.remote_app('facebook', app_key='FACEBOOK')
 google = oauth.remote_app('google', app_key='GOOGLE')
 
-@app.before_request()
+@app.before_request
 def before_request():
     # Get the current user before each request.
     g.user = None
@@ -36,6 +36,7 @@ def login():
 def logout():
     for token in ['twitter', 'facebook', 'google']:
         session.pop('{0}_oauth'.format(token), None)
+    logout_user()
 
 @twitter.tokengetter
 def get_twitter_token():
@@ -63,6 +64,7 @@ def twitter_authorized(resp):
                 'image': me['profile_image_url_https']
         }
         user = User.create_or_update(me['id_str'], 'twitter', resp['access_token'], **data)
+        # IMPLEMENT RESTFUL USER ACCESS
 
 @app.route('/login/auth/facebook')
 @facebook.authorized_handler
@@ -93,4 +95,5 @@ def google_authorized(resp):
                 'image': me['picture']
         }
         user = User.create_or_update(me['id'], 'google', resp['access_token'], **data)
+
 
