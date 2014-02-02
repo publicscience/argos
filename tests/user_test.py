@@ -59,7 +59,7 @@ class UserAPITest(RequiresApp):
         r = self.client.patch('/user', data={'something':'foo'})
         self.assertEqual(r.status_code, 401)
 
-    def test_path_current_user_authenticated(self):
+    def test_patch_current_user_authenticated(self):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
