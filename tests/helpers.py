@@ -1,4 +1,4 @@
-from app import app
+from app import app, db
 from models import User
 from flask_security.utils import login_user
 from flask import jsonify, request
@@ -15,3 +15,13 @@ def test_login():
     login_user(user)
     return jsonify(success=True)
 
+def save(objs):
+    """
+    Saves a set of objects to the database.
+    """
+    if type(objs) is list:
+        for obj in objs:
+            db.session.add(obj)
+    else:
+        db.session.add(objs)
+    db.session.commit()

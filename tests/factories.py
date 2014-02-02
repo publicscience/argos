@@ -1,5 +1,6 @@
 from models import Entity, Article, Cluster, Source
 from app import db
+from tests.helpers import save
 
 def entity(num=1):
     args = [
@@ -88,15 +89,3 @@ def cluster(num=1, num_members=2, tag='default', member_factory=article):
     if len(c_s) is 1:
         return c_s[0]
     return c_s
-
-
-def save(objs):
-    """
-    Saves a set of objects to the database.
-    """
-    if type(objs) is list:
-        for obj in objs:
-            db.session.add(obj)
-    else:
-        db.session.add(objs)
-    db.session.commit()
