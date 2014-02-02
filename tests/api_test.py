@@ -1,12 +1,14 @@
-from tests import RequiresApp
 import tests.factories as fac
-from models import Entity, Article, Cluster
+
+from tests import RequiresApp
+
+from argos.core.models import Entity, Article, Cluster
 
 class APITest(RequiresApp):
     def test_404(self):
         r = self.client.get('/does_not_exist')
         self.assertTrue(r.data)
-        self.assertEquals(r.status_code, 404)
+        self.assertEqual(r.status_code, 404)
 
     def test_GET_entity(self):
         entity = fac.entity()

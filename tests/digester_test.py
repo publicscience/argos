@@ -1,7 +1,8 @@
 import unittest
 from tests import RequiresApp
-from digester import Digester
-from digester.wikidigester import WikiDigester
+
+from argos.core.digester import Digester
+from argos.core.digester.wikidigester import WikiDigester
 
 class DigesterTest(unittest.TestCase):
     def setUp(self):

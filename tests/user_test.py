@@ -1,5 +1,6 @@
 from tests import RequiresApp
-from models import User, Auth
+
+from argos.web.models import User, Auth
 
 class UserTest(RequiresApp):
     def setUp(self):

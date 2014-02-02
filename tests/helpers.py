@@ -1,5 +1,6 @@
-from app import app, db
-from models import User
+from argos.web.models import User
+from argos.datastore import db
+from argos.web.app import app
 from flask_security.utils import login_user
 from flask import jsonify, request
 

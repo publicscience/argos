@@ -1,10 +1,12 @@
 from tests import RequiresMocks, RequiresApp
-from models import Source, Article, Author
 from unittest.mock import MagicMock
 from datetime import datetime
-import membrane.feed as feed
-import membrane.feedfinder as feedfinder
-import membrane.collector as collector
+
+import argos.core.membrane.feed as feed
+import argos.core.membrane.feedfinder as feedfinder
+import argos.core.membrane.collector as collector
+
+from argos.core.models import Source, Article, Author
 
 # Some testing data.
 mock_page = """
@@ -161,31 +163,31 @@ class FeedTest(RequiresApp):
     def test_articles(self):
         extracted_data = MagicMock()
         extracted_data.cleaned_text = full_text
-        self.create_patch('membrane.feed.extract_entry_data', return_value=(extracted_data, full_text))
+        self.create_patch('argos.core.membrane.feed.extract_entry_data', return_value=(extracted_data, full_text))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 1)
 
     def test_articles_skips_short_articles(self):
         extracted_data = MagicMock()
         extracted_data.cleaned_text = 'short full text'
-        self.create_patch('membrane.feed.extract_entry_data', return_value=(extracted_data, 'short full text'))
+        self.create_patch('argos.core.membrane.feed.extract_entry_data', return_value=(extracted_data, 'short full text'))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_404_articles(self):
         from urllib import error
-        self.create_patch('membrane.feed.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        self.create_patch('argos.core.membrane.feed.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_unreachable_articles(self):
         from urllib import error
-        self.create_patch('membrane.feed.extract_entry_data', side_effect=error.URLError('unreachable'))
+        self.create_patch('argos.core.membrane.feed.extract_entry_data', side_effect=error.URLError('unreachable'))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_extract_entry_data(self):
-        self.create_patch('membrane.feed._get_html', return_value=html_doc)
+        self.create_patch('argos.core.membrane.feed._get_html', return_value=html_doc)
         data, html = feed.extract_entry_data('http://foo.com')
         expected = {
                 'title': 'Why Israel Fears the Boycott',
@@ -200,7 +202,7 @@ class FeedTest(RequiresApp):
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
-        self.mock_get = self.create_patch('membrane.feedfinder._get')
+        self.mock_get = self.create_patch('argos.core.membrane.feedfinder._get')
 
     def tearDown(self):
         pass
@@ -244,10 +246,10 @@ class CollectorTest(RequiresApp):
         self.db.session.commit()
 
         # Mock articles.
-        self.mock_articles = self.create_patch('membrane.feed.articles')
+        self.mock_articles = self.create_patch('argos.core.membrane.feed.articles')
 
         # Mock finding feeds.
-        self.mock_find_feed = self.create_patch('membrane.feed.find_feed')
+        self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
 
     def test_collect(self):
         self.mock_articles.return_value = [
