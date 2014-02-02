@@ -23,11 +23,13 @@ from http.client import IncompleteRead
 from http.cookiejar import CookieJar
 from . import feedfinder
 from brain import trim, sanitize, entities
-from readability.readability import Document
+from goose import Goose
+from readability import Document
 
 # For feedparser exceptions.
 from xml.sax._exceptions import SAXException
 
+g = Goose()
 
 def articles(source):
     """
@@ -69,8 +71,8 @@ def articles(source):
 
         # Complete HTML content for this entry.
         try:
-            html = fetch_full_text(url)
-            entry['fulltext'] = trim(sanitize(html))
+            entry_data, html = extract_entry_data(url)
+            full_text = entry_data.cleaned_text
         except (error.HTTPError, error.URLError) as e:
             if type(e) == error.URLError or e.code == 404:
                 continue
@@ -79,30 +81,43 @@ def articles(source):
 
 
         # Skip over entries that are too short.
-        if len(entry['fulltext']) < 400:
+        if len(full_text) < 400:
             continue
+
+        url = entry_data.canonical_link or url
+        published = parse(entry.get('published')) or entry_data.publish_date
+        updated = parse(entry.get('updated')) or published
+        title = entry.get('title', entry_data.title)
+
+        # TO DO
+        # These images should be downloaded and saved.
+        image_url = ''
+        if entry_data.top_image:
+            image_url = entry_data.top_image.src
 
         articles.append(Article(
             url=url,
             source=source,
             html=html,
-            text=entry['fulltext'],
+            text=full_text,
             authors=extract_authors(entry),
-            tags=extract_tags(entry),
-            title=entry['title'],
-            created_at=parse(entry.get('published', '')),
-            updated_at=parse(entry.get('updated', entry.get('published', '')))
+            tags=extract_tags(entry, known_tags=entry_data.tags),
+            title=title,
+            created_at=published,
+            updated_at=updated,
+            image=image_url
        ))
 
     return articles
 
-def extract_tags(entry):
+def extract_tags(entry, known_tags=None):
     """
     Extract tags from a feed's entry,
     returning it in a simpler format (a list of strings).
 
     Args:
-        | entry (dict)   -- the entry
+        | entry (dict)        -- the entry
+        | known_tags (set)    -- known tags
 
     This operates assuming the tags are formatted like so::
 
@@ -119,9 +134,18 @@ def extract_tags(entry):
     Named Entity Recognition is used as a rough approximation of tags.
     (not currently enabled)
     """
+    tags = []
+
+    # Use known tags if available.
+    if known_tags is not None:
+        tags += list(known_tags)
+
     # If tags are supplied, use them.
     if 'tags' in entry:
-        return [tag['term'] for tag in entry['tags']]
+        tags += [tag['term'] for tag in entry['tags']]
+
+    return list(set(tags))
+
 
     # DISABLING FOR NOW. Easier to run through all entries and add
     # these entities later.
@@ -129,6 +153,13 @@ def extract_tags(entry):
     #else:
         #sample = entry['fulltext']
         #return entities(sample)
+
+def extract_image(entry):
+    """
+    Extracts a representative image
+    for the entry.
+    """
+    pass
 
 def extract_authors(entry):
     """
@@ -221,7 +252,7 @@ def find_feeds(url):
     return feedfinder.feeds(url)
 
 
-def fetch_full_text(url):
+def extract_entry_data(url):
     """
     Fetch the full content for a feed entry url.
 
@@ -232,6 +263,14 @@ def fetch_full_text(url):
         | str -- the full text, including html.
     """
 
+    html = _get_html(url)
+
+    # Use Goose to extract data from the raw html,
+    # Use readability to give us the html of the main document.
+    return g.extract(raw_html=html), Document(html).summary()
+
+
+def _get_html(url):
     # Some sites, such as NYTimes, track which
     # articles have been viewed with cookies.
     # Without cookies, you get thrown into an infinite loop.
@@ -242,8 +281,8 @@ def fetch_full_text(url):
     # This can help get around 403 (forbidden) errors.
     req = request.Request(url, headers={'User-Agent': 'Chrome'})
 
+    # Get the raw html.
     try:
         html = opener.open(req).read()
     except IncompleteRead as e:
         html = e.partial
-    return Document(html).summary()

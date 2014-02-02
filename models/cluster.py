@@ -22,10 +22,10 @@ class Clusterable(db.Model):
     __mapper_args__ = {'polymorphic_on': 'type'}
 
     def vectorize(self):
-        raise Exception('Not implemented!')
+        raise NotImplementedError
 
     def similarity(self):
-        raise Exception('Not implemented!')
+        raise NotImplementedError
 
 
 class Cluster(Clusterable):
@@ -42,6 +42,7 @@ class Cluster(Clusterable):
     active      = db.Column(db.Boolean, default=True)
     title       = db.Column(db.Unicode)
     summary     = db.Column(db.UnicodeText)
+    image       = db.Column(db.String())
     tag         = db.Column(db.String(50))
     entities    = db.relationship('Entity',
                     secondary=cluster_entities,
@@ -86,6 +87,7 @@ class Cluster(Clusterable):
             if avg_sim >= max_member[1]:
                 max_member = (member, avg_sim)
         self.title = max_member[0].title
+        self.image = max_member[0].image
 
     def entitize(self):
         """

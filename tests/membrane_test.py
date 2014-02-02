@@ -1,5 +1,6 @@
 from tests import RequiresMocks, RequiresApp
 from models import Source, Article, Author
+from unittest.mock import MagicMock
 from datetime import datetime
 import membrane.feed as feed
 import membrane.feedfinder as feedfinder
@@ -46,10 +47,29 @@ mock_feed = """
     </rss>
 """
 
+full_text = """
+            We have an infinite amount to learn both from nature and from each other
+            The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+            Curious that we spend more time congratulating people who have succeeded than encouraging people who have not.
+            There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.
+            We want to explore. We’re curious people. Look back over history, people have put their lives at stake to go out and explore … We believe in what we’re doing. Now it’s time to go.
+            Here men from the planet Earth first set foot upon the Moon. July 1969 AD. We came in peace for all mankind.
+            There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.
+            Where ignorance lurks, so too do the frontiers of discovery and imagination.
+            Problems look mighty small from 150 miles up.
+            I don't know what you could say about a day in which you have seen four beautiful sunsets.
+            As we got further and further away, it [the Earth] diminished in size. Finally it shrank to the size of a marble, the most beautiful you can imagine. That beautiful, warm, living object looked so fragile, so delicate, that if you touched it with a finger it would crumble and fall apart. Seeing this has to change a man.
+            Spaceflights cannot be stopped. This is not the work of any one man or even a group of men. It is a historical process which mankind is carrying out in accordance with the natural laws of human development.
+            Space, the final frontier. These are the voyages of the Starship Enterprise. Its five-year mission: to explore strange new worlds, to seek out new life and new civilizations, to boldly go where no man has gone before.
+            NASA is not about the ‘Adventure of Human Space Exploration’…We won’t be doing it just to get out there in space – we’ll be doing it because the things we learn out there will be making life better for a lot of people who won’t be able to go.
+            I don't know what you could say about a day in which you have seen four beautiful sunsets.
+"""
+
+html_doc = open('tests/data/article.html', 'r').read()
+
 
 class FeedTest(RequiresApp):
     def setUp(self):
-        from unittest.mock import MagicMock
         article = {
                 'links': [{'href': 'some url'}],
                 'title': 'some title',
@@ -79,8 +99,8 @@ class FeedTest(RequiresApp):
             ]
         }
 
-        tags = feed.extract_tags(article)
-        self.assertEqual(tags, ['Military', 'National Security'])
+        tags = feed.extract_tags(article, known_tags=set(['Helicopters']))
+        self.assertEqual(set(tags), set(['Military', 'National Security', 'Helicopters']))
 
     def test_extract_single_authors(self):
         articles = [{
@@ -139,42 +159,44 @@ class FeedTest(RequiresApp):
 
 
     def test_articles(self):
-        self.create_patch('membrane.feed.fetch_full_text', return_value='''
-            We have an infinite amount to learn both from nature and from each other
-            The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
-            Curious that we spend more time congratulating people who have succeeded than encouraging people who have not.
-            There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.
-            We want to explore. We’re curious people. Look back over history, people have put their lives at stake to go out and explore … We believe in what we’re doing. Now it’s time to go.
-            Here men from the planet Earth first set foot upon the Moon. July 1969 AD. We came in peace for all mankind.
-            There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.
-            Where ignorance lurks, so too do the frontiers of discovery and imagination.
-            Problems look mighty small from 150 miles up.
-            I don't know what you could say about a day in which you have seen four beautiful sunsets.
-            As we got further and further away, it [the Earth] diminished in size. Finally it shrank to the size of a marble, the most beautiful you can imagine. That beautiful, warm, living object looked so fragile, so delicate, that if you touched it with a finger it would crumble and fall apart. Seeing this has to change a man.
-            Spaceflights cannot be stopped. This is not the work of any one man or even a group of men. It is a historical process which mankind is carrying out in accordance with the natural laws of human development.
-            Space, the final frontier. These are the voyages of the Starship Enterprise. Its five-year mission: to explore strange new worlds, to seek out new life and new civilizations, to boldly go where no man has gone before.
-            NASA is not about the ‘Adventure of Human Space Exploration’…We won’t be doing it just to get out there in space – we’ll be doing it because the things we learn out there will be making life better for a lot of people who won’t be able to go.
-            I don't know what you could say about a day in which you have seen four beautiful sunsets.
-        ''')
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = full_text
+        self.create_patch('membrane.feed.extract_entry_data', return_value=(extracted_data, full_text))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 1)
 
     def test_articles_skips_short_articles(self):
-        self.create_patch('membrane.feed.fetch_full_text', return_value='some full text')
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = 'short full text'
+        self.create_patch('membrane.feed.extract_entry_data', return_value=(extracted_data, 'short full text'))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_404_articles(self):
         from urllib import error
-        self.create_patch('membrane.feed.fetch_full_text', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        self.create_patch('membrane.feed.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_unreachable_articles(self):
         from urllib import error
-        self.create_patch('membrane.feed.fetch_full_text', side_effect=error.URLError('unreachable'))
+        self.create_patch('membrane.feed.extract_entry_data', side_effect=error.URLError('unreachable'))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
+
+    def test_extract_entry_data(self):
+        self.create_patch('membrane.feed._get_html', return_value=html_doc)
+        data, html = feed.extract_entry_data('http://foo.com')
+        expected = {
+                'title': 'Why Israel Fears the Boycott',
+                'image': 'http://static01.nyt.com/images/2014/02/01/opinion/sunday/01goodman/01goodman-videoSixteenByNine1050.jpg'
+        }
+        results = {
+                'title': data.title,
+                'image': data.top_image.src
+        }
+        self.assertEqual(expected, results)
+
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
