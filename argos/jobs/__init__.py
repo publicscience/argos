@@ -6,15 +6,16 @@ Provides access to
 distributed task processing.
 """
 
-from celery import Celery
 from conf import CELERY
+from util.logger import logger
+
+from celery import Celery
 
 # For sending mail.
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from logger import logger
 logger = logger(__name__)
 
 celery = Celery()

@@ -1,3 +1,5 @@
+from os import environ
+
 from conf import APP
 
 from flask import Flask

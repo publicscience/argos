@@ -1,5 +1,6 @@
 import unittest
-import brain
+
+import core.brain as brain
 
 class BrainTest(unittest.TestCase):
     def setUp(self):

@@ -1,12 +1,12 @@
 import os
 import cProfile, pstats
-from app import db
-from brain import cluster
-from models import Cluster, Article
+from database.datastore import db
+from core.brain import cluster
+from core.models import Cluster, Article
 from manage import progress
 
 # Logging.
-from logger import logger
+from util.logger import logger
 logger = logger(__name__)
 
 

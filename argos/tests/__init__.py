@@ -1,9 +1,23 @@
 import unittest
 from unittest.mock import patch
+
 import time, socket, subprocess, tempfile
+
 from jobs import workers
-from app import app, db
 from json import loads
+
+from database.datastore import init_db, init_model 
+from web.app import app
+
+from flask.ext.sqlalchemy import SQLAlchemy
+
+# Initalize the database
+db = SQLAlchemy(app)
+
+init_db(db)
+init_model(db.Model)
+
+import web.routes
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):
@@ -46,6 +60,7 @@ class RequiresApp(RequiresMocks):
         self._ctx.push()
 
         self.db = db
+
         self.db.create_all()
 
     def _post_teardown(self):

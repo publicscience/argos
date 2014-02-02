@@ -6,7 +6,7 @@ collected articles by keywords.
 import json
 from os import path
 from manage import load_articles, progress
-from brain import tokenize
+from core.brain import tokenize
 
 def generate(keywords, num=5000):
     this_dir = path.dirname(__file__)

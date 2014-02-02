@@ -1,9 +1,12 @@
 from tests import RequiresMocks, RequiresApp
-from models import Source, Article, Author
+
 from datetime import datetime
-import membrane.feed as feed
-import membrane.feedfinder as feedfinder
-import membrane.collector as collector
+
+import core.membrane.feed as feed
+import core.membrane.feedfinder as feedfinder
+import core.membrane.collector as collector
+
+from core.models import Source, Article, Author
 
 # Some testing data.
 mock_page = """

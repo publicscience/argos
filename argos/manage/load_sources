@@ -4,9 +4,7 @@ echo -e "\n\n\n"
 echo -e "$(tput setaf 3)Loading default sources to the database. This may take awhile...$(tput sgr0)"
 echo -e "\n\n\n"
 
-cd argos
-
-python -c 'from web.app import app
+dev-env/bin/python -c 'from web.app import app
 from database.datastore import init_db, init_model
 from flask.ext.sqlalchemy import SQLAlchemy
 

@@ -75,6 +75,7 @@ def add_sources(urls):
     for url in urls:
         feed_url = feed.find_feed(url)
         source = Source(feed_url)
+        print(source)
         db.session.add(source)
     db.session.commit()
 
@@ -116,7 +117,7 @@ def collect_sources(url):
     add_sources([f for f in feeds])
 
 
-def load_sources_from_file(filepath='../manage/sources.txt'):
+def load_sources_from_file(filepath='manage/sources.txt'):
     """
     Load feeds from a text file.
     Each line should be the url to the source

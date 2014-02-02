@@ -5,11 +5,14 @@ Seed
 Create some seed data.
 """
 
-from app import db
+from database.datastore import db
+from core.models import Entity, Article, Cluster, Source
+from core.brain.cluster import cluster
+
 from manage import progress
-from models import Entity, Article, Cluster, Source
-from brain.cluster import cluster
+
 import os, json
+
 from datetime import datetime
 from dateutil.parser import parse
 

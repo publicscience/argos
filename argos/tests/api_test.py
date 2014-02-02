@@ -1,6 +1,7 @@
 from tests import RequiresApp
 import tests.factories as fac
-from models import Entity, Article, Cluster
+
+from core.models import Entity, Article, Cluster
 
 class APITest(RequiresApp):
     def test_404(self):

@@ -1,4 +1,4 @@
-http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml
+ http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml
 http://www.nytimes.com/services/xml/rss/nyt/InternationalHome.xml
 http://www.nytimes.com/services/xml/rss/nyt/World.xml
 http://www.nytimes.com/services/xml/rss/nyt/Africa.xml

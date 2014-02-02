@@ -1,5 +1,6 @@
-from models import Entity, Article, Cluster, Source
-from app import db
+from core.models import Entity, Article, Cluster, Source
+
+from database.datastore import db
 
 def entity(num=1):
     args = [
@@ -98,5 +99,6 @@ def save(objs):
         for obj in objs:
             db.session.add(obj)
     else:
+        print("Here")
         db.session.add(objs)
     db.session.commit()
