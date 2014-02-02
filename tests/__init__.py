@@ -4,6 +4,7 @@ import time, socket, subprocess, tempfile
 from jobs import workers
 from app import app, db
 from json import loads
+from tests import helpers
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):

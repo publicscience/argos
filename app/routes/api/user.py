@@ -3,21 +3,28 @@ from flask_security.core import current_user
 from flask.ext.restful import Resource, marshal_with, fields, reqparse
 from flask import request
 import models
+from app import db
 
 parser = reqparse.RequestParser()
 parser.add_argument('something', type=str)
 
+permitted_user_fields = {
+    'id': fields.Integer,
+    'image': fields.String,
+    'name': fields.String,
+    'updated_at': DateTimeField,
+    'created_at': DateTimeField
+}
+
 class CurrentUser(Resource):
-    @marshal_with({
-        'id': fields.Integer,
-        'image': fields.String,
-        'name': fields.String
-    })
+    @marshal_with(permitted_user_fields)
     def get(self):
         if current_user.is_authenticated():
             return current_user
         else:
             return unauthorized()
+
+    @marshal_with(permitted_user_fields)
     def patch(self):
         if current_user.is_authenticated():
             for key, val in parser.parse_args().items():
@@ -29,13 +36,7 @@ class CurrentUser(Resource):
 api.add_resource(CurrentUser, '/user')
 
 class User(Resource):
-    @marshal_with({
-        'id': fields.Integer,
-        'image': fields.String,
-        'name': fields.String,
-        'updated_at': DateTimeField,
-        'created_at': DateTimeField
-    })
+    @marshal_with(permitted_user_fields)
     def get(self, id):
         result = models.User.query.get(id)
         return result or not_found()

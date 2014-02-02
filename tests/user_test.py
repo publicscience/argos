@@ -51,7 +51,7 @@ class UserAPITest(RequiresApp):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
-        # login user?
+        r = self.client.post('/test_login', data={'id': 1})
         r = self.client.get('/user')
         self.assertEqual(r.status_code, 200)
 
@@ -63,8 +63,7 @@ class UserAPITest(RequiresApp):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
-        # login user?
-        # this should be an actual attribute on the user
+        r = self.client.post('/test_login', data={'id': 1})
         r = self.client.patch('/user', data={'something':'foo'})
         self.assertEqual(r.status_code, 200)
 
