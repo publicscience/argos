@@ -45,7 +45,7 @@ git+git://github.com/bsidhom/python3-chardet.git
 bzr+https://code.launchpad.net/~dateutil/dateutil/trunk
 
 # Install Python 3 versions.
-git+git://github.com/nltk/nltk.git@f160a92df2708240c9b922da3500d9be9f2e4ad6
+git+git://github.com/nltk/nltk.git
 git+git://github.com/ftzeng/python-readability.git
 
 #git+git://github.com/boto/boto.git@py3kport

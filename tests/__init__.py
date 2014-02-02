@@ -5,6 +5,7 @@ import time, socket, subprocess, tempfile
 
 from jobs import workers
 from json import loads
+from tests import helpers
 
 from argos.web.app import app
 from argos.datastore import db
