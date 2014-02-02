@@ -99,6 +99,5 @@ def save(objs):
         for obj in objs:
             db.session.add(obj)
     else:
-        print("Here")
         db.session.add(objs)
     db.session.commit()

@@ -11,4 +11,4 @@ def internal_error(error):
     app.logger.exception(error)
     return jsonify(status=500, message='Internal server error.'), 500
 
-from . import api, auth
+from argos.web.routes import api, auth
