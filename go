@@ -25,7 +25,7 @@ NERSV_PID=$!
 cd ..
 
 source dev-env/bin/activate
-celery worker --loglevel=info --config=conf.${ARGOS_ENV}_celery &
+celery worker --loglevel=INFO --config=argos.conf.${ARGOS_ENV}_celery &
 WORKR_PID=$!
 
 wait

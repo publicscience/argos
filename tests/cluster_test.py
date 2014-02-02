@@ -1,8 +1,9 @@
 from tests import RequiresApp
 from copy import deepcopy
 from datetime import datetime, timedelta
-from brain import cluster, vectorize
-from models import Cluster, Article
+
+from argos.core.brain import cluster, vectorize
+from argos.core.models import Cluster, Article
 
 class ClusterTest(RequiresApp):
     def setUp(self):

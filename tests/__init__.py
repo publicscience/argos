@@ -1,10 +1,16 @@
 import unittest
 from unittest.mock import patch
+
 import time, socket, subprocess, tempfile
+
 from jobs import workers
-from app import app, db
 from json import loads
 from tests import helpers
+
+from argos.web.app import app
+from argos.datastore import db
+
+from flask.ext.sqlalchemy import SQLAlchemy
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):
@@ -47,6 +53,7 @@ class RequiresApp(RequiresMocks):
         self._ctx.push()
 
         self.db = db
+
         self.db.create_all()
 
     def _post_teardown(self):

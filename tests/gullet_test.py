@@ -1,10 +1,13 @@
+import os
 import unittest
+
 from tests import RequiresMocks
 from unittest.mock import mock_open
-from digester import gullet
+
+from argos.core.digester import gullet
+
 from tempfile import NamedTemporaryFile
 from io import BytesIO
-import os
 
 class GulletTest(RequiresMocks):
     def setUp(self):
