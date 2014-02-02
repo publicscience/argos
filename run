@@ -84,5 +84,4 @@ then
             echo -e "Database $(tput setaf 3)$DB_NAME$(tput sgr0) doesn't exist, moving on..."
         fi
     done
-
 fi

@@ -1,12 +1,14 @@
 import os
 import cProfile, pstats
-from app import db
-from brain import cluster
-from models import Cluster, Article
+
 from manage import progress
 
+from argos.datastore import db
+from argos.core.brain import cluster
+from argos.core.models import Cluster, Article
+from argos.util.logger import logger
+
 # Logging.
-from logger import logger
 logger = logger(__name__)
 
 

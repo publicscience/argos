@@ -2,6 +2,8 @@ import sys
 import json
 from os import path
 
+from argos.datastore import db
+
 def progress(percent):
     """
     Show a progress bar.
