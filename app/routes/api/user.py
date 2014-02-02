@@ -1,6 +1,7 @@
 from . import api, not_found, unauthorized, page_parser, DateTimeField
 from flask_security.core import current_user
 from flask.ext.restful import Resource, marshal_with, fields, reqparse
+from flask import request
 import models
 
 parser = reqparse.RequestParser()
@@ -13,7 +14,6 @@ class CurrentUser(Resource):
         'name': fields.String
     })
     def get(self):
-        print(current_user)
         if current_user.is_authenticated():
             return current_user
         else:
