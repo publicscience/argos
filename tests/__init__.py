@@ -3,7 +3,7 @@ from unittest.mock import patch
 import time, socket, subprocess, tempfile
 from jobs import workers
 from app import app, db
-
+from json import loads
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):
@@ -22,15 +22,48 @@ class RequiresApp(RequiresMocks):
     """
     This class will setup a database server
     for the duration of its tests.
-    """
-    def setup_app(self):
-        self.app = app.test_client()
-        self.db = db
-        db.create_all()
 
-    def teardown_app(self):
-        db.session.remove()
-        db.drop_all()
+    Much of this is ported from the flask-testing library.
+    Credit goes to Dan Jacob & collaborators!
+    """
+    def __call__(self, result=None):
+        """
+        Sets up the tests without needing
+        to call setUp.
+        """
+        try:
+            self._pre_setup()
+            super(RequiresMocks, self).__call__(result)
+        finally:
+            self._post_teardown()
+
+    def _pre_setup(self):
+        self.app = app
+
+        self.client = self.app.test_client()
+
+        self._ctx = self.app.test_request_context()
+        self._ctx.push()
+
+        self.db = db
+        self.db.create_all()
+
+    def _post_teardown(self):
+        if self._ctx is not None:
+            self._ctx.pop()
+
+        del self.app
+        del self.client
+        del self._ctx
+
+        self.db.session.remove()
+        self.db.drop_all()
+
+    def json(self, resp):
+        """
+        Load response data into json.
+        """
+        return loads(resp.data.decode('utf-8'))
 
 
 class RequiresWorkers(RequiresApp):

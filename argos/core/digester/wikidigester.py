@@ -6,7 +6,7 @@ Handles Wikipedia dump processing.
 """
 
 from . import Digester
-import brain
+import core.brain
 
 # Goodies
 from os.path import exists
@@ -22,7 +22,7 @@ from mwlib.refine.compat import parse_txt
 from lxml.etree import tostring, fromstring
 
 # Logging.
-from logger import logger
+from util.logger import logger
 logger = logger(__name__)
 
 

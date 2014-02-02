@@ -13,7 +13,7 @@ from core.brain import vectorize, entities
 from core.models import Cluster
 
 # Logging.
-from logger import logger
+from util.logger import logger
 
 def cluster(articles, threshold=0.7, tag='', debug=False):
     """

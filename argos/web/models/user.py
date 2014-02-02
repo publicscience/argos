@@ -1,6 +1,7 @@
 from database.datastore import db, Model
 
 from flask.ext.security import Security, UserMixin, RoleMixin
+from datetime import datetime
 
 # Table connecting users and roles
 roles_users = db.Table('roles_users',
@@ -73,6 +74,8 @@ class User(Model, UserMixin):
     auths           = db.relationship('Auth', backref='user', lazy='dynamic')
     roles           = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
+    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at      = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __init__(self, **kwargs):
         for key in kwargs:

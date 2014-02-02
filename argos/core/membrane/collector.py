@@ -6,12 +6,13 @@ A corpus builder, for the sake of collecting
 articles for training and/or testing.
 """
 
-from app import db
-from models import Source, Article
-from membrane import feed
+from database.datastore import db
+
+from core.models import Source, Article
+from core.membrane import feed
 
 # Logging.
-from logger import logger
+from util.logger import logger
 logger = logger(__name__)
 
 def collect():
@@ -115,7 +116,7 @@ def collect_sources(url):
     add_sources([f for f in feeds])
 
 
-def load_sources_from_file(filepath='manage/sources.txt'):
+def load_sources_from_file(filepath='../manage/sources.txt'):
     """
     Load feeds from a text file.
     Each line should be the url to the source

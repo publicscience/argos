@@ -4,7 +4,7 @@ import web.models as models
 
 from flask import session, request, url_for, jsonify, g
 from flask_oauthlib.client import OAuth
-from flask_security.utils import logout_user
+from flask_security.utils import logout_user, login_user
 
 oauth = OAuth(app)
 
@@ -66,7 +66,7 @@ def twitter_authorized(resp):
                 'image': me['profile_image_url_https']
         }
         user = User.create_or_update(me['id_str'], 'twitter', resp['access_token'], **data)
-        # IMPLEMENT RESTFUL USER ACCESS
+        login_user(user)
 
 @app.route('/login/auth/facebook')
 @facebook.authorized_handler
@@ -82,6 +82,7 @@ def facebook_authorized(resp):
             'image': 'https://graph.facebook.com/{0}/picture'.format(id),
         }
         user = User.create_or_update(me['id'], 'facebook', resp['access_token'], **data)
+        login_user(user)
 
 @app.route('/login/auth/google')
 @google.authorized_handler
@@ -97,5 +98,6 @@ def google_authorized(resp):
                 'image': me['picture']
         }
         user = User.create_or_update(me['id'], 'google', resp['access_token'], **data)
+        login_user(user)
 
 

@@ -14,15 +14,20 @@ Example::
     print(articles(source))
 """
 
+from . import feedfinder
+
+from core.models import Article, Author
+from core.brain import trim, sanitize, entities
+
 import feedparser
 import time
+
 from dateutil.parser import parse
-from models import Article, Author
 from urllib import request, error
+
 from http.client import IncompleteRead
 from http.cookiejar import CookieJar
-from . import feedfinder
-from brain import trim, sanitize, entities
+
 from readability.readability import Document
 
 # For feedparser exceptions.

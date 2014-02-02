@@ -16,7 +16,7 @@ except ImportError:
 import os, time, sys
 
 # Logging.
-from logger import logger
+from util.logger import logger
 logger = logger(__name__)
 
 CHUNK = 16 * 1024
