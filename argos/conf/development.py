@@ -1,1 +1,1 @@
-from conf.base import *
+from argos.conf.base import *

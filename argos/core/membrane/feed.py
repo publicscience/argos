@@ -14,10 +14,9 @@ Example::
     print(articles(source))
 """
 
-from . import feedfinder
-
-from core.models import Article, Author
-from core.brain import trim, sanitize, entities
+from argos.core.membrane import feedfinder
+from argos.core.models import Article, Author
+from argos.core.brain import trim, sanitize, entities
 
 import feedparser
 import time

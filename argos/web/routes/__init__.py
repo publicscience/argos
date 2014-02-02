@@ -1,4 +1,4 @@
-from web.app import app
+from argos.web.app import app
 
 from flask import jsonify
 

@@ -1,6 +1,6 @@
-from web.app import app
+from argos.web.app import app
 
-import web.models as models
+import argos.web.models as models
 
 from flask import session, request, url_for, jsonify, g
 from flask_oauthlib.client import OAuth

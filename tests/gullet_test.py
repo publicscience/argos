@@ -4,7 +4,7 @@ import unittest
 from tests import RequiresMocks
 from unittest.mock import mock_open
 
-from core.digester import gullet
+from argos.core.digester import gullet
 
 from tempfile import NamedTemporaryFile
 from io import BytesIO

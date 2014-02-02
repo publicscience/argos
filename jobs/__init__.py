@@ -6,8 +6,8 @@ Provides access to
 distributed task processing.
 """
 
-from conf import CELERY
-from util.logger import logger
+from argos.conf import CELERY
+from argos.util.logger import logger
 
 from celery import Celery
 

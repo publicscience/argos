@@ -1,7 +1,8 @@
-from database.datastore import db, Model
+from datetime import datetime
+
+from argos.datastore import db, Model
 
 from flask.ext.security import Security, UserMixin, RoleMixin
-from datetime import datetime
 
 # Table connecting users and roles
 roles_users = db.Table('roles_users',

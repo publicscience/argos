@@ -5,6 +5,8 @@ import math, time
 from celery import chord
 from jobs import celery, workers
 
+print(celery.registry_cls.__dict__)
+
 class TasksTest(RequiresWorkers):
     def test_chord(self):
         result = chord(pow.s(x, 2) for x in range(100))(combine.s())

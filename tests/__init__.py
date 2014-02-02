@@ -6,18 +6,10 @@ import time, socket, subprocess, tempfile
 from jobs import workers
 from json import loads
 
-from database.datastore import init_db, init_model 
-from web.app import app
+from argos.web.app import app
+from argos.datastore import db
 
 from flask.ext.sqlalchemy import SQLAlchemy
-
-# Initalize the database
-db = SQLAlchemy(app)
-
-init_db(db)
-init_model(db.Model)
-
-import web.routes
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):

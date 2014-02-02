@@ -12,11 +12,12 @@ Which is based off of TextTeaser:
 This currently only supports single document summarization.
 """
 
-from core.brain import tokenize, sentences, stopwords
-from core.models import Article
-from collections import Counter
+from argos.core.brain import tokenize, sentences, stopwords
+from argos.core.models import Article
+
 from re import sub
 from math import fabs
+from collections import Counter
 
 IDEAL_WORDS = 20
 

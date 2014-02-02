@@ -1,6 +1,5 @@
-from database.datastore import db, Model
-
-from core.brain import vectorize, entities
+from argos.datastore import db, Model
+from argos.core.brain import vectorize, entities
 
 from scipy.spatial.distance import jaccard
 

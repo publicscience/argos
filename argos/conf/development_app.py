@@ -1,4 +1,4 @@
-from conf.base_security import *
+from argos.conf.base_security import *
 from os import environ as env
 
 # App config

@@ -4,8 +4,6 @@ DB_USER=argos_user
 DEV_DB=argos_dev
 TEST_DB=argos_test
 
-cd argos
-
 if [ -z $1 ]
 then
     echo -e "$(tput setaf 3)Tell me what to do...$(tput sgr0)"

@@ -1,4 +1,4 @@
-from database.datastore import db, Model
+from argos.datastore import db, Model
 
 class Source(Model):
     """

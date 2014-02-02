@@ -5,8 +5,10 @@ WikiDigester
 Handles Wikipedia dump processing.
 """
 
-from . import Digester
-import core.brain
+from argos.util.logger import logger
+from argos.core.digester import Digester
+
+import argos.core.brain
 
 # Goodies
 from os.path import exists
@@ -22,7 +24,6 @@ from mwlib.refine.compat import parse_txt
 from lxml.etree import tostring, fromstring
 
 # Logging.
-from util.logger import logger
 logger = logger(__name__)
 
 

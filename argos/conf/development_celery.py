@@ -10,7 +10,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 #CELERY_RESULT_BACKEND = '{DATABASE[celery][TYPE]}://{DATABASE[celery][HOST]}:{DATABASE[celery][PORT]}/{DATABASE[celery][NAME]}'
 
 # What modules to import on start.
-CELERY_IMPORTS = ('tests.tasks_test', 'jobs', 'digester.wikidigester',)
+CELERY_IMPORTS = ('tests.tasks_test', 'jobs', 'argos.core.digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True

@@ -1,6 +1,6 @@
 import unittest
 
-import core.brain as brain
+import argos.core.brain as brain
 
 class BrainTest(unittest.TestCase):
     def setUp(self):

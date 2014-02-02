@@ -6,13 +6,12 @@ A corpus builder, for the sake of collecting
 articles for training and/or testing.
 """
 
-from database.datastore import db
-
-from core.models import Source, Article
-from core.membrane import feed
+from argos.datastore import db
+from argos.core.models import Source, Article
+from argos.core.membrane import feed
+from argos.util.logger import logger
 
 # Logging.
-from util.logger import logger
 logger = logger(__name__)
 
 def collect():
@@ -75,7 +74,6 @@ def add_sources(urls):
     for url in urls:
         feed_url = feed.find_feed(url)
         source = Source(feed_url)
-        print(source)
         db.session.add(source)
     db.session.commit()
 

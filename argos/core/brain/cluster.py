@@ -7,13 +7,10 @@ Clusters text documents.
 
 from datetime import datetime
 
-from database.datastore import db
-
-from core.brain import vectorize, entities
-from core.models import Cluster
-
-# Logging.
-from util.logger import logger
+from argos.util.logger import logger
+from argos.datastore import db
+from argos.core.models import Cluster
+from argos.core.brain import vectorize, entities
 
 def cluster(articles, threshold=0.7, tag='', debug=False):
     """

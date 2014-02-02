@@ -7,9 +7,11 @@ Interface to AlchemyAPI
 """
 
 import json
+
 from urllib.request import urlopen
 from urllib.parse import urlencode
-from conf import ALCHEMY_KEY
+
+from argos.conf import ALCHEMY_KEY
 
 API_KEY = ALCHEMY_KEY 
 BASE_URL = 'https://access.alchemyapi.com/'

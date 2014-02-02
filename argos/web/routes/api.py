@@ -1,6 +1,6 @@
-from web.app import app
+from argos.web.app import app
 
-import web.models as models
+import argos.web.models as models
 
 from flask import request
 from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse, marshal

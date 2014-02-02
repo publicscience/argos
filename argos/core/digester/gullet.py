@@ -7,6 +7,8 @@ Can resume downloads if the server supports it
 (that is, it responds with an Accepts-Range header).
 """
 
+from argos.util.logger import logger
+
 # Python 2.7 support.
 try:
     from urllib import request
@@ -16,7 +18,6 @@ except ImportError:
 import os, time, sys
 
 # Logging.
-from util.logger import logger
 logger = logger(__name__)
 
 CHUNK = 16 * 1024

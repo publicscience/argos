@@ -5,9 +5,9 @@ Seed
 Create some seed data.
 """
 
-from database.datastore import db
-from core.models import Entity, Article, Cluster, Source
-from core.brain.cluster import cluster
+from argos.datastore import db
+from argos.core.models import Entity, Article, Cluster, Source
+from argos.core.brain.cluster import cluster
 
 from manage import progress
 

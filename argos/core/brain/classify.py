@@ -6,9 +6,11 @@ Provides an interface to classification,
 and its training.
 """
 
-from sklearn.naive_bayes import MultinomialNB
-from brain import vectorize
 import pickle
+
+from argos.brain import vectorize
+
+from sklearn.naive_bayes import MultinomialNB
 
 class Classifier():
     def __init__(self):

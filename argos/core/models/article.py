@@ -1,9 +1,7 @@
-from database.datastore import db, Model
-
-from core.models.entity import Entity
-from core.models.cluster import Clusterable
-
-from core.brain import vectorize, entities
+from argos.datastore import db, Model
+from argos.core.models.entity import Entity
+from argos.core.models.cluster import Clusterable
+from argos.core.brain import vectorize, entities
 
 from scipy.spatial.distance import jaccard
 

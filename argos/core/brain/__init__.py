@@ -30,7 +30,7 @@ from collections import Counter
 
 # For prototyping/experimentation purposes,
 # using the AlchemyAPI
-from core.brain import alchemy
+from argos.core.brain import alchemy
 
 
 def tokenize(doc, **kwargs):

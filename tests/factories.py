@@ -1,6 +1,6 @@
-from core.models import Entity, Article, Cluster, Source
+from argos.core.models import Entity, Article, Cluster, Source
 
-from database.datastore import db
+from argos.datastore import db
 
 def entity(num=1):
     args = [

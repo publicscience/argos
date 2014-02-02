@@ -2,11 +2,11 @@ from tests import RequiresMocks, RequiresApp
 
 from datetime import datetime
 
-import core.membrane.feed as feed
-import core.membrane.feedfinder as feedfinder
-import core.membrane.collector as collector
+import argos.core.membrane.feed as feed
+import argos.core.membrane.feedfinder as feedfinder
+import argos.core.membrane.collector as collector
 
-from core.models import Source, Article, Author
+from argos.core.models import Source, Article, Author
 
 # Some testing data.
 mock_page = """
@@ -142,7 +142,7 @@ class FeedTest(RequiresApp):
 
 
     def test_articles(self):
-        self.create_patch('membrane.feed.fetch_full_text', return_value='''
+        self.create_patch('argos.core.membrane.feed.fetch_full_text', return_value='''
             We have an infinite amount to learn both from nature and from each other
             The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
             Curious that we spend more time congratulating people who have succeeded than encouraging people who have not.
@@ -163,25 +163,25 @@ class FeedTest(RequiresApp):
         self.assertEquals(len(articles), 1)
 
     def test_articles_skips_short_articles(self):
-        self.create_patch('membrane.feed.fetch_full_text', return_value='some full text')
+        self.create_patch('argos.core.membrane.feed.fetch_full_text', return_value='some full text')
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_404_articles(self):
         from urllib import error
-        self.create_patch('membrane.feed.fetch_full_text', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        self.create_patch('argos.core.membrane.feed.fetch_full_text', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_unreachable_articles(self):
         from urllib import error
-        self.create_patch('membrane.feed.fetch_full_text', side_effect=error.URLError('unreachable'))
+        self.create_patch('argos.core.membrane.feed.fetch_full_text', side_effect=error.URLError('unreachable'))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 0)
 
 class FeedFinderTest(RequiresMocks):
     def setUp(self):
-        self.mock_get = self.create_patch('membrane.feedfinder._get')
+        self.mock_get = self.create_patch('argos.core.membrane.feedfinder._get')
 
     def tearDown(self):
         pass
@@ -225,10 +225,10 @@ class CollectorTest(RequiresApp):
         self.db.session.commit()
 
         # Mock articles.
-        self.mock_articles = self.create_patch('membrane.feed.articles')
+        self.mock_articles = self.create_patch('argos.core.membrane.feed.articles')
 
         # Mock finding feeds.
-        self.mock_find_feed = self.create_patch('membrane.feed.find_feed')
+        self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
 
     def test_collect(self):
         self.mock_articles.return_value = [
