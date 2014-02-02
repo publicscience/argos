@@ -3,25 +3,19 @@ import tests.factories as fac
 from models import Entity, Article, Cluster
 
 class APITest(RequiresApp):
-    def setUp(self):
-        self.setup_app()
-
-    def tearDown(self):
-        self.teardown_app()
-
     def test_404(self):
-        r = self.app.get('/does_not_exist')
+        r = self.client.get('/does_not_exist')
         self.assertTrue(r.data)
         self.assertEquals(r.status_code, 404)
 
     def test_GET_entity(self):
         entity = fac.entity()
-        r = self.app.get('/entities/{0}'.format(entity.slug))
+        r = self.client.get('/entities/{0}'.format(entity.slug))
         expected = {
                 'name': entity.name,
                 'slug': entity.slug
         }
-        self.assertEqual(self.data(r), expected)
+        self.assertEqual(self.json(r), expected)
 
     def test_GET_event(self):
         event = fac.event()
@@ -56,9 +50,9 @@ class APITest(RequiresApp):
                 'entities': expected_entities
         }
 
-        r = self.app.get('/events/{0}'.format(event.id))
+        r = self.client.get('/events/{0}'.format(event.id))
 
-        self.assertEqual(self.data(r), expected)
+        self.assertEqual(self.json(r), expected)
 
     def test_GET_story(self):
         story = fac.story()
@@ -93,6 +87,6 @@ class APITest(RequiresApp):
                 'entities': expected_entities
         }
 
-        r = self.app.get('/stories/{0}'.format(story.id))
+        r = self.client.get('/stories/{0}'.format(story.id))
 
-        self.assertEqual(self.data(r), expected)
+        self.assertEqual(self.json(r), expected)

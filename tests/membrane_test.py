@@ -50,7 +50,6 @@ mock_feed = """
 class FeedTest(RequiresApp):
     def setUp(self):
         from unittest.mock import MagicMock
-        self.setup_app()
         article = {
                 'links': [{'href': 'some url'}],
                 'title': 'some title',
@@ -64,9 +63,6 @@ class FeedTest(RequiresApp):
         self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
         self.source = Source('foo')
-
-    def tearDown(self):
-        self.teardown_app()
 
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, feed.articles, self.source)
@@ -220,8 +216,6 @@ class FeedFinderTest(RequiresMocks):
 
 class CollectorTest(RequiresApp):
     def setUp(self):
-        self.setup_app()
-
         # Add a fake source to work with.
         self.source = Source('foo')
         self.db.session.add(self.source)
@@ -232,9 +226,6 @@ class CollectorTest(RequiresApp):
 
         # Mock finding feeds.
         self.mock_find_feed = self.create_patch('membrane.feed.find_feed')
-
-    def tearDown(self):
-        self.teardown_app()
 
     def test_collect(self):
         self.mock_articles.return_value = [

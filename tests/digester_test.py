@@ -25,14 +25,11 @@ class DigesterTest(unittest.TestCase):
 
 class WikiDigesterTest(RequiresApp):
     def setUp(self):
-        self.setup_app()
-
         # Create the WikiDigester.
         self.w = WikiDigester('tests/data/article.xml', db='test')
 
     def tearDown(self):
         self.w = None
-        self.teardown_app()
 
     def test_instance(self):
         self.assertIsInstance(self.w, WikiDigester)

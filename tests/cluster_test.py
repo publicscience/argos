@@ -6,11 +6,7 @@ from models import Cluster, Article
 
 class ClusterTest(RequiresApp):
     def setUp(self):
-        self.setup_app()
         self.article = self.prepare_articles()[0]
-
-    def tearDown(self):
-        self.teardown_app()
 
     def prepare_articles(self, type='standard'):
         a = {'title':'Dinosaurs', 'text':'dinosaurs are cool, Clinton'}

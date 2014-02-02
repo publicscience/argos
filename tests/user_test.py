@@ -1,19 +1,13 @@
 from tests import RequiresApp
 from models import User, Auth
-from flask_security.utils import login_user
-from flask_security.core import current_user
 
 class UserTest(RequiresApp):
     def setUp(self):
-        self.setup_app()
         self.userdata = {
                 'name': 'Hubble Bubble',
                 'email': 'hubbubs@mail.com',
                 'image': 'https://hubb.ub/pic.png'
         }
-
-    def tearDown(self):
-        self.teardown_app()
 
     def test_create_or_update_creates(self):
         provider_id = '12e31a'
@@ -42,25 +36,41 @@ class UserTest(RequiresApp):
 
 class UserAPITest(RequiresApp):
     def setUp(self):
-        self.setup_app()
         self.userdata = {
                 'name': 'Hubble Bubble',
                 'email': 'hubbubs@mail.com',
-                'image': 'https://hubb.ub/pic.png'
+                'image': 'https://hubb.ub/pic.png',
+                'password': '123456'
         }
 
-    def tearDown(self):
-        self.teardown_app()
-
     def test_get_current_user_not_authenticated(self):
-        r = self.app.get('/user')
-        self.assertEqual(self.data(r)['status'], 401)
+        r = self.client.get('/user')
+        self.assertEqual(r.status_code, 401)
 
     def test_get_current_user_authenticated(self):
-        with self.app_context() as c:
-            user = User(active=True, **self.userdata)
-            self.db.session.add(user)
-            self.db.session.commit()
-            login_user(user)
-            r = c.get('/user')
-            self.assertEqual(self.data(r)['status'], 401)
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+        self.db.session.commit()
+        # login user?
+        r = self.client.get('/user')
+        self.assertEqual(r.status_code, 200)
+
+    def test_patch_current_user_not_authenticated(self):
+        r = self.client.patch('/user', data={'something':'foo'})
+        self.assertEqual(r.status_code, 401)
+
+    def test_path_current_user_authenticated(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+        self.db.session.commit()
+        # login user?
+        # this should be an actual attribute on the user
+        r = self.client.patch('/user', data={'something':'foo'})
+        self.assertEqual(r.status_code, 200)
+
+    def test_get_single_user(self):
+        user = User(**self.userdata)
+        self.db.session.add(user)
+        self.db.session.commit()
+        r = self.client.get('/users/1')
+        self.assertEqual(self.json(r)['name'], self.userdata['name'])
