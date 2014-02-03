@@ -12,29 +12,104 @@ Which is based off of TextTeaser:
 This currently only supports single document summarization.
 """
 
-from argos.core.brain import tokenize, sentences, stopwords
+from argos.core.brain import tokenize, sentences, stopwords, vectorize
 from argos.core.models import Article
 
 from re import sub
 from math import fabs
 from collections import Counter
+from scipy.spatial.distance import cosine
 
 IDEAL_WORDS = 20
 
-def summarize(title, text):
+def summarize(text, title='', summary_length=5):
     """
     Summarizes a single document.
     """
-    summaries = []
+    summary = []
     keys = keywords(text)
     title_tokens = tokenize(title)
 
-    # Score sentences and use the top 5.
-    ranks = score(sentences(text), title_tokens, keys).most_common(5)
+    # Score sentences and use the top selections.
+    ranks = score(sentences(text), title_tokens, keys).most_common(summary_length)
     for rank in ranks:
-        summaries.append(rank[0])
+        summary.append(rank[0])
 
-    return summaries
+    return summary
+
+
+def multisummarize(docs, summary_length=5):
+    """
+    Summarize multi documents.
+
+    The current implementation is super naive,
+    thus the quality and coherence of its summaries is pretty damn terrible.
+    But it's purpose for now is that there is *some* API for
+    multidoc summarization.
+
+    btw: this is super slow. takes well over a minute for 4 moderately-sized documents.
+    """
+    # Collect all sentences from the input documents.
+    # Also collect position information about each sentence.
+    sents = []
+    for doc in docs:
+        sents += [(sent, vectorize(sent), pos + 1) for pos, sent in enumerate(sentences(doc))]
+    clusters = []
+
+    # Cluster the sentences.
+    for sent in sents:
+        # sent = (sent, vec, pos)
+
+        # Keep track of the maximum scoring cluster
+        # (above some minimum similarity)
+        # and the avg sim score.
+        min_sim = 0.01
+        max_cluster = None, min_sim
+        for cluster in clusters:
+            avg_sim = 0
+            for sent_c in cluster:
+                avg_sim += (1 - cosine(sent[1], sent_c[1]))
+            avg_sim = avg_sim/len(cluster)
+            if avg_sim >= max_cluster[1]:
+                max_cluster = cluster, avg_sim
+
+        # If a cluster was found, 
+        # add the sentence to it
+        if max_cluster[0]:
+            max_cluster[0].append(sent)
+
+        # Otherwise, create a new cluster.
+        else:
+            clusters.append([sent])
+
+    # Rank the clusters.
+    # Assuming that clusters with more sentences are more important,
+    # take the top 5.
+    ranked_clusters = sorted(clusters, key=lambda x: -len(x))[:summary_length]
+
+    # For each sentence cluster, select the highest scoring sentence.
+    # Again - very naive.
+    ideal_length = 20
+    summary_sentences = []
+    for cluster in ranked_clusters:
+        max_sent = None, 0
+        for sent in cluster:
+            avg_sim = 0
+            for sent_c in cluster:
+                avg_sim += 1 - cosine(sent[1], sent_c[1])
+            avg_sim = avg_sim/len(cluster)
+            pos = sent[2]
+            length = fabs(ideal_length - len(tokenize(sent[0])))/ideal_length
+
+            # Score is the average similarity penalized by distance from ideal length,
+            # weighted by the inverse of the position.
+            score = (avg_sim - length)/pos
+            if score >= max_sent[1]:
+                max_sent = sent[0], score
+        summary_sentences.append(max_sent[0])
+
+    return summary_sentences
+
 
 
 def score(sentences, title_words, keywords):
