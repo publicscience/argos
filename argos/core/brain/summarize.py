@@ -22,7 +22,7 @@ from scipy.spatial.distance import cosine
 
 IDEAL_WORDS = 20
 
-def summarize(text, title='', summary_length=5):
+def summarize(title, text, summary_length=5):
     """
     Summarizes a single document.
     """
