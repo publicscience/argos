@@ -165,8 +165,27 @@ class User(Model, UserMixin):
             db.session.add(auth)
 
         db.session.commit()
-
         return auth
+
+    def merge(self, user):
+        """
+        Merge this user with another user,
+        where *this* user is considered the canonical
+        user (i.e. its attributes are preferred over
+        the other user's).
+
+        UI tip: prompt the user to pick which account is their primary one!
+        """
+        providers = [auth.provider for auth in self.auths]
+        for auth in user.auths:
+            # In the event that the merged user has authentications
+            # which conflict with one on this user, prefer the one on this user.
+            # I don't anticipate this will happen, but it's possible, e.g. if a user
+            # has two twitter accts and authenticates each on different user accts here.
+            if auth.provider not in providers:
+                auth.user = self
+        db.session.delete(user)
+        db.session.commit()
 
     @staticmethod
     def for_provider(provider, provider_id):

@@ -12,8 +12,8 @@ class UserTest(RequiresApp):
                 'image': 'https://hubb.ub/pic.png'
         }
         self.authdata = {
-                'provider_id': '12e31a',
                 'provider': 'google',
+                'provider_id': '12e31a',
                 'access_token': '18487afkajhsdf'
         }
 
@@ -36,6 +36,44 @@ class UserTest(RequiresApp):
         db.session.commit()
 
         self.assertRaises(AuthExistsForUserException, user_b.add_provider, **self.authdata)
+
+    def test_merge(self):
+        user_a = User(**self.userdata)
+        user_b = User(name='Hubble Bubbs')
+        auth_a = Auth(**self.authdata)
+        auth_b = Auth('twitter', '8ahf81', '98kn32kafo2')
+
+        auth_a.user = user_a
+        auth_b.user = user_b
+
+        for obj in [user_a, user_b, auth_a, auth_b]:
+            db.session.add(obj)
+        db.session.commit()
+
+        self.assertEqual(User.query.count(), 2)
+
+        user_a.merge(user_b)
+
+        self.assertEqual(len(user_a.auths.all()), 2)
+        self.assertEqual(User.query.count(), 1)
+
+    def test_merge_prefer_merger(self):
+        user_a = User(**self.userdata)
+        user_b = User(name='Hubble Bubbs')
+        auth_a = Auth(**self.authdata)
+        auth_b = Auth(self.authdata['provider'], '8ahf81', '98kn32kafo2')
+
+        auth_a.user = user_a
+        auth_b.user = user_b
+
+        for obj in [user_a, user_b, auth_a, auth_b]:
+            db.session.add(obj)
+        db.session.commit()
+
+        user_a.merge(user_b)
+
+        self.assertEqual(len(user_a.auths.all()), 1)
+        self.assertEqual(user_a.auths.first().provider_id, self.authdata['provider_id'])
 
 
 class UserAPITest(RequiresApp):
