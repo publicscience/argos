@@ -3,6 +3,8 @@ from os import environ as env
 
 # App config
 SECRET_KEY = 'development'
+AES_KEY = '123456789abcdefg123456789abcdefg' # must be 32 bytes
+AES_IV = '123456789abcdefg' # must be 16 bytes
 DEBUG = True
 SQLALCHEMY_DATABASE_URI = "{DATABASE[default][TYPE]}://{DATABASE[default][HOST]}:{DATABASE[default][PORT]}/{DATABASE[default][NAME]}"
 

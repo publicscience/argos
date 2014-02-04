@@ -1,6 +1,8 @@
 from tests import RequiresApp
 
-from argos.web.models import User, Auth
+from argos.web.models.user import User, Auth, AuthExistsForUserException
+from argos.web.routes.auth import _process_user
+from argos.datastore import db
 
 class UserTest(RequiresApp):
     def setUp(self):
@@ -9,31 +11,32 @@ class UserTest(RequiresApp):
                 'email': 'hubbubs@mail.com',
                 'image': 'https://hubb.ub/pic.png'
         }
+        self.authdata = {
+                'provider_id': '12e31a',
+                'provider': 'google',
+                'access_token': '18487afkajhsdf'
+        }
 
-    def test_create_or_update_creates(self):
-        provider_id = '12e31a'
-        provider = 'google'
-        user = User.create_or_update(provider_id, provider, '189aec714fad', **self.userdata)
-        self.assertEqual(Auth.query.count(), 1)
-        self.assertEqual(User.query.count(), 1)
-        self.assertEqual(Auth.find_by_provider(provider_id, provider).user, user)
+    def test_add_provider(self):
+        user = User(**self.userdata)
+        user.add_provider(**self.authdata)
 
-    def test_create_or_update_updates(self):
-        provider_id = '12e31a'
-        provider = 'google'
-        access_token = '189aec714fad'
-        access_token_ = 'foobar'
-        user = User.create_or_update(provider_id, provider, access_token, **self.userdata)
-        self.assertEqual(Auth.find_by_provider(provider_id, provider).access_token, access_token)
-        self.assertEqual(user.name, 'Hubble Bubble')
-
-        self.userdata['name'] = 'Bubble Truble'
-        user = User.create_or_update(provider_id, provider, access_token_, **self.userdata)
-        self.assertEqual(Auth.find_by_provider(provider_id, provider).access_token, access_token_)
-        self.assertEqual(user.name, 'Bubble Truble')
+        auth = Auth.for_provider(self.authdata['provider'], self.authdata['provider_id'])
 
         self.assertEqual(Auth.query.count(), 1)
-        self.assertEqual(User.query.count(), 1)
+        self.assertEqual(auth.user, user)
+
+    def test_add_provider_conflict(self):
+        auth = Auth(**self.authdata)
+        user_a = User(**self.userdata)
+        user_b = User(name='Hubble Bubbs')
+        auth.user = user_a
+
+        db.session.add(auth)
+        db.session.commit()
+
+        self.assertRaises(AuthExistsForUserException, user_b.add_provider, **self.authdata)
+
 
 class UserAPITest(RequiresApp):
     def setUp(self):
@@ -74,3 +77,36 @@ class UserAPITest(RequiresApp):
         self.db.session.commit()
         r = self.client.get('/users/1')
         self.assertEqual(self.json(r)['name'], self.userdata['name'])
+
+class AuthTest(RequiresApp):
+    def test_update_token_simple(self):
+        a = Auth('12345', 'twooter', 'an_access_token')
+        a.update_token('new_token')
+        self.assertEqual(a.access_token, 'new_token')
+
+    def test_update_token_missing_secret(self):
+        secret = 'an_access_token_secret'
+        a = Auth('12345', 'twooter', 'an_access_token', secret)
+        self.assertRaises(Exception, a.update_token, 'new_token')
+
+    def test_update_token_with_secret(self):
+        secret = 'an_access_token_secret'
+        a = Auth('12345', 'twooter', 'an_access_token', secret)
+        a.update_token('new_token', 'new_secret')
+        self.assertEqual(a.access_token, 'new_token')
+        self.assertEqual(a.access_token_secret, 'new_secret')
+
+    def test_auth_encrypts_decrypts_secret(self):
+        secret = 'an_access_token_secret'
+        a = Auth('12345', 'twooter', 'an_access_token', secret)
+        self.assertNotEqual(a._access_token_secret, secret)
+        self.assertEqual(a.access_token_secret, secret)
+        self.db.session.add(a)
+        self.db.session.commit()
+        self.assertEqual(Auth.query.count(), 1)
+
+        # Test that retrieval/decryption works as expected as well.
+        a = None
+        a = Auth.query.first()
+        self.assertNotEqual(a._access_token_secret, secret)
+        self.assertEqual(a.access_token_secret, secret)

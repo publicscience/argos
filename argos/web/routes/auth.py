@@ -1,6 +1,7 @@
 from argos.web.app import app
+from argos.datastore import db
 
-import argos.web.models as models
+from argos.web.models.user import User, Auth, AuthExistsForUserException
 
 from flask import session, request, url_for, jsonify, g
 from flask_oauthlib.client import OAuth
@@ -14,25 +15,26 @@ google = oauth.remote_app('google', app_key='GOOGLE')
 
 @app.before_request
 def before_request():
+    pass
     # Get the current user before each request.
-    g.user = None
-    for provider in ['twitter', 'facebook', 'google']:
-        oauth = '{0}_oauth'.format(provider)
-        if oauth in session:
-            g.user = session[oauth]
-            break
+    #g.user = None
+    #for provider in ['twitter', 'facebook', 'google']:
+        #oauth = '{0}_oauth'.format(provider)
+        #if oauth in session:
+            #g.user = session[oauth]
+            #break
 
-@app.route('/login')
-def login():
-    provider = request.args.get('provider')
-    if provider == 'twitter':
-        return twitter.authorize(callback=url_for('twitter_authorized', _external=True))
-    elif provider == 'facebook':
-        return facebook.authorize(callback=url_for('facebook_authorized', _external=True))
-    elif provider == 'google':
-        return google.authorize(callback=url_for('google_authorized', _external=True))
-    else:
-        return jsonify(status=400, message='The specified provider was not recognized.')
+@app.route('/oauth/twitter')
+def twitter_authorize():
+    return twitter.authorize(callback=url_for('twitter_authorized', _external=True))
+
+@app.route('/oauth/facebook')
+def facebook_authorize():
+    return facebook.authorize(callback=url_for('facebook_authorized', _external=True))
+
+@app.route('/oauth/google')
+def google_authorize():
+    return google.authorize(callback=url_for('google_authorized', _external=True))
 
 @app.route('/logout')
 def logout():
@@ -52,23 +54,22 @@ def get_facebook_token():
 def get_google_token():
     return session.get('google_oauth')
 
-@app.route('/login/auth/twitter')
+@app.route('/oauth/twitter/callback')
 @twitter.authorized_handler
 def twitter_authorized(resp):
     if resp is None:
         return jsonify(status=401, message='Access denied - did you deny the request?')
     else:
-        session['twitter_oauth'] = resp
-        me = twitter.get('account/verify_credentials.json')
-        data = {
+        session['twitter_oauth'] = resp['oauth_token'], resp['oauth_token_secret']
+        me = twitter.get('account/verify_credentials.json').data
+        userdata = {
                 'name': me['name'],
                 'email': None, # twitter doesn't allow access to a user's email.
                 'image': me['profile_image_url_https']
         }
-        user = User.create_or_update(me['id_str'], 'twitter', resp['access_token'], **data)
-        login_user(user)
+        _process_user('twitter', me['id_str'], resp['oauth_token'], None, userdata)
 
-@app.route('/login/auth/facebook')
+@app.route('/oauth/facebook/callback')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None:
@@ -76,15 +77,14 @@ def facebook_authorized(resp):
     else:
         session['facebook_oauth'] = (resp['access_token'], '')
         me = facebook.get('/me')
-        data = {
+        userdata = {
             'name': me['name'],
             'email': me['email'],
             'image': 'https://graph.facebook.com/{0}/picture'.format(id),
         }
-        user = User.create_or_update(me['id'], 'facebook', resp['access_token'], **data)
-        login_user(user)
+        _process_user('facebook', me['id'], resp['access_token'], None, userdata)
 
-@app.route('/login/auth/google')
+@app.route('/oauth/google/callback')
 @google.authorized_handler
 def google_authorized(resp):
     if resp is None:
@@ -92,12 +92,46 @@ def google_authorized(resp):
     else:
         session['google_oauth'] = (resp['access_token'], '')
         me = google.get('userinfo')
-        data = {
+        userdata = {
                 'name': me['name'],
                 'email': me['email'],
                 'image': me['picture']
         }
-        user = User.create_or_update(me['id'], 'google', resp['access_token'], **data)
+        _process_user('google', me['id'], resp['access_token'], None, userdata)
+
+
+def _process_user(provider, provider_id, token, secret, userdata):
+    """
+    Processes a user to either login or
+    add a new authentication to an existing user.
+    """
+    # If there is already an authenticated user,
+    # add this provider to that user.
+    if current_user.is_authenticated:
+        try:
+            current_user.add_provider(provider, provider_id, token, secret, update=True)
+
+        # Conflict - this added authentication already exists but is
+        # associated with another user.
+        except AuthExistsForUserException as e:
+            return jsonify(status=409, message=e.message)
+
+    # Otherwise...
+    else:
+        # Try to find an existing auth and user.
+        auth = Auth.for_provider(provider, provider_id)
+
+        # If one is found, update the auth.
+        if auth:
+            user = auth.user
+            auth.update_token(token, secret)
+
+        # Otherwise create a new user and auth.
+        else:
+            user = User(**userdata)
+            auth = Auth(provider, provider_id, token, secret)
+            auth.user = user
+            db.session.add(user)
+            db.session.add(auth)
+        db.session.commit()
         login_user(user)
-
-
