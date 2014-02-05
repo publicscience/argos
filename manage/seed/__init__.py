@@ -6,8 +6,7 @@ Create some seed data.
 """
 
 from argos.datastore import db
-from argos.core.models import Entity, Article, Cluster, Source
-from argos.core.brain.cluster import cluster
+from argos.core.models import Entity, Article, Event, Story, Source
 
 from manage import progress
 
@@ -68,14 +67,14 @@ def seed(debug=False):
     print('Found {0} entities.'.format(num_entities))
 
     print('Clustering articles into events...')
-    cluster(articles, debug=True, threshold=0.04, tag='event')
-    num_events = Cluster.query.filter_by(tag='event').count()
+    Event.cluster(articles, threshold=0.04, debug=True)
+    num_events = Event.query.count()
     print('Created {0} event clusters.'.format(num_events))
 
     print('Clustering events into stories...')
-    events = Cluster.query.filter_by(tag='event')
-    cluster(events, debug=True, threshold=0.04, tag='story')
-    num_stories = Cluster.query.filter_by(tag='story').count()
+    events = Event.query.all()
+    Story.cluster(events, threshold=0.04, debug=True)
+    num_stories = Story.query.count()
     print('Created {0} story clusters.'.format(num_stories))
 
     print('\n\n==============================================')

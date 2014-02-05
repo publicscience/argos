@@ -14,12 +14,12 @@ from slugify import slugify
 import numpy
 numpy.seterr(invalid='ignore')
 
-authors = db.Table('authors',
+articles_authors = db.Table('authors',
         db.Column('author_id', db.Integer, db.ForeignKey('author.id')),
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
-article_entities = db.Table('article_entities',
+articles_entities = db.Table('articles_entities',
         db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
@@ -29,7 +29,7 @@ class Article(Clusterable):
     An article.
     """
     __tablename__ = 'article'
-    id          = db.Column(db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
+    __entities__    = {'secondary': articles_entities, 'backref_name': 'articles'}
     vectors     = db.Column(db.PickleType)
     title       = db.Column(db.Unicode)
     text        = db.Column(db.UnicodeText)
@@ -37,13 +37,9 @@ class Article(Clusterable):
     url         = db.Column(db.Unicode)
     image       = db.Column(db.String())
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
-    entities    = db.relationship('Entity',
-                    secondary=article_entities,
-                    backref=db.backref('articles', lazy='dynamic'))
     authors     = db.relationship('Author',
-                    secondary=authors,
+                    secondary=articles_authors,
                     backref=db.backref('articles', lazy='dynamic'))
-    __mapper_args__ = {'polymorphic_identity': 'article'}
 
     def __init__(self, **kwargs):
         for key in kwargs:
@@ -91,6 +87,8 @@ class Article(Clusterable):
         Calculate the similarity between this article
         and another article.
         """
+        # Compare the text vectors,
+        # and the entity vectors.
         v = self.vectorize()
         v_ = article.vectorize()
 
@@ -109,6 +107,9 @@ class Article(Clusterable):
                 dist = 1
             s = 1 - dist
             sim += (coefs[i] * s)
+
+        # TO DO
+        # Also take publication dates into account.
 
         # Normalize back to [0, 1].
         return sim/sum(coefs)

@@ -1,5 +1,5 @@
 from tests.helpers import save
-from argos.core.models import Entity, Article, Cluster, Source
+from argos.core.models import Entity, Article, Event, Story, Source
 from argos.datastore import db
 
 def entity(num=1):
@@ -53,7 +53,7 @@ def event(num=1, num_members=2):
     Creates an event cluster.
     """
     return cluster(
-            tag='event',
+            cls=Event,
             member_factory=article,
             num=num,
             num_members=num_members
@@ -64,26 +64,26 @@ def story(num=1, num_members=2):
     Creates a story cluster.
     """
     return cluster(
-            tag='story',
+            cls=Story,
             member_factory=event,
             num=num,
             num_members=num_members
     )
 
-def cluster(num=1, num_members=2, tag='default', member_factory=article):
+def cluster(cls, member_factory, num=1, num_members=2):
     """
-    Creates a generic cluster.
+    Convenience method for creating a Cluster-like object.
 
     Args:
+        | cls (class)           -- a Cluster-like class
+        | member_factory (func) -- function for creating members
         | num (int)             -- number of clusters to create
         | num_members (int)     -- number of members in each cluster
-        | tag (str)             -- tag of the cluster to create
-        | member_factory (func) -- function for creating members
     """
     c_s = []
     for i in range(num):
         members = member_factory(num=num_members)
-        c = Cluster(members, tag=tag)
+        c = cls(members)
         c_s.append(c)
     save(c_s)
     if len(c_s) is 1:

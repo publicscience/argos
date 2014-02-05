@@ -2,7 +2,7 @@ import tests.factories as fac
 
 from tests import RequiresApp
 
-from argos.core.models import Entity, Article, Cluster
+from argos.core.models import Entity, Article
 
 class APITest(RequiresApp):
     def test_404(self):
@@ -26,7 +26,6 @@ class APITest(RequiresApp):
         entities = []
         for member in event.members:
             expected_members.append({
-                'type': 'article',
                 'title': member.title,
                 'id': member.id,
                 'url': member.url,
@@ -45,7 +44,6 @@ class APITest(RequiresApp):
                 'id': event.id,
                 'title': event.title,
                 'summary': event.summary,
-                'tag': event.tag,
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'members': expected_members,
@@ -63,7 +61,6 @@ class APITest(RequiresApp):
         entities = []
         for member in story.members:
             expected_members.append({
-                'type': 'cluster',
                 'title': member.title,
                 'id': member.id,
                 'url': '/events/{0}'.format(member.id),
@@ -82,7 +79,6 @@ class APITest(RequiresApp):
                 'id': story.id,
                 'title': story.title,
                 'summary': story.summary,
-                'tag': story.tag,
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
                 'members': expected_members,
@@ -91,4 +87,6 @@ class APITest(RequiresApp):
 
         r = self.client.get('/stories/{0}'.format(story.id))
 
+        print(self.json(r))
+        print(expected)
         self.assertEqual(self.json(r), expected)

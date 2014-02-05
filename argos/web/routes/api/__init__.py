@@ -37,7 +37,6 @@ def cluster_fields(members={}, custom={}):
         'id': fields.Integer,
         'title': fields.String,
         'summary': fields.String,
-        'tag': fields.String,
         'updated_at': DateTimeField,
         'created_at': DateTimeField,
         'entities': fields.Nested({
@@ -48,7 +47,6 @@ def cluster_fields(members={}, custom={}):
 
     if members is not None:
         members_ = {
-            'type': fields.String,
             'title': fields.String,
             'url': fields.String,
             'id': fields.Integer,
@@ -65,7 +63,7 @@ def cluster_fields(members={}, custom={}):
 class Event(Resource):
     @marshal_with(cluster_fields())
     def get(self, id):
-        result = models.Cluster.query.get(id)
+        result = models.Event.query.get(id)
         return result or not_found()
 class Events(Resource):
     # Doesn't need to return members, i.e. individual articles.
@@ -73,7 +71,7 @@ class Events(Resource):
     @marshal_with(cluster_fields(members=None))
     def get(self):
         args = page_parser.parse_args()
-        results = models.Cluster.query.filter_by(tag='event').paginate(args['page']).items
+        results = models.Event.query.paginate(args['page']).items
         return results or not_found()
 api.add_resource(Event, '/events/<int:id>')
 api.add_resource(Events, '/events')
@@ -82,13 +80,13 @@ api.add_resource(Events, '/events')
 class Story(Resource):
     @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
     def get(self, id):
-        result = models.Cluster.query.get(id)
+        result = models.Story.query.get(id)
         return result or not_found()
 class Stories(Resource):
     @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
     def get(self):
         args = page_parser.parse_args()
-        results = models.Cluster.query.filter_by(tag='story').paginate(args['page']).items
+        results = models.Story.query.paginate(args['page']).items
         return results or not_found()
 api.add_resource(Story, '/stories/<int:id>')
 api.add_resource(Stories, '/stories')

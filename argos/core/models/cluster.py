@@ -1,33 +1,44 @@
 from argos.datastore import db, Model
 from argos.core.brain import vectorize, entities
 
+from sqlalchemy.ext.declarative import declared_attr
 from scipy.spatial.distance import jaccard
 
 from datetime import datetime
 from itertools import chain
 
-cluster_entities = db.Table('cluster_entities',
-        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
-        db.Column('cluster_id', db.Integer, db.ForeignKey('cluster.id'))
-)
-
-cluster_clusterables = db.Table('cluster_clusterables',
-        db.Column('cluster_id', db.Integer, db.ForeignKey('cluster.id'), primary_key=True),
-        db.Column('clusterable_id', db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
-)
 
 class Clusterable(Model):
+    """
+    An abstract class for anything that can be clustered.
+    """
+    __abstract__ = True
     id          = db.Column(db.Integer, primary_key=True)
-    type        = db.Column('type', db.String(50))
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
-    __mapper_args__ = {'polymorphic_on': 'type'}
+
+    @declared_attr
+    def entities(cls):
+        """
+        Build the entities attribute from the
+        subclass's `__entities__` class attribute.
+
+        Example::
+
+            __entities__ = {'secondary': articles_entities, 'backref_name': 'articles'}
+        """
+        args = cls.__entities__
+
+        return db.relationship('Entity',
+                secondary=args['secondary'],
+                backref=db.backref(args['backref_name']))
 
     def vectorize(self):
         raise NotImplementedError
 
     def similarity(self):
         raise NotImplementedError
+
 
 class Cluster(Clusterable):
     """
@@ -38,33 +49,42 @@ class Cluster(Clusterable):
     Note: A Cluster itself is a Clusterable; i.e. clusters
     can cluster clusters :)
     """
-    __tablename__ = 'cluster'
-    id          = db.Column(db.Integer, db.ForeignKey('clusterable.id'), primary_key=True)
-    active      = db.Column(db.Boolean, default=True)
+    __abstract__ = True
     title       = db.Column(db.Unicode)
     summary     = db.Column(db.UnicodeText)
     image       = db.Column(db.String())
-    tag         = db.Column(db.String(50))
-    entities    = db.relationship('Entity',
-                    secondary=cluster_entities,
-                    backref=db.backref('clusters', lazy='dynamic'))
-    members     = db.relationship('Clusterable',
-                    secondary=cluster_clusterables,
-                    backref=db.backref('clusters'))
 
-    __mapper_args__ = {
-            'polymorphic_identity': 'cluster',
-            'inherit_condition': (id == Clusterable.id)
-    }
+    @declared_attr
+    def members(cls):
+        """
+        Build the members attribute from the
+        subclass's `__members__` class attribute.
 
-    def __init__(self, members, tag=''):
+        Example::
+
+            __members__ = {'class_name': 'Article', 'secondary': events_articles, 'backref_name': 'events'}
+        """
+        args = cls.__members__
+
+        return db.relationship(args['class_name'],
+                secondary=args['secondary'],
+                backref=db.backref(args['backref_name']))
+
+    @staticmethod
+    def cluster(cls, clusterables):
+        """
+        The particular clustering method for this Cluster class.
+        Must be implemented on subclasses, otherwise raises NotImplementedError.
+        """
+        raise NotImplementedError
+
+    def __init__(self, members):
         """
         Initialize a cluster with some members and a tag.
 
         Tags are used to keep track of "levels" or "kinds" of clusters.
         """
         self.members = members
-        self.tag = tag
         self.update()
 
     def summarize(self):
@@ -135,23 +155,3 @@ class Cluster(Clusterable):
         if end is None:
             end = datetime.utcnow()
         return [member for member in self.members if start < member.created_at < end]
-
-
-    # May not be necessary.
-    def similarity_with_cluster(self, cluster):
-        """
-        Calculate the average similarity of each
-        member to each member of the other cluster.
-        """
-        avg_sims = []
-        vs = self.vectorize()
-        vs_ = cluster.vectorize()
-        return 1 - jaccard(vs, vs_)
-
-    # May not be necessary.
-    def vectorize(self):
-        """
-        Vectorize all members in a cluster
-        into a 1D array.
-        """
-        return vectorize([m.text for m in self.members]).toarray().flatten()

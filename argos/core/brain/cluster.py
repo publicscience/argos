@@ -5,93 +5,61 @@ Cluster
 Clusters text documents.
 """
 
-from datetime import datetime
-
-from argos.util.logger import logger
-from argos.datastore import db
-from argos.core.models import Cluster
-from argos.core.brain import vectorize, entities
-
-def cluster(articles, threshold=0.7, tag='', debug=False):
+def cluster(obj, clusters, threshold=0.7, logger=None):
     """
-    Clusters a set of articles
-    into existing clusters.
+    A generic clustering function.
+    It relies on the (Clusterable) object's similarity function to assign
+    the object to a cluster, if a qualifying one is found.
+    This function *does not* create a new cluster if a qualifying one isn't found.
+    Nor does it save the cluster changes – it is expected that the database session is committed outside of the function.
 
     Args:
-        | articles (list)   -- the articles to classify (a list of article dicts)
-        | threshold (float) -- the similarity threshold for qualifying a cluster
-        | tag (str)         -- the tag of the clusters to look through
+        | obj (Clusterable)     -- the object to be clustered
+        | cluster (list)        -- the list of Clusters to compare to
+        | threshold (float)     -- the minimum similarity threshold for a qualifying cluster
+        | logger (logger)       -- will log to this logger if one is provided (default: None)
+
+    Returns:
+        | the qualifying cluster if found, else None.
+
+    It's meant to be called from Cluster subclass's own `cluster` methods.
     """
 
-    log = logger('clustering')
-    if debug:
-        log.setLevel('DEBUG')
-    else:
-        log.setLevel('ERROR')
+    # For logging purposes.
+    name = obj.__class__.__name__
+    logger.debug('Using {0} candidate clusters.'.format(len(clusters)))
 
-    log.debug('Threshold is set to {0}.'.format(threshold))
+    # Keep tracking of qualifying clusters
+    # and their avg sim with this obj.
+    # [(cluster, avg_sim),...]
+    qualifying_clusters = []
+    selected_cluster = None
 
-    active_clusters = Cluster.query.filter_by(active=True, tag=tag).all()
+    # Compare the obj with the candidate clusters.
+    for cluster in clusters:
+        avg_sim = cluster.similarity(obj)
+        if logger: logger.debug('Average similarity was {0}.'.format(avg_sim))
+        if avg_sim > threshold:
+            qualifying_clusters.append((cluster, avg_sim))
 
-    now = datetime.utcnow()
+    num_qualified = len(qualifying_clusters)
+    if logger: logger.debug('Found {0} qualifying clusters.'.format(num_qualified))
 
-    # TO DO: BIAS CLOSER PUBLICATION DATES
-    for article in articles:
-        log.debug('There are {0} active clusters.'.format(len(active_clusters)))
+    if num_qualified == 1:
+        # Grab the only cluster and add the obj.
+        if logger: logger.debug('Only one qualifying cluster, adding {0} to it.'.format(name))
+        selected_cluster = qualifying_clusters[0][0]
 
-        # Select candidate clusters,
-        # i.e. active clusters which share at least one entity with this article.
-        a_ents = [entity.slug for entity in article.entities]
-        candidate_clusters = []
-        for c in active_clusters:
-            c_ents = [entity.slug for entity in c.entities]
-            if set(c_ents).intersection(a_ents):
-                candidate_clusters.append(c)
-        log.debug('Found {0} candidate clusters.'.format(len(candidate_clusters)))
+    elif num_qualified > 1:
+        # Get the most similar cluster and add the obj.
+        if logger: logger.debug('Multiple qualifying clusters found, adding {0} to the most similar one.'.format(name))
+        max_cluster = (None, 0)
+        for cluster in qualifying_clusters:
+            if cluster[1] > max_cluster[1]:
+                max_cluster = cluster
+        selected_cluster = max_cluster[0]
 
-        # Keep tracking of qualifying clusters
-        # and their avg sim with this article.
-        # [(cluster, avg_sim),...]
-        qualifying_clusters = []
+    if selected_cluster:
+        selected_cluster.add(obj)
 
-        # Compare the article with the candidate clusters.
-        for cluster in candidate_clusters:
-            avg_sim = cluster.similarity(article)
-            log.debug('Average similarity was {0}.'.format(avg_sim))
-            if avg_sim > threshold:
-                qualifying_clusters.append((cluster, avg_sim))
-
-        num_qualified = len(qualifying_clusters)
-        log.debug('Found {0} qualifying clusters.'.format(num_qualified))
-
-        if num_qualified == 1:
-            # Grab the only cluster and add the article.
-            log.debug('Only one qualifying cluster, adding article to it.')
-            qualifying_clusters[0][0].add(article)
-
-        elif num_qualified > 1:
-            # Get the most similar cluster and add the article.
-            log.debug('Multiple qualifying clusters found, adding article to the most similar one.')
-            max_cluster = (None, 0)
-            for cluster in qualifying_clusters:
-                if cluster[1] > max_cluster[1]:
-                    max_cluster = cluster
-            max_cluster[0].add(article)
-
-        else:
-            # Create a new cluster.
-            log.debug('No qualifying clusters found, creating a new cluster.')
-            new_cluster = Cluster([article], tag=tag)
-            db.session.add(new_cluster)
-            active_clusters.append(new_cluster)
-
-    for cluster in active_clusters:
-        # Mark expired clusters inactive.
-        if (now - cluster.updated_at).days > 3:
-            cluster.active = False
-        else:
-            cluster.update()
-    db.session.commit()
-
-    return active_clusters
-
+    return selected_cluster

@@ -4,8 +4,7 @@ import cProfile, pstats
 from manage import progress
 
 from argos.datastore import db
-from argos.core.brain import cluster
-from argos.core.models import Cluster, Article
+from argos.core.models import Event, Article
 from argos.util.logger import logger
 
 # Logging.
@@ -48,8 +47,7 @@ def evaluate_clustering():
 
     logger.info('Clustering...')
     p = cProfile.Profile()
-    #clusters = cluster.cluster(articles, debug=True, threshold=0.04)
-    clusters = p.runcall(cluster.cluster, articles, debug=True, threshold=0.04)
+    clusters = p.runcall(Event.cluster, articles, threshold=0.04, debug=True)
 
     logger.info('Created {0} clusters.'.format(len(clusters)))
 

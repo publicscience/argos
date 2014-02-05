@@ -1,5 +1,5 @@
 """
-The `init_db` function should be called to 
+The `init_db` function should be called to
 initialize this value to be used.
 """
 db = None
@@ -11,12 +11,12 @@ initialize this value to be used.
 Model = None
 
 def init_db(_db):
-    """ 
-    Initialize a database 
     """
-    global db 
-    
-    db = _db 
+    Initialize a database
+    """
+    global db
+
+    db = _db
 
     return db
 
