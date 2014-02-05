@@ -101,17 +101,6 @@ function setup_ner {
     rm ner.zip
 }
 
-function setup_doc {
-    echo -e "\n\n\n"
-    echo -e "$(tput setaf 3)Building documentation...$(tput sgr0)"
-    echo -e "\n\n\n"
-
-    source dev-env/bin/activate
-    cd doc
-    make clean
-    make html
-    cd ..
-}
 
 
 echo -e "\n\n\n\n\n"
@@ -128,7 +117,7 @@ setup_nltk
 # Create databases.
 ./manage db:create
 
-setup_doc
+./run doc
 
 echo -e "\n\n\n\n\n"
 echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

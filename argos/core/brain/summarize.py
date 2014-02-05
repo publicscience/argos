@@ -3,13 +3,6 @@ Summarize
 ==============
 
 Summarizes documents.
-
-Currently uses a modified version of PyTeaser:
-    https://github.com/xiaoxu193/PyTeaser
-Which is based off of TextTeaser:
-    https://github.com/MojoJolo/textteaser
-
-This currently only supports single document summarization.
 """
 
 from argos.core.brain import tokenize, sentences, stopwords, vectorize
@@ -25,6 +18,13 @@ IDEAL_WORDS = 20
 def summarize(title, text, summary_length=5):
     """
     Summarizes a single document.
+
+    Args:
+        | title (str)   -- the document title
+        | text (str)    -- the document test
+        | summary_length (int)  -- the preferred sentence length of the summary (default=5)
+
+    Currently uses a modified version of `PyTeaser <https://github.com/xiaoxu193/PyTeaser>`_, which is based off of `TextTeaser <https://github.com/MojoJolo/textteaser>`_.
     """
     summary = []
     keys = keywords(text)
@@ -42,12 +42,18 @@ def multisummarize(docs, summary_length=5):
     """
     Summarize multi documents.
 
-    The current implementation is super naive,
-    thus the quality and coherence of its summaries is pretty damn terrible.
-    But it's purpose for now is that there is *some* API for
-    multidoc summarization.
+    Args:
+        | docs (list)           -- list of documents (i.e. texts)
+        | summary_length (int)  -- the preferred sentence length of the summary (default=5)
 
-    btw: this is super slow. takes well over a minute for 4 moderately-sized documents.
+    .. note::
+        The current implementation is super naive,
+        thus the quality and coherence of its summaries is pretty damn terrible.
+        But it's purpose for now is that there is *some* API for
+        multidoc summarization.
+
+    .. note::
+        BTW: this is super slow. takes well over a minute for 4 moderately-sized documents.
     """
     # Collect all sentences from the input documents.
     # Also collect position information about each sentence.

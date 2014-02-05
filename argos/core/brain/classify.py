@@ -8,7 +8,7 @@ and its training.
 
 import pickle
 
-from argos.brain import vectorize
+from argos.core.brain import vectorize
 
 from sklearn.naive_bayes import MultinomialNB
 

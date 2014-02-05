@@ -91,6 +91,18 @@ elif [ $1 == 'profile' ]
 then
     FLASK_ENV=TESTING python -c "from manage.profile import profile; profile()"
 
+elif [ $1 == 'doc' ]
+then
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Building documentation...$(tput sgr0)"
+    echo -e "\n\n\n"
+
+    source dev-env/bin/activate
+    cd doc
+    make clean
+    make html
+    cd ..
+
 elif [ $1 == 'db:seed' ]
 then
     python -c "from manage.seed import seed; seed()"

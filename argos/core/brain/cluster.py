@@ -8,10 +8,14 @@ Clusters text documents.
 def cluster(obj, clusters, threshold=0.7, logger=None):
     """
     A generic clustering function.
-    It relies on the (Clusterable) object's similarity function to assign
+
+    It relies on the :class:`Clusterable` object's similarity function to assign
     the object to a cluster, if a qualifying one is found.
-    This function *does not* create a new cluster if a qualifying one isn't found.
-    Nor does it save the cluster changes – it is expected that the database session is committed outside of the function.
+
+    .. note::
+        This function *does not* create a new cluster if a qualifying one isn't found.
+
+        Nor does it save the cluster changes – it is expected that the database session is committed outside of the function.
 
     Args:
         | obj (Clusterable)     -- the object to be clustered
@@ -22,7 +26,7 @@ def cluster(obj, clusters, threshold=0.7, logger=None):
     Returns:
         | the qualifying cluster if found, else None.
 
-    It's meant to be called from Cluster subclass's own `cluster` methods.
+    It's meant to be called from :class:`Cluster` subclass's own `cluster` methods.
     """
 
     # For logging purposes.

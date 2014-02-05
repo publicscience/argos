@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Argos'
-copyright = u'2013, Francis Tseng'
+copyright = u'2013-2014, Francis Tseng'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -234,7 +234,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Argos', u'Argos Documentation',
-   u'Francis Tseng', 'Argos', 'One line description of project.',
+   u'Francis Tseng', 'Argos', 'Know more with less.',
    'Miscellaneous'),
 ]
 
