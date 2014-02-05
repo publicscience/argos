@@ -103,6 +103,11 @@ then
     make html
     cd ..
 
+elif [ $1 == 'server' ]
+then
+    source dev-env/bin/activate
+    python application.py
+
 elif [ $1 == 'db:seed' ]
 then
     python -c "from manage.seed import seed; seed()"
