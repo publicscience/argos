@@ -11,6 +11,10 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
+users_stories = db.Table('users_stories',
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('story_id', db.Integer(), db.ForeignKey('story.id')))
+
 class AuthExistsForUserException(Exception):
     pass
 
@@ -130,6 +134,8 @@ class User(Model, UserMixin):
     auths           = db.relationship('Auth', backref='user', lazy='dynamic')
     roles           = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
+    watching        = db.relationship('Story', secondary=users_stories,
+                            backref=db.backref('watchers', lazy='joined'))
     created_at      = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at      = db.Column(db.DateTime, default=datetime.utcnow)
 

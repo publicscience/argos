@@ -1,8 +1,10 @@
 import argos.web.models as models
 
+from argos.datastore import db
 from argos.web.app import app
 
 from flask import request
+from flask_security.core import current_user
 from flask.ext.restful import Api, Resource, abort, marshal_with, fields, reqparse
 
 api = Api(app)
@@ -88,8 +90,33 @@ class Stories(Resource):
         args = page_parser.parse_args()
         results = models.Story.query.paginate(args['page']).items
         return results or not_found()
+class StoryWatchers(Resource):
+    from argos.web.routes.api.user import permitted_user_fields
+    @marshal_with({ 'watchers': fields.Nested(permitted_user_fields) })
+    def get(self, id):
+        result = models.Story.query.get(id)
+        return result or not_found()
+    @marshal_with(permitted_user_fields)
+    def post(self, id):
+        if current_user.is_authenticated():
+            result = models.Story.query.get(id)
+            result.watchers.append(current_user)
+            db.session.commit()
+            return current_user
+        else:
+            return unauthorized()
+    @marshal_with(permitted_user_fields)
+    def delete(self, id):
+        if current_user.is_authenticated():
+            result = models.Story.query.get(id)
+            result.watchers.remove(current_user)
+            db.session.commit()
+            return current_user
+        else:
+            return unauthorized()
 api.add_resource(Story, '/stories/<int:id>')
 api.add_resource(Stories, '/stories')
+api.add_resource(StoryWatchers, '/stories/<int:id>/watchers')
 
 
 class Entity(Resource):

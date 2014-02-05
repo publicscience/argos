@@ -1,8 +1,9 @@
 import tests.factories as fac
+from tests.helpers import save
 
 from tests import RequiresApp
 
-from argos.core.models import Entity, Article
+from argos.core.models import Entity, Article, Story
 
 class APITest(RequiresApp):
     def test_404(self):
@@ -87,6 +88,54 @@ class APITest(RequiresApp):
 
         r = self.client.get('/stories/{0}'.format(story.id))
 
-        print(self.json(r))
-        print(expected)
         self.assertEqual(self.json(r), expected)
+
+    def test_GET_story_watchers(self):
+        story = fac.story()
+        users = fac.user(num=3)
+        story.watchers = users
+        save()
+
+        expected = []
+        for user in users:
+            expected.append({
+                'id': user.id,
+                'name': user.name,
+                'image': user.image,
+                'created_at': user.created_at.isoformat(),
+                'updated_at': user.updated_at.isoformat()
+            })
+
+        r = self.client.get('/stories/{0}/watchers'.format(story.id))
+
+        self.assertEqual(self.json(r), {'watchers': expected})
+
+    def test_POST_story_watchers(self):
+        story = fac.story()
+        users = fac.user(num=4)
+        user = users[-1]
+        story.watchers = users[:3]
+        save()
+
+        self.assertEqual(len(story.watchers), 3)
+
+        # Login the user so we have an authenticated user.
+        r = self.client.post('/test_login', data={'id': user.id})
+
+        r = self.client.post('/stories/{0}/watchers'.format(story.id))
+        self.assertEqual(len(story.watchers), 4)
+
+    def test_DELETE_story_watchers(self):
+        story = fac.story()
+        users = fac.user(num=3)
+        user = users[0]
+        story.watchers = users
+        save()
+
+        self.assertEqual(len(story.watchers), 3)
+
+        # Login the user so we have an authenticated user.
+        r = self.client.post('/test_login', data={'id': user.id})
+
+        r = self.client.delete('/stories/{0}/watchers'.format(story.id))
+        self.assertEqual(len(story.watchers), 2)
