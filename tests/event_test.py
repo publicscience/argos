@@ -60,7 +60,7 @@ class EventTest(RequiresApp):
         # because we calculate the average similarity of the articles
         # between the clusters, rather than the overlap of the two clusters.
         #self.assertEqual(avg_sim, 1.0)
-        self.assertAlmostEqual(avg_sim, 0.733333333)
+        self.assertAlmostEqual(avg_sim, 0.83999999999999)
 
     def test_event_similarity_with_cluster_different(self):
         self.prepare_event()
@@ -89,7 +89,8 @@ class EventTest(RequiresApp):
         self.prepare_event()
         members = [Article(
             title='Robots',
-            text='dinosaurs are cool, Reagan'
+            text='dinosaurs are cool, Reagan',
+            created_at=datetime.utcnow()
         )]
         self.cluster.members = members
 
@@ -100,7 +101,8 @@ class EventTest(RequiresApp):
         self.prepare_event()
         article = Article(
                 title='Superstars',
-                text='superstars are awesome, Clinton'
+                text='superstars are awesome, Clinton',
+                created_at=datetime.utcnow()
         )
         Event.cluster([article])
         self.assertEqual(len(self.cluster.members), 2)
@@ -108,7 +110,8 @@ class EventTest(RequiresApp):
     def test_event_no_matching_cluster_creates_new_cluster(self):
         article = Article(
                 title='Superstars',
-                text='superstars are awesome, Clinton'
+                text='superstars are awesome, Clinton',
+                created_at=datetime.utcnow()
         )
         Event.cluster([article])
 
