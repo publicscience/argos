@@ -8,6 +8,9 @@ import argos.core.membrane.collector as collector
 
 from argos.core.models import Source, Article, Author
 
+from io import BytesIO
+import os
+
 # Some testing data.
 mock_page = """
     <!doctype html>
@@ -163,6 +166,10 @@ class FeedTest(RequiresApp):
     def test_articles(self):
         extracted_data = MagicMock()
         extracted_data.cleaned_text = full_text
+
+        # Mock the download method to return some local image path.
+        self.create_patch('argos.core.membrane.feed.download', return_value='/foo/bar/image.jpg')
+
         self.create_patch('argos.core.membrane.feed.extract_entry_data', return_value=(extracted_data, full_text))
         articles = feed.articles(self.source)
         self.assertEquals(len(articles), 1)
@@ -198,6 +205,30 @@ class FeedTest(RequiresApp):
                 'image': data.top_image.src
         }
         self.assertEqual(expected, results)
+
+    def test_extract_image(self):
+        entry_data = MagicMock()
+        entry_data.top_image.src = 'http://foo.com/bar/image.jpg'
+        expected_url = 'tests/data/downloaded.jpg'
+
+        if os.path.isfile(expected_url):
+            os.remove(expected_url)
+
+        # Mock response for downloading.
+        image_data = open('tests/data/image.jpg', 'rb').read()
+        mock_response = BytesIO(image_data)
+        mock_response.headers = {
+            'Accept-Ranges': 'bytes',
+            'Last-Modified': 'Wed, 05 Sep 2013 08:53:26 GMT',
+            'Content-Length': str(len(image_data))
+        }
+        mock_urlopen = self.create_patch('urllib.request.urlopen', return_value=mock_response)
+
+        image_url = feed.extract_image(entry_data, filename='downloaded.jpg', save_dir='tests/data/')
+
+        self.assertEqual(image_url, expected_url)
+        self.assertTrue(os.path.isfile(expected_url))
+        self.assertEqual(len(image_data), len(open(expected_url, 'rb').read()))
 
 
 class FeedFinderTest(RequiresMocks):

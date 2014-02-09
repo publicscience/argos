@@ -5,6 +5,7 @@ dev-env/
 node_modules/
 fontcustom/*
 data/wiki/*.xml
+data/images/*
 *.swp
 doc/_build
 doc/_static

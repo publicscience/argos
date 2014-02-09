@@ -17,6 +17,7 @@ Example::
 from argos.core.membrane import feedfinder
 from argos.core.models import Article, Author
 from argos.core.brain import entities
+from argos.util.gullet import download
 
 import feedparser
 import time
@@ -92,11 +93,8 @@ def articles(source):
         updated = parse(entry.get('updated')) or published
         title = entry.get('title', entry_data.title)
 
-        # TO DO
-        # These images should be downloaded and saved.
-        image_url = ''
-        if entry_data.top_image:
-            image_url = entry_data.top_image.src
+        # Download and save the top article image.
+        image_url = extract_image(entry_data, filename=hash(url), save_dir='data/images/')
 
         articles.append(Article(
             url=url,
@@ -157,12 +155,16 @@ def extract_tags(entry, known_tags=None):
         #sample = entry['fulltext']
         #return entities(sample)
 
-def extract_image(entry):
+def extract_image(entry_data, filename=None, save_dir='.'):
     """
-    Extracts a representative image
-    for the entry.
+    Extracts and saves a representative
+    image for the entry.
     """
-    pass
+    image_url = ''
+    if entry_data.top_image:
+        remote_image_url = entry_data.top_image.src
+        image_url = download(remote_image_url, save_dir, filename=filename)
+    return image_url
 
 def extract_authors(entry):
     """

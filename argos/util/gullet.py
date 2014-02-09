@@ -23,7 +23,7 @@ logger = logger(__name__)
 
 CHUNK = 16 * 1024
 
-def download(url, save_path, progress=False):
+def download(url, save_path, filename=None, progress=False):
     """
     Downloads a file from the specified URL.
     Will resume an existing download if the target
@@ -37,7 +37,8 @@ def download(url, save_path, progress=False):
 
     # Strip trailing slash, if there is one.
     save_path = save_path.rstrip('\/')
-    filename = url.split('/').pop()
+    if filename is None:
+        filename = url.split('/').pop()
     file = '{0}/{1}'.format(save_path, filename)
 
     existing_size = 0
