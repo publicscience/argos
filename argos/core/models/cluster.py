@@ -102,17 +102,24 @@ class Cluster(Clusterable):
     def titleize(self):
         """
         Generate a title for this cluster.
+        Also selects a representative image.
 
         Looks for the cluster member that is most similar to the others,
         and then uses the title of that member.
         """
         max_member = (None, 0)
+        max_member_w_image = (None, 0)
         for member in self.members:
             avg_sim = self.similarity(member)
             if avg_sim >= max_member[1]:
                 max_member = (member, avg_sim)
+            if avg_sim >= max_member_w_image[1] and member.image is not None:
+                max_member_w_image = (member, avg_sim)
+
         self.title = max_member[0].title
-        self.image = max_member[0].image
+
+        if max_member_w_image[0] is not None:
+            self.image = max_member_w_image[0].image
 
     def entitize(self):
         """

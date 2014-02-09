@@ -38,6 +38,7 @@ def cluster_fields(members={}, custom={}):
     fields_ = {
         'id': fields.Integer,
         'title': fields.String,
+        'image': fields.String,
         'summary': fields.String,
         'updated_at': DateTimeField,
         'created_at': DateTimeField,
