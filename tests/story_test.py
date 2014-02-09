@@ -37,3 +37,7 @@ class StoryTest(RequiresApp):
         Story.cluster([event])
         self.assertEqual(len(story.members), 2)
         self.assertEqual(Story.query.count(), 2)
+
+    def test_story_summarize(self):
+        story = fac.story()
+        self.assertTrue(story.summary)

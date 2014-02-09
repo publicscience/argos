@@ -6,7 +6,6 @@ Summarizes documents.
 """
 
 from argos.core.brain import tokenize, sentences, stopwords, vectorize
-from argos.core.models import Article
 
 from re import sub
 from math import fabs
@@ -23,6 +22,9 @@ def summarize(title, text, summary_length=5):
         | title (str)   -- the document title
         | text (str)    -- the document test
         | summary_length (int)  -- the preferred sentence length of the summary (default=5)
+
+    Returns:
+        | summary (list)    -- list of sentences selected for the summary.
 
     Currently uses a modified version of `PyTeaser <https://github.com/xiaoxu193/PyTeaser>`_, which is based off of `TextTeaser <https://github.com/MojoJolo/textteaser>`_.
     """
@@ -51,6 +53,9 @@ def multisummarize(docs, summary_length=5):
         thus the quality and coherence of its summaries is pretty damn terrible.
         But it's purpose for now is that there is *some* API for
         multidoc summarization.
+
+    Returns:
+        | summary (list)    -- list of sentences selected for the summary.
 
     .. note::
         BTW: this is super slow. takes well over a minute for 4 moderately-sized documents.
@@ -109,7 +114,7 @@ def multisummarize(docs, summary_length=5):
 
             # Score is the average similarity penalized by distance from ideal length,
             # weighted by the inverse of the position.
-            score = (avg_sim - length)/pos
+            score = (avg_sim - length/2)/pos
             if score >= max_sent[1]:
                 max_sent = sent[0], score
         summary_sentences.append(max_sent[0])

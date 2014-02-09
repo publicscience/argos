@@ -139,6 +139,14 @@ class EventTest(RequiresApp):
         self.cluster = Event(members)
         self.assertEqual(self.cluster.title, 'Dinosaurs')
 
+    def test_event_summarize(self):
+        self.cluster = Event(self.prepare_articles())
+        self.assertTrue(self.cluster.summary)
+
+    def test_event_summarize_single_article(self):
+        self.cluster = Event([self.prepare_articles()[0]])
+        self.assertTrue(self.cluster.summary)
+
     def test_event_timespan(self):
         text = 'the worldly philosophers today cautious optimism is based to a large extent on technological breakthroughs'
         members = [

@@ -2,6 +2,7 @@ from argos.datastore import db
 from argos.core.models import Entity
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
+from argos.core.brain.summarize import multisummarize
 
 from argos.util.logger import logger
 
@@ -30,6 +31,16 @@ class Story(Cluster):
     @events.setter
     def events(self, value):
         self.members = value
+
+    def summarize(self):
+        """
+        Generate a summary for this cluster.
+        """
+        if len(self.members) == 1:
+            self.summary = self.members[0].summary
+        else:
+            self.summary = ' '.join(multisummarize([m.summary for m in self.members]))
+        return self.summary
 
     @staticmethod
     def cluster(events, threshold=0.7, debug=False):

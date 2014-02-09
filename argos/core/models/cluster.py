@@ -1,5 +1,6 @@
 from argos.datastore import db, Model
 from argos.core.brain import vectorize, entities
+from argos.core.brain.summarize import summarize, multisummarize
 
 from sqlalchemy.ext.declarative import declared_attr
 from scipy.spatial.distance import jaccard
@@ -91,9 +92,12 @@ class Cluster(Clusterable):
         """
         Generate a summary for this cluster.
         """
-        # something like:
-        # self.summary = summarize([m.text for m in self.members])
-        pass
+        if len(self.members) == 1:
+            member = self.members[0]
+            self.summary = ' '.join(summarize(member.title, member.text))
+        else:
+            self.summary = ' '.join(multisummarize([m.text for m in self.members]))
+        return self.summary
 
     def titleize(self):
         """
