@@ -1,11 +1,11 @@
 import os
 import cProfile, pstats
 
-from manage import progress
 
 from argos.datastore import db
 from argos.core.models import Event, Article
 from argos.util.logger import logger
+from argos.util.progress import progress_bar
 
 # Logging.
 logger = logger(__name__)
@@ -39,7 +39,7 @@ def evaluate_clustering():
         )
         expected_clusters.setdefault(category, []).append(article)
         articles.append(article)
-        progress(len(articles)/len(all_files) * 100)
+        progress_bar(len(articles)/len(all_files) * 100)
     print('\n')
 
     logger.info('Will cluster {0} articles.'.format(len(articles)))

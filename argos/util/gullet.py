@@ -8,6 +8,7 @@ Can resume downloads if the server supports it
 """
 
 from argos.util.logger import logger
+from argos.util.progress import progress_bar
 
 # Python 2.7 support.
 try:
@@ -85,7 +86,7 @@ def download(url, save_path, progress=False):
             outfile.seek(0)
 
         if progress:
-            _progress( (existing_size/total_size) * 100 )
+            progress_bar( (existing_size/total_size) * 100 )
 
         # Pull out the chunks!
         for chunk in iter(lambda: resp.read(CHUNK), b''):
@@ -99,7 +100,7 @@ def download(url, save_path, progress=False):
 
             # Show progress.
             if progress:
-                _progress(percent_complete)
+                progress_bar(percent_complete)
 
         if progress:
             sys.stdout.write('\n')
@@ -136,21 +137,6 @@ def _expired(url, file):
         logger.error('HTTP Error:', e.code, url)
     except request.URLError as e:
         logger.error('URL Error:', e.reason, url)
-
-def _progress(percent):
-    """
-    Show a progress bar.
-    """
-    width = 100
-    sys.stdout.write('[{0}] {1}'.format(' ' * width, '{:8.4f}'.format(percent)))
-    sys.stdout.flush()
-    sys.stdout.write('\b' * (width+10))
-
-    for i in range(int(percent)):
-        sys.stdout.write('=')
-        sys.stdout.flush()
-    sys.stdout.write('\b' * (width+10))
-
 
 def main():
     if len(sys.argv) < 2:

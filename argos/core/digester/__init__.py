@@ -13,7 +13,7 @@ Credit for the gensim-derived modules goes to:
 Homer Strong, Radim Rehurek, and Lars Buitinck.
 """
 
-from argos.core.digester import gullet
+from argos.util import gullet
 
 from lxml import etree
 

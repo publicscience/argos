@@ -7,8 +7,7 @@ Create some seed data.
 
 from argos.datastore import db
 from argos.core.models import Entity, Article, Event, Story, Source
-
-from manage import progress
+from argos.util.progress import progress_bar
 
 import os, json
 
@@ -57,7 +56,7 @@ def seed(debug=False):
         articles.append(a)
         db.session.add(a)
 
-        progress(len(articles) / len(entries) * 100)
+        progress_bar(len(articles) / len(entries) * 100)
 
     db.session.commit()
 
