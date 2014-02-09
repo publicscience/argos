@@ -5,4 +5,3 @@ Web
    :maxdepth: 2
 
    web/models
-   web/api

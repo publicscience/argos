@@ -13,6 +13,7 @@ Contents:
 
    core
    web
+   api
 
 
 Indices and tables
