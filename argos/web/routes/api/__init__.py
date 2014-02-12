@@ -30,48 +30,85 @@ class DateTimeField(fields.Raw):
     def format(self, value):
         return value.isoformat()
 
+EVENT_FIELDS = {
+    'id': fields.Integer,
+    'title': fields.String,
+    'image': fields.String,
+    'summary': fields.String,
+    'updated_at': DateTimeField,
+    'created_at': DateTimeField,
+    'entities': fields.Nested({
+        'url': fields.Url('entity')
+    }),
+    'articles': fields.Nested({
+        'url': fields.Url('article')
+    })
+}
 
-def cluster_fields(members={}, custom={}):
-    """
-    The default fields for any Cluster-like resource.
-    """
-    fields_ = {
-        'id': fields.Integer,
-        'title': fields.String,
-        'image': fields.String,
-        'summary': fields.String,
-        'updated_at': DateTimeField,
-        'created_at': DateTimeField,
-        'entities': fields.Nested({
-            'name': fields.String,
-            'url': fields.Url('entity')
-        })
-    }
+STORY_FIELDS = {
+    'id': fields.Integer,
+    'title': fields.String,
+    'image': fields.String,
+    'summary': fields.String,
+    'updated_at': DateTimeField,
+    'created_at': DateTimeField,
+    'entities': fields.Nested({
+        'url': fields.Url('entity')
+    }),
+    'events': fields.Nested({
+        'url': fields.Url('event')
+    }),
+    'watchers': fields.Nested({
+        'url': fields.Url('user')
+    })
+}
 
-    if members is not None:
-        members_ = {
-            'title': fields.String,
-            'url': fields.String,
-            'id': fields.Integer,
-            'created_at': DateTimeField
-        }
-        members_.update(members)
+ENTITY_FIELDS = {
+    'name': fields.String,
+    'slug': fields.String
+}
 
-        fields_['members'] = fields.Nested(members_)
+ARTICLE_FIELDS = {
+    'id': fields.Integer,
+    'title': fields.String,
+    'image': fields.String,
+    'ext_url': fields.String,
+    'created_at': DateTimeField,
+    'updated_at': DateTimeField,
+    'source': fields.Url('source'),
+    'authors': fields.Nested({
+        'url': fields.Url('author')
+    }),
+    'events': fields.Nested({
+        'url': fields.Url('event')
+    })
+}
 
-    fields_.update(custom)
-    return fields_
+AUTHOR_FIELDS = {
+    'id': fields.Integer,
+    'name': fields.String,
+    'articles': fields.Nested({
+        'url': fields.Url('article')
+    })
+}
+
+SOURCE_FIELDS = {
+    'id': fields.Integer,
+    'name': fields.String,
+    'url': fields.String,
+    'articles': fields.Nested({
+        'url': fields.Url('article')
+    })
+}
 
 
 class Event(Resource):
-    @marshal_with(cluster_fields())
+    @marshal_with(EVENT_FIELDS)
     def get(self, id):
         result = models.Event.query.get(id)
         return result or not_found()
 class Events(Resource):
-    # Doesn't need to return members, i.e. individual articles.
-    # That slows it down by a lot, and they aren't necessary here.
-    @marshal_with(cluster_fields(members=None))
+    @marshal_with(EVENT_FIELDS)
     def get(self):
         args = page_parser.parse_args()
         results = models.Event.query.paginate(args['page']).items
@@ -81,22 +118,22 @@ api.add_resource(Events, '/events')
 
 
 class Story(Resource):
-    @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
+    @marshal_with(STORY_FIELDS)
     def get(self, id):
         result = models.Story.query.get(id)
         return result or not_found()
 class Stories(Resource):
-    @marshal_with(cluster_fields(members={'url': fields.Url('event')}))
+    @marshal_with(STORY_FIELDS)
     def get(self):
         args = page_parser.parse_args()
         results = models.Story.query.paginate(args['page']).items
         return results or not_found()
 class StoryWatchers(Resource):
     from argos.web.routes.api.user import permitted_user_fields
-    @marshal_with({ 'watchers': fields.Nested(permitted_user_fields) })
+    @marshal_with(permitted_user_fields)
     def get(self, id):
         result = models.Story.query.get(id)
-        return result or not_found()
+        return result.watchers or not_found()
     @marshal_with(permitted_user_fields)
     def post(self, id):
         if current_user.is_authenticated():
@@ -121,13 +158,34 @@ api.add_resource(StoryWatchers, '/stories/<int:id>/watchers')
 
 
 class Entity(Resource):
-    @marshal_with({
-        'name': fields.String,
-        'slug': fields.String
-    })
+    @marshal_with(ENTITY_FIELDS)
     def get(self, slug):
         result = models.Entity.query.get(slug)
         return result or not_found()
 api.add_resource(Entity, '/entities/<string:slug>')
+
+
+class Article(Resource):
+    @marshal_with(ARTICLE_FIELDS)
+    def get(self, id):
+        result = models.Article.query.get(id)
+        return result or not_found()
+api.add_resource(Article, '/articles/<int:id>')
+
+
+class Author(Resource):
+    @marshal_with(AUTHOR_FIELDS)
+    def get(self, id):
+        result = models.Author.query.get(id)
+        return result or not_found()
+api.add_resource(Author, '/authors/<int:id>')
+
+
+class Source(Resource):
+    @marshal_with(SOURCE_FIELDS)
+    def get(self, id):
+        result = models.Source.query.get(id)
+        return result or not_found()
+api.add_resource(Source, '/sources/<int:id>')
 
 from argos.web.routes.api import user

@@ -32,7 +32,7 @@ def collect():
 
             # Check for existing copy.
             for article in articles:
-                if not Article.query.filter_by(url=article.url).count():
+                if not Article.query.filter_by(ext_url=article.url).count():
                     db.session.add(article)
                 results.append(article)
 

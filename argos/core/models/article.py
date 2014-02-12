@@ -34,7 +34,7 @@ class Article(Clusterable):
     title       = db.Column(db.Unicode)
     text        = db.Column(db.UnicodeText)
     html        = db.Column(db.UnicodeText)
-    url         = db.Column(db.Unicode)
+    ext_url     = db.Column(db.Unicode)
     image       = db.Column(db.String())
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
     authors     = db.relationship('Author',

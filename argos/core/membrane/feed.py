@@ -97,7 +97,7 @@ def articles(source):
         image_url = extract_image(entry_data, filename=hash(url), save_dir='data/images/')
 
         articles.append(Article(
-            url=url,
+            ext_url=url,
             source=source,
             html=html,
             text=full_text,

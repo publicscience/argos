@@ -27,14 +27,10 @@ class APITest(RequiresApp):
         entities = []
         for member in event.members:
             expected_members.append({
-                'title': member.title,
-                'id': member.id,
-                'url': member.url,
-                'created_at': member.created_at.isoformat()
+                'url': '/articles/{0}'.format(member.id)
             })
             for entity in member.entities:
                 entities.append({
-                    'name': entity.name,
                     'url': '/entities/{0}'.format(entity.slug)
                 })
 
@@ -48,7 +44,7 @@ class APITest(RequiresApp):
                 'image': event.image,
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
-                'members': expected_members,
+                'articles': expected_members,
                 'entities': expected_entities
         }
 
@@ -58,21 +54,25 @@ class APITest(RequiresApp):
 
     def test_GET_story(self):
         story = fac.story()
+        users = fac.user(num=4)
+        story.watchers = users
+        save()
 
         expected_members = []
         entities = []
+        expected_watchers = []
         for member in story.members:
             expected_members.append({
-                'title': member.title,
-                'id': member.id,
-                'url': '/events/{0}'.format(member.id),
-                'created_at': member.created_at.isoformat()
+                'url': '/events/{0}'.format(member.id)
             })
             for entity in member.entities:
                 entities.append({
-                    'name': entity.name,
                     'url': '/entities/{0}'.format(entity.slug)
                 })
+        for user in users:
+            expected_watchers.append({
+                'url': '/users/{0}'.format(user.id)
+            })
 
         # Filter down to unique entities.
         expected_entities = list({v['url']:v for v in entities}.values())
@@ -84,8 +84,9 @@ class APITest(RequiresApp):
                 'image': story.image,
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
-                'members': expected_members,
-                'entities': expected_entities
+                'events': expected_members,
+                'entities': expected_entities,
+                'watchers': expected_watchers
         }
 
         r = self.client.get('/stories/{0}'.format(story.id))
@@ -110,7 +111,7 @@ class APITest(RequiresApp):
 
         r = self.client.get('/stories/{0}/watchers'.format(story.id))
 
-        self.assertEqual(self.json(r), {'watchers': expected})
+        self.assertEqual(self.json(r), expected)
 
     def test_POST_story_watchers(self):
         story = fac.story()
@@ -141,3 +142,5 @@ class APITest(RequiresApp):
 
         r = self.client.delete('/stories/{0}/watchers'.format(story.id))
         self.assertEqual(len(story.watchers), 2)
+        for watcher in story.watchers:
+            self.assertNotEqual(watcher, user)
