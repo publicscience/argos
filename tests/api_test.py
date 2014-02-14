@@ -45,7 +45,8 @@ class APITest(RequiresApp):
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
-                'entities': expected_entities
+                'entities': expected_entities,
+                'stories': []
         }
 
         r = self.client.get('/events/{0}'.format(event.id))

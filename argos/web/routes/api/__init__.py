@@ -42,6 +42,9 @@ EVENT_FIELDS = {
     }),
     'articles': fields.Nested({
         'url': fields.Url('article')
+    }),
+    'stories': fields.Nested({
+        'url': fields.Url('story')
     })
 }
 
