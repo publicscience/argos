@@ -27,18 +27,18 @@ def collect():
     # Fetch entries for each source
     for source in Source.query.all():
         try:
-            logger.info('Fetching from {0}...'.format(source.url))
+            logger.info('Fetching from {0}...'.format(source.ext_url))
             articles = feed.articles(source)
 
             # Check for existing copy.
             for article in articles:
-                if not Article.query.filter_by(url=article.url).count():
+                if not Article.query.filter_by(ext_url=article.url).count():
                     db.session.add(article)
                 results.append(article)
 
         except feed.SAXException as e:
             # Error with the feed, make a note.
-            logger.info('Error fetching from {0}.'.format(source.url))
+            logger.info('Error fetching from {0}.'.format(source.ext_url))
             source.errors += 1
 
     logger.info('Finished fetching articles.')
@@ -57,7 +57,7 @@ def add_source(url):
                            or the feed itself.
     """
     feed_url = feed.find_feed(url)
-    if not Source.query.filter_by(url=feed_url).count():
+    if not Source.query.filter_by(ext_url=feed_url).count():
         source = Source(feed_url)
         db.session.add(source)
         db.session.commit()
@@ -89,7 +89,7 @@ def remove_source(url, delete_articles=False):
                                        from this source.
     """
     feed_url = feed.find_feed(url)
-    source = Source.query.filter_by(url=feed_url).first()
+    source = Source.query.filter_by(ext_url=feed_url).first()
 
     if source:
         # If specified, delete articles associated with
