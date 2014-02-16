@@ -16,7 +16,8 @@ class APITest(RequiresApp):
         r = self.client.get('/entities/{0}'.format(entity.slug))
         expected = {
                 'name': entity.name,
-                'slug': entity.slug
+                'slug': entity.slug,
+                'url': '/entities/{0}'.format(entity.slug),
         }
         self.assertEqual(self.json(r), expected)
 
@@ -39,6 +40,7 @@ class APITest(RequiresApp):
 
         expected = {
                 'id': event.id,
+                'url': '/events/{0}'.format(event.id),
                 'title': event.title,
                 'summary': event.summary,
                 'image': event.image,
@@ -80,6 +82,7 @@ class APITest(RequiresApp):
 
         expected = {
                 'id': story.id,
+                'url': '/stories/{0}'.format(story.id),
                 'title': story.title,
                 'summary': story.summary,
                 'image': story.image,

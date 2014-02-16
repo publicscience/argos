@@ -32,6 +32,7 @@ class DateTimeField(fields.Raw):
 
 EVENT_FIELDS = {
     'id': fields.Integer,
+    'url': fields.Url('event'),
     'title': fields.String,
     'image': fields.String,
     'summary': fields.String,
@@ -50,6 +51,7 @@ EVENT_FIELDS = {
 
 STORY_FIELDS = {
     'id': fields.Integer,
+    'url': fields.Url('story'),
     'title': fields.String,
     'image': fields.String,
     'summary': fields.String,
@@ -68,11 +70,13 @@ STORY_FIELDS = {
 
 ENTITY_FIELDS = {
     'name': fields.String,
-    'slug': fields.String
+    'slug': fields.String,
+    'url': fields.Url('entity')
 }
 
 ARTICLE_FIELDS = {
     'id': fields.Integer,
+    'url': fields.Url('article'),
     'title': fields.String,
     'image': fields.String,
     'ext_url': fields.String,
@@ -89,6 +93,7 @@ ARTICLE_FIELDS = {
 
 AUTHOR_FIELDS = {
     'id': fields.Integer,
+    'url': fields.Url('author'),
     'name': fields.String,
     'articles': fields.Nested({
         'url': fields.Url('article')
@@ -97,8 +102,9 @@ AUTHOR_FIELDS = {
 
 SOURCE_FIELDS = {
     'id': fields.Integer,
+    'url': fields.Url('source'),
     'name': fields.String,
-    'url': fields.String,
+    'ext_url': fields.String,
     'articles': fields.Nested({
         'url': fields.Url('article')
     })
