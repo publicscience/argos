@@ -40,7 +40,7 @@ def seed(debug=False):
         if debug:
             print(json.dumps(entry, sort_keys=True, indent=4))
 
-        source = Source.query.filter_by(url=entry['source']).first()
+        source = Source.query.filter_by(ext_url=entry['source']).first()
 
 
         a = Article(

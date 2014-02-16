@@ -57,7 +57,7 @@ def articles(source):
         | list -- list of processed latest articles (as dicts).
     """
     # Fetch the feed data.
-    data = feedparser.parse(source.url)
+    data = feedparser.parse(source.ext_url)
 
     # If the `bozo` value is anything
     # but 0, there was an error parsing (or connecting) to the feed.
