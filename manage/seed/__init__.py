@@ -42,16 +42,16 @@ def seed(debug=False):
 
         source = Source.query.filter_by(ext_url=entry['source']).first()
 
-
         a = Article(
-                url=entry['url'],
+                ext_url=entry['url'],
                 source=source,
                 html=entry['html'],
                 text=entry['text'],
                 tags=entry['tags'],
                 title=entry['title'],
                 created_at = parse(entry['published']),
-                updated_at = parse(entry['updated'])
+                updated_at = parse(entry['updated']),
+                image='http://frnsys.com/img/projects/album-art.png' # fake image
         )
         articles.append(a)
         db.session.add(a)

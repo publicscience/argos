@@ -8,6 +8,7 @@ from os import path
 from manage import load_articles
 
 def generate(num=200):
+    this_dir = path.dirname(__file__)
     articles = load_articles()
 
     # Load seed sources.
