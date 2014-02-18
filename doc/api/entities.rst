@@ -12,5 +12,8 @@ Example response
     {
         "name": "John Kerry",
         "slug": "john-kerry",
-        "url": "/entities/john-kerry"
+        "url": "/entities/john-kerry",
+        "stories": [{
+            "url": "/stories/1"
+        }]
     }

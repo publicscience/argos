@@ -71,7 +71,10 @@ STORY_FIELDS = {
 ENTITY_FIELDS = {
     'name': fields.String,
     'slug': fields.String,
-    'url': fields.Url('entity')
+    'url': fields.Url('entity'),
+    'stories': fields.Nested({
+        'url': fields.Url('story')
+    })
 }
 
 ARTICLE_FIELDS = {
