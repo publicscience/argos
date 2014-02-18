@@ -18,6 +18,7 @@ class APITest(RequiresApp):
                 'name': entity.name,
                 'slug': entity.slug,
                 'url': '/entities/{0}'.format(entity.slug),
+                'stories': []
         }
         self.assertEqual(self.json(r), expected)
 
