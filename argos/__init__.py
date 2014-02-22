@@ -3,6 +3,7 @@ from argos.datastore import init_db, init_model
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import SQLAlchemyUserDatastore, Security
+from flask_oauthlib.provider import OAuth2Provider
 
 # Initialize the database and declarative Base class
 db = SQLAlchemy(app)
