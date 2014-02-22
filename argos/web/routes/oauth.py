@@ -87,6 +87,12 @@ def save_token(token, request, *args, **kwargs):
 def access_token():
     return None
 
+@oauth.usergetter
+def get_user(username, password, *args, **kwargs):
+    # This is only necessary for the `password` grant type
+    # (i.e. resource owner credentials)
+    return User.query.filter_by(username=username).first()
+
 @app.route('/oauth/authorize', methods=['GET', 'POST'])
 @login_required
 @oauth.authorize_handler
