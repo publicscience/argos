@@ -13,17 +13,6 @@ twitter = oauth.remote_app('twitter', app_key='TWITTER')
 facebook = oauth.remote_app('facebook', app_key='FACEBOOK')
 google = oauth.remote_app('google', app_key='GOOGLE')
 
-@app.before_request
-def before_request():
-    pass
-    # Get the current user before each request.
-    #g.user = None
-    #for provider in ['twitter', 'facebook', 'google']:
-        #oauth = '{0}_oauth'.format(provider)
-        #if oauth in session:
-            #g.user = session[oauth]
-            #break
-
 @app.route('/oauth/twitter')
 def twitter_authorize():
     return twitter.authorize(callback=url_for('twitter_authorized', _external=True))
