@@ -46,9 +46,9 @@ def entity(num=1):
 
 def source(num=1):
     args = [
-        {'url': 'foo'},
-        {'url': 'bar'},
-        {'url': 'sup'}
+        {'ext_url': 'foo', 'name': 'The Times'},
+        {'ext_url': 'bar', 'name': 'The Post'},
+        {'ext_url': 'sup', 'name': 'The Journal'}
     ]
     s_s = [Source(**args[i]) for i in range(num)]
 

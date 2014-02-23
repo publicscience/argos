@@ -22,5 +22,9 @@ Example response
         }],
         "events": [{
             "url": "/events/1"
-        }]
+        }],
+        "source": {
+            "name": "The Times",
+            "url": "/sources/1"
+        }
     }

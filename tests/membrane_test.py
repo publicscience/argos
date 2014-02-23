@@ -87,7 +87,7 @@ class FeedTest(RequiresApp):
                )
         self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
-        self.source = Source('foo')
+        self.source = Source(ext_url='foo')
 
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, feed.articles, self.source)
@@ -272,7 +272,7 @@ class FeedFinderTest(RequiresMocks):
 class CollectorTest(RequiresApp):
     def setUp(self):
         # Add a fake source to work with.
-        self.source = Source('foo')
+        self.source = Source(ext_url='foo')
         self.db.session.add(self.source)
         self.db.session.commit()
 

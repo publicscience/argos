@@ -86,7 +86,10 @@ ARTICLE_FIELDS = {
     'ext_url': fields.String,
     'created_at': DateTimeField,
     'updated_at': DateTimeField,
-    'source': fields.Url('source'),
+    'source': fields.Nested({
+        'url': fields.Url('source'),
+        'name': fields.String
+    }),
     'authors': fields.Nested({
         'url': fields.Url('author')
     }),

@@ -58,7 +58,7 @@ def add_source(url):
     """
     feed_url = feed.find_feed(url)
     if not Source.query.filter_by(ext_url=feed_url).count():
-        source = Source(feed_url)
+        source = Source(ext_url=feed_url)
         db.session.add(source)
         db.session.commit()
 
@@ -73,7 +73,7 @@ def add_sources(urls):
     """
     for url in urls:
         feed_url = feed.find_feed(url)
-        source = Source(feed_url)
+        source = Source(ext_url=feed_url)
         db.session.add(source)
     db.session.commit()
 

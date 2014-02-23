@@ -150,3 +150,27 @@ class APITest(RequiresApp):
         self.assertEqual(len(story.watchers), 2)
         for watcher in story.watchers:
             self.assertNotEqual(watcher, user)
+
+    def test_GET_article(self):
+        article = fac.article()
+        source = fac.source()
+        article.source = source
+        save()
+
+        r = self.client.get('/articles/{0}'.format(article.id))
+        expected = {
+                'id': article.id,
+                'url': '/articles/{0}'.format(article.id),
+                'title': article.title,
+                'ext_url': article.ext_url,
+                'image': article.image,
+                'created_at': article.created_at.isoformat(),
+                'updated_at': article.updated_at.isoformat(),
+                'authors': [],
+                'events': [],
+                'source': {
+                    'url': '/sources/{0}'.format(source.id),
+                    'name': source.name
+                }
+        }
+        self.assertEqual(self.json(r), expected)
