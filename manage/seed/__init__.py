@@ -40,7 +40,7 @@ def seed(debug=False):
     # Create sources
     print('Creating sources...')
     for url in json.load(sources):
-        s = Source(url)
+        s = Source(ext_url=url, name='The Times') # fake name
         db.session.add(s)
     db.session.commit()
     num_sources = Source.query.count()
