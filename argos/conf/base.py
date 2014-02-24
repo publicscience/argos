@@ -17,6 +17,8 @@ DATABASE = {
     'default': {
         'TYPE': 'postgresql',
         'HOST': 'localhost',
+        'USER': 'argos_user',
+        'PASSWORD': 'password',
         'PORT': 5432,
         'NAME': 'argos_dev'
     },

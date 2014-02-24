@@ -5,6 +5,7 @@
 DB_USER=argos_user
 DEV_DB=argos_dev
 TEST_DB=argos_test
+DEFAULT_PW=password
 
 
 # FUNCS
@@ -39,7 +40,9 @@ function db_create {
     if [[ $user_exists != 1 ]]
     then
         echo -e "Creating database user $(tput setaf 3)$DB_USER$(tput sgr0)..."
-        $PREFIX createuser -U postgres $DB_USER -S -d -R
+        $PREFIX psql postgres <<OMG
+            CREATE USER $DB_USER PASSWORD $DEFAULT_PW NOSUPERUSER CREATEDB NOCREATEROLE INHERIT LOGIN;
+        OMG
     else
         echo -e "Database user $(tput setaf 3)$DB_USER$(tput sgr0) already exists, moving on..."
     fi
