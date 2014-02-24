@@ -40,9 +40,7 @@ function db_create {
     if [[ $user_exists != 1 ]]
     then
         echo -e "Creating database user $(tput setaf 3)$DB_USER$(tput sgr0)..."
-        $PREFIX psql postgres <<OMG
-            CREATE USER $DB_USER PASSWORD $DEFAULT_PW NOSUPERUSER CREATEDB NOCREATEROLE INHERIT LOGIN;
-        OMG
+        $PREFIX psql postgres -c "CREATE USER $DB_USER PASSWORD $DEFAULT_PW NOSUPERUSER CREATEDB NOCREATEROLE INHERIT LOGIN;"
     else
         echo -e "Database user $(tput setaf 3)$DB_USER$(tput sgr0) already exists, moving on..."
     fi
