@@ -32,6 +32,13 @@ This will install any necessary system dependencies, setup the
 virtualenv, setup NLTK with the necessary data, install Postgres and setup its databases,
 download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download), and generate the documentation.
 
+You will also need to setup the databases, which you can do with:
+```bash
+$ ./run db:create
+```
+This creates a Postgres user, `argos_user`, and sets up development and
+testing databases (`argos_dev`, and `argos_test`) respectively.
+
 ### Running & Development
 And then when you're ready to start developing/testing, run:
 ```bash
