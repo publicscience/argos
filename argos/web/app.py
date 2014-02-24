@@ -11,4 +11,4 @@ app = Flask(__name__,
 app.config.update(APP)
 
 if environ.get('FLASK_ENV') == 'TESTING':
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/argos_test'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://argos_user:password@localhost:5432/argos_test'
