@@ -115,7 +115,7 @@ setup_ner
 setup_nltk
 
 # Create databases.
-./manage db:create
+./run db:create
 
 ./run doc
 
