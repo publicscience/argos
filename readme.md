@@ -37,7 +37,7 @@ You will also need to setup the databases, which you can do with:
 $ ./run db:create
 ```
 This creates a Postgres user, `argos_user`, and sets up development and
-testing databases (`argos_dev`, and `argos_test`) respectively.
+testing databases (`argos_dev`, and `argos_test`) respectively. (If you ran `./setup` already, this step should not be necessary.)
 
 ### Running & Development
 And then when you're ready to start developing/testing, run:
