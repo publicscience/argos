@@ -26,33 +26,25 @@ class OAuthTest(RequiresApp):
         r = self.client.get('/client')
         oauth_client_credentials = self.json(r)
 
-        # The official client should be allowed the `resource_owner_credentials` grant type.
         oauth_client_ = Client.query.get(oauth_client_credentials['client_id'])
         oauth_client_._allowed_grant_types=allowed_grant_types
         self.db.session.commit()
 
         return oauth_client_credentials['client_id'], oauth_client_credentials['client_secret']
 
-    def get_auth_code(self, client_id, grant_type='authorization_code', scope='userinfo', method='GET', email=None, password=None):
+    def get_auth_code(self, client_id, grant_type='authorization_code', scope='userinfo'):
         auth_url = '/oauth/authorize?client_id={0}&response_type=code&grant_type={1}&scope={2}&redirect_uri={3}'.format(client_id, grant_type, scope, self.encoded_redirect_uri)
 
-        if method == 'POST':
-            # Meant for the `resource_owner_credentials` flow,
-            # where the user authenticates with their credentials.
-            r = self.client.post(auth_url, data={'email': email, 'password': password})
-        else:
-            # Meant for the more traditional `authorization_code` flow.
-            r = self.client.get(auth_url)
+        # Meant for the more traditional `authorization_code` flow.
+        r = self.client.get(auth_url)
 
         location = r.headers.get('Location')
 
-        # For the `authorization_code` flow, we expect this to return the authorization form.
+        # Except this to return the authorization form.
         if location is None and r.status_code == 200:
             return r.data
 
-        # Access denied/credentials invalid.
-        if location == '{0}?error=access_denied'.format(self.default_redirect_uri) or r.status_code == 400:
-            return None
+        # Extract and return the auth code.
         return location.replace('{0}?code='.format(self.default_redirect_uri), '')
 
     def get_tokens(self, authorization_code, client_id, client_secret=None):
@@ -74,112 +66,126 @@ class OAuthTest(RequiresApp):
         self.assertGreater(len(oauth_client_credentials['client_secret']), 0)
         self.assertEqual(Client.query.count(), 1)
 
-    def test_flow_official_client_valid_user_credentials(self):
-        # Official client, e.g. grant type of `resource_owner_credentials`.
+class OAuthPasswordGrantTypeTest(OAuthTest):
+    def test_with_confidential_client(self):
+        client_id, client_secret = self.create_client(allowed_grant_types='password')
+        client = Client.query.get(client_id)
+        client.is_confidential = True
+        self.db.session.commit()
+
         self.assertEqual(Token.query.count(), 0)
-        self.assertEqual(Grant.query.count(), 0)
+        #self.assertEqual(Grant.query.count(), 0)
 
-        client_id, client_secret = self.create_client(allowed_grant_types='resource_owner_credentials authorization_code')
-        code = self.get_auth_code(
-                client_id,
-                grant_type='resource_owner_credentials',
-                scope='userinfo',
-                method='POST',
-                email=self.userdata['email'],
-                password=self.userdata['password']
-        )
+        r = self.client.post('/oauth/token', data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'password',
+            'username': self.userdata['email'],
+            'password': self.userdata['password']
+        })
+        data = self.json(r)
 
-        tokens = self.get_tokens(code, client_id)
-
-        self.assertGreater(len(tokens['access_token']), 0)
-        self.assertGreater(len(tokens['refresh_token']), 0)
-        self.assertEqual(tokens['token_type'], 'Bearer')
-        self.assertEqual(tokens['scope'], 'userinfo')
-
+        self.assertTrue('access_token' in data)
+        self.assertTrue('refresh_token' in data)
+        self.assertEqual(data['token_type'], 'Bearer')
+        self.assertEqual(data['scope'], 'userinfo')
         self.assertEqual(Token.query.count(), 1)
-        self.assertEqual(Grant.query.count(), 1)
+        #self.assertEqual(Grant.query.count(), 1)
 
-    def test_flow_official_client_invalid_user_password(self):
-        client_id, client_secret = self.create_client(allowed_grant_types='resource_owner_credentials authorization_code')
-
-        code = self.get_auth_code(
-                client_id,
-                grant_type='resource_owner_credentials',
-                scope='userinfo',
-                method='POST',
-                email=self.userdata['email'],
-                password='incorrect password'
-        )
-
-        self.assertEqual(code, None)
-
-    def test_flow_official_client_invalid_user_email(self):
-        client_id, client_secret = self.create_client(allowed_grant_types='resource_owner_credentials authorization_code')
-
-        code = self.get_auth_code(
-                client_id,
-                grant_type='resource_owner_credentials',
-                scope='userinfo',
-                method='POST',
-                email='invalid email',
-                password=self.userdata['password']
-        )
-
-        self.assertEqual(code, None)
-
-    def test_flow_client_not_allowed_resource_owner_credentials_grant_type(self):
+    def test_not_in_allowed_grant_types(self):
         # Only allow `authorization_code`
         client_id, client_secret = self.create_client(allowed_grant_types='authorization_code')
+        client = Client.query.get(client_id)
+        client.is_confidential = True
+        self.db.session.commit()
 
-        code = self.get_auth_code(
-                client_id,
-                grant_type='resource_owner_credentials',
-                scope='userinfo',
-                method='POST',
-                email=self.userdata['email'],
-                password=self.userdata['password']
-        )
+        r = self.client.post('/oauth/token', data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'password',
+            'username': self.userdata['email'],
+            'password': self.userdata['password']
+        })
+        data = self.json(r)
 
-        # Begin authorization flow.
-        self.assertEqual(code, None)
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(data['error'], 'unauthorized_client')
 
-    def test_flow_client_invalid_scope(self):
-        client_id, client_secret = self.create_client(allowed_grant_types='resource_owner_credentials authorization_code')
+    def test_with_confidential_client_invalid_password(self):
+        client_id, client_secret = self.create_client(allowed_grant_types='password')
+        client = Client.query.get(client_id)
+        client.is_confidential = True
+        self.db.session.commit()
 
-        code = self.get_auth_code(
-                client_id,
-                grant_type='resource_owner_credentials',
-                scope='invalid',
-                method='POST',
-                email=self.userdata['email'],
-                password=self.userdata['password']
-        )
+        r = self.client.post('/oauth/token', data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'password',
+            'username': self.userdata['email'],
+            'password': 'wrong_password'
+        })
+        data = self.json(r)
 
-        self.assertEqual(code, None)
+        self.assertEqual(data['error'], 'invalid_grant')
 
-    def test_flow_client_invalid_method_for_resource_owner_credentials(self):
-        client_id, client_secret = self.create_client(allowed_grant_types='resource_owner_credentials authorization_code')
+    def test_with_confidential_client_invalid_email(self):
+        client_id, client_secret = self.create_client(allowed_grant_types='password')
+        client = Client.query.get(client_id)
+        client.is_confidential = True
+        self.db.session.commit()
 
-        code = self.get_auth_code(
-                client_id,
-                grant_type='resource_owner_credentials',
-                scope='userinfo',
-                method='GET',
-                email=self.userdata['email'],
-                password=self.userdata['password']
-        )
+        r = self.client.post('/oauth/token', data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'password',
+            'username': 'wrong_email@email.com',
+            'password': self.userdata['password']
+        })
+        data = self.json(r)
 
-        self.assertEqual(code, None)
+        self.assertEqual(data['error'], 'invalid_grant')
 
-    def test_flow_client_for_authorization_code_grant_type_user_allows(self):
+    def test_with_public_client(self):
+        client_id, client_secret = self.create_client(allowed_grant_types='password')
+        r = self.client.post('/oauth/token', data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'password',
+            'username': self.userdata['email'],
+            'password': self.userdata['password']
+        })
+        data = self.json(r)
+        self.assertEqual(data['error'], 'invalid_client')
+
+    def test_with_confidential_client_invalid_scope(self):
+        client_id, client_secret = self.create_client(allowed_grant_types='password')
+        client = Client.query.get(client_id)
+        client.is_confidential = True
+        self.db.session.commit()
+
+        r = self.client.post('/oauth/token', data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'password',
+            'scope': 'invalid',
+            'username': self.userdata['email'],
+            'password': self.userdata['password']
+        })
+        data = self.json(r)
+
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(data['message'], 'Invalid scope.')
+
+
+class OAuthAuthCodeGrantTypeTest(OAuthTest):
+    def test_when_user_confirms(self):
         client_id, client_secret = self.create_client(allowed_grant_types='authorization_code')
 
         scope = 'userinfo'
         auth_form = self.get_auth_code(
                 client_id,
                 grant_type='authorization_code',
-                scope=scope,
-                method='GET'
+                scope=scope
         )
 
         self.assertNotEqual(auth_form, None)
@@ -206,16 +212,14 @@ class OAuthTest(RequiresApp):
         self.assertEqual(Token.query.count(), 1)
         self.assertEqual(Grant.query.count(), 1)
 
-
-    def test_flow_client_for_authorization_code_grant_type_user_does_not_allow(self):
+    def test_when_user_doesnt_confirm(self):
         client_id, client_secret = self.create_client(allowed_grant_types='authorization_code')
 
         scope = 'userinfo'
         auth_form = self.get_auth_code(
                 client_id,
                 grant_type='authorization_code',
-                scope=scope,
-                method='GET'
+                scope=scope
         )
 
         self.assertNotEqual(auth_form, None)
