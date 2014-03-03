@@ -117,7 +117,6 @@ SOURCE_FIELDS = {
     })
 }
 
-
 class Event(Resource):
     @marshal_with(EVENT_FIELDS)
     def get(self, id):
@@ -204,4 +203,4 @@ class Source(Resource):
         return result or not_found()
 api.add_resource(Source, '/sources/<int:id>')
 
-from argos.web.routes.api import user
+from argos.web.routes.api import user, search
