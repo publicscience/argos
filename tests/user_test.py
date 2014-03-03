@@ -1,4 +1,6 @@
 from tests import RequiresApp
+import tests.factories as fac
+from tests.helpers import save
 
 from argos.web.models.user import User, Auth, AuthExistsForUserException
 from argos.web.routes.auth import _process_user
@@ -93,7 +95,7 @@ class UserAPITest(RequiresApp):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
-        r = self.client.post('/test_login', data={'id': 1})
+        self.client.post('/test_login', data={'id': 1})
         r = self.client.get('/user')
         self.assertEqual(r.status_code, 200)
 
@@ -105,7 +107,7 @@ class UserAPITest(RequiresApp):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
-        r = self.client.post('/test_login', data={'id': 1})
+        self.client.post('/test_login', data={'id': 1})
         r = self.client.patch('/user', data={'something':'foo'})
         self.assertEqual(r.status_code, 200)
 
@@ -115,6 +117,70 @@ class UserAPITest(RequiresApp):
         self.db.session.commit()
         r = self.client.get('/users/1')
         self.assertEqual(self.json(r)['name'], self.userdata['name'])
+
+    def test_get_current_user_watching(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        story = fac.story()
+        user.watching.append(story)
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+
+        r = self.client.get('/user/watching')
+
+        expected_members = []
+        entities = []
+        expected_watchers = [{'url': '/users/{0}'.format(user.id)}]
+        for member in story.members:
+            expected_members.append({
+                'url': '/events/{0}'.format(member.id)
+            })
+            for entity in member.entities:
+                entities.append({
+                    'url': '/entities/{0}'.format(entity.slug)
+                })
+
+        # Filter down to unique entities.
+        expected_entities = list({v['url']:v for v in entities}.values())
+
+        expected = {
+                'id': story.id,
+                'url': '/stories/{0}'.format(story.id),
+                'title': story.title,
+                'summary': story.summary,
+                'image': story.image,
+                'updated_at': story.updated_at.isoformat(),
+                'created_at': story.created_at.isoformat(),
+                'events': expected_members,
+                'entities': expected_entities,
+                'watchers': expected_watchers
+        }
+        self.assertEqual(self.json(r), [expected])
+
+    def test_patch_current_user_watching(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+        story = fac.story()
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+        r = self.client.post('/user/watching', data={'story_id':story.id})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(story.watchers, [user])
+        self.assertEqual(user.watching, [story])
+
+    def test_patch_current_user_watching_not_authenticated(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+        story = fac.story()
+        save()
+
+        r = self.client.post('/user/watching', data={'story_id':story.id})
+        self.assertEqual(r.status_code, 401)
+        self.assertEqual(story.watchers, [])
+        self.assertEqual(user.watching, [])
 
 class AuthTest(RequiresApp):
     def test_update_token_simple(self):

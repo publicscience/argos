@@ -20,7 +20,7 @@ Example response
     [
         {
             "id": 1,
-            "url": "/stories",
+            "url": "/stories/1",
             "title": "Syrian civil war",
             "image": "https://s3.amazonaws.com/argos/237383249.jpg",
             "summary": "Armed uprising in Syria between President Assad and the Muslim Brotherhood...",
@@ -50,7 +50,7 @@ Example response
 
     {
         "id": 1,
-        "url": "/stories",
+        "url": "/stories/1",
         "title": "Syrian civil war",
         "image": "https://s3.amazonaws.com/argos/237383249.jpg",
         "summary": "Armed uprising in Syria between President Assad and the Muslim Brotherhood...",
