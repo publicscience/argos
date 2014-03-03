@@ -150,3 +150,24 @@ Example response
             }]
         }
     ]
+
+
+**Add a story to the currently authenticated user watched stories**::
+
+    DELETE /user/watching
+
+Parameters
+
++---------------+--------+---------------------------------------+
+| Name          | Type   | Description                           |
++===============+========+=======================================+
+| story_id      | int    | The id of the story to stop watching. |
++---------------+--------+---------------------------------------+
+
+Example response
+
+for `/user/watching?story_id=1`
+
+.. code-block:: json
+
+    200

@@ -61,6 +61,18 @@ class CurrentUserWatching(Resource):
             return story
         else:
             return unauthorized()
+
+    def delete(self):
+        if current_user.is_authenticated():
+            id = watching_parser.parse_args()['story_id']
+            story = models.Story.query.get(id)
+            if not story or story not in current_user.watching:
+                return not_found()
+            current_user.watching.remove(story)
+            db.session.commit()
+            return 200
+        else:
+            return unauthorized()
 api.add_resource(CurrentUserWatching, '/user/watching')
 
 class User(Resource):

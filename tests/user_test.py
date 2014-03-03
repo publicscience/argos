@@ -171,6 +171,18 @@ class UserAPITest(RequiresApp):
         self.assertEqual(story.watchers, [user])
         self.assertEqual(user.watching, [story])
 
+    def test_delete_current_user_watching(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+        story = fac.story()
+        user.watching.append(story)
+        save()
+        self.client.post('/test_login', data={'id': 1})
+        r = self.client.delete('/user/watching?story_id={0}'.format(story.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(story.watchers, [])
+        self.assertEqual(user.watching, [])
+
     def test_patch_current_user_watching_not_authenticated(self):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
