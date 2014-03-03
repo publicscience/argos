@@ -11,3 +11,4 @@ API
    api/authors
    api/sources
    api/users
+   api/search
