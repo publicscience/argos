@@ -25,6 +25,8 @@ class APITest(RequiresApp):
 
     def test_GET_event(self):
         event = fac.event()
+        event.members[0].image = 'http://foo.jpg'
+        save()
 
         expected_members = []
         entities = []
@@ -46,6 +48,7 @@ class APITest(RequiresApp):
                 'title': event.title,
                 'summary': event.summary,
                 'image': event.image,
+                'images': ['http://foo.jpg'],
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
@@ -61,6 +64,7 @@ class APITest(RequiresApp):
         story = fac.story()
         users = fac.user(num=4)
         story.watchers = users
+        story.members[0].image = 'http://foo.jpg'
         save()
 
         expected_members = []
@@ -88,6 +92,7 @@ class APITest(RequiresApp):
                 'title': story.title,
                 'summary': story.summary,
                 'image': story.image,
+                'images': ['http://foo.jpg'],
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,

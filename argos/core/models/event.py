@@ -34,6 +34,13 @@ class Event(Cluster):
     def articles(self, value):
         self.members = value
 
+    @property
+    def images(self):
+        """
+        Gets images from its members.
+        """
+        return [member.image for member in self.members if member.image is not None]
+
     def summarize(self):
         """
         Generate a summary for this cluster.
