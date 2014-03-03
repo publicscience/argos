@@ -1,7 +1,7 @@
 import argos.web.models as models
 
 from argos.datastore import db
-from argos.web.routes.api import api, not_found, unauthorized, page_parser, DateTimeField, STORY_FIELDS
+from argos.web.routes.api import api, not_found, unauthorized, page_parser, DateTimeField, STORY_FIELDS, EVENT_FIELDS
 
 from flask import request
 from flask_security.core import current_user
@@ -14,6 +14,9 @@ parser.add_argument('something', type=str)
 
 watching_parser = reqparse.RequestParser()
 watching_parser.add_argument('story_id', type=int)
+
+bookmarked_parser = reqparse.RequestParser()
+bookmarked_parser.add_argument('event_id', type=int)
 
 permitted_user_fields = {
     'id': fields.Integer,
@@ -49,7 +52,6 @@ class CurrentUserWatching(Resource):
             return current_user.watching
         else:
             return unauthorized()
-    @marshal_with(STORY_FIELDS)
     def post(self):
         if current_user.is_authenticated():
             id = watching_parser.parse_args()['story_id']
@@ -58,10 +60,9 @@ class CurrentUserWatching(Resource):
                 return not_found()
             current_user.watching.append(story)
             db.session.commit()
-            return story
+            return 200
         else:
             return unauthorized()
-
     def delete(self):
         if current_user.is_authenticated():
             id = watching_parser.parse_args()['story_id']
@@ -74,6 +75,37 @@ class CurrentUserWatching(Resource):
         else:
             return unauthorized()
 api.add_resource(CurrentUserWatching, '/user/watching')
+
+class CurrentUserBookmarked(Resource):
+    @marshal_with(EVENT_FIELDS)
+    def get(self):
+        if current_user.is_authenticated():
+            return current_user.bookmarked
+        else:
+            return unauthorized()
+    def post(self):
+        if current_user.is_authenticated():
+            id = bookmarked_parser.parse_args()['event_id']
+            event = models.Event.query.get(id)
+            if not event:
+                return not_found()
+            current_user.bookmarked.append(event)
+            db.session.commit()
+            return 200
+        else:
+            return unauthorized()
+    def delete(self):
+        if current_user.is_authenticated():
+            id = bookmarked_parser.parse_args()['event_id']
+            event = models.Event.query.get(id)
+            if not event or event not in current_user.bookmarked:
+                return not_found()
+            current_user.bookmarked.remove(event)
+            db.session.commit()
+            return 200
+        else:
+            return unauthorized()
+api.add_resource(CurrentUserBookmarked, '/user/bookmarked')
 
 class User(Resource):
     @marshal_with(permitted_user_fields)

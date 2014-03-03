@@ -11,9 +11,17 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
+# Table for users watching stories.
 users_stories = db.Table('users_stories',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('story_id', db.Integer(), db.ForeignKey('story.id')))
+
+# Table for users bookmarking events.
+users_events = db.Table('users_events',
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('event_id', db.Integer(), db.ForeignKey('event.id')))
+
+# Table for users 
 
 class AuthExistsForUserException(Exception):
     pass
@@ -136,6 +144,8 @@ class User(Model, UserMixin):
                             backref=db.backref('users', lazy='dynamic'))
     watching        = db.relationship('Story', secondary=users_stories,
                             backref=db.backref('watchers', lazy='joined'))
+    bookmarked      = db.relationship('Event', secondary=users_events,
+                            backref=db.backref('bookmarkers', lazy='joined'))
     created_at      = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at      = db.Column(db.DateTime, default=datetime.utcnow)
 

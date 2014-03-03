@@ -130,27 +130,7 @@ Example response
 
 .. code-block:: json
 
-    [
-        {
-            "id": 1,
-            "url": "/stories/1",
-            "title": "Syrian civil war",
-            "image": "https://s3.amazonaws.com/argos/237383249.jpg",
-            "summary": "Armed uprising in Syria between President Assad and the Muslim Brotherhood...",
-            "updated_at": "2014-02-07T23:42:15.581374",
-            "created_at": "2014-02-06T20:55:54.597459",
-            "entities": [{
-                "url": "/entities/muslim-brotherhood"
-            }],
-            "events": [{
-                "url": "/events/1"
-            }],
-            "watchers": [{
-                "url": "/users/1"
-            }]
-        }
-    ]
-
+    200
 
 **Add a story to the currently authenticated user watched stories**::
 
@@ -167,6 +147,77 @@ Parameters
 Example response
 
 for `/user/watching?story_id=1`
+
+.. code-block:: json
+
+    200
+
+-----
+
+**Get the currently authenticated user's bookmarked events**::
+
+    GET /user/bookmarked
+
+Example response
+
+.. code-block:: json
+
+    [
+        {
+            "id": 1,
+            "url": "/events/1",
+            "title": "Kerry leads Syrian peace talks",
+            "image": "https://s3.amazonaws.com/argos/189751513.jpg",
+            "summary": "Secretary of State John Kerry said on Sunday that Iran might play...",
+            "updated_at": "2014-02-07T23:42:15.581374",
+            "created_at": "2014-02-06T20:55:54.597459",
+            "entities": [{
+                "url": "/entities/john-kerry"
+            }],
+            "articles": [{
+                "url": "/articles/1"
+            }],
+            "stories": [{
+                "url": "/stories/1"
+            }]
+        }
+    ]
+
+-----
+
+**Add a event to the currently authenticated user bookmarked events**::
+
+    POST /user/bookmarked
+
+Parameters
+
++---------------+--------+----------------------------------+
+| Name          | Type   | Description                      |
++===============+========+==================================+
+| event_id      | int    | The id of the event to bookmark. |
++---------------+--------+----------------------------------+
+
+Example response
+
+.. code-block:: json
+
+    200
+
+**Add a event to the currently authenticated user bookmarked events**::
+
+    DELETE /user/bookmarked
+
+Parameters
+
++---------------+--------+---------------------------------------+
+| Name          | Type   | Description                           |
++===============+========+=======================================+
+| event_id      | int    | The id of the event to unbookmark.    |
++---------------+--------+---------------------------------------+
+
+Example response
+
+for `/user/bookmarked?event_id=1`
 
 .. code-block:: json
 

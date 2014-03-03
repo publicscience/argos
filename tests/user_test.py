@@ -159,7 +159,7 @@ class UserAPITest(RequiresApp):
         }
         self.assertEqual(self.json(r), [expected])
 
-    def test_patch_current_user_watching(self):
+    def test_post_current_user_watching(self):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         story = fac.story()
@@ -183,7 +183,7 @@ class UserAPITest(RequiresApp):
         self.assertEqual(story.watchers, [])
         self.assertEqual(user.watching, [])
 
-    def test_patch_current_user_watching_not_authenticated(self):
+    def test_post_current_user_watching_not_authenticated(self):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         story = fac.story()
@@ -193,6 +193,82 @@ class UserAPITest(RequiresApp):
         self.assertEqual(r.status_code, 401)
         self.assertEqual(story.watchers, [])
         self.assertEqual(user.watching, [])
+
+    def test_get_current_user_bookmarked(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        event = fac.event()
+        user.bookmarked.append(event)
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+
+        r = self.client.get('/user/bookmarked')
+
+        expected_members = []
+        entities = []
+        for member in event.members:
+            expected_members.append({
+                'url': '/articles/{0}'.format(member.id)
+            })
+            for entity in member.entities:
+                entities.append({
+                    'url': '/entities/{0}'.format(entity.slug)
+                })
+
+        # Filter down to unique entities.
+        expected_entities = list({v['url']:v for v in entities}.values())
+
+        expected = {
+                'id': event.id,
+                'url': '/events/{0}'.format(event.id),
+                'title': event.title,
+                'summary': event.summary,
+                'image': event.image,
+                'updated_at': event.updated_at.isoformat(),
+                'created_at': event.created_at.isoformat(),
+                'articles': expected_members,
+                'entities': expected_entities,
+                'stories': []
+        }
+
+        self.assertEqual(self.json(r), [expected])
+
+    def test_post_current_user_bookmarked(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        event = fac.event()
+        user.bookmarked.append(event)
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+        r = self.client.post('/user/bookmarked', data={'event_id':event.id})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(user.bookmarked, [event])
+
+    def test_delete_current_user_bookmarked(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+        event = fac.event()
+        user.bookmarked.append(event)
+        save()
+        self.client.post('/test_login', data={'id': 1})
+        r = self.client.delete('/user/bookmarked?event_id={0}'.format(event.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(user.bookmarked, [])
+
+    def test_post_current_user_bookmarked_not_authenticated(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        event = fac.event()
+        save()
+
+        r = self.client.post('/user/bookmarked', data={'event_id':event.id})
+        self.assertEqual(r.status_code, 401)
+        self.assertEqual(user.bookmarked, [])
 
 class AuthTest(RequiresApp):
     def test_update_token_simple(self):
