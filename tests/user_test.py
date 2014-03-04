@@ -151,6 +151,7 @@ class UserAPITest(RequiresApp):
                 'title': story.title,
                 'summary': story.summary,
                 'image': story.image,
+                'images': [],
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,
@@ -195,6 +196,9 @@ class UserAPITest(RequiresApp):
         self.assertEqual(user.watching, [])
 
     def test_get_current_user_bookmarked(self):
+        # The score of an event is hard to anticipate, so mock it.
+        self.create_patch('argos.core.models.Event.score', return_value=1)
+
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
 
@@ -226,6 +230,8 @@ class UserAPITest(RequiresApp):
                 'title': event.title,
                 'summary': event.summary,
                 'image': event.image,
+                'images': [],
+                'score': 1,
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,

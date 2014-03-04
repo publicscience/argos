@@ -6,6 +6,7 @@ from argos.core.brain.summarize import summarize, multisummarize
 from argos.util.logger import logger
 
 from datetime import datetime
+from math import log
 
 events_articles = db.Table('events_articles',
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
@@ -40,6 +41,26 @@ class Event(Cluster):
         Gets images from its members.
         """
         return [member.image for member in self.members if member.image is not None]
+
+    @property
+    def score(self):
+        """
+        Calculates a score for the event,
+        based on its articles' scores.
+
+        Its score is modified by the oldness of this event.
+
+        Currently this uses the Reddit 'hot' formula,
+        see: http://amix.dk/blog/post/19588
+        """
+        score = sum([member.score for member in self.members])
+        epoch = datetime(1970, 1, 1)
+        td = self.updated_at - epoch
+        epoch_seconds = td.days * 86400 + td.seconds + (float(td.microseconds) / 1000000)
+        order = log(max(abs(score), 1), 10)
+        sign = 1 if score > 0 else -1 if score < 0 else 0
+        seconds = epoch_seconds - 1134028003
+        return round(order + sign * seconds / 45000, 7)
 
     def summarize(self):
         """

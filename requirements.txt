@@ -35,6 +35,7 @@ sphinx-rtd-theme==0.1.5
 python-slugify==0.0.7
 Unidecode==0.04.14
 pycrypto==2.6.1
+xmltodict==0.8.6
 
 # Use latest feedparser and unofficial Py3 chardet port.
 # Although feedparser says it supports Py3.3,

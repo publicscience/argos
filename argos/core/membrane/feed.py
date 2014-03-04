@@ -14,7 +14,7 @@ Example::
     print(articles(source))
 """
 
-from argos.core.membrane import feedfinder
+from argos.core.membrane import feedfinder, evaluator
 from argos.core.models import Article, Author
 from argos.core.brain import entities
 from argos.util.gullet import download
@@ -106,7 +106,8 @@ def articles(source):
             title=title,
             created_at=published,
             updated_at=updated,
-            image=image_url
+            image=image_url,
+            score=evaluator.score(url)
        ))
 
     return articles

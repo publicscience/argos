@@ -22,7 +22,6 @@ def collect():
     results = []
 
     logger.info('Fetching articles...')
-    print('collecting')
 
     # Fetch entries for each source
     for source in Source.query.all():

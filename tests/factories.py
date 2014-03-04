@@ -60,9 +60,9 @@ def source(num=1):
 
 def article(num=1, **kwargs):
     args = [
-        {'title':'Dinosaurs', 'text':'Dinosaurs are cool, Clinton'},
-        {'title':'Robots', 'text':'Robots are nice, Clinton'},
-        {'title':'Mudcrabs', 'text':'Mudcrabs are everywhere, Clinton'}
+        {'title':'Dinosaurs', 'text':'Dinosaurs are cool, Clinton', 'score': 100},
+        {'title':'Robots', 'text':'Robots are nice, Clinton', 'score': 100},
+        {'title':'Mudcrabs', 'text':'Mudcrabs are everywhere, Clinton', 'score': 100}
     ]
 
     if not kwargs:

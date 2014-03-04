@@ -5,6 +5,7 @@ from datetime import datetime
 import argos.core.membrane.feed as feed
 import argos.core.membrane.feedfinder as feedfinder
 import argos.core.membrane.collector as collector
+import argos.core.membrane.evaluator as evaluator
 
 from argos.core.models import Source, Article, Author
 
@@ -169,6 +170,9 @@ class FeedTest(RequiresApp):
 
         # Mock the download method to return some local image path.
         self.create_patch('argos.core.membrane.feed.download', return_value='/foo/bar/image.jpg')
+
+        # Mock the evaluator score calculation.
+        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
 
         self.create_patch('argos.core.membrane.feed.extract_entry_data', return_value=(extracted_data, full_text))
         articles = feed.articles(self.source)
@@ -335,3 +339,65 @@ class CollectorTest(RequiresApp):
         collector.add_source(url)
         self.assertEquals(Source.query.count(), 2)
 
+
+class EvaluatorTest(RequiresApp):
+    url = 'test'
+
+    def test_facebook(self):
+        body = b"""
+            <links_getStats_response xmlns="http://api.facebook.com/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://api.facebook.com/1.0/ http://api.facebook.com/1.0/facebook.xsd" list="true">
+                <link_stat>
+                    <url>www.google.com</url>
+                    <normalized_url>http://www.google.com/</normalized_url>
+                    <share_count>5402940</share_count>
+                    <like_count>1371562</like_count>
+                    <comment_count>1728901</comment_count>
+                    <total_count>8503403</total_count>
+                    <click_count>265614</click_count>
+                    <comments_fbid>381702034999</comments_fbid>
+                    <commentsbox_count>841</commentsbox_count>
+                </link_stat>
+            </links_getStats_response>
+        """
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = body
+
+        self.create_patch('urllib.request.urlopen', return_value=mock_resp)
+        self.assertEqual(evaluator.facebook(self.url), 66403.5 + 8503403 + 841)
+
+    def test_facebook_graph(self):
+        body = b'{"id":"http:\\/\\/www.google.com","shares":8503603,"comments":841}'
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = body
+
+        self.create_patch('urllib.request.urlopen', return_value=mock_resp)
+        self.assertEqual(evaluator.facebook_graph(self.url), 8503603 + 841)
+
+    def test_twitter(self):
+        body = b'{"count":19515036,"url":"http:\\/\\/www.google.com\\/"}'
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = body
+
+        self.create_patch('urllib.request.urlopen', return_value=mock_resp)
+        self.assertEqual(evaluator.twitter(self.url), 19515036)
+
+    def test_linkedin(self):
+        body = b'{"count":63952,"fCnt":"63K","fCntPlusOne":"63K","url":"http:\\/\\/www.google.com"}'
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = body
+
+        self.create_patch('urllib.request.urlopen', return_value=mock_resp)
+        self.assertEqual(evaluator.linkedin(self.url), 63952)
+
+    def test_stumbleupon(self):
+        body = b'{"result":{"url":"http:\\/\\/www.google.com\\/","in_index":true,"publicid":"2pI1xR","views":254956,"title":"Google","thumbnail":"http:\\/\\/cdn.stumble-upon.com\\/mthumb\\/31\\/10031.jpg","thumbnail_b":"http:\\/\\/cdn.stumble-upon.com\\/bthumb\\/31\\/10031.jpg","submit_link":"http:\\/\\/www.stumbleupon.com\\/submit\\/?url=http:\\/\\/www.google.com\\/","badge_link":"http:\\/\\/www.stumbleupon.com\\/badge\\/?url=http:\\/\\/www.google.com\\/","info_link":"http:\\/\\/www.stumbleupon.com\\/url\\/www.google.com\\/"},"timestamp":1393900890,"success":true}'
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = body
+
+        self.create_patch('urllib.request.urlopen', return_value=mock_resp)
+        self.assertEqual(evaluator.stumbleupon(self.url), 254956)

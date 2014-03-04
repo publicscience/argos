@@ -3,8 +3,6 @@ from tests.helpers import save
 
 from tests import RequiresApp
 
-from argos.core.models import Entity, Article, Story
-
 class APITest(RequiresApp):
     def test_404(self):
         r = self.client.get('/does_not_exist')
@@ -24,6 +22,9 @@ class APITest(RequiresApp):
         self.assertEqual(self.json(r), expected)
 
     def test_GET_event(self):
+        # The score of an event is hard to anticipate, so mock it.
+        self.create_patch('argos.core.models.Event.score', return_value=1)
+
         event = fac.event()
         event.members[0].image = 'http://foo.jpg'
         save()
@@ -49,6 +50,7 @@ class APITest(RequiresApp):
                 'summary': event.summary,
                 'image': event.image,
                 'images': ['http://foo.jpg'],
+                'score': 1,
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
