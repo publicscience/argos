@@ -6,6 +6,7 @@ node_modules/
 fontcustom/*
 data/wiki/*.xml
 data/images/*
+data/knowledge/*
 *.swp
 doc/_build
 doc/_static
@@ -14,4 +15,5 @@ dumps/
 *.log
 config.py
 ner/
+jena/
 *.rdb

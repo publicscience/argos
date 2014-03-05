@@ -24,6 +24,11 @@ java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier
 NERSV_PID=$!
 cd ..
 
+cd jena/fuseki
+./fuseki-server --loc=../../data/knowledge/knodb /knowledge &
+KNOSV_PID=$!
+cd ../..
+
 source dev-env/bin/activate
 celery worker --loglevel=INFO --config=argos.conf.${ARGOS_ENV}_celery &
 WORKR_PID=$!
@@ -42,5 +47,6 @@ then
     kill $REDIS_PID
     kill $RABMQ_PID
     kill $NERSV_PID
+    kill $KNOSV_PID
     kill $WORKR_PID
 fi

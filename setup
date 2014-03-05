@@ -101,6 +101,29 @@ function setup_ner {
     rm ner.zip
 }
 
+function setup_knowledge {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Setting up Apache Jena/Fuseki...$(tput sgr0)"
+    echo -e "\n\n\n"
+
+    wget -O jena.tar.gz 'http://mirrors.gigenet.com/apache//jena/binaries/apache-jena-2.11.1.tar.gz'
+    wget -O fuseki.tar.gz 'http://mirrors.gigenet.com/apache//jena/binaries/jena-fuseki-1.0.1-distribution.tar.gz'
+
+    # Extract only the Jena tools we need directly to jena/.
+    mkdir jena
+    tar -xzvf jena.tar.gz
+    mv 'apache-jena-2.11.1' jena/jena
+    rm jena.tar.gz
+
+    tar -xvzf fuseki.tar.gz
+    mv 'jena-fuseki-1.0.1' jena/fuseki
+    rm fuseki.tar.gz
+
+    # Make a directory to store the TDB (the triple database, i.e.
+    # the knowledge database).
+    mkdir -p data/knowledge
+}
+
 
 
 echo -e "\n\n\n\n\n"
@@ -112,6 +135,7 @@ echo -e "\n\n\n\n\n"
 setup_dependencies
 setup_virtualenv
 setup_ner
+setup_knowledge
 setup_nltk
 
 # Create databases.
