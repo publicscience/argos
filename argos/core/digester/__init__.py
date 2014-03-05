@@ -3,14 +3,6 @@ Digester
 ==============
 
 Processes XML or bzipped XML dumps.
-
-Some of this package is derived from gensim 0.8.6.
-As such, this Digester package is licensed under
-the GNU LGPL v2.1, which is gensim's license.
-http://www.gnu.org/licenses/lgpl.html
-
-Credit for the gensim-derived modules goes to:
-Homer Strong, Radim Rehurek, and Lars Buitinck.
 """
 
 from argos.util import gullet

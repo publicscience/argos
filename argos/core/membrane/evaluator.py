@@ -18,7 +18,6 @@ def _request(endpoint, url, format='json'):
         raise Exception('Response error, status was not 200')
     else:
         content = res.read()
-        print(content)
         if format == 'json':
             return json.loads(content.decode('utf-8'))
         elif format == 'xml':

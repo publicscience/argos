@@ -75,7 +75,9 @@ def download(url, save_path, filename=None, progress=False):
         # Check if the file has already been downloaded_size.
         if total_size == existing_size:
             logger.info('File already downloaded.')
-            return
+            return file
+
+        logger.info('Total file size: {0}'.format(_format_filesize(total_size)))
 
         # Check that the server accepts ranges.
         # If it does not, the server will ignore the Range header,
@@ -110,9 +112,9 @@ def download(url, save_path, filename=None, progress=False):
         return file
 
     except request.HTTPError as e:
-        logger.error('HTTP Error:', e.code, url)
+        logger.error('HTTP Error: {0} at {1}'.format(e.code, url))
     except request.URLError as e:
-        logger.error('URL Error:', e.reason, url)
+        logger.error('URL Error: {0} at {1}'.format(e.reason, url))
 
 
 def _expired(url, file):
@@ -138,6 +140,18 @@ def _expired(url, file):
         logger.error('HTTP Error:', e.code, url)
     except request.URLError as e:
         logger.error('URL Error:', e.reason, url)
+
+
+def _format_filesize(num):
+    """
+    Format a filesize in bytes
+    to a human readable format.
+    From: https://stackoverflow.com/a/1094933/1097920
+    """
+    for x in ['bytes','KB','MB','GB','TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
 
 def main():
     if len(sys.argv) < 2:
