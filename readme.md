@@ -30,7 +30,9 @@ $ ./setup
 ```
 This will install any necessary system dependencies, setup the
 virtualenv, setup NLTK with the necessary data, install Postgres and setup its databases,
-download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download), and generate the documentation.
+download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download), 
+download and setup [Apache Jena](https://jena.apache.org) & [Fuseki](https://jena.apache.org/documentation/serving_data/index.html),
+and generate the documentation.
 
 You will also need to setup the databases, which you can do with:
 ```bash
@@ -50,6 +52,7 @@ The environment runs:
 * Redis (6379)
 * Stanford NER (8080)
 * RabbitMQ (5672)
+* Apache Jena Fuseki (3030)
 * A Celery worker
 
 *Note: If you're running this on Ubuntu, some of these processes may
