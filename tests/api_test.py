@@ -32,18 +32,11 @@ class APITest(RequiresApp):
         save()
 
         expected_members = []
-        entities = []
+        expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in event.entities]
         for member in event.members:
             expected_members.append({
                 'url': '/articles/{0}'.format(member.id)
             })
-            for entity in member.entities:
-                entities.append({
-                    'url': '/entities/{0}'.format(entity.slug)
-                })
-
-        # Filter down to unique entities.
-        expected_entities = list({v['url']:v for v in entities}.values())
 
         expected = {
                 'id': event.id,
@@ -72,23 +65,16 @@ class APITest(RequiresApp):
         save()
 
         expected_members = []
-        entities = []
         expected_watchers = []
+        expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in story.entities]
         for member in story.members:
             expected_members.append({
                 'url': '/events/{0}'.format(member.id)
             })
-            for entity in member.entities:
-                entities.append({
-                    'url': '/entities/{0}'.format(entity.slug)
-                })
         for user in users:
             expected_watchers.append({
                 'url': '/users/{0}'.format(user.id)
             })
-
-        # Filter down to unique entities.
-        expected_entities = list({v['url']:v for v in entities}.values())
 
         expected = {
                 'id': story.id,

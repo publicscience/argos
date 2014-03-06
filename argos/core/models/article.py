@@ -1,7 +1,7 @@
 from argos.datastore import db, Model
 from argos.core.models.entity import Entity, Alias
 from argos.core.models.cluster import Clusterable
-from argos.core.brain import vectorize, entities, knowledge
+from argos.core import brain
 
 from scipy.spatial.distance import jaccard
 
@@ -58,8 +58,8 @@ class Article(Clusterable):
             (bag of words vector, entities vector)
         """
         if self.vectors is None:
-            bow_vec = vectorize(self.text)
-            ent_vec = vectorize(' '.join(entities(self.text)))
+            bow_vec = brain.vectorize(self.text)
+            ent_vec = brain.vectorize(' '.join(brain.entities(self.text)))
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
@@ -68,9 +68,9 @@ class Article(Clusterable):
         Process the article text for entities.
         """
         ents = []
-        for e_name in entities(self.text):
+        for e_name in brain.entities(self.text):
             # Search for the entity.
-            uri = knowledge.uri_for_name(e_name)
+            uri = brain.knowledge.uri_for_name(e_name)
 
             if uri:
                 slug = uri.split('/')[-1]

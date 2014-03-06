@@ -1,5 +1,5 @@
 from tests import RequiresMocks, RequiresApp
-from tests.patches import patch_knowledge
+import tests.factories as fac
 from unittest.mock import MagicMock
 from datetime import datetime
 
@@ -76,8 +76,10 @@ html_doc = open('tests/data/article.html', 'r').read()
 
 
 class FeedTest(RequiresApp):
+    patch_knowledge = True
+    patch_entities = True
+
     def setUp(self):
-        self.patcher = patch_knowledge()
         article = {
                 'links': [{'href': 'some url'}],
                 'title': 'some title',
@@ -91,9 +93,6 @@ class FeedTest(RequiresApp):
         self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
         self.source = Source(ext_url='foo')
-
-    def tearDown(self):
-        self.patcher.stop()
 
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, feed.articles, self.source)
@@ -279,9 +278,9 @@ class FeedFinderTest(RequiresMocks):
 
 
 class CollectorTest(RequiresApp):
-    def setUp(self):
-        self.patcher = patch_knowledge()
+    patch_knowledge = True
 
+    def setUp(self):
         # Add a fake source to work with.
         self.source = Source(ext_url='foo')
         self.db.session.add(self.source)
@@ -292,9 +291,6 @@ class CollectorTest(RequiresApp):
 
         # Mock finding feeds.
         self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
-
-    def tearDown(self):
-        self.patcher.stop()
 
     def test_collect(self):
         self.mock_articles.return_value = [

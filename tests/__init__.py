@@ -3,6 +3,8 @@ from unittest.mock import patch
 
 import time, socket, subprocess, tempfile
 
+from tests.patches import patch_knowledge, patch_entities
+
 from jobs import workers
 from json import loads
 from tests import helpers
@@ -31,14 +33,26 @@ class RequiresApp(RequiresMocks):
     for the duration of its tests.
 
     Much of this is ported from the flask-testing library.
-    Credit goes to Dan Jacob & collaborators!
+    Credit: Dan Jacob & collaborators
     """
+
+    # Mock out calls to Apache Jena/Fuseki.
+    patch_knowledge = False
+
+    # Mock out calls to Stanford NER.
+    patch_entities = False
+
     def __call__(self, result=None):
         """
         Sets up the tests without needing
         to call setUp.
         """
         try:
+            self.patchers = []
+            if self.patch_knowledge:
+                self.patchers.append(patch_knowledge())
+            if self.patch_entities:
+                self.patchers.append(patch_entities())
             self._pre_setup()
             super(RequiresMocks, self).__call__(result)
         finally:
@@ -57,6 +71,9 @@ class RequiresApp(RequiresMocks):
         self.db.create_all()
 
     def _post_teardown(self):
+        for patcher in self.patchers:
+            patcher.stop()
+
         if self._ctx is not None:
             self._ctx.pop()
 

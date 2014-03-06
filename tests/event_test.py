@@ -1,5 +1,4 @@
 from tests import RequiresApp
-from tests.patches import patch_knowledge
 from datetime import datetime, timedelta
 
 from argos.core.models import Article, Event
@@ -10,12 +9,10 @@ class EventTest(RequiresApp):
     A Cluster instance can't be instantiated since it is abstract,
     so we use the Event as a testing proxy.
     """
-    def setUp(self):
-        self.patcher = patch_knowledge()
-        self.article = self.prepare_articles()[0]
+    patch_knowledge = True
 
-    def tearDown(self):
-        self.patcher.stop()
+    def setUp(self):
+        self.article = self.prepare_articles()[0]
 
     def prepare_articles(self, type='standard', score=100):
         a = {'title':'Dinosaurs', 'text':'dinosaurs are cool, Clinton', 'score':score}
@@ -175,4 +172,3 @@ class EventTest(RequiresApp):
         event_b = Event(self.prepare_articles(score=200))
 
         self.assertGreater(event_b.score, event_a.score)
-

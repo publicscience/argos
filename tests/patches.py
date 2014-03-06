@@ -1,12 +1,14 @@
 from unittest.mock import patch
 from functools import wraps
 
-def requires_knowledge_patches(f):
+def requires_patches(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        patcher = patch_knowledge()
+        k_patcher = patch_knowledge()
+        e_patcher = patch_entities()
         return_value = f(*args, **kwargs)
-        patcher.stop()
+        k_patcher.stop()
+        e_patcher.stop()
         return return_value
     return decorated
 
@@ -17,6 +19,14 @@ def patch_knowledge():
     patcher = Patcher([
         'argos.core.brain.knowledge.knowledge_for',
         'argos.core.brain.knowledge.uri_for_name'
+    ])
+    return patcher
+
+def patch_entities():
+    # Patch these methods so
+    # tests don't require the Stanford NER server.
+    patcher = Patcher([
+        'argos.core.brain.entities'
     ])
     return patcher
 
@@ -58,9 +68,7 @@ class Patcher():
         for patcher in self.patchers:
             patcher.stop()
 
-# Patch these methods so
-# tests don't require the Fuseki server
-# or a network connection to Wikipedia.
+
 def faux_knowledge_for(name=None, uri=None, fallback=None):
     if uri:
         return {
@@ -76,3 +84,6 @@ def faux_knowledge_for(name=None, uri=None, fallback=None):
 
 def faux_uri_for_name(name):
     return "http://fauxpedia.org/resource/{0}".format(name)
+
+def faux_entities(docs):
+    return ['Nautilus', 'Picard']

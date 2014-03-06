@@ -7,12 +7,6 @@ import argos.core.brain as brain
 from argos.core.brain import knowledge
 
 class BrainTest(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
     def test_tokenize(self):
         data = "hey there buddy, hey Says, say"
         tokens = brain.tokenize(data)
