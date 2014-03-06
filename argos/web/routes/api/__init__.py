@@ -72,9 +72,11 @@ STORY_FIELDS = {
 }
 
 ENTITY_FIELDS = {
-    'name': fields.String,
+    'names': fields.List(fields.String),
     'slug': fields.String,
     'url': fields.Url('entity'),
+    'summary': fields.String,
+    'image': fields.String,
     'updated_at': DateTimeField,
     'stories': fields.Nested({
         'url': fields.Url('story')

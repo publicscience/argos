@@ -9,11 +9,11 @@ class StoryTest(RequiresApp):
 
         expected_entities = []
         for event in story.events:
-            expected_entities += [ent.name for ent in event.entities]
+            expected_entities += [ent.slug for ent in event.entities]
 
         expected_entities = set(expected_entities)
 
-        entities = {ent.name for ent in story.entities}
+        entities = {ent.slug for ent in story.entities}
         self.assertEqual(entities, expected_entities)
 
     def test_story_clustering_with_matching_entities(self):

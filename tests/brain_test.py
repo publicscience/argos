@@ -115,5 +115,12 @@ class KnowledgeTest(RequiresMocks):
                                  'http://dbpedia.org/resource/Star_Trek_(franchise)',
                                  'http://dbpedia.org/resource/Star_trek.com'])
 
+
+    def test_name_for_uri(self):
+        self.mock_resp.read.return_value = b'{\n  "head": {\n    "vars": [ "name" ]\n  } ,\n  "results": {\n    "bindings": [\n      {\n        "name": { "type": "literal" , "xml:lang": "en" , "value": "United States Secretary of State" }\n      }\n    ]\n  }\n}\n'
+
+        name = knowledge.name_for_uri('http://dbpedia.org/resource/United_States_Secretary_of_State')
+        self.assertEqual(name, 'United States Secretary of State')
+
 if __name__ == '__main__':
 	unittest.main()

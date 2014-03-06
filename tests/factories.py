@@ -1,4 +1,5 @@
 from tests.helpers import save
+from tests.patches import requires_knowledge_patches
 from argos.core.models import Entity, Article, Event, Story, Source
 from argos.web.models import User
 from argos.datastore import db
@@ -30,6 +31,7 @@ def user(num=1):
     return u_s
 
 
+@requires_knowledge_patches
 def entity(num=1):
     args = [
         {'name': 'Argos'},
@@ -58,6 +60,7 @@ def source(num=1):
         return s_s[0]
     return s_s
 
+@requires_knowledge_patches
 def article(num=1, **kwargs):
     args = [
         {'title':'Dinosaurs', 'text':'Dinosaurs are cool, Clinton', 'score': 100},
@@ -76,6 +79,7 @@ def article(num=1, **kwargs):
         return a_s[0]
     return a_s
 
+@requires_knowledge_patches
 def event(num=1, num_members=2):
     """
     Creates an event cluster.
@@ -87,6 +91,7 @@ def event(num=1, num_members=2):
             num_members=num_members
     )
 
+@requires_knowledge_patches
 def story(num=1, num_members=2):
     """
     Creates a story cluster.
@@ -117,3 +122,4 @@ def cluster(cls, member_factory, num=1, num_members=2):
     if len(c_s) is 1:
         return c_s[0]
     return c_s
+

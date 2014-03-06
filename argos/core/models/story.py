@@ -73,7 +73,7 @@ class Story(Cluster):
 
         for event in events:
             # Find stories which have some matching entities with this event.
-            candidate_clusters = Story.query.filter(Entity.name.in_([entity.name for entity in event.entities])).all()
+            candidate_clusters = Story.query.filter(Entity.slug.in_([entity.slug for entity in event.entities])).all()
 
             # Cluster this event.
             selected_cluster = cluster(event, candidate_clusters, threshold=threshold, logger=log)

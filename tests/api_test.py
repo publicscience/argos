@@ -13,10 +13,12 @@ class APITest(RequiresApp):
         entity = fac.entity()
         r = self.client.get('/entities/{0}'.format(entity.slug))
         expected = {
-                'name': entity.name,
+                'names': entity.names,
                 'slug': entity.slug,
                 'url': '/entities/{0}'.format(entity.slug),
                 'updated_at': entity.updated_at.isoformat(),
+                'summary': entity.summary,
+                'image': entity.image,
                 'stories': []
         }
         self.assertEqual(self.json(r), expected)

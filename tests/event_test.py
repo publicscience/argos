@@ -1,4 +1,5 @@
 from tests import RequiresApp
+from tests.patches import patch_knowledge
 from datetime import datetime, timedelta
 
 from argos.core.models import Article, Event
@@ -10,7 +11,11 @@ class EventTest(RequiresApp):
     so we use the Event as a testing proxy.
     """
     def setUp(self):
+        self.patcher = patch_knowledge()
         self.article = self.prepare_articles()[0]
+
+    def tearDown(self):
+        self.patcher.stop()
 
     def prepare_articles(self, type='standard', score=100):
         a = {'title':'Dinosaurs', 'text':'dinosaurs are cool, Clinton', 'score':score}
@@ -123,12 +128,12 @@ class EventTest(RequiresApp):
             text='dinosaurs are cool, Reagan'
         ), self.prepare_articles()[0]]
         self.cluster = Event(members)
-        entities = {ent.name for ent in self.cluster.entities}
+        entities = {ent.slug for ent in self.cluster.entities}
         self.assertEqual(entities, {'Clinton', 'Reagan'})
 
     def test_entitize_no_duplicates(self):
         self.cluster = Event(self.prepare_articles())
-        entities = [ent.name for ent in self.cluster.entities]
+        entities = [ent.slug for ent in self.cluster.entities]
         self.assertEqual(entities, ['Clinton'])
 
     def test_titleize(self):

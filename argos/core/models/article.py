@@ -1,7 +1,7 @@
 from argos.datastore import db, Model
-from argos.core.models.entity import Entity
+from argos.core.models.entity import Entity, Alias
 from argos.core.models.cluster import Clusterable
-from argos.core.brain import vectorize, entities
+from argos.core.brain import vectorize, entities, knowledge
 
 from scipy.spatial.distance import jaccard
 
@@ -69,11 +69,20 @@ class Article(Clusterable):
         """
         ents = []
         for e_name in entities(self.text):
-            # TO DO: Need to find a way of getting canonical name.
-
             # Search for the entity.
-            slug = slugify(e_name)
+            uri = knowledge.uri_for_name(e_name)
+
+            if uri:
+                slug = uri.split('/')[-1]
+            else:
+                slug = slugify(e_name)
             e = Entity.query.get(slug)
+
+            # If an entity is found...
+            if e:
+                # Add this name as a new alias, if necessary.
+                if e_name not in [a.name for a in e.aliases]:
+                    e.aliases.append(Alias(name))
 
             # If one doesn't exist, create a new one.
             if not e:
