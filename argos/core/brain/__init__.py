@@ -137,7 +137,7 @@ def entities(docs, strategy='stanford'):
             names = [ents[key] for key in ents]
 
             # Flatten the list of lists.
-            names = [name for sublist in names for name in sublist]
+            names = [strip(name) for sublist in names for name in sublist]
 
             entities += names
 
@@ -152,9 +152,9 @@ def entities(docs, strategy='stanford'):
         #for entity, count in counts.items():
             #results.append((entity, count/top_count))
         #return results
-        return entities
 
     elif strategy == 'nltk':
+        names = []
         from nltk.tag import pos_tag
         from nltk.chunk import batch_ne_chunk
         for doc in docs:
@@ -164,11 +164,13 @@ def entities(docs, strategy='stanford'):
             chunked = batch_ne_chunk(tagged, binary=True) # binary=False will tag entities as ORGANIZATION, etc.
 
             for tree in chunked:
-                entities.extend(_extract_entities(tree))
-            return entities
+                names.extend(_extract_entities(tree))
+        entities = [strip(name) for name in names]
 
     else:
         raise Exception('Unknown strategy specified.')
+
+    return entities
 
 
 def trim(text):
@@ -183,18 +185,26 @@ def depunctuate(text):
     Removes all punctuation from text,
     replacing them with spaces.
     """
+    punctuation = string.punctuation + '“”‘’–"'
     try:
-        replace_punctuation = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+        replace_punctuation = str.maketrans(punctuation, ' '*len(punctuation))
         return text.translate(replace_punctuation)
 
     # Python 2.7 support.
     except AttributeError:
-        replace_punctuation = string.maketrans(string.punctuation, ' '*len(string.punctuation))
-        rmap = dict((ord(char), u' ') for char in string.punctuation)
+        replace_punctuation = string.maketrans(punctuation, ' '*len(punctuation))
+        rmap = dict((ord(char), u' ') for char in punctuation)
         if isinstance(text, str):
             text = unicode(text, 'utf-8')
         return text.translate(rmap)
 
+def strip(text):
+    """
+    Removes punctuation from the beginning
+    and end of text.
+    """
+    punctuation = string.punctuation + '“”‘’–"'
+    return text.strip(punctuation)
 
 def sanitize(html):
     """

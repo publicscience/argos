@@ -95,7 +95,7 @@ def uri_for_name(name):
                 NOT EXISTS {{  ?uri dbo:wikiPageRedirects ?nil }}
             }}
         }}
-    '''.format(name)
+    '''.format(_sanitize(name))
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -372,5 +372,24 @@ def _prepare_results(data):
     for binding in bindings:
         results.append({k: v['value'] for k, v in binding.items()})
     return results
+
+
+def _sanitize(text):
+    """
+    Properly escape SPARQL strings.
+    """
+    mappings = [
+		("\\", "\\\\"),
+        ("\t", "\\t"),
+		("\n", "\\n"),
+		("\r", "\\r"),
+		("\b", "\\b"),
+		("\f", "\\f"),
+		("\"", "\\\""),
+        ("'", "\\'")
+    ]
+    for mapping in mappings:
+        text = text.replace(mapping[0], mapping[1])
+    return text
 
 

@@ -61,6 +61,11 @@ class KnowledgeTest(RequiresMocks):
         self.mock_resp.status = 200
         self.create_patch('urllib.request.urlopen', return_value=self.mock_resp)
 
+    def test_sanitize_names(self):
+        name = 'Trailer Song" Live'
+        s_name = knowledge._sanitize(name)
+        self.assertEqual(s_name, 'Trailer Song\\" Live')
+
     def test_uri_for_name(self):
         self.mock_resp.read.return_value = b'{\n  "head": {\n    "vars": [ "uri" ]\n  } ,\n  "results": {\n    "bindings": [\n      {\n        "uri": { "type": "uri" , "value": "http://dbpedia.org/resource/United_States_Secretary_of_State" }\n      }\n    ]\n  }\n}\n'
         uri = knowledge.uri_for_name('United States Secretary of State')
