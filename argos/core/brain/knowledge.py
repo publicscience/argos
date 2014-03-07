@@ -136,6 +136,8 @@ def image_for_name(name, fallback=False, no_uri=False):
         'http://upload.wikimedia.org/wikipedia/commons/7/7e/StarTrek_Logo_2007.JPG'
     """
 
+    uri = None
+    image = None
     if not no_uri:
         uri = uri_for_name(name)
         image = image_for_uri(uri) if uri else None
@@ -224,6 +226,8 @@ def summary_for_name(name, short=False, fallback=False, no_uri=False):
     # `fallback` and set to True.
     fallback = True if no_uri else fallback
 
+    uri = None
+    summary = None
     if not no_uri:
         uri = uri_for_name(name)
 
@@ -330,7 +334,6 @@ def _query(query):
         raise Exception('Response error, status was not 200')
     else:
         content = res.read()
-        print(content)
         return json.loads(content.decode('utf-8'))
     return None
 

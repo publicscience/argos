@@ -82,7 +82,7 @@ class Article(Clusterable):
             if e:
                 # Add this name as a new alias, if necessary.
                 if e_name not in [a.name for a in e.aliases]:
-                    e.aliases.append(Alias(name))
+                    e.aliases.append(Alias(e_name))
 
             # If one doesn't exist, create a new one.
             if not e:
