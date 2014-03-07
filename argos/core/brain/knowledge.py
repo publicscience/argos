@@ -48,8 +48,6 @@ Would return the response::
 from urllib import request
 import json
 
-import wikipedia
-
 # Default
 # TODO: will need to make this configurable later.
 KNOWLEDGE_URL = 'http://localhost:3030/knowledge/query'
@@ -167,11 +165,10 @@ def wiki_image_for_name(name):
     """
     Queries Wikipedia for an image for an entity name.
     """
-    try:
-        page = wikipedia.page(name)
-        return page.images[0]
-    except (wikipedia.exceptions.DisambiguationError, wikipedia.exceptions.PageError):
-        return None
+    # Eventually this will get from a locally processed
+    # Wikipedia clone database.
+    # For now, return None.
+    return None
 
 def coordinates_for_name(name):
     """
@@ -265,12 +262,10 @@ def wiki_summary_for_name(name, short=False):
     """
     Queries Wikipedia for a summary for an entity name.
     """
-    try:
-        length = 5 if short else 10
-        summary = wikipedia.summary(name, sentences=length)
-    except (wikipedia.exceptions.DisambiguationError, wikipedia.exceptions.PageError):
-        summary = None
-    return summary
+    # Eventually this will get from a locally processed
+    # Wikipedia clone database.
+    # For now, return None.
+    return None
 
 def aliases_for_name(name):
     """
@@ -319,8 +314,8 @@ def knowledge_for(uri=None, name=None, fallback=False):
         results['summary'] = summary_for_uri(uri, short=False, fallback=fallback)
         results['image'] = image_for_uri(uri, fallback=fallback)
     elif name:
-        results['summary'] = summary_for_name(uri, short=False, no_uri=True)
-        results['image'] = image_for_name(uri, no_uri=True)
+        results['summary'] = summary_for_name(name, short=False, no_uri=True)
+        results['image'] = image_for_name(name, no_uri=True)
     return results
 
 
