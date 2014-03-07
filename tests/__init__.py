@@ -48,12 +48,12 @@ class RequiresApp(RequiresMocks):
         to call setUp.
         """
         try:
+            self._pre_setup()
             self.patchers = []
             if self.patch_knowledge:
                 self.patchers.append(patch_knowledge())
             if self.patch_entities:
                 self.patchers.append(patch_entities())
-            self._pre_setup()
             super(RequiresMocks, self).__call__(result)
         finally:
             self._post_teardown()

@@ -34,6 +34,7 @@ class Entity(Model):
     In the spirit of Python's developer maturity,
     you're trusted not to modify them.
     """
+    name        = db.Column(db.UnicodeText)
     slug        = db.Column(db.String(255), primary_key=True)
     uri         = db.Column(db.String)
     summary     = db.Column(db.UnicodeText)
@@ -61,6 +62,7 @@ class Entity(Model):
 
         self.summary = k['summary']
         self.image = k['image']
+        self.name = k['name']
 
     @property
     def names(self):

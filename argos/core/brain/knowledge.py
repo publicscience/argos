@@ -313,9 +313,11 @@ def knowledge_for(uri=None, name=None, fallback=False):
     if uri:
         results['summary'] = summary_for_uri(uri, short=False, fallback=fallback)
         results['image'] = image_for_uri(uri, fallback=fallback)
+        results['name'] = name_for_uri(uri)
     elif name:
         results['summary'] = summary_for_name(name, short=False, no_uri=True)
         results['image'] = image_for_name(name, no_uri=True)
+        results['name'] = name
     return results
 
 

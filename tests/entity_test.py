@@ -63,12 +63,14 @@ class EntityTest(RequiresApp):
             if uri:
                 return {
                     'summary': 'this is a fake summary for uri {0}'.format(uri),
-                    'image': 'http://www.argos.la/image.jpg'
+                    'image': 'http://www.argos.la/image.jpg',
+                    'name': 'Canonical name'
                 }
             if name:
                 return {
                     'summary': 'this is a fake summary for name {0}'.format(name),
-                    'image': 'http://www.argos.la/image.jpg'
+                    'image': 'http://www.argos.la/image.jpg',
+                    'name': name
                 }
             return None
 
