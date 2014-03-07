@@ -65,7 +65,8 @@ def seed(debug=False):
                 title=entry['title'],
                 created_at = parse(entry['published']),
                 updated_at = parse(entry['updated']),
-                image=random.choice(sample_images) # fake image
+                image=random.choice(sample_images), # fake image
+                score=random.random() * 100 # fake score
         )
         articles.append(a)
         db.session.add(a)
