@@ -1,3 +1,14 @@
+"""
+Factories
+=========
+
+Churns out model instances to test with.
+
+All calls to external dependencies (e.g. Stanford NER, Apache Fuseki) are mocked out, so they do not need to be running.
+It's assumed that when factories are used, you aren't testing the lower-level functionality/initialization of models, so this mocking is ok.
+"""
+
+
 from tests.helpers import save
 from tests.patches import requires_patches
 from argos.core.models import Entity, Article, Event, Story, Source

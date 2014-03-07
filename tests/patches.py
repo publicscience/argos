@@ -1,3 +1,10 @@
+"""
+Patches
+=======
+
+Provides patches for common external dependencies (e.g. Stanford NER, Apache Fuseki) so they don't need to be running.
+"""
+
 from unittest.mock import patch
 from functools import wraps
 
@@ -68,6 +75,15 @@ class Patcher():
         for patcher in self.patchers:
             patcher.stop()
 
+
+
+"""
+Faux Functions
+==============
+
+The mock functions used in place of
+the real ones.
+"""
 
 def faux_knowledge_for(name=None, uri=None, fallback=None):
     if uri:
