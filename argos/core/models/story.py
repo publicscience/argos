@@ -16,10 +16,16 @@ stories_entities = db.Table('stories_entities',
         db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
 )
 
+stories_mentions = db.Table('stories_mentions',
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
+        db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
+)
+
 class Story(Cluster):
     __tablename__   = 'story'
     __members__     = {'class_name': 'Event', 'secondary': stories_events, 'backref_name': 'stories'}
     __entities__    = {'secondary': stories_entities, 'backref_name': 'stories'}
+    __mentions__    = {'secondary': stories_mentions, 'backref_name': 'stories'}
 
     @property
     def events(self):
