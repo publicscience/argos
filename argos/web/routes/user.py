@@ -1,7 +1,10 @@
 import argos.web.models as models
 
 from argos.datastore import db
-from argos.web.routes.api import api, not_found, unauthorized, page_parser, DateTimeField, STORY_FIELDS, EVENT_FIELDS
+from argos.web.routes import api
+from argos.web.routes.api import page_parser
+from argos.web.routes.fields import STORY_FIELDS, EVENT_FIELDS, permitted_user_fields
+from argos.web.routes.errors import not_found, unauthorized
 
 from flask import request
 from flask_security.core import current_user
@@ -18,13 +21,6 @@ watching_parser.add_argument('story_id', type=int)
 bookmarked_parser = reqparse.RequestParser()
 bookmarked_parser.add_argument('event_id', type=int)
 
-permitted_user_fields = {
-    'id': fields.Integer,
-    'image': fields.String,
-    'name': fields.String,
-    'updated_at': DateTimeField,
-    'created_at': DateTimeField
-}
 
 class CurrentUser(Resource):
     @marshal_with(permitted_user_fields)

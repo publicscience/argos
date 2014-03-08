@@ -2,25 +2,15 @@ import argos.web.models as models
 
 from argos.datastore import db
 from argos.web.app import app
-from argos.web.routes.api import not_found, DateTimeField
+from argos.web.routes.fields import SEARCH_FIELDS
+from argos.web.routes.errors import not_found
 from flask import jsonify, url_for
-from flask.ext.restful import fields, reqparse, marshal
+from flask.ext.restful import reqparse, marshal
 
 from sqlalchemy import select, func, literal
 
 search_parser = reqparse.RequestParser()
 search_parser.add_argument('query', type=str)
-
-SEARCH_FIELDS = {
-    'id': fields.Integer,
-    'title': fields.String,
-    'image': fields.String,
-    'summary': fields.String,
-    'updated_at': DateTimeField,
-    'created_at': DateTimeField,
-    'type': fields.String
-    # url is also added in below.
-}
 
 @app.route('/search')
 def search():

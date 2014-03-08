@@ -104,10 +104,10 @@ def seed(debug=False):
     client = app.test_client()
     ctx = app.test_request_context()
     ctx.push()
-    register_user(email='t@t.c', password='12345678')
+    register_user(email='t@t.c', password='password')
     ctx.pop()
     print('\n\n==============================================')
-    print('Created a test user, email is t@t.c, password is 12345678')
+    print('Created a test user, email is t@t.c, password is password')
     print('==============================================\n\n')
 
     client = Client(
