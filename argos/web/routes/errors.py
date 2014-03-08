@@ -1,6 +1,6 @@
 from argos.web.app import app
 
-from flask import jsonify
+from flask import jsonify, request
 from flask.ext.restful import abort
 
 def not_found():

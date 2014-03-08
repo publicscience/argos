@@ -13,6 +13,7 @@ class APITest(RequiresApp):
         entity = fac.entity()
         r = self.client.get('/entities/{0}'.format(entity.slug))
         expected = {
+                'name': entity.name,
                 'names': entity.names,
                 'slug': entity.slug,
                 'url': '/entities/{0}'.format(entity.slug),
@@ -33,6 +34,7 @@ class APITest(RequiresApp):
 
         expected_members = []
         expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in event.entities]
+        expected_mentions = [{'name': alias.name, 'entity_slug': alias.entity.slug} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
                 'url': '/articles/{0}'.format(member.id)
@@ -50,6 +52,7 @@ class APITest(RequiresApp):
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
                 'entities': expected_entities,
+                'mentions': expected_mentions,
                 'stories': []
         }
 
@@ -67,6 +70,7 @@ class APITest(RequiresApp):
         expected_members = []
         expected_watchers = []
         expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in story.entities]
+        expected_mentions = [{'name': alias.name, 'entity_slug': alias.entity.slug} for alias in story.mentions]
         for member in story.members:
             expected_members.append({
                 'url': '/events/{0}'.format(member.id)
@@ -87,6 +91,7 @@ class APITest(RequiresApp):
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,
                 'entities': expected_entities,
+                'mentions': expected_mentions,
                 'watchers': expected_watchers
         }
 

@@ -6,7 +6,6 @@ from argos.web.routes import api
 from argos.web.routes.errors import not_found, unauthorized
 from argos.web.routes.fields import EVENT_FIELDS, STORY_FIELDS, ENTITY_FIELDS, ARTICLE_FIELDS, AUTHOR_FIELDS, SOURCE_FIELDS, permitted_user_fields
 
-from flask import request
 from flask_security.core import current_user
 from flask.ext.restful import Resource, marshal_with, fields, reqparse
 

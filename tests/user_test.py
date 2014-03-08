@@ -133,6 +133,7 @@ class UserAPITest(RequiresApp):
         expected_members = []
         expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in story.entities]
         expected_watchers = [{'url': '/users/{0}'.format(user.id)}]
+        expected_mentions = [{'name': alias.name, 'entity_slug': alias.entity.slug} for alias in story.mentions]
         for member in story.members:
             expected_members.append({
                 'url': '/events/{0}'.format(member.id)
@@ -149,6 +150,7 @@ class UserAPITest(RequiresApp):
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,
                 'entities': expected_entities,
+                'mentions': expected_mentions,
                 'watchers': expected_watchers
         }
         self.assertEqual(self.json(r), [expected])
@@ -205,6 +207,7 @@ class UserAPITest(RequiresApp):
 
         expected_members = []
         expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in event.entities]
+        expected_mentions = [{'name': alias.name, 'entity_slug': alias.entity.slug} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
                 'url': '/articles/{0}'.format(member.id)
@@ -222,6 +225,7 @@ class UserAPITest(RequiresApp):
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
                 'entities': expected_entities,
+                'mentions': expected_mentions,
                 'stories': []
         }
 
