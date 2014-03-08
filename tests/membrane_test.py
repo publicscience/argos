@@ -171,6 +171,7 @@ class FeedTest(RequiresApp):
     def test_articles(self):
         extracted_data = MagicMock()
         extracted_data.cleaned_text = full_text
+        extracted_data.canonical_link = 'a canonical link'
 
         # Mock the download method to return some local image path.
         self.create_patch('argos.core.membrane.feed.download', return_value='/foo/bar/image.jpg')

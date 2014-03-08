@@ -43,6 +43,10 @@ EVENT_FIELDS = {
     'entities': fields.Nested({
         'url': fields.Url('entity')
     }),
+    'mentions': fields.Nested({
+        'name': fields.String,
+        'entity_slug': fields.String
+    }),
     'articles': fields.Nested({
         'url': fields.Url('article')
     }),
@@ -63,6 +67,10 @@ STORY_FIELDS = {
     'entities': fields.Nested({
         'url': fields.Url('entity')
     }),
+    'mentions': fields.Nested({
+        'name': fields.String,
+        'entity_slug': fields.String
+    }),
     'events': fields.Nested({
         'url': fields.Url('event')
     }),
@@ -72,6 +80,7 @@ STORY_FIELDS = {
 }
 
 ENTITY_FIELDS = {
+    'name': fields.String,
     'names': fields.List(fields.String),
     'slug': fields.String,
     'url': fields.Url('entity'),

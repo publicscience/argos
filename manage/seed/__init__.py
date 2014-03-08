@@ -5,9 +5,15 @@ Seed
 Create some seed data.
 """
 
+from argos.web.app import app
 from argos.datastore import db
 from argos.core.models import Entity, Article, Event, Story, Source
 from argos.util.progress import progress_bar
+from argos.web.models.oauth import Client
+from werkzeug.security import gen_salt
+
+# For creating a test user.
+from flask_security.registerable import register_user
 
 import os, json
 
@@ -93,6 +99,32 @@ def seed(debug=False):
 
     print('\n\n==============================================')
     print('From {0} sources, seeded {1} articles, found {2} entities, created {3} events and {4} stories.'.format(num_sources, num_articles, num_entities, num_events, num_stories))
+    print('==============================================\n\n')
+
+    client = app.test_client()
+    ctx = app.test_request_context()
+    ctx.push()
+    register_user(email='t@t.c', password='12345678')
+    ctx.pop()
+    print('\n\n==============================================')
+    print('Created a test user, email is t@t.c, password is 12345678')
+    print('==============================================\n\n')
+
+    client = Client(
+        #client_id=gen_salt(40),
+        #client_secret=gen_salt(50),
+        client_id='test',
+        client_secret='test',
+        _redirect_uris='http://localhost:5000/authorized',
+        _default_scopes='userinfo',
+        _allowed_grant_types='authorization_code refresh_token password',
+        user_id=None,
+        is_confidential=True # make a confidential client.
+    )
+    db.session.add(client)
+    db.session.commit()
+    print('\n\n==============================================')
+    print('Created a test client:\nclient id: {0}\nclient secret: {1}'.format(client.client_id, client.client_secret))
     print('==============================================\n\n')
 
 

@@ -34,6 +34,22 @@ class Clusterable(Model):
                 secondary=args['secondary'],
                 backref=db.backref(args['backref_name']))
 
+    @declared_attr
+    def mentions(cls):
+        """
+        Build the mentions attribute from the
+        subclass's `__mentions__` class attribute.
+
+        Example::
+
+            __mentions__ = {'secondary': articles_mentions, 'backref_name': 'articles'}
+        """
+        args = cls.__mentions__
+
+        return db.relationship('Alias',
+                secondary=args['secondary'],
+                backref=db.backref(args['backref_name']))
+
     def vectorize(self):
         raise NotImplementedError
 
@@ -123,9 +139,10 @@ class Cluster(Clusterable):
 
     def entitize(self):
         """
-        Update entities for this cluster.
+        Update entities (and mentions) for this cluster.
         """
         self.entities = list(set(chain.from_iterable([member.entities for member in self.members])))
+        self.mentions = list(set(chain.from_iterable([member.mentions for member in self.members])))
 
     def update(self):
         """

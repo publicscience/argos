@@ -18,10 +18,16 @@ events_entities = db.Table('events_entities',
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
 )
 
+events_mentions = db.Table('events_mentions',
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
+)
+
 class Event(Cluster):
     __tablename__   = 'event'
     __members__     = {'class_name': 'Article', 'secondary': events_articles, 'backref_name': 'events'}
     __entities__    = {'secondary': events_entities, 'backref_name': 'events'}
+    __mentions__    = {'secondary': events_mentions, 'backref_name': 'events'}
     active          = db.Column(db.Boolean, default=True)
 
     @property

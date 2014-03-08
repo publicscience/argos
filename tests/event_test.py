@@ -126,12 +126,16 @@ class EventTest(RequiresApp):
         ), self.prepare_articles()[0]]
         self.cluster = Event(members)
         entities = {ent.slug for ent in self.cluster.entities}
+        mentions = {ali.name for ali in self.cluster.mentions}
         self.assertEqual(entities, {'Clinton', 'Reagan'})
+        self.assertEqual(mentions, {'Clinton', 'Reagan'})
 
     def test_entitize_no_duplicates(self):
         self.cluster = Event(self.prepare_articles())
         entities = [ent.slug for ent in self.cluster.entities]
+        mentions = [ali.name for ali in self.cluster.mentions]
         self.assertEqual(entities, ['Clinton'])
+        self.assertEqual(mentions, ['Clinton'])
 
     def test_titleize(self):
         members = [Article(

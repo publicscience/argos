@@ -8,13 +8,18 @@ class StoryTest(RequiresApp):
         story = fac.story()
 
         expected_entities = []
+        expected_mentions = []
         for event in story.events:
             expected_entities += [ent.slug for ent in event.entities]
+            expected_mentions += [ali.name for ali in event.mentions]
 
         expected_entities = set(expected_entities)
+        expected_mentions = set(expected_mentions)
 
         entities = {ent.slug for ent in story.entities}
+        mentions = {ali.name for ali in story.mentions}
         self.assertEqual(entities, expected_entities)
+        self.assertEqual(mentions, expected_mentions)
 
     def test_story_clustering_with_matching_entities(self):
         # This creates a story with duplicate member events.

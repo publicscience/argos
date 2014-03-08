@@ -24,12 +24,18 @@ articles_entities = db.Table('articles_entities',
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
+articles_mentions = db.Table('articles_mentions',
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
+        db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
+)
+
 class Article(Clusterable):
     """
     An article.
     """
     __tablename__ = 'article'
     __entities__    = {'secondary': articles_entities, 'backref_name': 'articles'}
+    __mentions__    = {'secondary': articles_mentions, 'backref_name': 'articles'}
     vectors     = db.Column(db.PickleType)
     title       = db.Column(db.Unicode)
     text        = db.Column(db.UnicodeText)
@@ -65,7 +71,8 @@ class Article(Clusterable):
 
     def entitize(self):
         """
-        Process the article text for entities.
+        Process the article text for entities,
+        and add the appropriate mentions.
         """
         ents = []
         for e_name in brain.entities(self.text):
@@ -81,15 +88,21 @@ class Article(Clusterable):
             # If an entity is found...
             if e:
                 # Add this name as a new alias, if necessary.
-                if e_name not in [a.name for a in e.aliases]:
-                    e.aliases.append(Alias(e_name))
+                alias = Alias.query.filter_by(name=e_name, entity=e).first()
+                if not alias:
+                    alias = Alias(e_name)
+                    e.aliases.append(alias)
+                self.mentions.append(alias)
 
             # If one doesn't exist, create a new one.
             if not e:
                 e = Entity(e_name)
+                self.mentions.append(e.aliases[0])
                 db.session.add(e)
                 db.session.commit()
-            ents.append(e)
+
+            if e not in self.entities and e not in ents:
+                ents.append(e)
         self.entities = ents
 
     def similarity(self, article):
