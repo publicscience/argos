@@ -27,6 +27,22 @@ class Events(Resource):
 api.add_resource(Event, '/events/<int:id>')
 api.add_resource(Events, '/events')
 
+class Latest(Resource):
+    @marshal_with(EVENT_FIELDS)
+    def get(self):
+        args = page_parser.parse_args()
+        results = models.Event.query.paginate(args['page']).items
+        return results or not_found()
+api.add_resource(Latest, '/latest')
+
+class Trending(Resource):
+    @marshal_with(EVENT_FIELDS)
+    def get(self):
+        args = page_parser.parse_args()
+        results = models.Event.query.order_by(models.Event._score.desc()).paginate(args['page']).items
+        return results or not_found()
+api.add_resource(Trending, '/trending')
+
 class Story(Resource):
     @marshal_with(STORY_FIELDS)
     def get(self, id):

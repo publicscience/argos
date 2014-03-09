@@ -42,7 +42,7 @@ class Article(Clusterable):
     html        = db.Column(db.UnicodeText)
     ext_url     = db.Column(db.Unicode)
     image       = db.Column(db.String)
-    score       = db.Column(db.Integer)
+    score       = db.Column(db.Float, default=0.0)
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
     authors     = db.relationship('Author',
                     secondary=articles_authors,
@@ -55,6 +55,9 @@ class Article(Clusterable):
         if self.text is not None:
             self.entitize()
             self.vectorize()
+
+        if self.score is None:
+            self.score = 0.0
 
     def vectorize(self):
         """

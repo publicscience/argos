@@ -7,6 +7,7 @@ from argos.util.logger import logger
 
 from datetime import datetime
 from math import log
+from sqlalchemy import event
 
 events_articles = db.Table('events_articles',
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
@@ -29,6 +30,8 @@ class Event(Cluster):
     __entities__    = {'secondary': events_entities, 'backref_name': 'events'}
     __mentions__    = {'secondary': events_mentions, 'backref_name': 'events'}
     active          = db.Column(db.Boolean, default=True)
+    raw_score       = db.Column(db.Float, default=0.0)
+    _score          = db.Column(db.Float, default=0.0)
 
     @property
     def articles(self):
@@ -51,15 +54,27 @@ class Event(Cluster):
     @property
     def score(self):
         """
+        Returns the event's score,
+        caculating a fresh value on the fly
+        and setting it on the event.
+        """
+        self._score = self.calculate_score()
+        return self._score
+
+    def calculate_score(self):
+        """
         Calculates a score for the event,
-        based on its articles' scores.
+        based on its articles' scores (its `raw_score`).
 
         Its score is modified by the oldness of this event.
 
         Currently this uses the Reddit 'hot' formula,
         see: http://amix.dk/blog/post/19588
         """
-        score = sum([member.score for member in self.members])
+        # Calculate the raw score if it doesn't yet exist.
+        if not self.raw_score:
+            self.raw_score = sum([member.score for member in self.members])
+        score = self.raw_score
         epoch = datetime(1970, 1, 1)
         td = self.updated_at - epoch
         epoch_seconds = td.days * 86400 + td.seconds + (float(td.microseconds) / 1000000)
@@ -128,4 +143,24 @@ class Event(Cluster):
 
         db.session.commit()
         return updated_clusters
+
+@event.listens_for(Event, 'before_update')
+def receive_before_update(mapper, connection, target):
+    # Calculate the raw score.
+    target.raw_score = sum([member.score for member in target.members])
+
+    # Cache a score.
+    target._score = target.calculate_score()
+
+    target.updated_at = datetime.utcnow()
+
+@event.listens_for(Event, 'before_insert')
+def receive_before_insert(mapper, connection, target):
+    # Calculate the raw score.
+    target.raw_score = sum([member.score for member in target.members])
+
+    # Cache a score.
+    target._score = target.calculate_score()
+
+    target.updated_at = datetime.utcnow()
 

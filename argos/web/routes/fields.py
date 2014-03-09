@@ -24,7 +24,7 @@ EVENT_FIELDS = {
     'image': fields.String,
     'images': fields.List(fields.String),
     'summary': fields.String,
-    'score': fields.Integer,
+    'score': fields.Float,
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
     'entities': fields.Nested({

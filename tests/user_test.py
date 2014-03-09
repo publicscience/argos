@@ -192,7 +192,7 @@ class UserAPITest(RequiresApp):
 
     def test_get_current_user_bookmarked(self):
         # The score of an event is hard to anticipate, so mock it.
-        self.create_patch('argos.core.models.Event.score', return_value=1)
+        self.create_patch('argos.core.models.Event.score', return_value=1.0)
 
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
@@ -220,7 +220,7 @@ class UserAPITest(RequiresApp):
                 'summary': event.summary,
                 'image': event.image,
                 'images': [],
-                'score': 1,
+                'score': '1.0', # json returns floats as strings.
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
@@ -265,6 +265,25 @@ class UserAPITest(RequiresApp):
         r = self.client.post('/user/bookmarked', data={'event_id':event.id})
         self.assertEqual(r.status_code, 401)
         self.assertEqual(user.bookmarked, [])
+
+    def test_get_current_user_feed(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        story = fac.story()
+        not_watched_story = fac.story()
+        user.watching.append(story)
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+
+        r = self.client.get('/user/feed')
+        expected_event_ids = [event.id for event in story.events]
+        not_expected_event_ids = [event.id for event in not_watched_story.events]
+        result_event_ids = [event['id'] for event in self.json(r)]
+        self.assertEqual(result_event_ids, expected_event_ids)
+        self.assertNotEqual(result_event_ids, not_expected_event_ids)
+
 
 class AuthTest(RequiresApp):
     def test_update_token_simple(self):

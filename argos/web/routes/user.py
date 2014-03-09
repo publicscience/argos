@@ -72,6 +72,22 @@ class CurrentUserWatching(Resource):
             return unauthorized()
 api.add_resource(CurrentUserWatching, '/user/watching')
 
+class CurrentUserFeed(Resource):
+    """
+    The authenticated user's feed is
+    assembled from the latest events of the
+    stories she is watching.
+    """
+    @marshal_with(EVENT_FIELDS)
+    def get(self):
+        if current_user.is_authenticated():
+            # Get all the events which belong to stories that the user is watching.
+            # This is so heinous, and probably very slow – but it works for now.
+            return models.Event.query.join(models.Event.stories).filter(models.Event.stories.any(models.Story.id.in_([story.id for story in current_user.watching]))).all()
+        else:
+            return unauthorized()
+api.add_resource(CurrentUserFeed, '/user/feed')
+
 class CurrentUserBookmarked(Resource):
     @marshal_with(EVENT_FIELDS)
     def get(self):

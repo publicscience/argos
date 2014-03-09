@@ -2,12 +2,6 @@ from argos.datastore import db, Model
 
 from argos.core.brain import knowledge
 
-"""
-Using Wikipedia as a fallback.
-This isn't a permanent solution!
-"""
-import wikipedia
-
 from slugify import slugify
 from datetime import datetime
 from sqlalchemy import event
