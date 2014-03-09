@@ -30,6 +30,7 @@ class APITest(RequiresApp):
 
         event = fac.event()
         event.members[0].image = 'http://foo.jpg'
+        event.members[1].image = 'http://foo2.jpg'
         save()
 
         expected_members = []
@@ -46,7 +47,7 @@ class APITest(RequiresApp):
                 'title': event.title,
                 'summary': event.summary,
                 'image': event.image,
-                'images': ['http://foo.jpg'],
+                'images': ['http://foo.jpg', 'http://foo2.jpg'],
                 'score': '1.0', # json returns floats as strings.
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
@@ -65,6 +66,7 @@ class APITest(RequiresApp):
         users = fac.user(num=4)
         story.watchers = users
         story.members[0].image = 'http://foo.jpg'
+        story.members[1].image = 'http://foo2.jpg'
         save()
 
         expected_members = []
@@ -86,7 +88,7 @@ class APITest(RequiresApp):
                 'title': story.title,
                 'summary': story.summary,
                 'image': story.image,
-                'images': ['http://foo.jpg'],
+                'images': ['http://foo.jpg', 'http://foo2.jpg'],
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,
