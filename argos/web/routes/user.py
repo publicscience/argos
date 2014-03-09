@@ -36,7 +36,7 @@ class CurrentUser(Resource):
             for key, val in parser.parse_args().items():
                 setattr(current_user, key, val)
             db.session.commit()
-            return current_user
+            return '', 204
         else:
             return unauthorized()
 api.add_resource(CurrentUser, '/user')

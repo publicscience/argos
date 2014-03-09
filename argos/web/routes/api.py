@@ -65,7 +65,7 @@ class StoryWatchers(Resource):
             result = models.Story.query.get(id)
             result.watchers.append(current_user)
             db.session.commit()
-            return current_user
+            return '', 201
         else:
             return unauthorized()
     @marshal_with(permitted_user_fields)
@@ -74,7 +74,7 @@ class StoryWatchers(Resource):
             result = models.Story.query.get(id)
             result.watchers.remove(current_user)
             db.session.commit()
-            return current_user
+            return '', 204
         else:
             return unauthorized()
 api.add_resource(Story, '/stories/<int:id>')

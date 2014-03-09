@@ -32,7 +32,7 @@ EVENT_FIELDS = {
     }),
     'mentions': fields.Nested({
         'name': fields.String,
-        'entity_slug': fields.String
+        'slug': fields.String(attribute='entity_slug')
     }),
     'articles': fields.Nested({
         'url': fields.Url('article')
@@ -56,7 +56,7 @@ STORY_FIELDS = {
     }),
     'mentions': fields.Nested({
         'name': fields.String,
-        'entity_slug': fields.String
+        'slug': fields.String(attribute='entity_slug')
     }),
     'events': fields.Nested({
         'url': fields.Url('event')
@@ -126,4 +126,5 @@ SEARCH_FIELDS = {
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
     'type': fields.String
+    # a url is also created by the search route.
 }
