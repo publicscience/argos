@@ -163,7 +163,7 @@ class UserAPITest(RequiresApp):
 
         self.client.post('/test_login', data={'id': 1})
         r = self.client.post('/user/watching', data={'story_id':story.id})
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 201)
         self.assertEqual(story.watchers, [user])
         self.assertEqual(user.watching, [story])
 
@@ -175,7 +175,7 @@ class UserAPITest(RequiresApp):
         save()
         self.client.post('/test_login', data={'id': 1})
         r = self.client.delete('/user/watching?story_id={0}'.format(story.id))
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 204)
         self.assertEqual(story.watchers, [])
         self.assertEqual(user.watching, [])
 
@@ -189,6 +189,23 @@ class UserAPITest(RequiresApp):
         self.assertEqual(r.status_code, 401)
         self.assertEqual(story.watchers, [])
         self.assertEqual(user.watching, [])
+
+    def test_current_user_check_watching(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        watched_story = fac.story()
+        user.watching.append(watched_story)
+        not_watched_story = fac.story()
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+
+        r = self.client.get('/user/watching/{0}'.format(watched_story.id))
+        self.assertEqual(r.status_code, 204)
+
+        r = self.client.get('/user/watching/{0}'.format(not_watched_story.id))
+        self.assertEqual(r.status_code, 404)
 
     def test_get_current_user_bookmarked(self):
         # The score of an event is hard to anticipate, so mock it.
@@ -241,7 +258,7 @@ class UserAPITest(RequiresApp):
 
         self.client.post('/test_login', data={'id': 1})
         r = self.client.post('/user/bookmarked', data={'event_id':event.id})
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 201)
         self.assertEqual(user.bookmarked, [event])
 
     def test_delete_current_user_bookmarked(self):
@@ -252,7 +269,7 @@ class UserAPITest(RequiresApp):
         save()
         self.client.post('/test_login', data={'id': 1})
         r = self.client.delete('/user/bookmarked?event_id={0}'.format(event.id))
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 204)
         self.assertEqual(user.bookmarked, [])
 
     def test_post_current_user_bookmarked_not_authenticated(self):
@@ -265,6 +282,23 @@ class UserAPITest(RequiresApp):
         r = self.client.post('/user/bookmarked', data={'event_id':event.id})
         self.assertEqual(r.status_code, 401)
         self.assertEqual(user.bookmarked, [])
+
+    def test_current_user_check_bookmarked(self):
+        user = User(active=True, **self.userdata)
+        self.db.session.add(user)
+
+        bookmarked_event = fac.event()
+        user.bookmarked.append(bookmarked_event)
+        not_bookmarked_event = fac.event()
+        save()
+
+        self.client.post('/test_login', data={'id': 1})
+
+        r = self.client.get('/user/bookmarked/{0}'.format(bookmarked_event.id))
+        self.assertEqual(r.status_code, 204)
+
+        r = self.client.get('/user/bookmarked/{0}'.format(not_bookmarked_event.id))
+        self.assertEqual(r.status_code, 404)
 
     def test_get_current_user_feed(self):
         user = User(active=True, **self.userdata)

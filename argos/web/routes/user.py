@@ -6,7 +6,7 @@ from argos.web.routes.api import page_parser
 from argos.web.routes.fields import STORY_FIELDS, EVENT_FIELDS, permitted_user_fields
 from argos.web.routes.errors import not_found, unauthorized
 
-from flask import request
+from flask import request, abort
 from flask_security.core import current_user
 from flask.ext.restful import Resource, marshal_with, fields, reqparse
 
@@ -56,7 +56,7 @@ class CurrentUserWatching(Resource):
                 return not_found()
             current_user.watching.append(story)
             db.session.commit()
-            return 200
+            return '', 201
         else:
             return unauthorized()
     def delete(self):
@@ -67,10 +67,23 @@ class CurrentUserWatching(Resource):
                 return not_found()
             current_user.watching.remove(story)
             db.session.commit()
-            return 200
+            return '', 204
+        else:
+            return unauthorized()
+class CurrentUserWatched(Resource):
+    """
+    For checking if an event is watched
+    by the authenticated user.
+    """
+    def get(self, id):
+        if current_user.is_authenticated():
+            if id in [watched.id for watched in current_user.watching]:
+                return '', 204
+            return abort(404)
         else:
             return unauthorized()
 api.add_resource(CurrentUserWatching, '/user/watching')
+api.add_resource(CurrentUserWatched, '/user/watching/<int:id>')
 
 class CurrentUserFeed(Resource):
     """
@@ -103,7 +116,7 @@ class CurrentUserBookmarked(Resource):
                 return not_found()
             current_user.bookmarked.append(event)
             db.session.commit()
-            return 200
+            return '', 201
         else:
             return unauthorized()
     def delete(self):
@@ -114,10 +127,23 @@ class CurrentUserBookmarked(Resource):
                 return not_found()
             current_user.bookmarked.remove(event)
             db.session.commit()
-            return 200
+            return '', 204
+        else:
+            return unauthorized()
+class CurrentUserBookmark(Resource):
+    """
+    For checking if an event is bookmarked
+    by the authenticated user.
+    """
+    def get(self, id):
+        if current_user.is_authenticated():
+            if id in [bookmark.id for bookmark in current_user.bookmarked]:
+                return '', 204
+            return abort(404)
         else:
             return unauthorized()
 api.add_resource(CurrentUserBookmarked, '/user/bookmarked')
+api.add_resource(CurrentUserBookmark, '/user/bookmarked/<int:id>')
 
 class User(Resource):
     @marshal_with(permitted_user_fields)
