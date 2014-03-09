@@ -59,17 +59,6 @@ class CurrentUserWatching(Resource):
             return '', 201
         else:
             return unauthorized()
-    def delete(self):
-        if current_user.is_authenticated():
-            id = watching_parser.parse_args()['story_id']
-            story = models.Story.query.get(id)
-            if not story or story not in current_user.watching:
-                return not_found()
-            current_user.watching.remove(story)
-            db.session.commit()
-            return '', 204
-        else:
-            return unauthorized()
 class CurrentUserWatched(Resource):
     """
     For checking if an event is watched
@@ -80,6 +69,16 @@ class CurrentUserWatched(Resource):
             if id in [watched.id for watched in current_user.watching]:
                 return '', 204
             return abort(404)
+        else:
+            return unauthorized()
+    def delete(self, id):
+        if current_user.is_authenticated():
+            story = models.Story.query.get(id)
+            if not story or story not in current_user.watching:
+                return not_found()
+            current_user.watching.remove(story)
+            db.session.commit()
+            return '', 204
         else:
             return unauthorized()
 api.add_resource(CurrentUserWatching, '/user/watching')
@@ -119,17 +118,6 @@ class CurrentUserBookmarked(Resource):
             return '', 201
         else:
             return unauthorized()
-    def delete(self):
-        if current_user.is_authenticated():
-            id = bookmarked_parser.parse_args()['event_id']
-            event = models.Event.query.get(id)
-            if not event or event not in current_user.bookmarked:
-                return not_found()
-            current_user.bookmarked.remove(event)
-            db.session.commit()
-            return '', 204
-        else:
-            return unauthorized()
 class CurrentUserBookmark(Resource):
     """
     For checking if an event is bookmarked
@@ -139,7 +127,17 @@ class CurrentUserBookmark(Resource):
         if current_user.is_authenticated():
             if id in [bookmark.id for bookmark in current_user.bookmarked]:
                 return '', 204
-            return abort(404)
+            return '', 404
+        else:
+            return unauthorized()
+    def delete(self, id):
+        if current_user.is_authenticated():
+            event = models.Event.query.get(id)
+            if not event or event not in current_user.bookmarked:
+                return not_found()
+            current_user.bookmarked.remove(event)
+            db.session.commit()
+            return '', 204
         else:
             return unauthorized()
 api.add_resource(CurrentUserBookmarked, '/user/bookmarked')

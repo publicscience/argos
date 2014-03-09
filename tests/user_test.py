@@ -174,7 +174,7 @@ class UserAPITest(RequiresApp):
         user.watching.append(story)
         save()
         self.client.post('/test_login', data={'id': 1})
-        r = self.client.delete('/user/watching?story_id={0}'.format(story.id))
+        r = self.client.delete('/user/watching/{0}'.format(story.id))
         self.assertEqual(r.status_code, 204)
         self.assertEqual(story.watchers, [])
         self.assertEqual(user.watching, [])
@@ -268,7 +268,7 @@ class UserAPITest(RequiresApp):
         user.bookmarked.append(event)
         save()
         self.client.post('/test_login', data={'id': 1})
-        r = self.client.delete('/user/bookmarked?event_id={0}'.format(event.id))
+        r = self.client.delete('/user/bookmarked/{0}'.format(event.id))
         self.assertEqual(r.status_code, 204)
         self.assertEqual(user.bookmarked, [])
 
