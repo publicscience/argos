@@ -10,11 +10,10 @@ from flask.ext.restful import reqparse, marshal
 from sqlalchemy import select, func, literal
 
 search_parser = reqparse.RequestParser()
-search_parser.add_argument('query', type=str)
 search_parser.add_argument('types', type=str)
 
-@app.route('/search')
-def search():
+@app.route('/search/<string:raw_query>')
+def search(raw_query):
     """
     Full-text search.
     Under the hood this takes advantage of PostgreSQL's full-text
@@ -25,7 +24,6 @@ def search():
     """
 
     args = search_parser.parse_args()
-    raw_query = args['query']
     raw_types = args.get('types') or 'event,story,entity'
     types = raw_types.split(',')
 
@@ -88,8 +86,8 @@ def search():
         if 'entity' in types:
             en_sql = db.select([
                         models.Entity,
-                        models.Entity.slug.label('id'),
-                        models.Entity.name.label('title'),
+                        models.Entity.slug,
+                        models.Entity.name,
                         literal('entity').label('type'),
                         db.func.ts_rank_cd(
                             weights,
@@ -101,7 +99,8 @@ def search():
             results.extend(db.engine.execute(en_sql).fetchall())
 
         # Sort results by rank in descending order.
-        results.sort(key=lambda x: x.rank, reverse=True)
+        # Consider a rank=None as 0.0.
+        results.sort(key=lambda x: x.rank or 0.0, reverse=True)
 
         # Process the result rows to match the specified fields.
         results_ = []

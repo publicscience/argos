@@ -14,12 +14,14 @@ class SearchTest(RequiresApp):
         event.title = "Foo bar hey"
         save()
 
-        r = self.client.get('/search?query=foo')
+        r = self.client.get('/search/foo')
         data = self.json(r)
 
         expected = {
             'id': event.id,
             'title': event.title,
+            'name': None,
+            'slug': None,
             'image': event.image,
             'summary': event.summary,
             'updated_at': event.updated_at.isoformat(),
@@ -40,13 +42,15 @@ class SearchTest(RequiresApp):
         story.title = "Hey there foo"
         save()
 
-        r = self.client.get('/search?query=foo')
+        r = self.client.get('/search/foo')
         data = self.json(r)
 
         expected_event = {
             'id': event.id,
             'title': event.title,
             'image': event.image,
+            'name': None,
+            'slug': None,
             'summary': event.summary,
             'updated_at': event.updated_at.isoformat(),
             'created_at': event.created_at.isoformat(),
@@ -58,6 +62,8 @@ class SearchTest(RequiresApp):
             'id': story.id,
             'title': story.title,
             'image': story.image,
+            'name': None,
+            'slug': None,
             'summary': story.summary,
             'updated_at': story.updated_at.isoformat(),
             'created_at': story.created_at.isoformat(),
@@ -77,13 +83,15 @@ class SearchTest(RequiresApp):
         story.title = "Hey there foo"
         save()
 
-        r = self.client.get('/search?query=foo&types=story')
+        r = self.client.get('/search/foo?types=story')
         data = self.json(r)
 
         expected_story = {
             'id': story.id,
             'title': story.title,
             'image': story.image,
+            'name': None,
+            'slug': None,
             'summary': story.summary,
             'updated_at': story.updated_at.isoformat(),
             'created_at': story.created_at.isoformat(),
@@ -103,13 +111,15 @@ class SearchTest(RequiresApp):
         story.title = "Hey there foo"
         save()
 
-        r = self.client.get('/search?query=foo&types=story,event')
+        r = self.client.get('/search/foo?types=story,event')
         data = self.json(r)
 
         expected_event = {
             'id': event.id,
             'title': event.title,
             'image': event.image,
+            'name': None,
+            'slug': None,
             'summary': event.summary,
             'updated_at': event.updated_at.isoformat(),
             'created_at': event.created_at.isoformat(),
@@ -121,6 +131,8 @@ class SearchTest(RequiresApp):
             'id': story.id,
             'title': story.title,
             'image': story.image,
+            'name': None,
+            'slug': None,
             'summary': story.summary,
             'updated_at': story.updated_at.isoformat(),
             'created_at': story.created_at.isoformat(),
@@ -141,7 +153,7 @@ class SearchTest(RequiresApp):
         story.summary = "foo foo foo foo foo"
         save()
 
-        r = self.client.get('/search?query=foo')
+        r = self.client.get('/search/foo')
         data = self.json(r)
 
         self.assertEqual(data['results'][0]['title'], story.title)

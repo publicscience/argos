@@ -121,6 +121,8 @@ SOURCE_FIELDS = {
 SEARCH_FIELDS = {
     'id': fields.Integer,
     'title': fields.String,
+    'slug': fields.String, # for entities
+    'name': fields.String, # for entities
     'image': fields.String,
     'summary': fields.String,
     'updated_at': DateTimeField,
