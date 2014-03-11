@@ -9,7 +9,7 @@ class DateTimeField(fields.Raw):
     def format(self, value):
         return value.isoformat()
 
-permitted_user_fields = {
+user = {
     'id': fields.Integer,
     'image': fields.String,
     'name': fields.String,
@@ -17,7 +17,7 @@ permitted_user_fields = {
     'created_at': DateTimeField
 }
 
-EVENT_FIELDS = {
+event = {
     'id': fields.Integer,
     'url': fields.Url('event'),
     'title': fields.String,
@@ -42,7 +42,7 @@ EVENT_FIELDS = {
     })
 }
 
-STORY_FIELDS = {
+story = {
     'id': fields.Integer,
     'url': fields.Url('story'),
     'title': fields.String,
@@ -66,7 +66,7 @@ STORY_FIELDS = {
     })
 }
 
-ENTITY_FIELDS = {
+entity = {
     'name': fields.String,
     'names': fields.List(fields.String),
     'slug': fields.String,
@@ -79,7 +79,7 @@ ENTITY_FIELDS = {
     })
 }
 
-ARTICLE_FIELDS = {
+article = {
     'id': fields.Integer,
     'url': fields.Url('article'),
     'title': fields.String,
@@ -99,7 +99,7 @@ ARTICLE_FIELDS = {
     })
 }
 
-AUTHOR_FIELDS = {
+author = {
     'id': fields.Integer,
     'url': fields.Url('author'),
     'name': fields.String,
@@ -108,7 +108,7 @@ AUTHOR_FIELDS = {
     })
 }
 
-SOURCE_FIELDS = {
+source = {
     'id': fields.Integer,
     'url': fields.Url('source'),
     'name': fields.String,
@@ -118,7 +118,7 @@ SOURCE_FIELDS = {
     })
 }
 
-SEARCH_FIELDS = {
+search = {
     'id': fields.Integer,
     'title': fields.String,
     'slug': fields.String, # for entities
@@ -127,6 +127,18 @@ SEARCH_FIELDS = {
     'summary': fields.String,
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
-    'type': fields.String
-    # a url is also created by the search route.
+    'type': fields.String,
+    'rank': fields.Float,
+    # the actual URL creation is handled by the search route
+    'url': fields.String
 }
+
+def collection(representation_fields):
+    return {
+        'results': fields.Nested(representation_fields),
+        'pagination': fields.Nested({
+            'page': fields.Integer,
+            'per_page': fields.Integer,
+            'total_count': fields.Integer
+        })
+    }

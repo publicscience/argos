@@ -118,6 +118,26 @@ class UserAPITest(RequiresApp):
         r = self.client.get('/users/1')
         self.assertEqual(self.json(r)['name'], self.userdata['name'])
 
+    def test_get_users(self):
+        user_a = User(**self.userdata)
+        user_b = User(**{
+            'name': 'Foo Bar',
+            'email': 'foo@foo.com',
+            'image': 'https://foob.ar/pic.png',
+            'password': '123456'
+        })
+        self.db.session.add(user_a)
+        self.db.session.add(user_b)
+        self.db.session.commit()
+
+        r = self.client.get('/users')
+
+        expected_names = [user_a.name, user_b.name]
+        data = self.json(r)
+        names = [u['name'] for u in data['results']]
+        self.assertEqual(expected_names, names)
+        self.assertEqual(data['pagination']['total_count'], 2)
+
     def test_get_current_user_watching(self):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)

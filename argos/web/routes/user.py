@@ -1,14 +1,13 @@
 import argos.web.models as models
 
 from argos.datastore import db
-from argos.web.routes import api
-from argos.web.routes.api import page_parser
-from argos.web.routes.fields import STORY_FIELDS, EVENT_FIELDS, permitted_user_fields
+from argos.web.routes import api, fields
+from argos.web.routes.resources import page_parser, collection, PER_PAGE
 from argos.web.routes.errors import not_found, unauthorized
 
 from flask import request, abort
 from flask_security.core import current_user
-from flask.ext.restful import Resource, marshal_with, fields, reqparse
+from flask.ext.restful import Resource, marshal_with, reqparse
 
 parser = reqparse.RequestParser()
 
@@ -23,14 +22,14 @@ bookmarked_parser.add_argument('event_id', type=int)
 
 
 class CurrentUser(Resource):
-    @marshal_with(permitted_user_fields)
+    @marshal_with(fields.user)
     def get(self):
         if current_user.is_authenticated():
             return current_user
         else:
             return unauthorized()
 
-    @marshal_with(permitted_user_fields)
+    @marshal_with(fields.user)
     def patch(self):
         if current_user.is_authenticated():
             for key, val in parser.parse_args().items():
@@ -42,7 +41,7 @@ class CurrentUser(Resource):
 api.add_resource(CurrentUser, '/user')
 
 class CurrentUserWatching(Resource):
-    @marshal_with(STORY_FIELDS)
+    @marshal_with(fields.story)
     def get(self):
         if current_user.is_authenticated():
             return current_user.watching
@@ -90,7 +89,7 @@ class CurrentUserFeed(Resource):
     assembled from the latest events of the
     stories she is watching.
     """
-    @marshal_with(EVENT_FIELDS)
+    @marshal_with(fields.event)
     def get(self):
         if current_user.is_authenticated():
             # Get all the events which belong to stories that the user is watching.
@@ -101,7 +100,7 @@ class CurrentUserFeed(Resource):
 api.add_resource(CurrentUserFeed, '/user/feed')
 
 class CurrentUserBookmarked(Resource):
-    @marshal_with(EVENT_FIELDS)
+    @marshal_with(fields.event)
     def get(self):
         if current_user.is_authenticated():
             return current_user.bookmarked
@@ -144,17 +143,19 @@ api.add_resource(CurrentUserBookmarked, '/user/bookmarked')
 api.add_resource(CurrentUserBookmark, '/user/bookmarked/<int:id>')
 
 class User(Resource):
-    @marshal_with(permitted_user_fields)
+    @marshal_with(fields.user)
     def get(self, id):
         result = models.User.query.get(id)
         return result or not_found()
 api.add_resource(User, '/users/<int:id>')
 
 class Users(Resource):
+    @collection(fields.user)
     def get(self):
-        args = page_parser.parse_args()
-        results = models.User.query.paginate(args['page']).items
-        return results or not_found()
+        page = page_parser.parse_args().get('page')
+        results = models.User.query.paginate(page, per_page=PER_PAGE).items
+        count = models.User.query.count()
+        return results, count or not_found()
 api.add_resource(Users, '/users')
 
 

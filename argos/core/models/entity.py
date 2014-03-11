@@ -34,6 +34,7 @@ class Entity(Model):
     summary     = db.Column(db.UnicodeText)
     image       = db.Column(db.String)
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
     aliases     = db.relationship('Alias', backref='entity', lazy='joined')
 
     def __init__(self, name):

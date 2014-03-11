@@ -2,64 +2,89 @@ import argos.web.models as models
 
 from argos.datastore import db
 from argos.web.app import app
-from argos.web.routes import api
+from argos.web.routes import api, fields
 from argos.web.routes.errors import not_found, unauthorized
-from argos.web.routes.fields import EVENT_FIELDS, STORY_FIELDS, ENTITY_FIELDS, ARTICLE_FIELDS, AUTHOR_FIELDS, SOURCE_FIELDS, permitted_user_fields
 
 from flask_security.core import current_user
-from flask.ext.restful import Resource, marshal_with, fields, reqparse
+from flask.ext.restful import Resource, marshal_with, reqparse
+from functools import wraps
 
 # Whitelist of allowed request parameters.
 page_parser = reqparse.RequestParser()
 page_parser.add_argument('page', type=int, default=1)
 
+PER_PAGE = 20
+
+def collection(member_fields):
+    """
+    A decorator for handling collection/list resources;
+    this will automatically format pagination information
+    in the response.
+    """
+    def decorator(f):
+        @marshal_with(fields.collection(member_fields))
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            page = page_parser.parse_args().get('page')
+            results, count = f(*args, **kwargs)
+            return {'results': results,
+                    'pagination': {
+                        'page': page,
+                        'per_page': PER_PAGE,
+                        'total_count': count
+                    }}
+        return decorated
+    return decorator
+
 class Event(Resource):
-    @marshal_with(EVENT_FIELDS)
+    @marshal_with(fields.event)
     def get(self, id):
         result = models.Event.query.get(id)
         return result or not_found()
 class Events(Resource):
-    @marshal_with(EVENT_FIELDS)
+    @collection(fields.event)
     def get(self):
-        args = page_parser.parse_args()
-        results = models.Event.query.paginate(args['page']).items
-        return results or not_found()
+        page = page_parser.parse_args().get('page')
+        results = models.Event.query.paginate(page, per_page=PER_PAGE).items
+        count = models.Event.query.count()
+        return results, count or not_found()
 api.add_resource(Event, '/events/<int:id>')
 api.add_resource(Events, '/events')
 
 class Latest(Resource):
-    @marshal_with(EVENT_FIELDS)
+    @collection(fields.event)
     def get(self):
-        args = page_parser.parse_args()
-        results = models.Event.query.paginate(args['page']).items
-        return results or not_found()
+        page = page_parser.parse_args().get('page')
+        results = models.Event.query.paginate(page, per_page=PER_PAGE).items
+        return results, count or not_found()
 api.add_resource(Latest, '/latest')
 
 class Trending(Resource):
-    @marshal_with(EVENT_FIELDS)
+    @collection(fields.event)
     def get(self):
-        args = page_parser.parse_args()
-        results = models.Event.query.order_by(models.Event._score.desc()).paginate(args['page']).items
-        return results or not_found()
+        page = page_parser.parse_args().get('page')
+        results = models.Event.query.order_by(models.Event._score.desc()).paginate(page, per_page=PER_PAGE).items
+        count = models.Event.query.count()
+        return results, count or not_found()
 api.add_resource(Trending, '/trending')
 
 class Story(Resource):
-    @marshal_with(STORY_FIELDS)
+    @marshal_with(fields.story)
     def get(self, id):
         result = models.Story.query.get(id)
         return result or not_found()
 class Stories(Resource):
-    @marshal_with(STORY_FIELDS)
+    @collection(fields.story)
     def get(self):
-        args = page_parser.parse_args()
-        results = models.Story.query.paginate(args['page']).items
-        return results or not_found()
+        page = page_parser.parse_args().get('page')
+        results = models.Story.query.paginate(page, per_page=PER_PAGE).items
+        count = models.Story.query.count()
+        return results, count or not_found()
 class StoryWatchers(Resource):
-    @marshal_with(permitted_user_fields)
+    @marshal_with(fields.user)
     def get(self, id):
         result = models.Story.query.get(id)
         return result.watchers or not_found()
-    @marshal_with(permitted_user_fields)
     def post(self, id):
         if current_user.is_authenticated():
             result = models.Story.query.get(id)
@@ -68,7 +93,6 @@ class StoryWatchers(Resource):
             return '', 201
         else:
             return unauthorized()
-    @marshal_with(permitted_user_fields)
     def delete(self, id):
         if current_user.is_authenticated():
             result = models.Story.query.get(id)
@@ -83,7 +107,7 @@ api.add_resource(StoryWatchers, '/stories/<int:id>/watchers')
 
 
 class Entity(Resource):
-    @marshal_with(ENTITY_FIELDS)
+    @marshal_with(fields.entity)
     def get(self, slug):
         result = models.Entity.query.get(slug)
         return result or not_found()
@@ -91,7 +115,7 @@ api.add_resource(Entity, '/entities/<string:slug>')
 
 
 class Article(Resource):
-    @marshal_with(ARTICLE_FIELDS)
+    @marshal_with(fields.article)
     def get(self, id):
         result = models.Article.query.get(id)
         return result or not_found()
@@ -99,7 +123,7 @@ api.add_resource(Article, '/articles/<int:id>')
 
 
 class Author(Resource):
-    @marshal_with(AUTHOR_FIELDS)
+    @marshal_with(fields.author)
     def get(self, id):
         result = models.Author.query.get(id)
         return result or not_found()
@@ -107,7 +131,7 @@ api.add_resource(Author, '/authors/<int:id>')
 
 
 class Source(Resource):
-    @marshal_with(SOURCE_FIELDS)
+    @marshal_with(fields.source)
     def get(self, id):
         result = models.Source.query.get(id)
         return result or not_found()

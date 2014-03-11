@@ -185,5 +185,23 @@ class APITest(RequiresApp):
                         reverse=True)
         event_ids = [event.id for event in events]
         r = self.client.get('/trending')
-        self.assertEqual([event['id'] for event in self.json(r)], event_ids)
+        results = self.json(r).get('results')
+        self.assertEqual([event['id'] for event in results], event_ids)
 
+    def test_collection_pagination(self):
+        fac.event(num=30)
+        r = self.client.get('/events')
+        data = self.json(r)
+
+        self.assertEqual(len(data['results']), 20)
+        self.assertEqual(data['pagination']['page'], 1)
+        self.assertEqual(data['pagination']['per_page'], 20)
+        self.assertEqual(data['pagination']['total_count'], 30)
+
+        r = self.client.get('/events?page=2')
+        data = self.json(r)
+
+        self.assertEqual(len(data['results']), 10)
+        self.assertEqual(data['pagination']['page'], 2)
+        self.assertEqual(data['pagination']['per_page'], 20)
+        self.assertEqual(data['pagination']['total_count'], 30)

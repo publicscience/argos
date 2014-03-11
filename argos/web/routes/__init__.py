@@ -3,4 +3,4 @@ from flask.ext.restful import Api
 
 api = Api(app)
 
-from argos.web.routes import user, api, auth, oauth, search
+from argos.web.routes import user, search, resources, auth, oauth
