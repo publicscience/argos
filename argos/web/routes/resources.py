@@ -56,6 +56,7 @@ class Latest(Resource):
     def get(self):
         page = page_parser.parse_args().get('page')
         results = models.Event.query.paginate(page, per_page=PER_PAGE).items
+        count = models.Event.query.count()
         return results, count or not_found()
 api.add_resource(Latest, '/latest')
 
