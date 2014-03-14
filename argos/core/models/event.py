@@ -14,8 +14,8 @@ events_articles = db.Table('events_articles',
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'), primary_key=True)
 )
 
-events_entities = db.Table('events_entities',
-        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
+events_concepts = db.Table('events_concepts',
+        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug')),
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
 )
 
@@ -27,7 +27,7 @@ events_mentions = db.Table('events_mentions',
 class Event(Cluster):
     __tablename__   = 'event'
     __members__     = {'class_name': 'Article', 'secondary': events_articles, 'backref_name': 'events'}
-    __entities__    = {'secondary': events_entities, 'backref_name': 'events'}
+    __concepts__    = {'secondary': events_concepts, 'backref_name': 'events'}
     __mentions__    = {'secondary': events_mentions, 'backref_name': 'events'}
     active          = db.Column(db.Boolean, default=True)
     raw_score       = db.Column(db.Float, default=0.0)
@@ -116,11 +116,11 @@ class Event(Cluster):
 
         for article in articles:
             # Select candidate clusters,
-            # i.e. active clusters which share at least one entity with this article.
-            a_ents = [entity.slug for entity in article.entities]
+            # i.e. active clusters which share at least one concept with this article.
+            a_ents = [concept.slug for concept in article.concepts]
             candidate_clusters = []
             for c in active_clusters:
-                c_ents = [entity.slug for entity in c.entities]
+                c_ents = [concept.slug for concept in c.concepts]
                 if set(c_ents).intersection(a_ents):
                     candidate_clusters.append(c)
 

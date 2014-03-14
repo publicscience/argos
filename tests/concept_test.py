@@ -1,9 +1,9 @@
 from tests import RequiresApp
 import tests.factories as fac
 from tests.helpers import save
-from argos.core.models.entity import Entity, Alias
+from argos.core.models.concept import Concept, Alias
 
-class EntityTest(RequiresApp):
+class ConceptTest(RequiresApp):
     def setUp(self):
         self.uri = 'http://fauxpedia.org/resource/argos_argos'
 
@@ -14,7 +14,7 @@ class EntityTest(RequiresApp):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
 
-        e = Entity('Argos')
+        e = Concept('Argos')
         self.db.session.add(e)
         save()
 
@@ -26,21 +26,21 @@ class EntityTest(RequiresApp):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
 
-        e = Entity('Argos')
+        e = Concept('Argos')
         self.assertEqual(e.slug, 'argos_argos')
 
     def test_fallback_slug_if_no_uri(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(None)
 
-        e = Entity('Argos')
+        e = Concept('Argos')
         self.assertEqual(e.slug, 'argos')
 
     def test_sets_properties_from_knowledge(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
 
-        e = Entity('Argos')
+        e = Concept('Argos')
 
         self.assertEqual(e.summary, 'this is a fake summary for uri {0}'.format(self.uri))
         self.assertEqual(e.image, 'http://www.argos.la/image.jpg')
@@ -49,7 +49,7 @@ class EntityTest(RequiresApp):
         self._patch_knowledge_for()
         self._patch_uri_for_name(None)
 
-        e = Entity('Argos')
+        e = Concept('Argos')
 
         self.assertEqual(e.summary, 'this is a fake summary for name Argos'.format(self.uri))
         self.assertEqual(e.image, 'http://www.argos.la/image.jpg')

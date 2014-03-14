@@ -26,7 +26,7 @@ class EventTest(RequiresApp):
         elif type == 'different':
             articles = [Article(**a), Article(**c)]
 
-        # Need to save these articles to persist entities,
+        # Need to save these articles to persist concepts,
         # so that their overlaps are calculated properly when clustering!
         for article in articles:
             self.db.session.add(article)
@@ -87,7 +87,7 @@ class EventTest(RequiresApp):
         Event.cluster([self.article])
         self.assertEqual(len(self.cluster.members), 3)
 
-    def test_does_not_cluster_if_no_shared_entities(self):
+    def test_does_not_cluster_if_no_shared_concepts(self):
         self.prepare_event()
         members = [Article(
             title='Robots',
@@ -119,22 +119,22 @@ class EventTest(RequiresApp):
 
         self.assertEqual(Event.query.count(), 1)
 
-    def test_entitize(self):
+    def test_conceptize(self):
         members = [Article(
             title='Robots',
             text='dinosaurs are cool, Reagan'
         ), self.prepare_articles()[0]]
         self.cluster = Event(members)
-        entities = {ent.slug for ent in self.cluster.entities}
+        concepts = {con.slug for con in self.cluster.concepts}
         mentions = {ali.name for ali in self.cluster.mentions}
-        self.assertEqual(entities, {'Clinton', 'Reagan'})
+        self.assertEqual(concepts, {'Clinton', 'Reagan'})
         self.assertEqual(mentions, {'Clinton', 'Reagan'})
 
-    def test_entitize_no_duplicates(self):
+    def test_conceptize_no_duplicates(self):
         self.cluster = Event(self.prepare_articles())
-        entities = [ent.slug for ent in self.cluster.entities]
+        concepts = [con.slug for con in self.cluster.concepts]
         mentions = [ali.name for ali in self.cluster.mentions]
-        self.assertEqual(entities, ['Clinton'])
+        self.assertEqual(concepts, ['Clinton'])
         self.assertEqual(mentions, ['Clinton'])
 
     def test_titleize(self):

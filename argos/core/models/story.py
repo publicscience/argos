@@ -1,5 +1,5 @@
 from argos.datastore import db
-from argos.core.models import Entity
+from argos.core.models import Concept
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
 from argos.core.brain.summarize import multisummarize
@@ -11,8 +11,8 @@ stories_events = db.Table('stories_events',
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True)
 )
 
-stories_entities = db.Table('stories_entities',
-        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
+stories_concepts = db.Table('stories_concepts',
+        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug')),
         db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
 )
 
@@ -24,7 +24,7 @@ stories_mentions = db.Table('stories_mentions',
 class Story(Cluster):
     __tablename__   = 'story'
     __members__     = {'class_name': 'Event', 'secondary': stories_events, 'backref_name': 'stories'}
-    __entities__    = {'secondary': stories_entities, 'backref_name': 'stories'}
+    __concepts__    = {'secondary': stories_concepts, 'backref_name': 'stories'}
     __mentions__    = {'secondary': stories_mentions, 'backref_name': 'stories'}
 
     @property
@@ -78,8 +78,8 @@ class Story(Cluster):
         updated_clusters = []
 
         for event in events:
-            # Find stories which have some matching entities with this event.
-            candidate_clusters = Story.query.filter(Entity.slug.in_([entity.slug for entity in event.entities])).all()
+            # Find stories which have some matching concepts with this event.
+            candidate_clusters = Story.query.filter(Concept.slug.in_([concept.slug for concept in event.concepts])).all()
 
             # Cluster this event.
             selected_cluster = cluster(event, candidate_clusters, threshold=threshold, logger=log)

@@ -107,12 +107,12 @@ api.add_resource(Stories, '/stories')
 api.add_resource(StoryWatchers, '/stories/<int:id>/watchers')
 
 
-class Entity(Resource):
-    @marshal_with(fields.entity)
+class Concept(Resource):
+    @marshal_with(fields.concept)
     def get(self, slug):
-        result = models.Entity.query.get(slug)
+        result = models.Concept.query.get(slug)
         return result or not_found()
-api.add_resource(Entity, '/entities/<string:slug>')
+api.add_resource(Concept, '/concepts/<string:slug>')
 
 
 class Article(Resource):

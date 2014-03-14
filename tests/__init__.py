@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import time, socket, subprocess, tempfile
 
-from tests.patches import patch_knowledge, patch_entities
+from tests.patches import patch_knowledge, patch_concepts
 
 from jobs import workers
 from json import loads
@@ -40,7 +40,7 @@ class RequiresApp(RequiresMocks):
     patch_knowledge = False
 
     # Mock out calls to Stanford NER.
-    patch_entities = False
+    patch_concepts = False
 
     def __call__(self, result=None):
         """
@@ -52,8 +52,8 @@ class RequiresApp(RequiresMocks):
             self.patchers = []
             if self.patch_knowledge:
                 self.patchers.append(patch_knowledge())
-            if self.patch_entities:
-                self.patchers.append(patch_entities())
+            if self.patch_concepts:
+                self.patchers.append(patch_concepts())
             super(RequiresMocks, self).__call__(result)
         finally:
             self._post_teardown()

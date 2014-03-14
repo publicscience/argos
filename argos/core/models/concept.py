@@ -8,20 +8,20 @@ from sqlalchemy import event
 
 class Alias(Model):
     """
-    An alias (i.e. a name) for an entity.
+    An alias (i.e. a name) for a concept.
     """
     id          = db.Column(db.Integer, primary_key=True)
     name        = db.Column(db.UnicodeText)
-    entity_slug = db.Column(db.String, db.ForeignKey('entity.slug'))
+    slug = db.Column(db.String, db.ForeignKey('concept.slug'))
 
     def __init__(self, name):
         self.name = name
 
-class Entity(Model):
+class Concept(Model):
     """
-    An entity,
+    An concept,
     which could be a place, person,
-    organization, concept, topic, etc.
+    organization, topic, etc.
 
     You should *not* set the `slug` or `uri`;
     they are set automatically according to the `name`.
@@ -35,7 +35,7 @@ class Entity(Model):
     image       = db.Column(db.String)
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
-    aliases     = db.relationship('Alias', backref='entity', lazy='joined')
+    aliases     = db.relationship('Alias', backref='concept', lazy='joined')
 
     def __init__(self, name):
         self.aliases.append(Alias(name))
@@ -63,6 +63,6 @@ class Entity(Model):
     def names(self):
         return [alias.name for alias in self.aliases]
 
-@event.listens_for(Entity, 'before_update')
+@event.listens_for(Concept, 'before_update')
 def receive_before_update(mapper, connection, target):
     target.updated_at = datetime.utcnow()

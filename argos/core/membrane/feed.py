@@ -16,7 +16,7 @@ Example::
 
 from argos.core.membrane import feedfinder, evaluator
 from argos.core.models import Article, Author
-from argos.core.brain import entities
+from argos.core.brain import concepts
 from argos.util.gullet import download
 
 import feedparser
@@ -150,11 +150,11 @@ def extract_tags(entry, known_tags=None):
 
 
     # DISABLING FOR NOW. Easier to run through all entries and add
-    # these entities later.
+    # these concepts later.
     # Otherwise, try to extract some.
     #else:
         #sample = entry['fulltext']
-        #return entities(sample)
+        #return concepts(sample)
 
 def extract_image(entry_data, filename=None, save_dir='.'):
     """

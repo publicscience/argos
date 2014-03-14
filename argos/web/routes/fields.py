@@ -27,12 +27,12 @@ event = {
     'score': fields.Float,
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
-    'entities': fields.Nested({
-        'url': fields.Url('entity')
+    'concepts': fields.Nested({
+        'url': fields.Url('concept')
     }),
     'mentions': fields.Nested({
         'name': fields.String,
-        'slug': fields.String(attribute='entity_slug')
+        'slug': fields.String
     }),
     'articles': fields.Nested({
         'url': fields.Url('article')
@@ -51,12 +51,12 @@ story = {
     'summary': fields.String,
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
-    'entities': fields.Nested({
-        'url': fields.Url('entity')
+    'concepts': fields.Nested({
+        'url': fields.Url('concept')
     }),
     'mentions': fields.Nested({
         'name': fields.String,
-        'slug': fields.String(attribute='entity_slug')
+        'slug': fields.String
     }),
     'events': fields.Nested({
         'url': fields.Url('event')
@@ -66,11 +66,11 @@ story = {
     })
 }
 
-entity = {
+concept = {
     'name': fields.String,
     'names': fields.List(fields.String),
     'slug': fields.String,
-    'url': fields.Url('entity'),
+    'url': fields.Url('concept'),
     'summary': fields.String,
     'image': fields.String,
     'updated_at': DateTimeField,
@@ -121,8 +121,8 @@ source = {
 search = {
     'id': fields.Integer,
     'title': fields.String,
-    'slug': fields.String, # for entities
-    'name': fields.String, # for entities
+    'slug': fields.String, # for concepts
+    'name': fields.String, # for concepts
     'image': fields.String,
     'summary': fields.String,
     'updated_at': DateTimeField,

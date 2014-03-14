@@ -99,14 +99,8 @@ def vectorize(docs):
     else:
         return h.transform(docs)
 
-def concepts(docs):
-    """
-    Extracts concepts for a list of documents.
-    """
-    return [alchemy.concepts(doc) for doc in docs]
 
-
-def entities(docs, strategy='stanford'):
+def concepts(docs, strategy='stanford'):
     """
     Named entity recognition on
     a text document or documents.

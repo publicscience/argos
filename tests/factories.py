@@ -11,7 +11,7 @@ It's assumed that when factories are used, you aren't testing the lower-level fu
 
 from tests.helpers import save
 from tests.patches import requires_patches
-from argos.core.models import Entity, Article, Event, Story, Source
+from argos.core.models import Concept, Article, Event, Story, Source
 from argos.web.models import User
 from argos.datastore import db
 
@@ -43,13 +43,13 @@ def user(num=1):
 
 
 @requires_patches
-def entity(num=1):
+def concept(num=1):
     args = [
         {'name': 'Argos'},
         {'name': 'Ceres'},
         {'name': 'Iliad'}
     ]
-    e_s = [Entity(**args[i]) for i in range(num)]
+    e_s = [Concept(**args[i]) for i in range(num)]
 
     save(e_s)
 

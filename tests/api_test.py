@@ -9,17 +9,17 @@ class APITest(RequiresApp):
         self.assertTrue(r.data)
         self.assertEqual(r.status_code, 404)
 
-    def test_GET_entity(self):
-        entity = fac.entity()
-        r = self.client.get('/entities/{0}'.format(entity.slug))
+    def test_GET_concept(self):
+        concept = fac.concept()
+        r = self.client.get('/concepts/{0}'.format(concept.slug))
         expected = {
-                'name': entity.name,
-                'names': entity.names,
-                'slug': entity.slug,
-                'url': '/entities/{0}'.format(entity.slug),
-                'updated_at': entity.updated_at.isoformat(),
-                'summary': entity.summary,
-                'image': entity.image,
+                'name': concept.name,
+                'names': concept.names,
+                'slug': concept.slug,
+                'url': '/concepts/{0}'.format(concept.slug),
+                'updated_at': concept.updated_at.isoformat(),
+                'summary': concept.summary,
+                'image': concept.image,
                 'stories': []
         }
         self.assertEqual(self.json(r), expected)
@@ -34,8 +34,8 @@ class APITest(RequiresApp):
         save()
 
         expected_members = []
-        expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in event.entities]
-        expected_mentions = [{'name': alias.name, 'slug': alias.entity.slug} for alias in event.mentions]
+        expected_concepts = [{'url': '/concepts/{0}'.format(concept.slug)} for concept in event.concepts]
+        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
                 'url': '/articles/{0}'.format(member.id)
@@ -52,7 +52,7 @@ class APITest(RequiresApp):
                 'updated_at': event.updated_at.isoformat(),
                 'created_at': event.created_at.isoformat(),
                 'articles': expected_members,
-                'entities': expected_entities,
+                'concepts': expected_concepts,
                 'mentions': expected_mentions,
                 'stories': []
         }
@@ -71,8 +71,8 @@ class APITest(RequiresApp):
 
         expected_members = []
         expected_watchers = []
-        expected_entities = [{'url': '/entities/{0}'.format(entity.slug)} for entity in story.entities]
-        expected_mentions = [{'name': alias.name, 'slug': alias.entity.slug} for alias in story.mentions]
+        expected_concepts = [{'url': '/concepts/{0}'.format(concept.slug)} for concept in story.concepts]
+        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in story.mentions]
         for member in story.members:
             expected_members.append({
                 'url': '/events/{0}'.format(member.id)
@@ -92,7 +92,7 @@ class APITest(RequiresApp):
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,
-                'entities': expected_entities,
+                'concepts': expected_concepts,
                 'mentions': expected_mentions,
                 'watchers': expected_watchers
         }

@@ -77,7 +77,7 @@ html_doc = open('tests/data/article.html', 'r').read()
 
 class FeedTest(RequiresApp):
     patch_knowledge = True
-    patch_entities = True
+    patch_concepts = True
 
     def setUp(self):
         article = {

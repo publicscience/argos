@@ -12,10 +12,10 @@ def requires_patches(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         k_patcher = patch_knowledge()
-        e_patcher = patch_entities()
+        c_patcher = patch_concepts()
         return_value = f(*args, **kwargs)
         k_patcher.stop()
-        e_patcher.stop()
+        c_patcher.stop()
         return return_value
     return decorated
 
@@ -29,11 +29,11 @@ def patch_knowledge():
     ])
     return patcher
 
-def patch_entities():
+def patch_concepts():
     # Patch these methods so
     # tests don't require the Stanford NER server.
     patcher = Patcher([
-        'argos.core.brain.entities'
+        'argos.core.brain.concepts'
     ])
     return patcher
 
@@ -103,5 +103,5 @@ def faux_knowledge_for(name=None, uri=None, fallback=None):
 def faux_uri_for_name(name):
     return "http://fauxpedia.org/resource/{0}".format(name)
 
-def faux_entities(docs):
+def faux_concepts(docs):
     return ['Nautilus', 'Picard']

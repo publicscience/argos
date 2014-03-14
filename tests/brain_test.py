@@ -13,10 +13,10 @@ class BrainTest(unittest.TestCase):
         expected = ['hey', 'buddy', 'hey', 'say', 'say']
         self.assertEqual(tokens,expected)
 
-    def test_entity_recognition(self):
+    def test_concept_recognition(self):
         with open('tests/data/sample.txt', 'r') as f:
             sample = f.read()
-        results = brain.entities(sample)
+        results = brain.concepts(sample)
 
         expected = [
             'Second Red Scare',

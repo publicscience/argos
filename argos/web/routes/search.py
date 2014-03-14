@@ -27,7 +27,7 @@ class Search(Resource):
 
         args = search_parser.parse_args()
         page = page_parser.parse_args().get('page')
-        raw_types = args.get('types') or 'event,story,entity'
+        raw_types = args.get('types') or 'event,story,concept'
         types = raw_types.split(',')
 
         if raw_query:
@@ -66,7 +66,7 @@ class Search(Resource):
                 # each SELECT statement has the same number of columns.
                             literal(None).label('slug'),
                             literal(None).label('name'),
-                # We also additionally include a `type` so we can distinguish Events from Stories from Entities.
+                # We also additionally include a `type` so we can distinguish Events from Stories from Concepts.
                             literal('event').label('type'),
                 # We also include a 'rank' column which is calculated by psql's full text ranking functions. This is used to sort results.
                             db.func.ts_rank_cd(
@@ -99,23 +99,23 @@ class Search(Resource):
                          whereclause=((models.Story.title.match(query)) | (models.Story.summary.match(query))))
                 sql_queries.append(st_sql)
 
-            if 'entity' in types:
+            if 'concept' in types:
                 en_sql = db.select([
                             literal(0).label('id'),
                             literal('').label('title'),
-                            models.Entity.image,
-                            models.Entity.summary,
-                            models.Entity.updated_at,
-                            models.Entity.created_at,
-                            models.Entity.slug,
-                            models.Entity.name,
-                            literal('entity').label('type'),
+                            models.Concept.image,
+                            models.Concept.summary,
+                            models.Concept.updated_at,
+                            models.Concept.created_at,
+                            models.Concept.slug,
+                            models.Concept.name,
+                            literal('concept').label('type'),
                             db.func.ts_rank_cd(
                                 weights,
-                                db.func.to_tsvector('english', models.Entity.summary),
+                                db.func.to_tsvector('english', models.Concept.summary),
                                 db.func.to_tsquery(query)).label('rank')
                          ],
-                         whereclause=((models.Entity.name.match(query)) | (models.Entity.summary.match(query))))
+                         whereclause=((models.Concept.name.match(query)) | (models.Concept.summary.match(query))))
                 sql_queries.append(en_sql)
 
             # Finally we combine the queries and then
@@ -134,7 +134,7 @@ class Search(Resource):
                 r = dict(r)
 
                 # Build the url for the result.
-                if (r['type'] == 'entity'):
+                if (r['type'] == 'concept'):
                     r['url'] = url_for(r['type'], slug=r['id'])
                 else:
                     r['url'] = url_for(r['type'], id=r['id'])

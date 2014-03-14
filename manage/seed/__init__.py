@@ -7,7 +7,7 @@ Create some seed data.
 
 from argos.web.app import app
 from argos.datastore import db
-from argos.core.models import Entity, Article, Event, Story, Source
+from argos.core.models import Concept, Article, Event, Story, Source
 from argos.util.progress import progress_bar
 from argos.web.models.oauth import Client
 from werkzeug.security import gen_salt
@@ -36,7 +36,19 @@ def seed(debug=False):
         'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Barack_Obama_at_Las_Vegas_Presidential_Forum.jpg/640px-Barack_Obama_at_Las_Vegas_Presidential_Forum.jpg'
         'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/2010-10-23-Demo-Stuttgart21-Befuerworter.png/640px-2010-10-23-Demo-Stuttgart21-Befuerworter.png',
         'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/51%C2%BA_Congresso_da_UNE_%28Conune%29.jpg/640px-51%C2%BA_Congresso_da_UNE_%28Conune%29.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Tough_return%2C_365.35.jpg/640px-Tough_return%2C_365.35.jpg'
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Tough_return%2C_365.35.jpg/640px-Tough_return%2C_365.35.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Saint_Isaac%27s_Cathedral_in_SPB.jpeg/800px-Saint_Isaac%27s_Cathedral_in_SPB.jpeg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Ponta_de_S%C3%A3o_Louren%C3%A7o_north_north_east.jpg/800px-Ponta_de_S%C3%A3o_Louren%C3%A7o_north_north_east.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/TU_Bibl_01_DSC1099w.jpg/644px-TU_Bibl_01_DSC1099w.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/%D0%9C%D0%B0%D0%BA%D0%B5%D0%B4%D0%BE%D0%BD%D0%B8%D1%83%D0%BC_-_%D0%9A%D1%80%D1%83%D1%88%D0%B5%D0%B2%D0%BE.jpg/800px-%D0%9C%D0%B0%D0%BA%D0%B5%D0%B4%D0%BE%D0%BD%D0%B8%D1%83%D0%BC_-_%D0%9A%D1%80%D1%83%D1%88%D0%B5%D0%B2%D0%BE.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Puente_Mong%2C_Ciudad_Ho_Chi_Minh%2C_Vietnam%2C_2013-08-14%2C_DD_01.JPG/800px-Puente_Mong%2C_Ciudad_Ho_Chi_Minh%2C_Vietnam%2C_2013-08-14%2C_DD_01.JPG',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Autignac%2C_H%C3%A9rault_01.jpg/800px-Autignac%2C_H%C3%A9rault_01.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Caesio_teres_in_Fiji_by_Nick_Hobgood.jpg/800px-Caesio_teres_in_Fiji_by_Nick_Hobgood.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Ash_in_Yogyakarta_during_the_2014_eruption_of_Kelud_01.jpg/800px-Ash_in_Yogyakarta_during_the_2014_eruption_of_Kelud_01.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/12-07-12-wikimania-wdc-by-RalfR-010.jpg/800px-12-07-12-wikimania-wdc-by-RalfR-010.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Mortagne-sur-Gironde_Civellier_Mayflowers_2013.jpg/800px-Mortagne-sur-Gironde_Civellier_Mayflowers_2013.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/British_Museum_Great_Court%2C_London%2C_UK_-_Diliff.jpg/611px-British_Museum_Great_Court%2C_London%2C_UK_-_Diliff.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Mercedes-Benz_Museum_201312_08_blue_hour.jpg/800px-Mercedes-Benz_Museum_201312_08_blue_hour.jpg'
     ]
 
     print('Resetting the database...')
@@ -82,9 +94,9 @@ def seed(debug=False):
     db.session.commit()
 
     num_articles = Article.query.count()
-    num_entities = Entity.query.count()
+    num_concepts = Concept.query.count()
     print('Seeded {0} articles.'.format(num_articles))
-    print('Found {0} entities.'.format(num_entities))
+    print('Found {0} concepts.'.format(num_concepts))
 
     print('Clustering articles into events...')
     Event.cluster(articles, threshold=0.02, debug=True)
@@ -98,7 +110,7 @@ def seed(debug=False):
     print('Created {0} story clusters.'.format(num_stories))
 
     print('\n\n==============================================')
-    print('From {0} sources, seeded {1} articles, found {2} entities, created {3} events and {4} stories.'.format(num_sources, num_articles, num_entities, num_events, num_stories))
+    print('From {0} sources, seeded {1} articles, found {2} concepts, created {3} events and {4} stories.'.format(num_sources, num_articles, num_concepts, num_events, num_stories))
     print('==============================================\n\n')
 
     client = app.test_client()

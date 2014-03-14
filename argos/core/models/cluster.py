@@ -1,5 +1,5 @@
 from argos.datastore import db, Model
-from argos.core.brain import vectorize, entities
+from argos.core.brain import vectorize, concepts
 from argos.core.brain.summarize import summarize, multisummarize
 
 from sqlalchemy.ext.declarative import declared_attr
@@ -19,18 +19,18 @@ class Clusterable(Model):
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
 
     @declared_attr
-    def entities(cls):
+    def concepts(cls):
         """
-        Build the entities attribute from the
-        subclass's `__entities__` class attribute.
+        Build the concepts attribute from the
+        subclass's `__concepts__` class attribute.
 
         Example::
 
-            __entities__ = {'secondary': articles_entities, 'backref_name': 'articles'}
+            __concepts__ = {'secondary': articles_concepts, 'backref_name': 'articles'}
         """
-        args = cls.__entities__
+        args = cls.__concepts__
 
-        return db.relationship('Entity',
+        return db.relationship('Concept',
                 secondary=args['secondary'],
                 backref=db.backref(args['backref_name']))
 
@@ -138,11 +138,11 @@ class Cluster(Clusterable):
         if max_member_w_image[0] is not None:
             self.image = max_member_w_image[0].image
 
-    def entitize(self):
+    def conceptize(self):
         """
-        Update entities (and mentions) for this cluster.
+        Update concepts (and mentions) for this cluster.
         """
-        self.entities = list(set(chain.from_iterable([member.entities for member in self.members])))
+        self.concepts = list(set(chain.from_iterable([member.concepts for member in self.members])))
         self.mentions = list(set(chain.from_iterable([member.mentions for member in self.members])))
 
     def update(self):
@@ -152,7 +152,7 @@ class Cluster(Clusterable):
         """
         self.titleize()
         self.summarize()
-        self.entitize()
+        self.conceptize()
         self.updated_at = datetime.utcnow()
         self.created_at = datetime.utcnow()
 

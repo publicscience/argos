@@ -1,5 +1,5 @@
 from argos.datastore import db, Model
-from argos.core.models.entity import Entity, Alias
+from argos.core.models.concept import Concept, Alias
 from argos.core.models.cluster import Clusterable
 from argos.core import brain
 
@@ -19,8 +19,8 @@ articles_authors = db.Table('authors',
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
-articles_entities = db.Table('articles_entities',
-        db.Column('entity_slug', db.String, db.ForeignKey('entity.slug')),
+articles_concepts = db.Table('articles_concepts',
+        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug')),
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
@@ -34,7 +34,7 @@ class Article(Clusterable):
     An article.
     """
     __tablename__ = 'article'
-    __entities__    = {'secondary': articles_entities, 'backref_name': 'articles'}
+    __concepts__    = {'secondary': articles_concepts, 'backref_name': 'articles'}
     __mentions__    = {'secondary': articles_mentions, 'backref_name': 'articles'}
     vectors     = db.Column(db.PickleType)
     title       = db.Column(db.Unicode)
@@ -53,7 +53,7 @@ class Article(Clusterable):
             setattr(self, key, kwargs[key])
 
         if self.text is not None:
-            self.entitize()
+            self.conceptize()
             self.vectorize()
 
         if self.score is None:
@@ -64,49 +64,49 @@ class Article(Clusterable):
         Returns a tuple of vectors representing this article.
 
         Articles are represented by:
-            (bag of words vector, entities vector)
+            (bag of words vector, concepts vector)
         """
         if self.vectors is None:
             bow_vec = brain.vectorize(self.text)
-            ent_vec = brain.vectorize(' '.join(brain.entities(self.text)))
+            ent_vec = brain.vectorize(' '.join(brain.concepts(self.text)))
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
-    def entitize(self):
+    def conceptize(self):
         """
-        Process the article text for entities,
+        Process the article text for concepts,
         and add the appropriate mentions.
         """
-        ents = []
-        for e_name in brain.entities(self.text):
-            # Search for the entity.
-            uri = brain.knowledge.uri_for_name(e_name)
+        concepts = []
+        for c_name in brain.concepts(self.text):
+            # Search for the concept.
+            uri = brain.knowledge.uri_for_name(c_name)
 
             if uri:
                 slug = uri.split('/')[-1]
             else:
-                slug = slugify(e_name)
-            e = Entity.query.get(slug)
+                slug = slugify(c_name)
+            c = Concept.query.get(slug)
 
-            # If an entity is found...
-            if e:
+            # If an concept is found...
+            if c:
                 # Add this name as a new alias, if necessary.
-                alias = Alias.query.filter_by(name=e_name, entity=e).first()
+                alias = Alias.query.filter_by(name=c_name, concept=c).first()
                 if not alias:
-                    alias = Alias(e_name)
-                    e.aliases.append(alias)
+                    alias = Alias(c_name)
+                    c.aliases.append(alias)
                 self.mentions.append(alias)
 
             # If one doesn't exist, create a new one.
-            if not e:
-                e = Entity(e_name)
-                self.mentions.append(e.aliases[0])
-                db.session.add(e)
+            if not c:
+                c = Concept(c_name)
+                self.mentions.append(c.aliases[0])
+                db.session.add(c)
                 db.session.commit()
 
-            if e not in self.entities and e not in ents:
-                ents.append(e)
-        self.entities = ents
+            if c not in self.concepts and c not in concepts:
+                concepts.append(c)
+        self.concepts = concepts
 
     def similarity(self, article):
         """
@@ -114,13 +114,13 @@ class Article(Clusterable):
         and another article.
         """
         # Compare the text vectors,
-        # and the entity vectors.
+        # and the concept vectors.
         v = self.vectorize()
         v_ = article.vectorize()
 
         # Linearly combine the similarity values,
-        # weighing them according to these coefficients.
-        # [text vector, entity vector, publication date]
+        # weighing them according to these coefficicepts.
+        # [text vector, concept vector, publication date]
         coefs = [2, 1, 2]
         sim = 0
         for i, vec in enumerate(v):
