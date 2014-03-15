@@ -54,6 +54,15 @@ class ConceptTest(RequiresApp):
         self.assertEqual(c.summary, 'this is a fakc.summary for name Argos'.format(self.uri))
         self.assertEqual(c.image, 'http://www.argos.la/image.jpg')
 
+    def test_related_concepts(self):
+        related_concepts = fac.concept(num=2)
+        c = Concept('Argos')
+        c.to_concepts = related_concepts
+
+        for concept in related_concepts:
+            self.assertTrue(c in concept.from_concepts)
+            self.assertTrue(concept in c.to_concepts)
+
     # Patches
     def _patch_knowledge_for(self):
         mock_func = self.create_patch('argos.core.brain.knowledge.knowledge_for')
