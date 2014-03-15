@@ -14,11 +14,11 @@ class ConceptTest(RequiresApp):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
 
-        e = Concept('Argos')
-        self.db.session.add(e)
+        c = Concept('Argos')
+        self.db.session.add(c)
         save()
 
-        self.assertEqual(len(e.aliases), 1)
+        self.assertEqual(len(c.aliases), 1)
         self.assertEqual(Alias.query.count(), 1)
         self.assertEqual(Alias.query.first().name, 'Argos')
 
@@ -26,34 +26,33 @@ class ConceptTest(RequiresApp):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
 
-        e = Concept('Argos')
-        self.assertEqual(e.slug, 'argos_argos')
+        c = Concept('Argos')
+        self.assertEqual(c.slug, 'argos_argos')
 
     def test_fallback_slug_if_no_uri(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(None)
 
-        e = Concept('Argos')
-        self.assertEqual(e.slug, 'argos')
+        c = Concept('Argos')
+        self.assertEqual(c.slug, 'argos')
 
     def test_sets_properties_from_knowledge(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
 
-        e = Concept('Argos')
+        c = Concept('Argos')
 
-        self.assertEqual(e.summary, 'this is a fake summary for uri {0}'.format(self.uri))
-        self.assertEqual(e.image, 'http://www.argos.la/image.jpg')
+        self.assertEqual(c.summary, 'this is a fakc.summary for uri {0}'.format(self.uri))
+        self.assertEqual(c.image, 'http://www.argos.la/image.jpg')
 
     def test_sets_properties_from_knowledge_no_uri(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(None)
 
-        e = Concept('Argos')
+        c = Concept('Argos')
 
-        self.assertEqual(e.summary, 'this is a fake summary for name Argos'.format(self.uri))
-        self.assertEqual(e.image, 'http://www.argos.la/image.jpg')
-
+        self.assertEqual(c.summary, 'this is a fakc.summary for name Argos'.format(self.uri))
+        self.assertEqual(c.image, 'http://www.argos.la/image.jpg')
 
     # Patches
     def _patch_knowledge_for(self):
@@ -62,13 +61,13 @@ class ConceptTest(RequiresApp):
         def faux_knowledge_for(name=None, uri=None, fallback=None):
             if uri:
                 return {
-                    'summary': 'this is a fake summary for uri {0}'.format(uri),
+                    'summary': 'this is a fakc.summary for uri {0}'.format(uri),
                     'image': 'http://www.argos.la/image.jpg',
                     'name': 'Canonical name'
                 }
             if name:
                 return {
-                    'summary': 'this is a fake summary for name {0}'.format(name),
+                    'summary': 'this is a fakc.summary for name {0}'.format(name),
                     'image': 'http://www.argos.la/image.jpg',
                     'name': name
                 }
