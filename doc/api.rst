@@ -6,7 +6,7 @@ API
 
    api/events
    api/stories
-   api/entities
+   api/concepts
    api/articles
    api/authors
    api/sources

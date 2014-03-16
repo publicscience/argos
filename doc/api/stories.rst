@@ -17,8 +17,8 @@ Example response
 
 .. code-block:: json
 
-    [
-        {
+    {
+        "results": [{
             "id": 1,
             "url": "/stories/1",
             "title": "Syrian civil war",
@@ -27,8 +27,9 @@ Example response
             "summary": "Armed uprising in Syria between President Assad and the Muslim Brotherhood...",
             "updated_at": "2014-02-07T23:42:15.581374",
             "created_at": "2014-02-06T20:55:54.597459",
-            "entities": [{
-                "url": "/entities/muslim-brotherhood"
+            "concepts": [{
+                "url": "/concepts/muslim-brotherhood",
+                "score": "0.67"
             }],
             "mentions": [{
                 "name": "The Muslim Brotherhood",
@@ -40,8 +41,13 @@ Example response
             "watchers": [{
                 "url": "/users/1"
             }]
+        }],
+        "pagination": {
+            "page": 1,
+            "per_page": 20,
+            "total_count": 240
         }
-    ]
+    }
 
 -----
 
@@ -62,8 +68,9 @@ Example response
         "summary": "Armed uprising in Syria between President Assad and the Muslim Brotherhood...",
         "updated_at": "2014-02-07T23:42:15.581374",
         "created_at": "2014-02-06T20:55:54.597459",
-        "entities": [{
-            "url": "/entities/muslim-brotherhood"
+        "concepts": [{
+            "url": "/concepts/muslim-brotherhood",
+            "score": "0.67"
         }],
         "mentions": [{
             "name": "The Muslim Brotherhood",

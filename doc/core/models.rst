@@ -10,7 +10,7 @@ Models
 .. autoclass:: argos.core.models.Story
     :members:
 
-.. autoclass:: argos.core.models.Entity
+.. autoclass:: argos.core.models.Concept
     :members:
 
 .. autoclass:: argos.core.models.Source

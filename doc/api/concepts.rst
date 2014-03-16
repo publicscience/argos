@@ -1,9 +1,9 @@
-Entities
+Concepts
 ------
 
-**Get a single entity**::
+**Get a single concept**::
 
-    GET /entities/:slug
+    GET /concepts/:slug
 
 Example response
 
@@ -18,6 +18,7 @@ Example response
         "url": "/entities/john-kerry",
         "updated_at": "2014-02-07T23:42:15.581374",
         "stories": [{
-            "url": "/stories/1"
+            "url": "/stories/1",
+            "relatedness": "0.24"
         }]
     }

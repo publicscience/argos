@@ -17,15 +17,20 @@ Example response
 
 .. code-block:: json
 
-    [
-        {
+    {
+        "results": [{
             "id": 1,
             "image": "https://s3.amazonaws.com/argos/12479514.jpg",
             "name": "Isaac Clarke",
             "updated_at": "2014-02-07T23:42:15.581374",
             "created_at": "2014-02-06T20:55:54.597459"
+        }],
+        "pagination": {
+            "page": 1,
+            "per_page": 20,
+            "total_count": 240
         }
-    ]
+    }
 
 -----
 
@@ -95,8 +100,9 @@ Example response
             "summary": "Armed uprising in Syria between President Assad and the Muslim Brotherhood...",
             "updated_at": "2014-02-07T23:42:15.581374",
             "created_at": "2014-02-06T20:55:54.597459",
-            "entities": [{
-                "url": "/entities/muslim-brotherhood"
+            "concepts": [{
+                "url": "/concepts/muslim-brotherhood",
+                "score": "0.67"
             }],
             "mentions": [{
                 "name": "The Muslim Brotherhood",
@@ -194,8 +200,9 @@ Example response
             "score": 71283,
             "updated_at": "2014-02-07T23:42:15.581374",
             "created_at": "2014-02-06T20:55:54.597459",
-            "entities": [{
-                "url": "/entities/john-kerry"
+            "concepts": [{
+                "url": "/concepts/john-kerry",
+                "score": "0.67"
             }],
             "mentions": [{
                 "name": "John Kerry",
