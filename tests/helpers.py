@@ -23,8 +23,7 @@ def save(objs=None):
     """
     if objs is not None:
         if type(objs) is list:
-            for obj in objs:
-                db.session.add(obj)
+            db.session.add_all(objs)
         else:
             db.session.add(objs)
     db.session.commit()
