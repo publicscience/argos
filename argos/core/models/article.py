@@ -1,11 +1,12 @@
-from argos.datastore import db, Model
-from argos.core.models.concept import Concept, Alias
+from argos.datastore import db
+from argos.core.models.concept import Concept, Alias, BaseConceptAssociation
 from argos.core.models.cluster import Clusterable
 from argos.core import brain
 
 from scipy.spatial.distance import jaccard
 
 from math import isnan
+from collections import Counter
 from slugify import slugify
 
 # Ignore the invalid numpy warning,
@@ -19,22 +20,21 @@ articles_authors = db.Table('authors',
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
-articles_concepts = db.Table('articles_concepts',
-        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug')),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
-)
-
 articles_mentions = db.Table('articles_mentions',
         db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
         db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
 )
 
+class ArticleConceptAssociation(BaseConceptAssociation):
+    __backref__ = 'article_associations'
+    article_id  = db.Column(db.Integer, db.ForeignKey('article.id'), primary_key=True)
+
 class Article(Clusterable):
     """
     An article.
     """
-    __tablename__ = 'article'
-    __concepts__    = {'secondary': articles_concepts, 'backref_name': 'articles'}
+    __tablename__   = 'article'
+    __concepts__    = {'association_model': ArticleConceptAssociation, 'backref_name': 'article'}
     __mentions__    = {'secondary': articles_mentions, 'backref_name': 'articles'}
     vectors     = db.Column(db.PickleType)
     title       = db.Column(db.Unicode)
@@ -104,9 +104,20 @@ class Article(Clusterable):
                 db.session.add(c)
                 db.session.commit()
 
-            if c not in self.concepts and c not in concepts:
-                concepts.append(c)
-        self.concepts = concepts
+            concepts.append(c)
+
+        # Score the concepts' importance.
+        total_found = len(concepts)
+        counter = Counter(concepts)
+        uniq_concepts = set(concepts)
+
+        assocs = []
+        for concept in uniq_concepts:
+            score = counter[concept]/total_found
+            assoc = ArticleConceptAssociation(concept, score)
+            assocs.append(assoc)
+
+        self.concept_associations = assocs
 
     def similarity(self, article):
         """

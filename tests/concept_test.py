@@ -1,7 +1,7 @@
 from tests import RequiresApp
 import tests.factories as fac
 from tests.helpers import save
-from argos.core.models.concept import Concept, Alias
+from argos.core.models.concept import Concept, Alias, ConceptConceptAssociation
 
 class ConceptTest(RequiresApp):
     def setUp(self):
@@ -57,11 +57,13 @@ class ConceptTest(RequiresApp):
     def test_related_concepts(self):
         related_concepts = fac.concept(num=2)
         c = Concept('Argos')
-        c.to_concepts = related_concepts
 
-        for concept in related_concepts:
+        concept_associations = [ConceptConceptAssociation(concept, 1.0) for concept in related_concepts]
+        c.concept_associations = concept_associations
+
+        for concept in c.concepts:
             self.assertTrue(c in concept.from_concepts)
-            self.assertTrue(concept in c.to_concepts)
+            self.assertTrue(concept in c.concepts)
 
     # Patches
     def _patch_knowledge_for(self):

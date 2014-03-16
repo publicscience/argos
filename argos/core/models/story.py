@@ -1,5 +1,6 @@
 from argos.datastore import db
 from argos.core.models import Concept
+from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
 from argos.core.brain.summarize import multisummarize
@@ -11,20 +12,19 @@ stories_events = db.Table('stories_events',
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True)
 )
 
-stories_concepts = db.Table('stories_concepts',
-        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug')),
-        db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
-)
-
 stories_mentions = db.Table('stories_mentions',
         db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
         db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
 )
 
+class StoryConceptAssociation(BaseConceptAssociation):
+    __backref__     = 'story_associations'
+    story_id        = db.Column(db.Integer, db.ForeignKey('story.id'), primary_key=True)
+
 class Story(Cluster):
     __tablename__   = 'story'
     __members__     = {'class_name': 'Event', 'secondary': stories_events, 'backref_name': 'stories'}
-    __concepts__    = {'secondary': stories_concepts, 'backref_name': 'stories'}
+    __concepts__    = {'association_model': StoryConceptAssociation, 'backref_name': 'story'}
     __mentions__    = {'secondary': stories_mentions, 'backref_name': 'stories'}
 
     @property

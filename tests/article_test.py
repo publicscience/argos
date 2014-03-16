@@ -114,3 +114,27 @@ class ArticleTest(RequiresApp):
         # But three aliases (the original one the
         # concept had, plus the two new ones here).
         self.assertEqual(len(concept.aliases), 3)
+
+    def test_conceptize_scores_related_concepts(self):
+        # Set things up so two concepts are found
+        # when processing the article.
+        def mock_uri_for_name(name):
+            if name == 'some concept':
+                return 'uri_a'
+            else:
+                return 'uri_b'
+        mock_func = self.create_patch('argos.core.brain.knowledge.uri_for_name')
+        mock_func.side_effect = mock_uri_for_name
+
+        # One concept appears 3 times, the other only once.
+        self.create_patch('argos.core.brain.concepts', return_value=['some concept', 'another concept', 'some concept', 'some concept'])
+
+        # Create the article, which calls conceptize.
+        article = Article(title='A title', text='Some text', score=100)
+
+        concepts = article.concepts
+        for concept in concepts:
+            if concept.uri == 'uri_a':
+                self.assertEqual(concept.score, 0.75)
+            else:
+                self.assertEqual(concept.score, 0.25)

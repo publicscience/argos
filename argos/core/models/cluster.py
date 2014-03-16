@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from scipy.spatial.distance import jaccard
 
 from datetime import datetime
-from itertools import chain
+from itertools import chain, groupby
 
 
 class Clusterable(Model):
@@ -19,20 +19,47 @@ class Clusterable(Model):
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
 
     @declared_attr
-    def concepts(cls):
+    def concept_associations(cls):
         """
-        Build the concepts attribute from the
+        Build the concepts relationship from the
         subclass's `__concepts__` class attribute.
+
+        This uses an Associated Object so we can
+        keep track of an additional property: the
+        importance score of a particular concept to a
+        given clusterable. The clusterable's concepts are
+        directly accessed through the `concepts` property.
+
+        The association model should inherit from BaseConceptAssociation.
 
         Example::
 
-            __concepts__ = {'secondary': articles_concepts, 'backref_name': 'articles'}
+            __concepts__ = {'association_model': ArticleConceptAssociation,
+                            'backref_name': 'article'}
         """
         args = cls.__concepts__
 
-        return db.relationship('Concept',
-                secondary=args['secondary'],
-                backref=db.backref(args['backref_name']))
+        return db.relationship(args['association_model'],
+                backref=db.backref(args['backref_name']),
+                cascade='all, delete-orphan')
+
+    @property
+    def concepts(self):
+        """
+        Returns this model's associated concepts,
+        along with their importance scores for this
+        particular model.
+
+        Note that `concepts` is a readonly property.
+        Adding more concepts requires the addition of
+        new instances of this model's concept-association model.
+        That is, concepts must be added with an importance score
+        which is accomplished by using the concept-association model.
+        """
+        def with_score(assoc):
+            assoc.concept.score = assoc.score
+            return assoc.concept
+        return list(map(with_score, self.concept_associations))
 
     @declared_attr
     def mentions(cls):
@@ -142,8 +169,31 @@ class Cluster(Clusterable):
         """
         Update concepts (and mentions) for this cluster.
         """
-        self.concepts = list(set(chain.from_iterable([member.concepts for member in self.members])))
         self.mentions = list(set(chain.from_iterable([member.mentions for member in self.members])))
+
+        # Calculate importance scores for the members' concepts.
+        assocs = chain.from_iterable([member.concept_associations for member in self.members])
+
+        # Group associations by their concept.
+        # Since `groupby` only looks at adjacent elements,
+        # we have to first sort the associations by their concepts' slugs.
+        key_func = lambda assoc: assoc.concept.slug
+        grouped_assocs = [list(g) for k, g in groupby(sorted(assocs, key=key_func), key_func)]
+
+        # Calculate the raw scores of each concept.
+        raw_scores = {}
+        for assoc_group in grouped_assocs:
+            concept = assoc_group[0].concept
+            raw_scores[concept] = sum(assoc.score for assoc in assoc_group)
+        total = sum(raw_scores.values())
+
+        # Calculate the final scores and create the associations.
+        assocs = []
+        for concept, raw_score in raw_scores.items():
+            score = raw_score/total
+            assoc = self.__class__.__concepts__['association_model'](concept, score) # this is nuts
+            assocs.append(assoc)
+        self.concept_associations = assocs
 
     def update(self):
         """

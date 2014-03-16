@@ -6,16 +6,55 @@ from argos.core.brain import knowledge
 from slugify import slugify
 from datetime import datetime
 from sqlalchemy import event
-
-concepts_concepts = db.Table('concepts_concepts',
-        db.Column('from_concept_slug', db.String, db.ForeignKey('concept.slug')),
-        db.Column('to_concept_slug', db.String, db.ForeignKey('concept.slug'))
-)
+from sqlalchemy.ext.declarative import declared_attr
 
 concepts_mentions = db.Table('concepts_mentions',
         db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
         db.Column('concept_slug', db.String, db.ForeignKey('concept.slug'))
 )
+
+class BaseConceptAssociation(Model):
+    """
+    Models which will be related to concepts must
+    subclass this model and specify a backref name
+    through a class property called `__backref__`
+    and a foreign key property for the related model.
+
+    Example::
+
+        class ArticleConceptAssociation(BaseConceptAssociation):
+            __backref__ = 'article_associations'
+            article_id  = db.Column(db.Integer, db.ForeignKey('article.id'), primary_key=True)
+
+    In the related model, you must also specify a
+    `__concepts__` class property which points to this association
+    model:
+
+            __concepts__ = {'association_model': ArticleConceptAssociation,
+                            'backref_name': 'article'}
+    """
+    __abstract__ = True
+    score           = db.Column(db.Float, default=0.0)
+
+    def __init__(self, concept, score):
+        self.score = score
+        self.concept = concept
+
+    @declared_attr
+    def concept(cls):
+        backref = cls.__backref__
+        return db.relationship('Concept', backref=backref)
+
+    @declared_attr
+    def concept_slug(cls):
+        return db.Column(db.String, db.ForeignKey('concept.slug'), primary_key=True)
+
+
+class ConceptConceptAssociation(BaseConceptAssociation):
+    from_concept_slug   = db.Column(db.String, db.ForeignKey('concept.slug'), primary_key=True)
+    concept_slug        = db.Column(db.String, db.ForeignKey('concept.slug'), primary_key=True)
+    concept             = db.relationship('Concept', backref=db.backref('from_concept_associations'), foreign_keys=[concept_slug])
+
 
 class Alias(Model):
     """
@@ -27,6 +66,7 @@ class Alias(Model):
 
     def __init__(self, name):
         self.name = name
+
 
 class Concept(Model):
     """
@@ -50,12 +90,11 @@ class Concept(Model):
 
     # Mapping concepts to concepts,
     # and tracking mentions of other concepts in this concept's summary.
-    to_concepts = db.relationship('Concept',
-                            secondary=concepts_concepts,
-                            primaryjoin=slug==concepts_concepts.c.from_concept_slug,
-                            secondaryjoin=slug==concepts_concepts.c.to_concept_slug,
-                            backref='from_concepts')
     mentions    = db.relationship('Alias', secondary=concepts_mentions, backref=db.backref('concepts'))
+    concept_associations = db.relationship(ConceptConceptAssociation,
+                                foreign_keys=[ConceptConceptAssociation.from_concept_slug],
+                                backref=db.backref('from_concept'),
+                                cascade='all, delete-orphan')
 
     def __init__(self, name):
         self.aliases.append(Alias(name))
@@ -87,6 +126,67 @@ class Concept(Model):
     @property
     def names(self):
         return [alias.name for alias in self.aliases]
+
+    @property
+    def concepts(self):
+        """
+        Returns the concepts this
+        concept points *to*,
+        with their importance scores
+        for this concept.
+        """
+        def with_score(assoc):
+            assoc.concept.score = assoc.score
+            return assoc.concept
+        return list(map(with_score, self.concept_associations))
+
+    @property
+    def from_concepts(self):
+        """
+        Returns the concepts that
+        points to this concept,
+        with their importance scores
+        for this concept.
+        """
+        def with_score(assoc):
+            assoc.from_concept.score = assoc.score
+            return assoc.from_concept
+        return list(map(with_score, self.from_concept_associations))
+
+    @property
+    def stories(self):
+        """
+        Return the stories associated with this concept,
+        adding an additional "relatedness" value
+        which is the concept's importance score for
+        a particular story.
+        """
+        def with_score(assoc):
+            assoc.story.relatedness = assoc.score
+            return assoc.story
+        return list(map(with_score, self.story_associations))
+
+    @property
+    def events(self):
+        """
+        Same as the `stories` property
+        but for events.
+        """
+        def with_score(assoc):
+            assoc.event.relatedness = assoc.score
+            return assoc.event
+        return list(map(with_score, self.event_associations))
+
+    @property
+    def articles(self):
+        """
+        Same as the `stories` property
+        but for articles.
+        """
+        def with_score(assoc):
+            assoc.article.relatedness = assoc.score
+            return assoc.article
+        return list(map(with_score, self.article_associations))
 
     @property
     def related_concepts(self):

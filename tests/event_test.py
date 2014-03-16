@@ -125,10 +125,17 @@ class EventTest(RequiresApp):
             text='dinosaurs are cool, Reagan'
         ), self.prepare_articles()[0]]
         self.cluster = Event(members)
+
         concepts = {con.slug for con in self.cluster.concepts}
         mentions = {ali.name for ali in self.cluster.mentions}
+
         self.assertEqual(concepts, {'Clinton', 'Reagan'})
         self.assertEqual(mentions, {'Clinton', 'Reagan'})
+
+        # Expect each concept's score to be 0.5, since
+        # each article only has one unique concept.
+        for concept in self.cluster.concepts:
+            self.assertEqual(concept.score, 0.5)
 
     def test_conceptize_no_duplicates(self):
         self.cluster = Event(self.prepare_articles())

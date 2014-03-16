@@ -10,7 +10,8 @@ class APITest(RequiresApp):
         self.assertEqual(r.status_code, 404)
 
     def test_GET_concept(self):
-        concept = fac.concept()
+        story = fac.story()
+        concept = story.concepts[0]
         r = self.client.get('/concepts/{0}'.format(concept.slug))
         expected = {
                 'name': concept.name,
@@ -20,7 +21,7 @@ class APITest(RequiresApp):
                 'updated_at': concept.updated_at.isoformat(),
                 'summary': concept.summary,
                 'image': concept.image,
-                'stories': []
+                'stories': [{'relatedness': '0.5', 'url': '/stories/1'}]
         }
         self.assertEqual(self.json(r), expected)
 
@@ -34,7 +35,10 @@ class APITest(RequiresApp):
         save()
 
         expected_members = []
-        expected_concepts = [{'url': '/concepts/{0}'.format(concept.slug)} for concept in event.concepts]
+        expected_concepts = [{
+            'url': '/concepts/{0}'.format(concept.slug),
+            'score': '0.5'
+        } for concept in event.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
@@ -71,7 +75,10 @@ class APITest(RequiresApp):
 
         expected_members = []
         expected_watchers = []
-        expected_concepts = [{'url': '/concepts/{0}'.format(concept.slug)} for concept in story.concepts]
+        expected_concepts = [{
+            'url': '/concepts/{0}'.format(concept.slug),
+            'score': '0.5'
+        } for concept in story.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in story.mentions]
         for member in story.members:
             expected_members.append({

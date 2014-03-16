@@ -151,7 +151,10 @@ class UserAPITest(RequiresApp):
         r = self.client.get('/user/watching')
 
         expected_members = []
-        expected_concepts = [{'url': '/concepts/{0}'.format(concept.slug)} for concept in story.concepts]
+        expected_concepts = [{
+            'url': '/concepts/{0}'.format(concept.slug),
+            'score': '0.5'
+        } for concept in story.concepts]
         expected_watchers = [{'url': '/users/{0}'.format(user.id)}]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in story.mentions]
         for member in story.members:
@@ -243,7 +246,10 @@ class UserAPITest(RequiresApp):
         r = self.client.get('/user/bookmarked')
 
         expected_members = []
-        expected_concepts = [{'url': '/concepts/{0}'.format(concept.slug)} for concept in event.concepts]
+        expected_concepts = [{
+            'url': '/concepts/{0}'.format(concept.slug),
+            'score': '0.5'
+        } for concept in event.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
@@ -273,7 +279,6 @@ class UserAPITest(RequiresApp):
         self.db.session.add(user)
 
         event = fac.event()
-        user.bookmarked.append(event)
         save()
 
         self.client.post('/test_login', data={'id': 1})
