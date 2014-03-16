@@ -69,12 +69,8 @@ then
 
 elif [ $1 == 'test' ]
 then
-    if [ -z $2 ]
-    then
-        FLASK_ENV=TESTING nosetests
-    else
-        FLASK_ENV=TESTING nosetests $2
-    fi
+    shift # to pass the rest of the args
+    FLASK_ENV=TESTING nosetests $@
 
 elif [ $1 == 'evaluate' ]
 then
