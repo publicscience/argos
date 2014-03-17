@@ -35,13 +35,13 @@ class EventTest(RequiresApp):
         return articles
 
     def prepare_event(self):
-        self.cluster = Event(self.prepare_articles())
-        self.db.session.add(self.cluster)
+        self.event = Event(self.prepare_articles())
+        self.db.session.add(self.event)
         self.db.session.commit()
 
     def test_similarity_with_object_different(self):
         self.prepare_event()
-        avg_sim = self.cluster.similarity(self.article)
+        avg_sim = self.event.similarity(self.article)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
 
@@ -55,7 +55,7 @@ class EventTest(RequiresApp):
         self.prepare_event()
         members = (self.prepare_articles())
         c = Event(members)
-        avg_sim = self.cluster.similarity(c)
+        avg_sim = self.event.similarity(c)
 
         # Currently, the similarity calculation between clusters
         # does not yield 1.0 if they are identical clusters,
@@ -69,23 +69,23 @@ class EventTest(RequiresApp):
         members = self.prepare_articles(type='different')
         c = Event(members)
 
-        avg_sim = self.cluster.similarity(c)
+        avg_sim = self.event.similarity(c)
         self.assertNotEqual(avg_sim, 1.0)
         self.assertNotEqual(avg_sim, 0.0)
 
     def test_expired_made_inactive(self):
         self.prepare_event()
-        self.cluster.updated_at = datetime.utcnow() - timedelta(days=4)
+        self.event.updated_at = datetime.utcnow() - timedelta(days=4)
         Event.cluster([self.article])
-        self.assertFalse(self.cluster.active)
+        self.assertFalse(self.event.active)
 
     def test_clusters_similar(self):
         self.prepare_event()
         members = self.prepare_articles(type='duplicate')
-        self.cluster.members = members
+        self.event.members = members
 
         Event.cluster([self.article])
-        self.assertEqual(len(self.cluster.members), 3)
+        self.assertEqual(len(self.event.members), 3)
 
     def test_does_not_cluster_if_no_shared_concepts(self):
         self.prepare_event()
@@ -94,10 +94,10 @@ class EventTest(RequiresApp):
             text='dinosaurs are cool, Reagan',
             created_at=datetime.utcnow()
         )]
-        self.cluster.members = members
+        self.event.members = members
 
         Event.cluster([self.article])
-        self.assertEqual(len(self.cluster.members), 1)
+        self.assertEqual(len(self.event.members), 1)
 
     def test_does_not_cluster_not_similar(self):
         self.prepare_event()
@@ -107,7 +107,7 @@ class EventTest(RequiresApp):
                 created_at=datetime.utcnow()
         )
         Event.cluster([article])
-        self.assertEqual(len(self.cluster.members), 2)
+        self.assertEqual(len(self.event.members), 2)
 
     def test_no_matching_cluster_creates_new_cluster(self):
         article = Article(
@@ -124,23 +124,23 @@ class EventTest(RequiresApp):
             title='Robots',
             text='dinosaurs are cool, Reagan'
         ), self.prepare_articles()[0]]
-        self.cluster = Event(members)
+        self.event = Event(members)
 
-        concepts = {con.slug for con in self.cluster.concepts}
-        mentions = {ali.name for ali in self.cluster.mentions}
+        concepts = {con.slug for con in self.event.concepts}
+        mentions = {ali.name for ali in self.event.mentions}
 
         self.assertEqual(concepts, {'Clinton', 'Reagan'})
         self.assertEqual(mentions, {'Clinton', 'Reagan'})
 
         # Expect each concept's score to be 0.5, since
         # each article only has one unique concept.
-        for concept in self.cluster.concepts:
+        for concept in self.event.concepts:
             self.assertEqual(concept.score, 0.5)
 
     def test_conceptize_no_duplicates(self):
-        self.cluster = Event(self.prepare_articles())
-        concepts = [con.slug for con in self.cluster.concepts]
-        mentions = [ali.name for ali in self.cluster.mentions]
+        self.event = Event(self.prepare_articles())
+        concepts = [con.slug for con in self.event.concepts]
+        mentions = [ali.name for ali in self.event.mentions]
         self.assertEqual(concepts, ['Clinton'])
         self.assertEqual(mentions, ['Clinton'])
 
@@ -149,16 +149,16 @@ class EventTest(RequiresApp):
             title='Robots',
             text='dinosaurs are cool, Reagan'
         )] + self.prepare_articles(type='duplicate')
-        self.cluster = Event(members)
-        self.assertEqual(self.cluster.title, 'Dinosaurs')
+        self.event = Event(members)
+        self.assertEqual(self.event.title, 'Dinosaurs')
 
     def test_summarize(self):
-        self.cluster = Event(self.prepare_articles())
-        self.assertTrue(self.cluster.summary)
+        self.event = Event(self.prepare_articles())
+        self.assertTrue(self.event.summary)
 
     def test_summarize_single_article(self):
-        self.cluster = Event([self.prepare_articles()[0]])
-        self.assertTrue(self.cluster.summary)
+        self.event = Event([self.prepare_articles()[0]])
+        self.assertTrue(self.event.summary)
 
     def test_timespan(self):
         text = 'the worldly philosophers today cautious optimism is based to a large extent on technological breakthroughs'
@@ -167,8 +167,8 @@ class EventTest(RequiresApp):
                 Article(title='B', text=text, created_at=datetime(2014, 1, 22, 1, 1, 1, 111111)),
                 Article(title='C', text=text, created_at=datetime(2014, 1, 24, 1, 1, 1, 111111))
         ]
-        self.cluster = Event(members)
-        results = self.cluster.timespan(datetime(2014, 1, 21, 1, 1, 1, 111111))
+        self.event = Event(members)
+        results = self.event.timespan(datetime(2014, 1, 21, 1, 1, 1, 111111))
         self.assertEqual(len(results), 2)
         self.assertEqual({r.title for r in results}, {'B', 'C'})
 

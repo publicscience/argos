@@ -4,7 +4,7 @@ import tests.factories as fac
 from argos.core.models import Story, Event
 
 class StoryTest(RequiresApp):
-    def test_story_entitize(self):
+    def test_story_conceptize(self):
         story = fac.story()
 
         expected_concepts = []
