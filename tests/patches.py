@@ -13,9 +13,11 @@ def requires_patches(f):
     def decorated(*args, **kwargs):
         k_patcher = patch_knowledge()
         c_patcher = patch_concepts()
+        s_patcher = patch_summarization()
         return_value = f(*args, **kwargs)
         k_patcher.stop()
         c_patcher.stop()
+        s_patcher.stop()
         return return_value
     return decorated
 
@@ -37,6 +39,12 @@ def patch_concepts():
     ])
     return patcher
 
+def patch_summarization():
+    patcher = Patcher([
+        'argos.core.brain.summarize.summarize',
+        'argos.core.brain.summarize.multisummarize'
+    ])
+    return patcher
 
 class Patcher():
     """
@@ -105,3 +113,9 @@ def faux_uri_for_name(name):
 
 def faux_concepts(docs):
     return ['Nautilus', 'Picard']
+
+def faux_summarize(title, text):
+    return ['this', 'is', 'a', 'fake', 'summary']
+
+def faux_multisummarize(docs):
+    return ['this', 'is', 'a', 'fake', 'summary']

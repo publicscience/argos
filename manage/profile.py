@@ -7,7 +7,6 @@ and identify bottlenecks.
 """
 
 import cProfile, pstats
-import brain
 from digester.wikidigester import WikiDigester
 
 def profile_wikidigester():

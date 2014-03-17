@@ -2,7 +2,7 @@ from argos.datastore import db
 from argos.core.models.cluster import Cluster
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core.brain.cluster import cluster
-from argos.core.brain.summarize import summarize, multisummarize
+from argos.core.brain import summarize
 
 from argos.util.logger import logger
 
@@ -89,9 +89,9 @@ class Event(Cluster):
         """
         if len(self.members) == 1:
             member = self.members[0]
-            self.summary = ' '.join(summarize(member.title, member.text))
+            self.summary = ' '.join(summarize.summarize(member.title, member.text))
         else:
-            self.summary = ' '.join(multisummarize([m.text for m in self.members]))
+            self.summary = ' '.join(summarize.multisummarize([m.text for m in self.members]))
         return self.summary
 
     @staticmethod

@@ -36,7 +36,6 @@ class Article(Clusterable):
     __tablename__   = 'article'
     __concepts__    = {'association_model': ArticleConceptAssociation, 'backref_name': 'article'}
     __mentions__    = {'secondary': articles_mentions, 'backref_name': 'articles'}
-    vectors     = db.Column(db.PickleType)
     title       = db.Column(db.Unicode)
     text        = db.Column(db.UnicodeText)
     html        = db.Column(db.UnicodeText)
@@ -66,7 +65,7 @@ class Article(Clusterable):
         Articles are represented by:
             (bag of words vector, concepts vector)
         """
-        if self.vectors is None:
+        if not hasattr(self, 'vectors') or self.vectors is None:
             bow_vec = brain.vectorize(self.text)
             ent_vec = brain.vectorize(' '.join(brain.concepts(self.text)))
             self.vectors = [bow_vec, ent_vec]
