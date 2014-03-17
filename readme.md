@@ -97,9 +97,3 @@ articles by doing (make sure Postgres is running):
 ```bash
 $ ./manage/load_sources
 ```
-
-
-# AWS Setup
-You will also need to set up Amazon Web Services to adminster and use
-cloud instances. See [AWS
-Setup](https://github.com/publicscience/argos/wiki/AWS-Setup)
