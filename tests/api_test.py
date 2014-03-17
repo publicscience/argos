@@ -21,7 +21,10 @@ class APITest(RequiresApp):
                 'updated_at': concept.updated_at.isoformat(),
                 'summary': concept.summary,
                 'image': concept.image,
-                'stories': [{'relatedness': '0.5', 'url': '/stories/1'}]
+                'stories': [{
+                    'relatedness': '0.5',
+                    'id': story.id,
+                    'url': '/stories/{0}'.format(story.id)}]
         }
         self.assertEqual(self.json(r), expected)
 
@@ -36,12 +39,14 @@ class APITest(RequiresApp):
 
         expected_members = []
         expected_concepts = [{
+            'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
             'score': '0.5'
         } for concept in event.concepts]
-        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in event.mentions]
+        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
+                'id': member.id,
                 'url': '/articles/{0}'.format(member.id)
             })
 
@@ -76,16 +81,19 @@ class APITest(RequiresApp):
         expected_members = []
         expected_watchers = []
         expected_concepts = [{
+            'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
             'score': '0.5'
         } for concept in story.concepts]
-        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in story.mentions]
+        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in story.mentions]
         for member in story.members:
             expected_members.append({
+                'id': member.id,
                 'url': '/events/{0}'.format(member.id)
             })
         for user in users:
             expected_watchers.append({
+                'id': user.id,
                 'url': '/users/{0}'.format(user.id)
             })
 
@@ -178,6 +186,7 @@ class APITest(RequiresApp):
                 'authors': [],
                 'events': [],
                 'source': {
+                    'id': source.id,
                     'url': '/sources/{0}'.format(source.id),
                     'name': source.name
                 }

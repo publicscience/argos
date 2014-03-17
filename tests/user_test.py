@@ -152,13 +152,15 @@ class UserAPITest(RequiresApp):
 
         expected_members = []
         expected_concepts = [{
+            'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
             'score': '0.5'
         } for concept in story.concepts]
-        expected_watchers = [{'url': '/users/{0}'.format(user.id)}]
-        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in story.mentions]
+        expected_watchers = [{'url': '/users/{0}'.format(user.id), 'id': user.id}]
+        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in story.mentions]
         for member in story.members:
             expected_members.append({
+                'id': member.id,
                 'url': '/events/{0}'.format(member.id)
             })
 
@@ -247,12 +249,14 @@ class UserAPITest(RequiresApp):
 
         expected_members = []
         expected_concepts = [{
+            'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
             'score': '0.5'
         } for concept in event.concepts]
-        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug} for alias in event.mentions]
+        expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
+                'id': member.id,
                 'url': '/articles/{0}'.format(member.id)
             })
 

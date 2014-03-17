@@ -29,16 +29,20 @@ event = {
     'created_at': DateTimeField,
     'concepts': fields.Nested({
         'url': fields.Url('concept'),
+        'slug': fields.String,
         'score': fields.Float
     }),
     'mentions': fields.Nested({
+        'id': fields.Integer,
         'name': fields.String,
         'slug': fields.String
     }),
     'articles': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('article')
     }),
     'stories': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('story')
     })
 }
@@ -54,16 +58,20 @@ story = {
     'created_at': DateTimeField,
     'concepts': fields.Nested({
         'url': fields.Url('concept'),
+        'slug': fields.String,
         'score': fields.Float
     }),
     'mentions': fields.Nested({
+        'id': fields.Integer,
         'name': fields.String,
         'slug': fields.String
     }),
     'events': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('event')
     }),
     'watchers': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('user')
     })
 }
@@ -77,6 +85,7 @@ concept = {
     'image': fields.String,
     'updated_at': DateTimeField,
     'stories': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('story'),
         'relatedness': fields.Float
     })
@@ -91,13 +100,16 @@ article = {
     'created_at': DateTimeField,
     'updated_at': DateTimeField,
     'source': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('source'),
         'name': fields.String
     }),
     'authors': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('author')
     }),
     'events': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('event')
     })
 }
@@ -107,6 +119,7 @@ author = {
     'url': fields.Url('author'),
     'name': fields.String,
     'articles': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('article')
     })
 }
@@ -117,6 +130,7 @@ source = {
     'name': fields.String,
     'ext_url': fields.String,
     'articles': fields.Nested({
+        'id': fields.Integer,
         'url': fields.Url('article')
     })
 }
