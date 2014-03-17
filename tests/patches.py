@@ -14,10 +14,12 @@ def requires_patches(f):
         k_patcher = patch_knowledge()
         c_patcher = patch_concepts()
         s_patcher = patch_summarization()
+        v_patcher = patch_vectorize()
         return_value = f(*args, **kwargs)
         k_patcher.stop()
         c_patcher.stop()
         s_patcher.stop()
+        v_patcher.stop()
         return return_value
     return decorated
 
@@ -43,6 +45,12 @@ def patch_summarization():
     patcher = Patcher([
         'argos.core.brain.summarize.summarize',
         'argos.core.brain.summarize.multisummarize'
+    ])
+    return patcher
+
+def patch_vectorize():
+    patcher = Patcher([
+        'argos.core.brain.vectorize'
     ])
     return patcher
 
@@ -119,3 +127,8 @@ def faux_summarize(title, text):
 
 def faux_multisummarize(docs):
     return ['this', 'is', 'a', 'fake', 'summary']
+
+from argos.core.brain import vectorize
+cached_vector = vectorize('foo bar')
+def faux_vectorize(docs):
+    return cached_vector
