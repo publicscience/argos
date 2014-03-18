@@ -124,8 +124,7 @@ function setup_knowledge {
     mkdir -p data/knowledge
 
     # Download and digest the DBpedia dumps.
-    python -c "from argos.core.digester import knowledge;
-    knowledge.download(); knowledge.digest()"
+    python -c "from argos.core.digester import knowledge; knowledge.download(); knowledge.digest()"
 }
 
 
