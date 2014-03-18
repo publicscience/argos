@@ -84,7 +84,7 @@ def articles(source):
         title = entry.get('title', entry_data.title)
 
         # Download and save the top article image.
-        image_url = extractor.extract_image(entry_data, filename=hash(url), save_dir='data/images/')
+        image_url = extractor.extract_image(entry_data, filename=hash(url))
 
         articles.append(Article(
             ext_url=url,

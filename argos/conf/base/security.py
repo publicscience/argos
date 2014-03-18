@@ -6,7 +6,7 @@ Most of them are set to default.
 """
 
 # ==============
-# Required 
+# Required
 # ==============
 
 SECRET_KEY = 'this-is-our-secret'

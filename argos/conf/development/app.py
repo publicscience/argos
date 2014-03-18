@@ -7,6 +7,10 @@ AES_IV = '123456789abcdefg' # must be 16 bytes
 DEBUG = True
 SQLALCHEMY_DATABASE_URI = "{DATABASE[default][TYPE]}://{DATABASE[default][USER]}:{DATABASE[default][PASSWORD]}@{DATABASE[default][HOST]}:{DATABASE[default][PORT]}/{DATABASE[default][NAME]}"
 
+AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
+S3_BUCKET_NAME = 'argos_development_storage'
+
 TWITTER = {
     'consumer_key':         env.get('ARGOS_TWITTER_CONSUMER_KEY'),
     'consumer_secret':      env.get('ARGOS_TWITTER_CONSUMER_SECRET'),

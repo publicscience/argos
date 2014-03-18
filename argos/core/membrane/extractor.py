@@ -8,14 +8,15 @@ for articles.
 
 from argos.core.models import Author
 from argos.core.brain import concepts
-from argos.util.gullet import download
+from argos.util import storage
 
 from http.client import IncompleteRead
 from http.cookiejar import CookieJar
-from goose import Goose
 from readability.readability import Document
+from goose import Goose
 
 from urllib import request
+from os.path import splitext
 
 g = Goose()
 
@@ -62,15 +63,19 @@ def extract_tags(entry, known_tags=None):
         #sample = entry['fulltext']
         #return concepts(sample)
 
-def extract_image(entry_data, filename=None, save_dir='.'):
+def extract_image(entry_data, filename):
     """
     Extracts and saves a representative
     image for the entry.
+
+    This preserves the file extension of the remote file,
+    preferencing it over the one specified by the user.
     """
-    image_url = ''
+    image_url = None
     if entry_data.top_image:
         remote_image_url = entry_data.top_image.src
-        image_url = download(remote_image_url, save_dir, filename=filename)
+        ext = splitext(remote_image_url)[-1]
+        image_url = storage.save_from_url(remote_image_url, '{0}{1}'.format(filename, ext))
     return image_url
 
 def extract_authors(entry):

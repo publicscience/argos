@@ -103,8 +103,7 @@ class FeedTest(RequiresApp):
         extracted_data.cleaned_text = full_text
         extracted_data.canonical_link = 'a canonical link'
 
-        # Mock the download method to return some local image path.
-        self.create_patch('argos.core.membrane.extractor.download', return_value='/foo/bar/image.jpg')
+        self.create_patch('argos.core.membrane.extractor.extract_image', return_value='https://s3.amazon.com/foo/bar/image.jpg')
 
         # Mock the evaluator score calculation.
         self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
@@ -219,10 +218,11 @@ class ExtractorTest(RequiresApp):
     def test_extract_image(self):
         entry_data = MagicMock()
         entry_data.top_image.src = 'http://foo.com/bar/image.jpg'
-        expected_url = 'tests/data/downloaded.jpg'
 
-        if os.path.isfile(expected_url):
-            os.remove(expected_url)
+        # Mock out S3/Boto.
+        key = MagicMock()
+        self.create_patch('argos.util.storage.S3Connection', return_value=MagicMock())
+        self.create_patch('argos.util.storage.Key', return_value=key)
 
         # Mock response for downloading.
         image_data = open('tests/data/image.jpg', 'rb').read()
@@ -234,11 +234,12 @@ class ExtractorTest(RequiresApp):
         }
         mock_urlopen = self.create_patch('urllib.request.urlopen', return_value=mock_response)
 
-        image_url = extractor.extract_image(entry_data, filename='downloaded.jpg', save_dir='tests/data/')
+        image_url = extractor.extract_image(entry_data, 'downloaded')
 
-        self.assertEqual(image_url, expected_url)
-        self.assertTrue(os.path.isfile(expected_url))
-        self.assertEqual(len(image_data), len(open(expected_url, 'rb').read()))
+        # Get the bytes data that the key was given.
+        called_data = key.set_contents_from_file.call_args_list[0][0][0].getvalue()
+        self.assertEqual(called_data, image_data)
+        self.assertEqual(key.key, 'downloaded.jpg')
 
 
 class FeedFinderTest(RequiresMocks):
