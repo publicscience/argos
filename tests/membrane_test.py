@@ -7,6 +7,7 @@ import argos.core.membrane.feed as feed
 import argos.core.membrane.feedfinder as feedfinder
 import argos.core.membrane.collector as collector
 import argos.core.membrane.evaluator as evaluator
+import argos.core.membrane.extractor as extractor
 
 from argos.core.models import Source, Article, Author
 
@@ -97,6 +98,41 @@ class FeedTest(RequiresApp):
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, feed.articles, self.source)
 
+    def test_articles(self):
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = full_text
+        extracted_data.canonical_link = 'a canonical link'
+
+        # Mock the download method to return some local image path.
+        self.create_patch('argos.core.membrane.extractor.download', return_value='/foo/bar/image.jpg')
+
+        # Mock the evaluator score calculation.
+        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
+
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, full_text))
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 1)
+
+    def test_articles_skips_short_articles(self):
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = 'short full text'
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, 'short full text'))
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 0)
+
+    def test_articles_skips_404_articles(self):
+        from urllib import error
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 0)
+
+    def test_articles_skips_unreachable_articles(self):
+        from urllib import error
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.URLError('unreachable'))
+        articles = feed.articles(self.source)
+        self.assertEquals(len(articles), 0)
+
+class ExtractorTest(RequiresApp):
     def test_extract_tags(self):
         article = {
             'tags': [
@@ -109,7 +145,7 @@ class FeedTest(RequiresApp):
             ]
         }
 
-        tags = feed.extract_tags(article, known_tags=set(['Helicopters']))
+        tags = extractor.extract_tags(article, known_tags=set(['Helicopters']))
         self.assertEqual(set(tags), set(['Military', 'National Security', 'Helicopters']))
 
     def test_extract_single_authors(self):
@@ -130,7 +166,7 @@ class FeedTest(RequiresApp):
             }
         ]
         for article in articles:
-            authors = feed.extract_authors(article)
+            authors = extractor.extract_authors(article)
             self.assertEqual(authors[0].name, 'John Heimer')
             self.assertEqual(Author.query.count(), 1)
 
@@ -140,7 +176,7 @@ class FeedTest(RequiresApp):
                 'name': 'BY JOHN HEIMER and BEN HUBBARD'
             }
         }
-        authors = feed.extract_authors(article)
+        authors = extractor.extract_authors(article)
         author_names = [author.name for author in authors]
         self.assertEqual(author_names, ['John Heimer', 'Ben Hubbard'])
         self.assertEqual(Author.query.count(), 2)
@@ -151,7 +187,7 @@ class FeedTest(RequiresApp):
                 'name': 'BY JOHN HEIMER, HWAIDA SAAD, and BEN HUBBARD'
             }
         }
-        authors = feed.extract_authors(article)
+        authors = extractor.extract_authors(article)
         author_names = [author.name for author in authors]
         self.assertEqual(author_names, ['John Heimer', 'Hwaida Saad', 'Ben Hubbard'])
         self.assertEqual(Author.query.count(), 3)
@@ -162,49 +198,14 @@ class FeedTest(RequiresApp):
                 'name': 'BY JOHN HEIMER, HWAIDA SAAD and BEN HUBBARD'
             }
         }
-        authors = feed.extract_authors(article)
+        authors = extractor.extract_authors(article)
         author_names = [author.name for author in authors]
         self.assertEqual(author_names, ['John Heimer', 'Hwaida Saad', 'Ben Hubbard'])
         self.assertEqual(Author.query.count(), 3)
 
-
-    def test_articles(self):
-        extracted_data = MagicMock()
-        extracted_data.cleaned_text = full_text
-        extracted_data.canonical_link = 'a canonical link'
-
-        # Mock the download method to return some local image path.
-        self.create_patch('argos.core.membrane.feed.download', return_value='/foo/bar/image.jpg')
-
-        # Mock the evaluator score calculation.
-        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
-
-        self.create_patch('argos.core.membrane.feed.extract_entry_data', return_value=(extracted_data, full_text))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 1)
-
-    def test_articles_skips_short_articles(self):
-        extracted_data = MagicMock()
-        extracted_data.cleaned_text = 'short full text'
-        self.create_patch('argos.core.membrane.feed.extract_entry_data', return_value=(extracted_data, 'short full text'))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 0)
-
-    def test_articles_skips_404_articles(self):
-        from urllib import error
-        self.create_patch('argos.core.membrane.feed.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 0)
-
-    def test_articles_skips_unreachable_articles(self):
-        from urllib import error
-        self.create_patch('argos.core.membrane.feed.extract_entry_data', side_effect=error.URLError('unreachable'))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 0)
-
     def test_extract_entry_data(self):
-        self.create_patch('argos.core.membrane.feed._get_html', return_value=html_doc)
-        data, html = feed.extract_entry_data('http://foo.com')
+        self.create_patch('argos.core.membrane.extractor._get_html', return_value=html_doc)
+        data, html = extractor.extract_entry_data('http://foo.com')
         expected = {
                 'title': 'Why Israel Fears the Boycott',
                 'image': 'http://static01.nyt.com/images/2014/02/01/opinion/sunday/01goodman/01goodman-videoSixteenByNine1050.jpg'
@@ -233,7 +234,7 @@ class FeedTest(RequiresApp):
         }
         mock_urlopen = self.create_patch('urllib.request.urlopen', return_value=mock_response)
 
-        image_url = feed.extract_image(entry_data, filename='downloaded.jpg', save_dir='tests/data/')
+        image_url = extractor.extract_image(entry_data, filename='downloaded.jpg', save_dir='tests/data/')
 
         self.assertEqual(image_url, expected_url)
         self.assertTrue(os.path.isfile(expected_url))
