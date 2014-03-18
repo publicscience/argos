@@ -11,7 +11,6 @@ import argos.core.membrane.extractor as extractor
 
 from argos.core.models import Source, Article, Author
 
-from io import BytesIO
 import os
 
 # Some testing data.
@@ -132,6 +131,9 @@ class FeedTest(RequiresApp):
         self.assertEquals(len(articles), 0)
 
 class ExtractorTest(RequiresApp):
+    # We patch it ourselves here.
+    patch_aws = False
+
     def test_extract_tags(self):
         article = {
             'tags': [
@@ -216,30 +218,19 @@ class ExtractorTest(RequiresApp):
         self.assertEqual(expected, results)
 
     def test_extract_image(self):
+        patched_saving = self.create_patch('argos.util.storage.save_from_url', return_value='fake return')
+        remote_image_url = 'http://foo.com/bar/image.jpg'
         entry_data = MagicMock()
-        entry_data.top_image.src = 'http://foo.com/bar/image.jpg'
+        entry_data.top_image.src = remote_image_url
 
-        # Mock out S3/Boto.
-        key = MagicMock()
-        self.create_patch('argos.util.storage.S3Connection', return_value=MagicMock())
-        self.create_patch('argos.util.storage.Key', return_value=key)
+        filename = 'downloaded'
+        image_url = extractor.extract_image(entry_data, filename)
 
-        # Mock response for downloading.
-        image_data = open('tests/data/image.jpg', 'rb').read()
-        mock_response = BytesIO(image_data)
-        mock_response.headers = {
-            'Accept-Ranges': 'bytes',
-            'Last-Modified': 'Wed, 05 Sep 2013 08:53:26 GMT',
-            'Content-Length': str(len(image_data))
-        }
-        mock_urlopen = self.create_patch('urllib.request.urlopen', return_value=mock_response)
+        # File extension should have been added.
+        patched_saving.assert_called_with(remote_image_url, '{0}.jpg'.format(filename))
 
-        image_url = extractor.extract_image(entry_data, 'downloaded')
-
-        # Get the bytes data that the key was given.
-        called_data = key.set_contents_from_file.call_args_list[0][0][0].getvalue()
-        self.assertEqual(called_data, image_data)
-        self.assertEqual(key.key, 'downloaded.jpg')
+        # Should return expected value from our mocked S3.
+        self.assertEqual(image_url, 'fake return')
 
 
 class FeedFinderTest(RequiresMocks):

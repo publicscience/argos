@@ -15,11 +15,13 @@ def requires_patches(f):
         c_patcher = patch_concepts()
         s_patcher = patch_summarization()
         v_patcher = patch_vectorize()
+        a_patcher = patch_aws()
         return_value = f(*args, **kwargs)
         k_patcher.stop()
         c_patcher.stop()
         s_patcher.stop()
         v_patcher.stop()
+        a_patcher.stop()
         return return_value
     return decorated
 
@@ -51,6 +53,12 @@ def patch_summarization():
 def patch_vectorize():
     patcher = Patcher([
         'argos.core.brain.vectorize'
+    ])
+    return patcher
+
+def patch_aws():
+    patcher = Patcher([
+        'argos.util.storage.save_from_url'
     ])
     return patcher
 
@@ -132,3 +140,6 @@ from argos.core.brain import vectorize
 cached_vector = vectorize('foo bar')
 def faux_vectorize(docs):
     return cached_vector
+
+def faux_save_from_url(url, filename):
+    return 'https://s3.amazon.com/fakeimage.jpg'

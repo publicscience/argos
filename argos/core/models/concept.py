@@ -2,6 +2,7 @@ from argos.datastore import db, Model
 
 from argos.core import brain
 from argos.core.brain import knowledge
+from argos.util import storage
 
 from slugify import slugify
 from datetime import datetime
@@ -115,8 +116,10 @@ class Concept(Model):
             k = knowledge.knowledge_for(name=name)
 
         self.summary = k['summary']
-        self.image = k['image']
         self.name = k['name']
+
+        # Download the image.
+        self.image = storage.save_from_url(k['image'], hash(self.slug))
 
         # If there's a summary,
         # extract concepts from it.

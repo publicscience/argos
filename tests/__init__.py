@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import time, socket, subprocess, tempfile
 
-from tests.patches import patch_knowledge, patch_concepts
+from tests.patches import patch_knowledge, patch_concepts, patch_aws
 
 from jobs import workers
 from json import loads
@@ -42,6 +42,9 @@ class RequiresApp(RequiresMocks):
     # Mock out calls to Stanford NER.
     patch_concepts = False
 
+    # Patch interactions with AWS S3.
+    patch_aws = True
+
     def __call__(self, result=None):
         """
         Sets up the tests without needing
@@ -54,6 +57,8 @@ class RequiresApp(RequiresMocks):
                 self.patchers.append(patch_knowledge())
             if self.patch_concepts:
                 self.patchers.append(patch_concepts())
+            if self.patch_aws:
+                self.patchers.append(patch_aws())
             super(RequiresMocks, self).__call__(result)
         finally:
             self._post_teardown()

@@ -42,17 +42,27 @@ class ConceptTest(RequiresApp):
 
         c = Concept('Argos')
 
-        self.assertEqual(c.summary, 'this is a fakc.summary for uri {0}'.format(self.uri))
-        self.assertEqual(c.image, 'http://www.argos.la/image.jpg')
+        self.assertEqual(c.summary, 'this is a fake.summary for uri {0}'.format(self.uri))
+        self.assertEqual(c.name, 'Canonical name')
+
+    def test_sets_downloaded_image_url(self):
+        # Check that the concept's image url is
+        # set to the url our mock S3 returns.
+        self._patch_knowledge_for()
+        self._patch_uri_for_name(self.uri)
+        c = Concept('Argos')
+        self.assertEqual(c.image, 'https://s3.amazon.com/fakeimage.jpg')
+
 
     def test_sets_properties_from_knowledge_no_uri(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(None)
 
-        c = Concept('Argos')
+        name = 'Argos'
+        c = Concept(name)
 
-        self.assertEqual(c.summary, 'this is a fakc.summary for name Argos'.format(self.uri))
-        self.assertEqual(c.image, 'http://www.argos.la/image.jpg')
+        self.assertEqual(c.summary, 'this is a fake.summary for name {0}'.format(name))
+        self.assertEqual(c.name, name)
 
     def test_related_concepts(self):
         related_concepts = fac.concept(num=2)
@@ -72,13 +82,13 @@ class ConceptTest(RequiresApp):
         def faux_knowledge_for(name=None, uri=None, fallback=None):
             if uri:
                 return {
-                    'summary': 'this is a fakc.summary for uri {0}'.format(uri),
+                    'summary': 'this is a fake.summary for uri {0}'.format(uri),
                     'image': 'http://www.argos.la/image.jpg',
                     'name': 'Canonical name'
                 }
             if name:
                 return {
-                    'summary': 'this is a fakc.summary for name {0}'.format(name),
+                    'summary': 'this is a fake.summary for name {0}'.format(name),
                     'image': 'http://www.argos.la/image.jpg',
                     'name': name
                 }
