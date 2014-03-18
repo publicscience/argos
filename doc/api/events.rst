@@ -29,17 +29,21 @@ Example response
             "updated_at": "2014-02-07T23:42:15.581374",
             "created_at": "2014-02-06T20:55:54.597459",
             "concepts": [{
+                "slug": "john-kerry",
                 "url": "/concepts/john-kerry",
                 "score": "0.67"
             }],
             "mentions": [{
+                "id": 1,
                 "name": "John Kerry",
                 "slug": "john-kerry"
             }],
             "articles": [{
+                "id": 1,
                 "url": "/articles/1"
             }],
             "stories": [{
+                "id": 1,
                 "url": "/stories/1"
             }]
         }],
@@ -72,17 +76,21 @@ Example response
         "updated_at": "2014-02-07T23:42:15.581374",
         "created_at": "2014-02-06T20:55:54.597459",
         "concepts": [{
+            "slug": "john-kerry",
             "url": "/concepts/john-kerry",
             "score": "0.67"
         }],
         "mentions": [{
+            "id": 1,
             "name": "John Kerry",
             "slug": "john-kerry"
         }],
         "articles": [{
+            "id": 1,
             "url": "/articles/1"
         }],
         "stories": [{
+            "id": 1,
             "url": "/stories/1"
         }]
     }

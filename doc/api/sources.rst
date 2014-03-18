@@ -15,6 +15,7 @@ Example response
         "name": "New York Times Home Page",
         "ext_url": "http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml"
         "articles": [{
+            "id": 1,
             "url": "/articles/1"
         }]
     }

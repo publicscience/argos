@@ -18,13 +18,16 @@ Example response
         "updated_at": "2014-02-07T23:42:15.581374",
         "created_at": "2014-02-06T20:55:54.597459",
         "authors": [{
+            "id": 1,
             "url": "/authors/1"
         }],
         "events": [{
+            "id": 1,
             "url": "/events/1"
         }],
         "source": {
-            "name": "The Times",
-            "url": "/sources/1"
+            "id": 1,
+            "url": "/sources/1",
+            "name": "The Times"
         }
     }

@@ -28,17 +28,21 @@ Example response
             "updated_at": "2014-02-07T23:42:15.581374",
             "created_at": "2014-02-06T20:55:54.597459",
             "concepts": [{
+                "slug": "muslim-brotherhood",
                 "url": "/concepts/muslim-brotherhood",
                 "score": "0.67"
             }],
             "mentions": [{
+                "id": 1,
                 "name": "The Muslim Brotherhood",
                 "slug": "muslim-brotherhood"
             }],
             "events": [{
+                "id": 1,
                 "url": "/events/1"
             }],
             "watchers": [{
+                "id": 1,
                 "url": "/users/1"
             }]
         }],
@@ -69,17 +73,21 @@ Example response
         "updated_at": "2014-02-07T23:42:15.581374",
         "created_at": "2014-02-06T20:55:54.597459",
         "concepts": [{
+            "slug": "muslim-brotherhood",
             "url": "/concepts/muslim-brotherhood",
             "score": "0.67"
         }],
         "mentions": [{
+            "id": 1,
             "name": "The Muslim Brotherhood",
             "slug": "muslim-brotherhood"
         }],
         "events": [{
+            "id": 1,
             "url": "/events/1"
         }],
         "watchers": [{
+            "id": 1,
             "url": "/users/1"
         }]
     }
