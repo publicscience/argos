@@ -13,10 +13,10 @@ def load_conf_module(name, key=None, env=None):
     namespace = globals()
 
   if env:
-    module = importlib.import_module("%s.%s_%s" % (PACKAGE, env, name))
+    module = importlib.import_module("%s.%s.%s" % (PACKAGE, env, name))
   else:
     module = importlib.import_module("%s.%s" % (PACKAGE, name))
-  
+
   for (k, v) in inspect.getmembers(module):
     if k.isupper():
       if isinstance(v, str):
@@ -38,7 +38,7 @@ NAMES = [
 ]
 
 """
-Get the ARGOS_ENV attribute. If not defined, assumed 
+Get the ARGOS_ENV attribute. If not defined, assumed
 development environment.
 """
 ENV = os.getenv('ARGOS_ENV', 'development')

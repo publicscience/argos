@@ -1,4 +1,3 @@
-from argos.conf.base_security import *
 from os import environ as env
 
 # App config
@@ -38,8 +37,6 @@ FACEBOOK = {
     'authorize_url':        'https://www.facebook.com/dialog/oauth',
     'request_token_params': {'scope': 'email'}
 }
-
-
 
 # Security Config
 SECURITY_SEND_REGISTER_EMAIL = False

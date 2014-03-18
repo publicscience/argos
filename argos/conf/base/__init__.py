@@ -45,3 +45,5 @@ EMAIL = {
         'PASS': 'your-pass'
     }
 }
+
+from argos.conf.base.security import *
