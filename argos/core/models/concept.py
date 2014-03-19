@@ -6,6 +6,7 @@ from argos.util import storage
 
 from slugify import slugify
 from datetime import datetime
+from os.path import splitext
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -119,7 +120,9 @@ class Concept(Model):
         self.name = k['name']
 
         # Download the image.
-        self.image = storage.save_from_url(k['image'], hash(self.slug))
+        if k['image'] is not None:
+            ext = splitext(k['image'])[-1].lower()
+            self.image = storage.save_from_url(k['image'], '{0}{1}'.format(hash(self.slug), ext))
 
         # If there's a summary,
         # extract concepts from it.

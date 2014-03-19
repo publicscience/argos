@@ -22,6 +22,11 @@ from dateutil.parser import parse
 
 import random
 
+# Boto outputs a lot of deprecation warnings (because it is
+# still in the process of being ported to Py3).
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
 def seed(debug=False):
     this_dir = os.path.dirname(__file__)
     seeds = open(os.path.join(this_dir, 'seed.json'), 'r')
