@@ -4,7 +4,7 @@ import importlib
 
 PACKAGE = __package__
 
-def load_conf_module(name, key=None, env=None):
+def load_conf_module(name, key=None):
   """ Load a module and its values into globals. """
 
   if key:
@@ -12,10 +12,7 @@ def load_conf_module(name, key=None, env=None):
   else:
     namespace = globals()
 
-  if env:
-    module = importlib.import_module("%s.%s.%s" % (PACKAGE, env, name))
-  else:
-    module = importlib.import_module("%s.%s" % (PACKAGE, name))
+  module = importlib.import_module("%s.%s" % (PACKAGE, name))
 
   for (k, v) in inspect.getmembers(module):
     if k.isupper():
@@ -23,27 +20,21 @@ def load_conf_module(name, key=None, env=None):
         namespace[k] = v.format(**globals())
       else:
         namespace[k] = v
+  print(namespace)
 
 """
 File names for configuration files.
 
 Configuration files should be of the format:
 
-  #{ENV}-#{NAME}.py
+  #{NAME}.py
 """
 
 NAMES = [
   'celery',
-  'app'
+  'app',
+  'security'
 ]
 
-"""
-Get the ARGOS_ENV attribute. If not defined, assumed
-development environment.
-"""
-ENV = os.getenv('ARGOS_ENV', 'development')
-
-load_conf_module(ENV)
-
 for n in NAMES:
-  load_conf_module(n, key=n, env=ENV)
+  load_conf_module(n, key=n)

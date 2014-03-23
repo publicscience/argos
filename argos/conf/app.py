@@ -5,7 +5,7 @@ SECRET_KEY = 'development'
 AES_KEY = '123456789abcdefg123456789abcdefg' # must be 32 bytes
 AES_IV = '123456789abcdefg' # must be 16 bytes
 DEBUG = True
-SQLALCHEMY_DATABASE_URI = "{DATABASE[default][TYPE]}://{DATABASE[default][USER]}:{DATABASE[default][PASSWORD]}@{DATABASE[default][HOST]}:{DATABASE[default][PORT]}/{DATABASE[default][NAME]}"
+SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos_dev"
 
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')

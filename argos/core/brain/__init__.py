@@ -28,11 +28,6 @@ import ner
 import string
 from collections import Counter
 
-# For prototyping/experimentation purposes,
-# using the AlchemyAPI
-from argos.core.brain import alchemy
-
-
 def tokenize(doc, **kwargs):
     """
     Tokenizes a document, using a lemmatizer.
