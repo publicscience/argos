@@ -20,7 +20,6 @@ def load_conf_module(name, key=None):
         namespace[k] = v.format(**globals())
       else:
         namespace[k] = v
-  print(namespace)
 
 """
 File names for configuration files.

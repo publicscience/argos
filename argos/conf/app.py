@@ -7,6 +7,8 @@ AES_IV = '123456789abcdefg' # must be 16 bytes
 DEBUG = True
 SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos_dev"
 
+KNOWLEDGE_HOST = 'http://localhost:3030/knowledge/query'
+
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
 S3_BUCKET_NAME = 'argos_development_storage'
@@ -41,8 +43,3 @@ FACEBOOK = {
     'authorize_url':        'https://www.facebook.com/dialog/oauth',
     'request_token_params': {'scope': 'email'}
 }
-
-# Security Config
-SECURITY_SEND_REGISTER_EMAIL = False
-SECURITY_SEND_PASSWORD_CHANGE_EMAIL = False
-SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL = False

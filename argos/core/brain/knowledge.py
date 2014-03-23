@@ -48,9 +48,7 @@ Would return the response::
 from urllib import request
 import json
 
-# Default
-# TODO: will need to make this configurable later.
-KNOWLEDGE_URL = 'http://localhost:3030/knowledge/query'
+from argos.conf import APP
 
 # Define some commonly used prefixed up front.
 # This are sent as part of each query.
@@ -323,7 +321,7 @@ def knowledge_for(uri=None, name=None, fallback=False):
 
 def _query(query):
     data = 'query={0} {1}'.format(PREFIXES, query).encode('utf-8')
-    req = request.Request(KNOWLEDGE_URL,
+    req = request.Request(APP['KNOWLEDGE_HOST'],
             headers={'Accept': 'application/sparql-results+json'},
             data=data)
     res = request.urlopen(req)
