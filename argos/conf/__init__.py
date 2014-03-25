@@ -32,8 +32,14 @@ Configuration files should be of the format:
 NAMES = [
   'celery',
   'app',
-  'security'
 ]
 
 for n in NAMES:
-  load_conf_module(n, key=n)
+  # Load defaults
+  load_conf_module('default.{0}'.format(n), key=n)
+
+  # Try to load custom configuration.
+  try:
+      load_conf_module(n, key=n)
+  except ImportError:
+      pass
