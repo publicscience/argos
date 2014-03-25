@@ -7,7 +7,7 @@ AES_IV = '123456789abcdefg' # must be 16 bytes
 DEBUG = True
 SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos_dev"
 
-KNOWLEDGE_HOST = 'http://localhost:3030/knowledge/query'
+KNOWLEDGE_HOST = 'localhost'
 
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')

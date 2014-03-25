@@ -28,6 +28,8 @@ import ner
 import string
 from collections import Counter
 
+from argos.conf import APP
+
 def tokenize(doc, **kwargs):
     """
     Tokenizes a document, using a lemmatizer.
@@ -100,8 +102,8 @@ def concepts(docs, strategy='stanford'):
     Named entity recognition on
     a text document or documents.
 
-    Requires that a Stanford NER server is
-    running on localhost:8080.
+    Requires that a Stanford NER server is running
+    at argos.conf.APP['KNOWLEDGE_HOST'].
 
     Args:
         | docs (list)       -- the documents to process.
@@ -117,7 +119,7 @@ def concepts(docs, strategy='stanford'):
     entities = []
 
     if strategy == 'stanford':
-        tagger = ner.SocketNER(host='localhost', port=8080)
+        tagger = ner.SocketNER(host=APP['KNOWLEDGE_HOST'], port=8080)
 
         for doc in docs:
             ents = tagger.get_entities(doc)

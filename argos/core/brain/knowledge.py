@@ -321,7 +321,7 @@ def knowledge_for(uri=None, name=None, fallback=False):
 
 def _query(query):
     data = 'query={0} {1}'.format(PREFIXES, query).encode('utf-8')
-    req = request.Request(APP['KNOWLEDGE_HOST'],
+    req = request.Request('http://{host}:3030/knowledge/query'.format(host=APP['KNOWLEDGE_HOST']),
             headers={'Accept': 'application/sparql-results+json'},
             data=data)
     res = request.urlopen(req)
