@@ -41,6 +41,7 @@ Refer to http://wiki.dbpedia.org/Downloads for more details.
 
 from argos.util.logger import logger
 from argos.util import gullet
+from argos.conf import APP
 
 # For collecting dump links.
 import re
@@ -66,9 +67,10 @@ DESIRED_DATASETS = [
     'persondata',
     'disambiguations'
 ]
-DATASETS_PATH = 'data/knowledge/'
 
-def download():
+DATASETS_PATH = APP['DATASETS_PATH']
+
+def download(force=False):
     """
     Downloads and extracts the desired DBpedia datasets.
 
@@ -78,15 +80,20 @@ def download():
     # Get the desired dataset urls.
     dataset_urls = [dataset_url for dataset_url in get_dataset_urls() if any(setname in dataset_url for setname in DESIRED_DATASETS)]
 
-    # Download each dataset.
     for dataset_url in dataset_urls:
+        # dc = decompressed
+        dc_filepath = os.path.join(DATASETS_PATH, os.path.basename(filepath)[:-4]) # remove '.bz2'
+
+        if os.path.exists(dc_filepath) and not force:
+            logger.warn('File exists, not re-downloading and extracting. You can force by passing `force=True`.')
+            continue
+
+        # Download the dataset.
         logger.info('Downloading knowledge dataset from {0}'.format(dataset_url))
         filepath = gullet.download(dataset_url, '/tmp/')
         logger.info('Downloaded to {0}'.format(filepath))
 
         # Decompress the files.
-        # dc = decompressed
-        dc_filepath = os.path.join(DATASETS_PATH, os.path.basename(filepath)[:-4]) # remove '.bz2'
         logger.info('Extracting to {0}'.format(dc_filepath))
         with open(dc_filepath, 'wb+') as dc_file, bz2.BZ2File(filepath, 'rb') as file:
             for data in iter(lambda : file.read(100 * 1024), b''):
@@ -96,7 +103,7 @@ def download():
         os.remove(filepath)
     logger.info('Downloading and extraction complete.')
 
-def digest():
+def digest(force=False):
     """
     Digests downloaded DBpedia `ttl` (Turtle) dumps
     using Apache Jena's `tdbloader2`.
@@ -111,6 +118,9 @@ def digest():
     logger.info('Digesting the datasets to {0}...'.format(knowledge_path))
 
     if os.path.exists(knowledge_path):
+        if not force:
+            logger.warn('It looks like a knowledge database already exists, not rebuilding it. You can force by passing `force=True`.')
+            return
         logger.warn('Existing knowledge database found. Removing...')
         shutil.rmtree(knowledge_path)
 

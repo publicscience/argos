@@ -8,6 +8,7 @@ DEBUG = True
 SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos_dev"
 
 KNOWLEDGE_HOST = 'localhost'
+DATASETS_PATH = 'data/knowledge/'
 
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
