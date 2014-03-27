@@ -288,11 +288,11 @@ class CollectorTest(RequiresApp):
 
     def test_collect(self):
         self.mock_articles.return_value = [
-            Article(
-                title='Foo',
-                published=datetime.utcnow(),
-                url='foo.com'
-            )
+            {
+                'title':'Foo',
+                'published':datetime.utcnow(),
+                'ext_url':'foo.com'
+            }
         ]
 
         self.assertEquals(Article.query.count(), 0)
@@ -306,11 +306,11 @@ class CollectorTest(RequiresApp):
 
     def test_collect_ignores_existing(self):
         self.mock_articles.return_value = [
-            Article(
-                title='Foo',
-                published=datetime.utcnow(),
-                url='foo.com'
-            )
+            {
+                'title':'Foo',
+                'published':datetime.utcnow(),
+                'ext_url':'foo.com'
+            }
         ]
 
         collector.collect()

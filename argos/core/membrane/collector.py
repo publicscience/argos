@@ -18,6 +18,10 @@ def collect():
     """
     Fetch articles from the sources,
     and save (or update) to db.
+
+    This only creates and saves new
+    Articles, but it returns all
+    the results it gathered.
     """
     results = []
 
@@ -27,13 +31,15 @@ def collect():
     for source in Source.query.all():
         try:
             logger.info('Fetching from {0}...'.format(source.ext_url))
-            articles = feed.articles(source)
+            raw_articles = feed.articles(source)
 
             # Check for existing copy.
-            for article in articles:
-                if not Article.query.filter_by(ext_url=article.url).count():
+            for raw_article in raw_articles:
+                print(raw_article)
+                if not Article.query.filter_by(ext_url=raw_article['ext_url']).count():
+                    article = Article(**raw_article)
                     db.session.add(article)
-                results.append(article)
+                results.append(raw_article)
 
         except feed.SAXException as e:
             # Error with the feed, make a note.

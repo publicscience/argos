@@ -15,7 +15,6 @@ Example::
 """
 
 from argos.core.membrane import feedfinder, evaluator, extractor
-from argos.core.models import Article
 
 import feedparser
 
@@ -39,6 +38,17 @@ def articles(source):
     Some feeds, for whatever reason, do not include a `published`
     date in their entry data. In which case, it is left as an
     empty string.
+
+    This does NOT return Article objects because it is quite expensive
+    to create them.
+
+    Instead this just passes out dictionaries
+    where the keys are the kwarg names for Article
+    initialization.
+
+    Then argos.core.membrane.collector.collect
+    can determine if a new Article should be created,
+    and handle things accordingly.
 
     Args:
         | source (Source)    -- the source to fetch from.
@@ -86,19 +96,19 @@ def articles(source):
         # Download and save the top article image.
         image_url = extractor.extract_image(entry_data, filename=hash(url))
 
-        articles.append(Article(
-            ext_url=url,
-            source=source,
-            html=html,
-            text=full_text,
-            authors=extractor.extract_authors(entry),
-            tags=extractor.extract_tags(entry, known_tags=entry_data.tags),
-            title=title,
-            created_at=published,
-            updated_at=updated,
-            image=image_url,
-            score=evaluator.score(url)
-       ))
+        articles.append({
+            'ext_url':url,
+            'source':source,
+            'html':html,
+            'text':full_text,
+            'authors':extractor.extract_authors(entry),
+            'tags':extractor.extract_tags(entry, known_tags=entry_data.tags),
+            'title':title,
+            'created_at':published,
+            'updated_at':updated,
+            'image':image_url,
+            'score':evaluator.score(url)
+            })
 
     return articles
 
