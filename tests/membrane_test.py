@@ -9,7 +9,7 @@ import argos.core.membrane.collector as collector
 import argos.core.membrane.evaluator as evaluator
 import argos.core.membrane.extractor as extractor
 
-from argos.core.models import Source, Article, Author
+from argos.core.models import Source, Article, Author, Event, Story
 
 import os
 
@@ -289,9 +289,9 @@ class CollectorTest(RequiresApp):
     def test_collect(self):
         self.mock_articles.return_value = [
             {
-                'title':'Foo',
-                'published':datetime.utcnow(),
-                'ext_url':'foo.com'
+                'title': 'Foo',
+                'published': datetime.utcnow(),
+                'ext_url': 'foo.com'
             }
         ]
 
@@ -307,9 +307,9 @@ class CollectorTest(RequiresApp):
     def test_collect_ignores_existing(self):
         self.mock_articles.return_value = [
             {
-                'title':'Foo',
-                'published':datetime.utcnow(),
-                'ext_url':'foo.com'
+                'title': 'Foo',
+                'published': datetime.utcnow(),
+                'ext_url': 'foo.com'
             }
         ]
 
@@ -338,6 +338,27 @@ class CollectorTest(RequiresApp):
         # Ensure duplicates aren't added.
         collector.add_source(url)
         self.assertEquals(Source.query.count(), 2)
+
+    def test_ponder(self):
+        self.mock_articles.return_value = [
+            {
+                'title': 'Foo',
+                'published': datetime.utcnow(),
+                'ext_url': 'foo.com',
+                'text': 'dinosaurs are cool, Clinton'
+            }
+        ]
+
+        self.assertEquals(Article.query.count(), 0)
+
+        collector.ponder()
+
+        self.assertEquals(Article.query.count(), 1)
+        self.assertEquals(Event.query.count(), 1)
+        self.assertEquals(Story.query.count(), 1)
+
+        article = Article.query.first()
+        self.assertEquals(article.title, 'Foo')
 
 
 class EvaluatorTest(RequiresApp):

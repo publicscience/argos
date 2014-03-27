@@ -7,9 +7,11 @@ articles for training and/or testing.
 """
 
 from argos.datastore import db
-from argos.core.models import Source, Article
+from argos.core.models import Source, Article, Event, Story
 from argos.core.membrane import feed
 from argos.util.logger import logger
+
+from datetime import datetime, timedelta
 
 # Logging.
 logger = logger(__name__)
@@ -19,9 +21,8 @@ def collect():
     Fetch articles from the sources,
     and save (or update) to db.
 
-    This only creates and saves new
-    Articles, but it returns all
-    the results it gathered.
+    This only creates, saves, and returns
+    new Articles.
     """
     results = []
 
@@ -35,11 +36,10 @@ def collect():
 
             # Check for existing copy.
             for raw_article in raw_articles:
-                print(raw_article)
                 if not Article.query.filter_by(ext_url=raw_article['ext_url']).count():
                     article = Article(**raw_article)
                     db.session.add(article)
-                results.append(raw_article)
+                    results.append(article)
 
         except feed.SAXException as e:
             # Error with the feed, make a note.
@@ -51,6 +51,26 @@ def collect():
     db.session.commit()
 
     return results
+
+
+def ponder():
+    """
+    This is a simple job
+    which is meant to be run regularly.
+
+    It collects the latest articles from
+    all the sources and clusters them into events,
+    and also clusters events from a recent timeframe
+    into stories.
+    """
+    logger.info('Pondering...')
+    articles = collect()
+    Event.cluster(articles, threshold=0.05)
+
+    # Cluster events from the past two weeks.
+    # (two weeks is an arbitrary number, will need to choose a time frame)
+    recent_events = Event.query.filter(Event.updated_at > datetime.utcnow() - timedelta(days=14)).all()
+    Story.cluster(recent_events, threshold=0.05)
 
 
 def add_source(url):
