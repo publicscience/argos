@@ -27,10 +27,18 @@ import random
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
+def create_sources():
+    this_dir = os.path.dirname(__file__)
+    sources = open(os.path.join(this_dir, 'seed_sources.json'), 'r')
+
+    for source in json.load(sources):
+        s = Source(ext_url=source[1], name=source[0])
+        db.session.add(s)
+    db.session.commit()
+
 def seed(debug=False):
     this_dir = os.path.dirname(__file__)
     seeds = open(os.path.join(this_dir, 'seed.json'), 'r')
-    sources = open(os.path.join(this_dir, 'seed_sources.json'), 'r')
 
     sample_images = [
         'https://upload.wikimedia.org/wikipedia/commons/d/d5/Michael_Rogers_-_Herbiers_2004.jpg',
@@ -62,10 +70,7 @@ def seed(debug=False):
 
     # Create sources
     print('Creating sources...')
-    for url in json.load(sources):
-        s = Source(ext_url=url, name='The Times') # fake name
-        db.session.add(s)
-    db.session.commit()
+    create_sources()
     num_sources = Source.query.count()
     print('Created {0} sources.'.format(num_sources))
 

@@ -332,12 +332,19 @@ class CollectorTest(RequiresApp):
         self.mock_find_feed.return_value = url
 
         # 2 because the default test source has been added.
-        collector.add_source(url)
+        collector.add_source(url, 'source name')
         self.assertEquals(Source.query.count(), 2)
 
         # Ensure duplicates aren't added.
-        collector.add_source(url)
+        collector.add_source(url, 'source name')
         self.assertEquals(Source.query.count(), 2)
+
+    def test_load_sources_from_file(self):
+        url = 'sup'
+        self.mock_find_feed.return_value = url
+
+        collector.load_sources_from_file()
+        self.assertTrue(Source.query.count() > 1)
 
     def test_ponder(self):
         self.mock_articles.return_value = [

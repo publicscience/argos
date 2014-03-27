@@ -12,6 +12,7 @@ from argos.core.membrane import feed
 from argos.util.logger import logger
 
 from datetime import datetime, timedelta
+import json
 
 # Logging.
 logger = logger(__name__)
@@ -73,32 +74,38 @@ def ponder():
     Story.cluster(recent_events, threshold=0.05)
 
 
-def add_source(url):
+def add_source(url, name):
     """
     Add a new source.
 
     Args:
-        | url (str)     -- where to look for the feed,
-                           or the feed itself.
+        | url  (str)     -- where to look for the feed,
+                            or the feed itself.
+        | name (str)     -- the name for the source.
     """
     feed_url = feed.find_feed(url)
     if not Source.query.filter_by(ext_url=feed_url).count():
-        source = Source(ext_url=feed_url)
+        source = Source(ext_url=feed_url, name=name)
         db.session.add(source)
         db.session.commit()
 
 
-def add_sources(urls):
+def add_sources(sources):
     """
     Add multiple sources.
 
     Args:
-        | urls (list)   -- list of urls to look for feeds, or
-                           the feed urls themselves.
+        | sources (list)   -- list of dicts of urls to look for feeds, or
+                              the feed urls themselves, and the source name::
+
+        [{
+            'name': 'The New York Times',
+            'url': 'http//www.nytimes.com/services/xml/rss/nyt/World.xml'
+        }]
     """
-    for url in urls:
-        feed_url = feed.find_feed(url)
-        source = Source(ext_url=feed_url)
+    for raw_source in sources:
+        feed_url = feed.find_feed(raw_source['url'])
+        source = Source(ext_url=feed_url, name=raw_source['name'])
         db.session.add(source)
     db.session.commit()
 
@@ -128,23 +135,30 @@ def remove_source(url, delete_articles=False):
         db.session.commit()
 
 
-def collect_sources(url):
+def collect_sources(url, name):
     """
     Collects feed sources from the specified url,
     and adds them.
 
     Args:
-        | url (str)     -- where to look for feeds.
+        | url  (str)     -- where to look for feeds.
+        | name (str)     -- the name of the source.
     """
     feeds = feed.find_feeds(url)
-    add_sources([f for f in feeds])
+    add_sources([{'name': name, 'url': f} for f in feeds])
 
 
-def load_sources_from_file(filepath='manage/sources.txt'):
+def load_sources_from_file(filepath='manage/sources.json'):
     """
-    Load feeds from a text file.
-    Each line should be the url to the source
-    you want to add.
+    Load feeds from a JSON file.
+    It should consist of an array of arrays like so::
+
+        [
+            ["The Atlantic", "http://feeds.feedburner.com/AtlanticNational"],
+            ["The New York Times", "http://www.nytimes.com/services/xml/rss/nyt/World.xml"]
+        ]
     """
     logger.info('Loading sources from file. This may take awhile...')
-    add_sources([line for line in open(filepath, 'r')])
+    sources = open(filepath, 'r')
+    raw_sources = json.load(sources)
+    add_sources([{'name': src[0], 'url': src[1]} for src in raw_sources])
