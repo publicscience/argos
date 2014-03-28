@@ -176,3 +176,5 @@ def _get_html(url):
         html = opener.open(req).read()
     except IncompleteRead as e:
         html = e.partial
+
+    return html
