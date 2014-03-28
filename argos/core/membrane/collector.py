@@ -105,8 +105,9 @@ def add_sources(sources):
     """
     for raw_source in sources:
         feed_url = feed.find_feed(raw_source['url'])
-        source = Source(ext_url=feed_url, name=raw_source['name'])
-        db.session.add(source)
+        if not Source.query.filter_by(ext_url=feed_url).count():
+            source = Source(ext_url=feed_url, name=raw_source['name'])
+            db.session.add(source)
     db.session.commit()
 
 
