@@ -23,7 +23,7 @@ NERSV_PID=$!
 cd ..
 
 cd jena/fuseki
-./fuseki-server --loc=../../data/knowledge/knodb /knowledge &
+./fuseki-server --loc=${HOME}/knodb /knowledge &
 KNOSV_PID=$!
 cd ../..
 

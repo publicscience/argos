@@ -114,7 +114,7 @@ def digest(force=False):
     Note: `tdbloader2` only runs properly on Unix systems.
     """
 
-    knowledge_path = os.path.join(DATASETS_PATH, 'knodb')
+    knowledge_path = os.path.join(os.path.expanduser(DATASETS_PATH), 'knodb')
     logger.info('Digesting the datasets to {0}...'.format(knowledge_path))
 
     if os.path.exists(knowledge_path):
