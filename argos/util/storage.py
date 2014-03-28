@@ -21,7 +21,7 @@ def save_from_url(url, filename):
     """
     try:
         # parse.quote necessary for unicode urls.
-        res = request.urlopen(parse.quote(url, safe='/:'))
+        res = request.urlopen(parse.quote(url, safe='/:?='))
     except error.HTTPError as e:
         print('Error requesting {0}: {1}'.format(url, e))
         return None
