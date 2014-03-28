@@ -84,7 +84,7 @@ def uri_for_name(name):
     """
 
     # Note: double braces are parsed down to single braces when using `str.format()`.
-    query = '''
+    base_query = '''
         SELECT ?uri
         WHERE {{
             {{ ?alias_uri rdfs:label "{0}"@en; dbo:wikiPageRedirects ?uri . }}
@@ -93,7 +93,8 @@ def uri_for_name(name):
                 NOT EXISTS {{  ?uri dbo:wikiPageRedirects ?nil }}
             }}
         }}
-    '''.format(_sanitize(name))
+    '''
+    query = _build_query(base_query, name)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -105,7 +106,8 @@ def name_for_uri(uri):
     Returns a name for a given uri.
     If none is found, None is returned.
     """
-    query = 'SELECT ?name WHERE {{ <{0}> rdfs:label ?name }}'.format(uri)
+    base_query = 'SELECT ?name WHERE {{ <{0}> rdfs:label ?name }}'
+    query = _build_query(base_query, uri)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -149,7 +151,8 @@ def image_for_uri(uri, fallback=False):
     If `fallback=True`, will fallback to Wikipedia
     for an image.
     """
-    query = 'SELECT ?image_url WHERE {{ <{0}> foaf:depiction ?image_url }}'.format(uri)
+    base_query = 'SELECT ?image_url WHERE {{ <{0}> foaf:depiction ?image_url }}'
+    query = _build_query(base_query, uri)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -186,7 +189,8 @@ def coordinates_for_uri(uri):
     Returns a set of coordinates for a given entity URI.
     If none is found, None is returned.
     """
-    query = 'SELECT ?lat ?long WHERE {{ <{0}> geo:lat ?lat; geo:long ?long }}'.format(uri)
+    base_query = 'SELECT ?lat ?long WHERE {{ <{0}> geo:lat ?lat; geo:long ?long }}'
+    query = _build_query(base_query, uri)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -246,7 +250,8 @@ def summary_for_uri(uri, short=False, fallback=False):
     shorter summary.
     """
     predicate = 'rdfs:comment' if short else 'dbo:abstract'
-    query = 'SELECT ?summary WHERE {{ <{0}> {1} ?summary }}'.format(uri, predicate)
+    base_query = 'SELECT ?summary WHERE {{ <{0}> {1} ?summary }}'
+    query = _build_query(base_query, uri, predicate)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -285,7 +290,8 @@ def aliases_for_uri(uri):
     Returns a list of alias URIs for a given entity URI.
     """
 
-    query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'.format(uri)
+    base_query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'
+    query = _build_query(base_query, uri)
     data = _query(query)
     results = _prepare_results(data)
     return [d['alias_uri'] for d in results]
@@ -373,6 +379,13 @@ def _prepare_results(data):
         results.append({k: v['value'] for k, v in binding.items()})
     return results
 
+def _build_query(base_query, *args):
+    """
+    Formats a query with arguments, sanitizing
+    the arguments first.
+    """
+    sanitized_args = [_sanitize(arg) for arg in args]
+    return base_query.format(*sanitized_args)
 
 def _sanitize(text):
     """
