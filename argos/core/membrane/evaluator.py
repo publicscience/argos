@@ -149,7 +149,7 @@ def stumbleupon(url):
     Returns the view count.
     """
     data = _request('http://www.stumbleupon.com/services/1.01/badge.getinfo?url=', url)
-    return data['result']['views']
+    return data['result'].get('views', 0)
 
 
 def score(url):
