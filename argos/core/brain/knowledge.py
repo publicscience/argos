@@ -54,10 +54,13 @@ they should work. But they don't.
 So for now they are just being removed.
 """
 
-from urllib import request
+from urllib import request, error
 import json
 
 from argos.conf import APP
+from argos.util.logger import logger
+
+logger = logger(__name__)
 
 # Define some commonly used prefixed up front.
 # This are sent as part of each query.
@@ -343,7 +346,11 @@ def _query(query):
     req = request.Request('http://{host}:3030/knowledge/query'.format(host=APP['KNOWLEDGE_HOST']),
             headers={'Accept': 'application/sparql-results+json'},
             data=data)
-    res = request.urlopen(req)
+    try:
+        res = request.urlopen(req)
+    except error.HTTPError as e:
+        logger.error('Error with with query: {0}'.format(query))
+        raise e
     if res.status != 200:
         raise Exception('Response error, status was not 200')
     else:
