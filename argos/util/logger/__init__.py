@@ -6,7 +6,10 @@ Logger!
 """
 
 import logging
+from logging import handlers
 from os import path
+
+from argos.conf import APP
 
 log_path = path.join(path.dirname(__file__), 'logs/log.log')
 
@@ -27,5 +30,20 @@ def logger(name):
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+
+    if not APP['DEBUG']:
+        # Output to email.
+        mh = handlers.SMTPHandler(
+                APP['EMAIL_HOST'],
+                APP['EMAIL_HOST_USER'],
+                APP['ADMINS'],
+                'Argos Error :(',
+                credentials=(
+                    APP['EMAIL_HOST_USER'],
+                    APP['EMAIL_HOST_PASSWORD']
+                ),
+                secure=()
+        )
+        mh.setLevel(logging.ERROR)
 
     return logger

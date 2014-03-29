@@ -14,6 +14,12 @@ AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
 S3_BUCKET_NAME = 'argos_development_storage'
 
+# Error emails
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'argos.errors@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-pass'
+ADMINS = ['ftzeng@gmail.com']
+
 TWITTER = {
     'consumer_key':         env.get('ARGOS_TWITTER_CONSUMER_KEY'),
     'consumer_secret':      env.get('ARGOS_TWITTER_CONSUMER_SECRET'),
