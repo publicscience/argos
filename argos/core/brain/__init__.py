@@ -30,6 +30,9 @@ from collections import Counter
 
 from argos.conf import APP
 
+from argos.util.logger import logger
+logger = logger(__name__)
+
 def tokenize(doc, **kwargs):
     """
     Tokenizes a document, using a lemmatizer.
@@ -122,7 +125,12 @@ def concepts(docs, strategy='stanford'):
         tagger = ner.SocketNER(host=APP['KNOWLEDGE_HOST'], port=8080)
 
         for doc in docs:
-            ents = tagger.get_entities(doc)
+            try:
+                ents = tagger.get_entities(doc)
+            except UnicodeDecodeError as e:
+                logger.error('Unexpected unicode decoding error: {0}'.format(e))
+                ents = {}
+
             # We're only interested in the entity names,
             # not their tags.
             names = [ents[key] for key in ents]

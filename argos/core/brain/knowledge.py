@@ -58,8 +58,8 @@ from urllib import request, error
 import json
 
 from argos.conf import APP
-from argos.util.logger import logger
 
+from argos.util.logger import logger
 logger = logger(__name__)
 
 # Define some commonly used prefixed up front.
