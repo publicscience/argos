@@ -45,5 +45,6 @@ def logger(name):
                 secure=()
         )
         mh.setLevel(logging.ERROR)
+        logger.addHandler(mh)
 
     return logger
