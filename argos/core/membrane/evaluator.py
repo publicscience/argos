@@ -6,22 +6,22 @@ Collects ranking info about articles,
 such as number of shares, likes, tweets, etc.
 """
 
-from urllib import request
+from urllib import request, error
 import json
 
 import xmltodict
 
+from argos.util.logger import logger
+logger = logger(__name__)
+
 def _request(endpoint, url, format='json'):
     req = request.Request('{0}{1}'.format(endpoint, url))
     res = request.urlopen(req)
-    if res.status != 200:
-        raise Exception('Response error, status was not 200')
-    else:
-        content = res.read()
-        if format == 'json':
-            return json.loads(content.decode('utf-8'))
-        elif format == 'xml':
-            return xmltodict.parse(content)
+    content = res.read()
+    if format == 'json':
+        return json.loads(content.decode('utf-8'))
+    elif format == 'xml':
+        return xmltodict.parse(content)
     return None
 
 def facebook_graph(url):
@@ -36,8 +36,12 @@ def facebook_graph(url):
 
     Returns total shares (i.e. likes, shares, and comments) plus the external comments.
     """
-    data = _request('https://graph.facebook.com/', url)
-    return data['comments'] + data['shares']
+    try:
+        data = _request('https://graph.facebook.com/', url)
+        return data['comments'] + data['shares']
+    except error.HTTPError:
+        logger.exception('Error getting score for `facebook_graph` ({0}): {1}'.format(url, e))
+        return 0
 
 def facebook(url):
     """
@@ -83,9 +87,13 @@ def facebook(url):
     This differs from `facebook_graph` in that the click count is incorporated (though weighted less).
     """
 
-    data = _request('https://api.facebook.com/restserver.php?method=links.getStats&urls=', url, format='xml')
-    data_ = dict(data['links_getStats_response']['link_stat'])
-    return int(data_['click_count'])/4 + int(data_['total_count']) + int(data_['commentsbox_count'])
+    try:
+        data = _request('https://api.facebook.com/restserver.php?method=links.getStats&urls=', url, format='xml')
+        data_ = dict(data['links_getStats_response']['link_stat'])
+        return int(data_['click_count'])/4 + int(data_['total_count']) + int(data_['commentsbox_count'])
+    except error.HTTPError:
+        logger.exception('Error getting score for `facebook` ({0}): {1}'.format(url, e))
+        return 0
 
 
 def twitter(url):
@@ -104,8 +112,12 @@ def twitter(url):
         This is an undocumented/unofficial endpoint,
         so it could be gone at any moment.
     """
-    data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
-    return int(data['count'])
+    try:
+        data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
+        return int(data['count'])
+    except error.HTTPError:
+        logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
+        return 0
 
 
 def linkedin(url):
@@ -121,8 +133,12 @@ def linkedin(url):
 
     Returns the count.
     """
-    data = _request('https://www.linkedin.com/countserv/count/share?format=json&url=', url)
-    return int(data['count'])
+    try:
+        data = _request('https://www.linkedin.com/countserv/count/share?format=json&url=', url)
+        return int(data['count'])
+    except error.HTTPError:
+        logger.exception('Error getting score for `linkedin` ({0}): {1}'.format(url, e))
+        return 0
 
 
 def stumbleupon(url):
@@ -148,8 +164,12 @@ def stumbleupon(url):
 
     Returns the view count.
     """
-    data = _request('http://www.stumbleupon.com/services/1.01/badge.getinfo?url=', url)
-    return int(data['result'].get('views', 0))
+    try:
+        data = _request('http://www.stumbleupon.com/services/1.01/badge.getinfo?url=', url)
+        return int(data['result'].get('views', 0))
+    except error.HTTPError:
+        logger.exception('Error getting score for `stumbleupon` ({0}): {1}'.format(url, e))
+        return 0
 
 
 def score(url):
