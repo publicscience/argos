@@ -34,7 +34,7 @@ def logger(name):
     if not APP['DEBUG']:
         # Output to email.
         mh = handlers.SMTPHandler(
-                APP['EMAIL_HOST'],
+                (APP['EMAIL_HOST'], APP['EMAIL_PORT']),
                 APP['EMAIL_HOST_USER'],
                 APP['ADMINS'],
                 'Argos Error :(',
