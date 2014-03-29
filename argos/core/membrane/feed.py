@@ -89,8 +89,8 @@ def articles(source):
             continue
 
         url = entry_data.canonical_link or url
-        published = parse(entry.get('published')) or entry_data.publish_date
-        updated = parse(entry.get('updated')) or published
+        published = parse(entry.get('published')) if entry.get('published') else entry_data.publish_date
+        updated = parse(entry.get('updated')) if entry.get('updated') else published
         title = entry.get('title', entry_data.title)
 
         # Download and save the top article image.
