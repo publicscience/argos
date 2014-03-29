@@ -122,15 +122,21 @@ class KnowledgeTest(RequiresMocks):
         self.assertEqual(name, 'United States Secretary of State')
 
 class KnowledgeSpecialTest(RequiresMocks):
+    """
+    SPARQL can be really sensitive about certain
+    characters. These tests are to check that
+    they are properly handled.
+    """
+
     def test_single_quotes_uri(self):
         test_uris = [
             "http://dbpedia.org/resource/O'Reilly_Media",
             "http://dbpedia.org/resource/O'Reilly'_Media",
         ]
         for uri in test_uris:
+            knowledge.name_for_uri(uri)
             knowledge.summary_for_uri(uri)
             knowledge.coordinates_for_uri(uri)
-            knowledge.name_for_uri(uri)
             knowledge.image_for_uri(uri)
             knowledge.aliases_for_uri(uri)
 
@@ -140,11 +146,22 @@ class KnowledgeSpecialTest(RequiresMocks):
             'http://dbpedia.org/resource/O"Reilly"_Media'
         ]
         for uri in test_uris:
+            knowledge.name_for_uri(uri)
             knowledge.summary_for_uri(uri)
             knowledge.coordinates_for_uri(uri)
-            knowledge.name_for_uri(uri)
             knowledge.image_for_uri(uri)
             knowledge.aliases_for_uri(uri)
+
+    def test_ampersands_name(self):
+        test_names = [
+            'Foo & Bar'
+        ]
+        for name in test_names:
+            knowledge.uri_for_name(name)
+            knowledge.summary_for_name(name)
+            knowledge.coordinates_for_name(name)
+            knowledge.image_for_name(name)
+            knowledge.aliases_for_name(name)
 
 if __name__ == '__main__':
 	unittest.main()
