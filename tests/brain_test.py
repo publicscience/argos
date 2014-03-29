@@ -121,5 +121,30 @@ class KnowledgeTest(RequiresMocks):
         name = knowledge.name_for_uri('http://dbpedia.org/resource/United_States_Secretary_of_State')
         self.assertEqual(name, 'United States Secretary of State')
 
+class KnowledgeSpecialTest(RequiresMocks):
+    def test_single_quotes_uri(self):
+        test_uris = [
+            "http://dbpedia.org/resource/O'Reilly_Media",
+            "http://dbpedia.org/resource/O'Reilly'_Media",
+        ]
+        for uri in test_uris:
+            knowledge.summary_for_uri(uri)
+            knowledge.coordinates_for_uri(uri)
+            knowledge.name_for_uri(uri)
+            knowledge.image_for_uri(uri)
+            knowledge.aliases_for_uri(uri)
+
+    def test_double_quotes_uri(self):
+        test_uris = [
+            'http://dbpedia.org/resource/O"Reilly_Media',
+            'http://dbpedia.org/resource/O"Reilly"_Media'
+        ]
+        for uri in test_uris:
+            knowledge.summary_for_uri(uri)
+            knowledge.coordinates_for_uri(uri)
+            knowledge.name_for_uri(uri)
+            knowledge.image_for_uri(uri)
+            knowledge.aliases_for_uri(uri)
+
 if __name__ == '__main__':
 	unittest.main()

@@ -43,6 +43,15 @@ Would return the response::
       }
     }
 
+
+NOTE:
+=====
+
+DBpedia dumps can have double quotes in their URIs, so
+they are not valid IRIs, and as such, they are invalid Fuseki SPARQL.
+I've read elsewhere that if you percent escape them (i.e. make them %22),
+they should work. But they don't.
+So for now they are just being removed.
 """
 
 from urllib import request
@@ -106,8 +115,8 @@ def name_for_uri(uri):
     Returns a name for a given uri.
     If none is found, None is returned.
     """
-    base_query = 'SELECT ?name WHERE {{ <{0}> rdfs:label ?name }}'
-    query = _build_query(base_query, uri)
+    uri = uri.replace('"', '')
+    query = 'SELECT ?name WHERE {{ <{0}> rdfs:label ?name }}'.format(uri)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -138,6 +147,7 @@ def image_for_name(name, fallback=False, no_uri=False):
     image = None
     if not no_uri:
         uri = uri_for_name(name)
+        uri = uri.replace('"', '')
         image = image_for_uri(uri) if uri else None
     if (uri is None or image is None) and fallback:
         image = wiki_image_for_name(name)
@@ -151,8 +161,8 @@ def image_for_uri(uri, fallback=False):
     If `fallback=True`, will fallback to Wikipedia
     for an image.
     """
-    base_query = 'SELECT ?image_url WHERE {{ <{0}> foaf:depiction ?image_url }}'
-    query = _build_query(base_query, uri)
+    uri = uri.replace('"', '')
+    query = 'SELECT ?image_url WHERE {{ <{0}> foaf:depiction ?image_url }}'.format(uri)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -182,6 +192,7 @@ def coordinates_for_name(name):
         {'lat': '39.90638888888889', 'long': '116.37972222222223'}
     """
     uri = uri_for_name(name)
+    uri = uri.replace('"', '')
     return coordinates_for_uri(uri)
 
 def coordinates_for_uri(uri):
@@ -189,8 +200,8 @@ def coordinates_for_uri(uri):
     Returns a set of coordinates for a given entity URI.
     If none is found, None is returned.
     """
-    base_query = 'SELECT ?lat ?long WHERE {{ <{0}> geo:lat ?lat; geo:long ?long }}'
-    query = _build_query(base_query, uri)
+    uri = uri.replace('"', '')
+    query = 'SELECT ?lat ?long WHERE {{ <{0}> geo:lat ?lat; geo:long ?long }}'.format(uri)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -229,6 +240,7 @@ def summary_for_name(name, short=False, fallback=False, no_uri=False):
     summary = None
     if not no_uri:
         uri = uri_for_name(name)
+        uri = uri.replace('"', '')
 
         # Override fallback here,
         # so we can just reuse the name from here.
@@ -249,9 +261,9 @@ def summary_for_uri(uri, short=False, fallback=False):
     Optionally specify `short=True` to get a
     shorter summary.
     """
+    uri = uri.replace('"', '')
     predicate = 'rdfs:comment' if short else 'dbo:abstract'
-    base_query = 'SELECT ?summary WHERE {{ <{0}> {1} ?summary }}'
-    query = _build_query(base_query, uri, predicate)
+    query = 'SELECT ?summary WHERE {{ <{0}> {1} ?summary }}'.format(uri, predicate)
     data = _query(query)
     results = _prepare_results(data)
     if results:
@@ -283,15 +295,15 @@ def aliases_for_name(name):
     """
 
     uri = uri_for_name(name)
+    uri = uri.replace('"', '')
     return aliases_for_uri(uri)
 
 def aliases_for_uri(uri):
     """
     Returns a list of alias URIs for a given entity URI.
     """
-
-    base_query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'
-    query = _build_query(base_query, uri)
+    uri = uri.replace('"', '')
+    query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'.format(uri)
     data = _query(query)
     results = _prepare_results(data)
     return [d['alias_uri'] for d in results]
@@ -315,6 +327,7 @@ def knowledge_for(uri=None, name=None, fallback=False):
 
     results = {}
     if uri:
+        uri = uri.replace('"', '')
         results['summary'] = summary_for_uri(uri, short=False, fallback=fallback)
         results['image'] = image_for_uri(uri, fallback=fallback)
         results['name'] = name_for_uri(uri)
