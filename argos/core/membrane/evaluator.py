@@ -105,7 +105,7 @@ def twitter(url):
         so it could be gone at any moment.
     """
     data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
-    return data['count']
+    return int(data['count'])
 
 
 def linkedin(url):
@@ -122,7 +122,7 @@ def linkedin(url):
     Returns the count.
     """
     data = _request('https://www.linkedin.com/countserv/count/share?format=json&url=', url)
-    return data['count']
+    return int(data['count'])
 
 
 def stumbleupon(url):
@@ -149,7 +149,7 @@ def stumbleupon(url):
     Returns the view count.
     """
     data = _request('http://www.stumbleupon.com/services/1.01/badge.getinfo?url=', url)
-    return data['result'].get('views', 0)
+    return int(data['result'].get('views', 0))
 
 
 def score(url):

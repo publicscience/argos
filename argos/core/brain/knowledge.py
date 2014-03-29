@@ -413,7 +413,6 @@ def _sanitize(text):
 		("\f", "\\f"),
 		("\"", "\\\""),
         ("'", "\\'"),
-        (".", "\\."),
     ]
     for mapping in mappings:
         text = text.replace(mapping[0], mapping[1])
