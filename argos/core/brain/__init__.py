@@ -128,7 +128,7 @@ def concepts(docs, strategy='stanford'):
             try:
                 ents = tagger.get_entities(doc)
             except UnicodeDecodeError as e:
-                logger.error('Unexpected unicode decoding error: {0}'.format(e))
+                logger.exception('Unexpected unicode decoding error: {0}'.format(e))
                 ents = {}
 
             # We're only interested in the entity names,

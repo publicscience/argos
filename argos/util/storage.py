@@ -6,13 +6,16 @@ Coordinator for interacting with storage infrastructure,
 i.e. Amazon Web Services S3.
 """
 
-from argos.conf import APP
-
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
 from urllib import request, error, parse
 from io import BytesIO
+
+from argos.conf import APP
+
+from argos.util.logger import logger
+logger = logger(__name__)
 
 def save_from_url(url, filename):
     """
@@ -22,8 +25,8 @@ def save_from_url(url, filename):
     try:
         # parse.quote necessary for unicode urls.
         res = request.urlopen(parse.quote(url, safe='/:?='))
-    except error.HTTPError as e:
-        print('Error requesting {0}: {1}'.format(url, e))
+    except (error.HTTPError, ConnectionResetError) as e:
+        logger.exception('Error requesting {0}: {1}'.format(url, e))
         return None
     conn = S3Connection(APP['AWS_ACCESS_KEY_ID'], APP['AWS_SECRET_ACCESS_KEY'])
     bucket = conn.get_bucket(APP['S3_BUCKET_NAME'])

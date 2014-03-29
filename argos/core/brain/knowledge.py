@@ -348,7 +348,7 @@ def _query(query):
     try:
         res = request.urlopen(req)
     except error.HTTPError as e:
-        logger.error('Error with with query: {0}'.format(query))
+        logger.exception('Error with with query: {0}'.format(query))
         raise e
     if res.status != 200:
         raise Exception('Response error, status was not 200')
