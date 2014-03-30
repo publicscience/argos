@@ -19,7 +19,7 @@ def _request(endpoint, url, format='json'):
     res = request.urlopen(req)
     content = res.read()
     if format == 'json':
-        return json.loads(content.decode('utf-8'))
+        return json.loads(content.decode('utf-8', 'ignore'))
     elif format == 'xml':
         return xmltodict.parse(content)
     return None
