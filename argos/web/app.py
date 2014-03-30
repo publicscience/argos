@@ -1,4 +1,5 @@
 from os import environ
+import logging
 from logging import handlers
 
 from argos.conf import APP
