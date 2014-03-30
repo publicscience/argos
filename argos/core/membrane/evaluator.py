@@ -166,7 +166,7 @@ def stumbleupon(url):
     """
     try:
         data = _request('http://www.stumbleupon.com/services/1.01/badge.getinfo?url=', url)
-        return int(data['result'].get('views', 0))
+        return int(data.get('result', {}).get('views', 0))
     except error.HTTPError:
         logger.exception('Error getting score for `stumbleupon` ({0}): {1}'.format(url, e))
         return 0
