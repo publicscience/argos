@@ -9,12 +9,12 @@ articles for training and/or testing.
 from argos.datastore import db
 from argos.core.models import Source, Article, Event, Story
 from argos.core.membrane import feed
-from argos.util.logger import logger
 
 from datetime import datetime, timedelta
 import json
 
 # Logging.
+from argos.util.logger import logger
 logger = logger(__name__)
 
 def collect():
@@ -64,14 +64,18 @@ def ponder():
     and also clusters events from a recent timeframe
     into stories.
     """
-    logger.info('Pondering...')
-    articles = collect()
-    Event.cluster(articles, threshold=0.05)
+    try:
+        logger.info('Pondering...')
+        articles = collect()
+        Event.cluster(articles, threshold=0.05)
 
-    # Cluster events from the past two weeks.
-    # (two weeks is an arbitrary number, will need to choose a time frame)
-    recent_events = Event.query.filter(Event.updated_at > datetime.utcnow() - timedelta(days=14)).all()
-    Story.cluster(recent_events, threshold=0.05)
+        # Cluster events from the past two weeks.
+        # (two weeks is an arbitrary number, will need to choose a time frame)
+        recent_events = Event.query.filter(Event.updated_at > datetime.utcnow() - timedelta(days=14)).all()
+        Story.cluster(recent_events, threshold=0.05)
+    except Exception:
+        logger.exception('Encountered an error while pondering!')
+        raise
 
 
 def add_source(url, name):
