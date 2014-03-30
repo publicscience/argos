@@ -15,8 +15,12 @@ from http.cookiejar import CookieJar
 from readability.readability import Document
 from goose import Goose
 
-from urllib import request
+from urllib import request, error
 from os.path import splitext
+from time import sleep
+
+from argos.util.logger import logger
+logger = logger(__name__)
 
 g = Goose()
 
@@ -142,22 +146,40 @@ def extract_authors(entry):
     return authors
 
 
-def extract_entry_data(url):
+def extract_entry_data(url, max_retries=10):
     """
     Fetch the full content for a feed entry url.
+
+    If a 503 Service Unavailable error is encountered,
+    will retry `max_retries` times.
 
     Args:
         | url (str)    -- the url of the entry.
 
     Returns:
-        | str -- the full text, including html.
+        | entry_data -- Goose object.
+        | str        -- the full text, including html.
     """
 
-    html = _get_html(url)
+    retries = 0
+    while True:
+        try:
+            html = _get_html(url)
 
-    # Use Goose to extract data from the raw html,
-    # Use readability to give us the html of the main document.
-    return g.extract(raw_html=html), Document(html).summary()
+            # Use Goose to extract data from the raw html,
+            # Use readability to give us the html of the main document.
+            return g.extract(raw_html=html), Document(html).summary()
+
+        except error.HTTPError as e:
+            if e.code == 503 and retries < max_retries:
+                # If 503 Service Unavailable,
+                # try again after a short delay.
+                sleep(1)
+                retries += 1
+            else:
+                raise e
+
+
 
 
 def _get_html(url):

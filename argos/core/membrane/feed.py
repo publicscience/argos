@@ -24,6 +24,9 @@ from urllib import error
 # For feedparser exceptions.
 from xml.sax._exceptions import SAXException
 
+from argos.util.logger import logger
+logger = logger(__name__)
+
 def articles(source):
     """
     Parse a feed from the specified source,
@@ -76,13 +79,17 @@ def articles(source):
         # Complete HTML content for this entry.
         try:
             entry_data, html = extractor.extract_entry_data(url)
-            full_text = entry_data.cleaned_text
         except (error.HTTPError, error.URLError) as e:
             if type(e) == error.URLError or e.code == 404:
+                # Can't reach, skip.
+                logger.exception('Error extracting data for url {0}'.format(url))
                 continue
             else:
-                raise
+                # Just skip so things don't break!
+                logger.exception('Error extracting data for url {0}'.format(url))
+                continue
 
+        full_text = entry_data.cleaned_text
 
         # Skip over entries that are too short.
         if len(full_text) < 400:
