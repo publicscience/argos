@@ -39,7 +39,7 @@ def facebook_graph(url):
     try:
         data = _request('https://graph.facebook.com/', url)
         return data['comments'] + data['shares']
-    except error.HTTPError:
+    except error.HTTPError as e:
         logger.exception('Error getting score for `facebook_graph` ({0}): {1}'.format(url, e))
         return 0
 
@@ -91,7 +91,7 @@ def facebook(url):
         data = _request('https://api.facebook.com/restserver.php?method=links.getStats&urls=', url, format='xml')
         data_ = dict(data['links_getStats_response']['link_stat'])
         return int(data_['click_count'])/4 + int(data_['total_count']) + int(data_['commentsbox_count'])
-    except error.HTTPError:
+    except error.HTTPError as e:
         logger.exception('Error getting score for `facebook` ({0}): {1}'.format(url, e))
         return 0
 
@@ -115,7 +115,7 @@ def twitter(url):
     try:
         data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
         return int(data['count'])
-    except error.HTTPError:
+    except error.HTTPError as e:
         logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
         return 0
 
@@ -136,7 +136,7 @@ def linkedin(url):
     try:
         data = _request('https://www.linkedin.com/countserv/count/share?format=json&url=', url)
         return int(data['count'])
-    except error.HTTPError:
+    except error.HTTPError as e:
         logger.exception('Error getting score for `linkedin` ({0}): {1}'.format(url, e))
         return 0
 
@@ -167,7 +167,7 @@ def stumbleupon(url):
     try:
         data = _request('http://www.stumbleupon.com/services/1.01/badge.getinfo?url=', url)
         return int(data.get('result', {}).get('views', 0))
-    except error.HTTPError:
+    except error.HTTPError as e:
         logger.exception('Error getting score for `stumbleupon` ({0}): {1}'.format(url, e))
         return 0
 
