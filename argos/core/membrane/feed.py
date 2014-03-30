@@ -79,7 +79,7 @@ def articles(source):
         # Complete HTML content for this entry.
         try:
             entry_data, html = extractor.extract_entry_data(url)
-        except (error.HTTPError, error.URLError) as e:
+        except (error.HTTPError, error.URLError, ConnectionResetError) as e:
             if type(e) == error.URLError or e.code == 404:
                 # Can't reach, skip.
                 logger.exception('Error extracting data for url {0}'.format(url))

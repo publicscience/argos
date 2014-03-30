@@ -170,8 +170,8 @@ def extract_entry_data(url, max_retries=10):
             # Use readability to give us the html of the main document.
             return g.extract(raw_html=html), Document(html).summary()
 
-        except error.HTTPError as e:
-            if e.code == 503 and retries < max_retries:
+        except (error.HTTPError, ConnectionResetError) as e:
+            if (type(e) is ConnectionResetError or e.code == 503) and retries < max_retries:
                 # If 503 Service Unavailable,
                 # try again after a short delay.
                 sleep(1)
