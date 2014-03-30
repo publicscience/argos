@@ -19,7 +19,7 @@ def _request(endpoint, url, format='json'):
     res = request.urlopen(req)
     content = res.read()
     if format == 'json':
-        return json.loads(content.decode('utf-8', 'ignore'))
+        return json.loads(content.decode('utf-8'))
     elif format == 'xml':
         return xmltodict.parse(content)
     return None
@@ -114,8 +114,10 @@ def twitter(url):
     """
     try:
         data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
-        return int(data['count'])
-    except error.HTTPError as e:
+        return int(data.get('count', 0))
+
+    # This Twitter endpoint occassionally, for some reason, returns undecodable bytes.
+    except (error.HTTPError, UnicodeDecodeError) as e:
         logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
         return 0
 
