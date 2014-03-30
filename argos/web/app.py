@@ -18,7 +18,7 @@ if not APP['DEBUG']:
             (APP['EMAIL_HOST'], APP['EMAIL_PORT']),
             APP['EMAIL_HOST_USER'],
             APP['ADMINS'],
-            'Argos Error :(',
+            'Argos Application Error :(',
             credentials=(
                 APP['EMAIL_HOST_USER'],
                 APP['EMAIL_HOST_PASSWORD']
