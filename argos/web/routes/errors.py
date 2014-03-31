@@ -13,7 +13,7 @@ def unauthorized():
     return abort(401, message='You are not authorized to access {0}. Have you authenticated?'.format(request.path), status=401)
 
 @app.errorhandler(404)
-def internal_error(error):
+def not_found_error(error):
     return jsonify(status=404, message='The resource you requested was not found.'), 404
 
 @app.errorhandler(500)
