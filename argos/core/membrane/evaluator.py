@@ -9,7 +9,7 @@ such as number of shares, likes, tweets, etc.
 MAX_RETRIES = 5
 from time import sleep
 
-from urllib import request, error
+from urllib import request, error, parse
 import json
 
 import xmltodict
@@ -18,7 +18,8 @@ from argos.util.logger import logger
 logger = logger(__name__)
 
 def _request(endpoint, url, format='json'):
-    req = request.Request('{0}{1}'.format(endpoint, url))
+    quoted_url = parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    req = request.Request('{0}{1}'.format(endpoint, quoted_url))
     res = request.urlopen(req)
     content = res.read()
     if format == 'json':
