@@ -123,7 +123,7 @@ def twitter(url):
 
         except (error.HTTPError) as e:
             if e.code == 503:
-                sleep(1)
+                sleep(1*retries)
                 retries += 1
             else:
                 logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
