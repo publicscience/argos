@@ -76,59 +76,27 @@ html_doc = open('tests/data/article.html', 'r').read()
 
 
 class FeedTest(RequiresApp):
-    patch_knowledge = True
-    patch_concepts = True
-
     def setUp(self):
-        article = {
-                'links': [{'href': 'some url'}],
-                'title': 'some title',
-                'published': 'Thu, 09 Jan 2014 14:00:00 GMT',
-                'updated': 'Thu, 09 Jan 2014 14:00:00 GMT'
-        }
-        data = MagicMock(
-                    entries=[article],
-                    bozo=False
-               )
-        self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
+        # Mock finding feeds.
+        self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
 
-        self.source = Source(ext_url='foo')
+    def test_add_source(self):
+        url = 'sup'
+        self.mock_find_feed.return_value = url
 
-    def test_feed_error_if_no_full_text(self):
-        self.assertRaises(Exception, feed.articles, self.source)
+        feed.add_source(url, 'source name')
+        self.assertEquals(Source.query.count(), 1)
 
-    def test_articles(self):
-        extracted_data = MagicMock()
-        extracted_data.cleaned_text = full_text
-        extracted_data.canonical_link = 'a canonical link'
+        # Ensure duplicates aren't added.
+        feed.add_source(url, 'source name')
+        self.assertEquals(Source.query.count(), 1)
 
-        self.create_patch('argos.core.membrane.extractor.extract_image', return_value='https://s3.amazon.com/foo/bar/image.jpg')
+    def test_load_sources_from_file(self):
+        url = 'sup'
+        self.mock_find_feed.return_value = url
 
-        # Mock the evaluator score calculation.
-        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
-
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, full_text))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 1)
-
-    def test_articles_skips_short_articles(self):
-        extracted_data = MagicMock()
-        extracted_data.cleaned_text = 'short full text'
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, 'short full text'))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 0)
-
-    def test_articles_skips_404_articles(self):
-        from urllib import error
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 0)
-
-    def test_articles_skips_unreachable_articles(self):
-        from urllib import error
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.URLError('unreachable'))
-        articles = feed.articles(self.source)
-        self.assertEquals(len(articles), 0)
+        feed.load_sources_from_file()
+        self.assertTrue(Source.query.count() > 1)
 
 class ExtractorTest(RequiresApp):
     # We patch it ourselves here.
@@ -273,6 +241,7 @@ class FeedFinderTest(RequiresMocks):
 
 class CollectorTest(RequiresApp):
     patch_knowledge = True
+    patch_concepts = True
 
     def setUp(self):
         # Add a fake source to work with.
@@ -280,23 +249,34 @@ class CollectorTest(RequiresApp):
         self.db.session.add(self.source)
         self.db.session.commit()
 
-        # Mock articles.
-        self.mock_articles = self.create_patch('argos.core.membrane.feed.articles')
+        article = {
+                'links': [{'href': 'some url'}],
+                'title': 'some title',
+                'published': 'Thu, 09 Jan 2014 14:00:00 GMT',
+                'updated': 'Thu, 09 Jan 2014 14:00:00 GMT'
+        }
+        data = MagicMock(
+                    entries=[article],
+                    bozo=False
+               )
+        self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
-        # Mock finding feeds.
-        self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
-
-    def test_collect(self):
+    def mock_articles(self):
+        self.mock_articles = self.create_patch('argos.core.membrane.collector.get_articles')
         self.mock_articles.return_value = [
-            {
-                'title': 'Foo',
-                'published': datetime.utcnow(),
-                'ext_url': 'foo.com'
-            }
+            Article(
+                title='Foo',
+                published=datetime.utcnow(),
+                ext_url='foo.com',
+                text='dinosaurs are cool, Clinton'
+            )
         ]
 
+
+    def test_collect(self):
         self.assertEquals(Article.query.count(), 0)
 
+        self.mock_articles()
         collector.collect()
 
         self.assertEquals(Article.query.count(), 1)
@@ -305,13 +285,7 @@ class CollectorTest(RequiresApp):
         self.assertEquals(article.title, 'Foo')
 
     def test_collect_ignores_existing(self):
-        self.mock_articles.return_value = [
-            {
-                'title': 'Foo',
-                'published': datetime.utcnow(),
-                'ext_url': 'foo.com'
-            }
-        ]
+        self.mock_articles()
 
         collector.collect()
         collector.collect()
@@ -319,45 +293,20 @@ class CollectorTest(RequiresApp):
         self.assertEquals(Article.query.count(), 1)
 
     def test_collect_error(self):
+        self.mock_articles()
+
         self.assertEquals(self.source.errors, 0)
 
-        self.mock_articles.side_effect = feed.SAXException('', None)
+        self.mock_articles.side_effect = collector.SAXException('', None)
 
         collector.collect()
 
         self.assertEquals(self.source.errors, 1)
 
-    def test_add_source(self):
-        url = 'sup'
-        self.mock_find_feed.return_value = url
-
-        # 2 because the default test source has been added.
-        collector.add_source(url, 'source name')
-        self.assertEquals(Source.query.count(), 2)
-
-        # Ensure duplicates aren't added.
-        collector.add_source(url, 'source name')
-        self.assertEquals(Source.query.count(), 2)
-
-    def test_load_sources_from_file(self):
-        url = 'sup'
-        self.mock_find_feed.return_value = url
-
-        collector.load_sources_from_file()
-        self.assertTrue(Source.query.count() > 1)
-
     def test_ponder(self):
-        self.mock_articles.return_value = [
-            {
-                'title': 'Foo',
-                'published': datetime.utcnow(),
-                'ext_url': 'foo.com',
-                'text': 'dinosaurs are cool, Clinton'
-            }
-        ]
-
         self.assertEquals(Article.query.count(), 0)
 
+        self.mock_articles()
         collector.ponder()
 
         self.assertEquals(Article.query.count(), 1)
@@ -366,6 +315,42 @@ class CollectorTest(RequiresApp):
 
         article = Article.query.first()
         self.assertEquals(article.title, 'Foo')
+
+    def test_feed_error_if_no_full_text(self):
+        self.assertRaises(Exception, collector.get_articles, self.source)
+
+    def test_articles(self):
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = full_text
+        extracted_data.canonical_link = 'a canonical link'
+
+        self.create_patch('argos.core.membrane.extractor.extract_image', return_value='https://s3.amazon.com/foo/bar/image.jpg')
+
+        # Mock the evaluator score calculation.
+        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
+
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, full_text))
+        articles = collector.get_articles(self.source)
+        self.assertEquals(len(articles), 1)
+
+    def test_articles_skips_short_articles(self):
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = 'short full text'
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, 'short full text'))
+        articles = collector.get_articles(self.source)
+        self.assertEquals(len(articles), 0)
+
+    def test_articles_skips_404_articles(self):
+        from urllib import error
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        articles = collector.get_articles(self.source)
+        self.assertEquals(len(articles), 0)
+
+    def test_articles_skips_unreachable_articles(self):
+        from urllib import error
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.URLError('unreachable'))
+        articles = collector.get_articles(self.source)
+        self.assertEquals(len(articles), 0)
 
 
 class EvaluatorTest(RequiresApp):
