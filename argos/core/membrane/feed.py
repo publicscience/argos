@@ -27,6 +27,8 @@ from xml.sax._exceptions import SAXException
 from argos.util.logger import logger
 logger = logger(__name__)
 
+from http.client import BadStatusLine
+
 def articles(source):
     """
     Parse a feed from the specified source,
@@ -79,7 +81,7 @@ def articles(source):
         # Complete HTML content for this entry.
         try:
             entry_data, html = extractor.extract_entry_data(url)
-        except (error.HTTPError, error.URLError, ConnectionResetError) as e:
+        except (error.HTTPError, error.URLError, ConnectionResetError, BadStatusLine) as e:
             if type(e) == error.URLError or e.code == 404:
                 # Can't reach, skip.
                 logger.exception('Error extracting data for url {0}'.format(url))

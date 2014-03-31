@@ -17,6 +17,8 @@ from argos.conf import APP
 from argos.util.logger import logger
 logger = logger(__name__)
 
+from http.client import BadStatusLine
+
 def save_from_url(url, filename):
     """
     Saves a remote file to S3 and returns
@@ -24,22 +26,23 @@ def save_from_url(url, filename):
     """
     try:
         # parse.quote necessary for unicode urls.
-        res = request.urlopen(parse.quote(url, safe='/:?=%#'))
+        quoted_url = parse.quote(url, safe='/:?=%#')
+        res = request.urlopen(quoted_url)
 
     except error.HTTPError as e:
         # Wikimedia 404 errors are very common, since images may go
         # out of date.
         # So common that for now these exceptions are just ignored.
         if e.code == 404 and 'wikimedia' in url:
-            logger.warn('Error requesting {0}: {1}'.format(url, e))
+            logger.warn('Error requesting {0} (quoted: {1}): {2}'.format(url, quoted_url, e))
 
         # Other exceptions are more remarkable and should be brought up.
         else:
-            logger.exception('Error requesting {0}: {1}'.format(url, e))
+            logger.exception('Error requesting {0} (quoted: {1}): {2}'.format(url, quoted_url, e))
         return None
 
-    except ConnectionResetError as e:
-        logger.exception('Error requesting {0}: {1}'.format(url, e))
+    except (ConnectionResetError, BadStatusLine, ValueError) as e:
+        logger.exception('Error requesting {0} (quoted: {1}): {2}'.format(url, quoted_url, e))
         return None
 
     conn = S3Connection(APP['AWS_ACCESS_KEY_ID'], APP['AWS_SECRET_ACCESS_KEY'])

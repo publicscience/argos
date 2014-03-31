@@ -6,6 +6,9 @@ Collects ranking info about articles,
 such as number of shares, likes, tweets, etc.
 """
 
+MAX_RETRIES = 5
+from time import sleep
+
 from urllib import request, error
 import json
 
@@ -112,14 +115,26 @@ def twitter(url):
         This is an undocumented/unofficial endpoint,
         so it could be gone at any moment.
     """
-    try:
-        data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
-        return int(data.get('count', 0))
+    retries = 0
+    while retries < MAX_RETRIES:
+        try:
+            data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
+            return int(data.get('count', 0))
 
-    # This Twitter endpoint occassionally, for some reason, returns undecodable bytes.
-    except (error.HTTPError, UnicodeDecodeError) as e:
-        logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
-        return 0
+        except (error.HTTPError) as e:
+            if e.code == 503:
+                sleep(1)
+                retries += 1
+            else:
+                logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
+                return 0
+
+        # This Twitter endpoint occassionally, for some reason, returns undecodable bytes.
+        # This is often resolved after a few tries.
+        except UnicodeDecodeError as e:
+            sleep(1)
+            retries += 1
+    return 0
 
 
 def linkedin(url):
