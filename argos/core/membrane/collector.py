@@ -40,7 +40,6 @@ def collect():
             logger.info('Fetching from {0}...'.format(source.ext_url))
             new_articles = get_articles(source)
 
-            # Check for existing copy.
             for article in new_articles:
                 db.session.add(article)
 

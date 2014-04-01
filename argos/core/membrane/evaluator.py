@@ -6,7 +6,6 @@ Collects ranking info about articles,
 such as number of shares, likes, tweets, etc.
 """
 
-MAX_RETRIES = 5
 from time import sleep
 
 from urllib import request, error, parse
@@ -14,13 +13,14 @@ import json
 
 import xmltodict
 
+from argos.util.request import make_request
+
 from argos.util.logger import logger
 logger = logger(__name__)
 
 def _request(endpoint, url, format='json'):
-    quoted_url = parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
-    req = request.Request('{0}{1}'.format(endpoint, quoted_url))
-    res = request.urlopen(req)
+    complete_url = '{0}{1}'.format(endpoint, url)
+    res = make_request(complete_url)
     content = res.read()
     if format == 'json':
         return json.loads(content.decode('utf-8'))
@@ -117,23 +117,19 @@ def twitter(url):
         so it could be gone at any moment.
     """
     retries = 0
-    while retries < MAX_RETRIES:
+    while retries < 5:
         try:
             data = _request('https://cdn.api.twitter.com/1/urls/count.json?url=', url)
             return int(data.get('count', 0))
 
-        except (error.HTTPError) as e:
-            if e.code == 503:
-                sleep(1*retries)
-                retries += 1
-            else:
-                logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
-                return 0
+        except error.HTTPError as e:
+            logger.exception('Error getting score for `twitter` ({0}): {1}'.format(url, e))
+            return 0
 
         # This Twitter endpoint occassionally, for some reason, returns undecodable bytes.
         # This is often resolved after a few tries.
         except UnicodeDecodeError as e:
-            sleep(1)
+            sleep(1*retries)
             retries += 1
     return 0
 
