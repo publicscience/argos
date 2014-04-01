@@ -37,12 +37,12 @@ python-slugify==0.0.7
 Unidecode==0.04.14
 pycrypto==2.6.1
 xmltodict==0.8.6
+chardet==2.2.1
 
-# Use latest feedparser and unofficial Py3 chardet port.
+# Use latest feedparser.
 # Although feedparser says it supports Py3.3,
 # the latest release (which is almost a year old) does not seem to.
 git+http://code.google.com/p/feedparser
-git+git://github.com/bsidhom/python3-chardet.git
 
 # pypi's python-dateutil isn't up to date, use latest.
 bzr+https://code.launchpad.net/~dateutil/dateutil/trunk
