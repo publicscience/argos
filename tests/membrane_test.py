@@ -72,7 +72,7 @@ full_text = """
             I don't know what you could say about a day in which you have seen four beautiful sunsets.
 """
 
-html_doc = open('tests/data/article.html', 'r').read()
+html_doc = open('tests/data/article.html', 'rb').read()
 
 
 class FeedTest(RequiresApp):
