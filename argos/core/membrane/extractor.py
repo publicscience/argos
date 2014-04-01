@@ -189,13 +189,11 @@ def _get_html(url):
     cookies = CookieJar()
     opener = request.build_opener(request.HTTPCookieProcessor(cookies))
 
+    # Get the raw html.
     # Spoof a user agent.
     # This can help get around 403 (forbidden) errors.
-    req = request.Request(url, headers={'User-Agent': 'Chrome'})
-
-    # Get the raw html.
     try:
-        html = make_request(req, open_func=opener.open).read()
+        html = make_request(url, open_func=opener.open, headers={'User-Agent': 'Chrome'}).read()
     except IncompleteRead as e:
         html = e.partial
 

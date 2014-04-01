@@ -12,6 +12,6 @@ class RequestTest(RequiresMocks):
         e = error.HTTPError('some url', 503, 'some msg', '', BytesIO())
         self.mock_open = MagicMock(side_effect=e)
 
-        request.make_request('faux url', max_retries=retries, open_func=self.mock_open)
+        request.make_request('http://fauxurl.com', max_retries=retries, open_func=self.mock_open)
 
         self.assertEqual(self.mock_open.call_count, retries)
