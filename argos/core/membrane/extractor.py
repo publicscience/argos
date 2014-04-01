@@ -166,10 +166,6 @@ def extract_entry_data(url, max_retries=10):
         try:
             html = _get_html(url)
 
-            # Use Goose to extract data from the raw html,
-            # Use readability to give us the html of the main document.
-            return g.extract(raw_html=html), Document(html).summary()
-
         except (error.HTTPError, ConnectionResetError) as e:
             if (type(e) is ConnectionResetError or e.code == 503) and retries < max_retries:
                 # If 503 Service Unavailable,
@@ -178,6 +174,15 @@ def extract_entry_data(url, max_retries=10):
                 retries += 1
             else:
                 raise e
+
+        try:
+            # Use Goose to extract data from the raw html,
+            # Use readability to give us the html of the main document.
+            return g.extract(raw_html=html), Document(html).summary()
+
+        except UnicodeDecodeError as e:
+            logger.exception('UnicodeDecodeError with html: {0}'.format(html))
+            return None, ''
 
 
 
