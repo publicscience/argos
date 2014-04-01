@@ -236,7 +236,15 @@ def _get(url):
 
         # Use Chardet to determine the encoding.
         encoding = chardet.detect(body)['encoding']
-        return body.decode(encoding)
+
+        try:
+            return body.decode(encoding)
+        except UnicodeDecodeError:
+            # Try a few common encodings.
+            if encoding != 'utf-8':
+                return body.decode('utf-8')
+            else:
+                return body.decode('ISO-8859-2')
 
     except request.HTTPError as e:
         print('HTTP Error:', e.code, url)
