@@ -178,6 +178,12 @@ def extract_entry_data(url, max_retries=10):
         try:
             # Use Goose to extract data from the raw html,
             # Use readability to give us the html of the main document.
+
+            # Some HTML comes with additional characters prior
+            # to the actual document, so we want to strip everything up
+            # to the first tag.
+            html = html[html.index(b'<'):]
+
             return g.extract(raw_html=html), Document(html).summary()
 
         except UnicodeDecodeError as e:
