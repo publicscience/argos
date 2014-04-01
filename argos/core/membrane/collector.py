@@ -25,14 +25,11 @@ logger = logger(__name__)
 def collect():
     """
     Fetch articles from the sources,
-    and save (or update) to db.
+    and save to db.
 
-    This only creates, saves, and returns
-    new Articles.
+    This is a generator which yields a list
+    of new Articles per Source.
     """
-    results = []
-
-    logger.info('Fetching articles...')
 
     # Fetch entries for each source
     for source in Source.query.all():
@@ -44,16 +41,15 @@ def collect():
                 db.session.add(article)
             db.session.commit()
 
-            results += new_articles
+            yield new_articles
 
         except SAXException as e:
             # Error with the feed, make a note.
             logger.info('Error fetching from {0}.'.format(source.ext_url))
             source.errors += 1
+            db.session.commit()
 
-    logger.info('Finished fetching articles.')
-
-    return results
+            yield []
 
 
 def ponder():
@@ -68,8 +64,10 @@ def ponder():
     """
     try:
         logger.info('Pondering...')
-        articles = collect()
-        Event.cluster(articles, threshold=0.05)
+
+        # Cluster each set of articles
+        for articles in collect():
+            Event.cluster(articles, threshold=0.05)
 
         # Cluster events from the past two weeks.
         # (two weeks is an arbitrary number, will need to choose a time frame)

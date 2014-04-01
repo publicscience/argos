@@ -291,7 +291,7 @@ class CollectorTest(RequiresApp):
         self.assertEquals(Article.query.count(), 0)
 
         self.mock_articles()
-        collector.collect()
+        articles = [a for a in collector.collect()]
 
         self.assertEquals(Article.query.count(), 1)
 
@@ -301,8 +301,8 @@ class CollectorTest(RequiresApp):
     def test_collect_ignores_existing(self):
         self.mock_articles()
 
-        collector.collect()
-        collector.collect()
+        articles = [a for a in collector.collect()]
+        articles = [a for a in collector.collect()]
 
         self.assertEquals(Article.query.count(), 1)
 
@@ -313,7 +313,7 @@ class CollectorTest(RequiresApp):
 
         self.mock_articles.side_effect = collector.SAXException('', None)
 
-        collector.collect()
+        articles = [a for a in collector.collect()]
 
         self.assertEquals(self.source.errors, 1)
 
