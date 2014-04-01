@@ -185,6 +185,20 @@ class ExtractorTest(RequiresApp):
         }
         self.assertEqual(expected, results)
 
+    def test_extract_malformed_entry_data(self):
+        mal_html_doc = b'aksuhdkjashdkf' + html_doc
+        self.create_patch('argos.core.membrane.extractor._get_html', return_value=mal_html_doc)
+        data, html = extractor.extract_entry_data('http://foo.com')
+        expected = {
+                'title': 'Why Israel Fears the Boycott',
+                'image': 'http://static01.nyt.com/images/2014/02/01/opinion/sunday/01goodman/01goodman-videoSixteenByNine1050.jpg'
+        }
+        results = {
+                'title': data.title,
+                'image': data.top_image.src
+        }
+        self.assertEqual(expected, results)
+
     def test_extract_image(self):
         patched_saving = self.create_patch('argos.util.storage.save_from_url', return_value='fake return')
         remote_image_url = 'http://foo.com/bar/image.jpg'
