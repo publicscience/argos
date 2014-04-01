@@ -195,7 +195,7 @@ def _get_html(url):
 
     # Get the raw html.
     try:
-        html = make_request(req, opener=opener.open).read()
+        html = make_request(req, open_func=opener.open).read()
     except IncompleteRead as e:
         html = e.partial
 
