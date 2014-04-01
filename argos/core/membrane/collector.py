@@ -141,6 +141,9 @@ def get_articles(source):
                 logger.exception('Error extracting data for url {0}'.format(url))
                 continue
 
+        if entry_data is None:
+            continue
+
         full_text = entry_data.cleaned_text
 
         # Skip over entries that are too short.

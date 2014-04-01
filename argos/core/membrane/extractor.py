@@ -175,20 +175,20 @@ def extract_entry_data(url, max_retries=10):
             else:
                 raise e
 
-        try:
-            # Use Goose to extract data from the raw html,
-            # Use readability to give us the html of the main document.
+    try:
+        # Use Goose to extract data from the raw html,
+        # Use readability to give us the html of the main document.
 
-            # Some HTML comes with additional characters prior
-            # to the actual document, so we want to strip everything up
-            # to the first tag.
-            html = html[html.index(b'<'):]
+        # Some HTML comes with additional characters prior
+        # to the actual document, so we want to strip everything up
+        # to the first tag.
+        html = html[html.index(b'<'):]
 
-            return g.extract(raw_html=html), Document(html).summary()
+        return g.extract(raw_html=html), Document(html).summary()
 
-        except UnicodeDecodeError as e:
-            logger.exception('UnicodeDecodeError with html: {0}'.format(html))
-            return None, ''
+    except UnicodeDecodeError as e:
+        logger.exception('UnicodeDecodeError with html: {0}'.format(html))
+        return None, ''
 
 
 
