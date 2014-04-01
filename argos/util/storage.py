@@ -34,7 +34,7 @@ def save_from_url(url, filename):
         # out of date.
         # So common that for now these exceptions are just ignored.
         if e.code == 404 and 'wikimedia' in url:
-            logger.warn('Error requesting {0} : {1}'.format(url, e))
+            logger.warning('Error requesting {0} : {1}'.format(url, e))
 
         # Other exceptions are more remarkable and should be brought up.
         else:
