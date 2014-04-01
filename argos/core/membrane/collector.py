@@ -42,6 +42,7 @@ def collect():
 
             for article in new_articles:
                 db.session.add(article)
+            db.session.commit()
 
             results += new_articles
 
@@ -51,8 +52,6 @@ def collect():
             source.errors += 1
 
     logger.info('Finished fetching articles.')
-
-    db.session.commit()
 
     return results
 
