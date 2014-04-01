@@ -79,8 +79,11 @@ def extract_image(entry_data, filename):
     image_url = None
     if entry_data.top_image:
         remote_image_url = entry_data.top_image.src
-        ext = splitext(remote_image_url)[-1].lower()
-        image_url = storage.save_from_url(remote_image_url, '{0}{1}'.format(filename, ext))
+
+        # Occasionally this url comes back as empty.
+        if remote_image_url:
+            ext = splitext(remote_image_url)[-1].lower()
+            image_url = storage.save_from_url(remote_image_url, '{0}{1}'.format(filename, ext))
     return image_url
 
 def extract_authors(entry):
