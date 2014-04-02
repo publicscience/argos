@@ -1,9 +1,9 @@
 import tests.factories as fac
 from tests.helpers import save
 
-from tests import RequiresApp
+from tests import RequiresAPI
 
-class SearchTest(RequiresApp):
+class SearchTest(RequiresAPI):
     def test_no_query(self):
         r = self.client.get('/search')
         self.assertEqual(r.status_code, 404)

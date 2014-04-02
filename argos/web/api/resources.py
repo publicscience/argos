@@ -1,9 +1,8 @@
 import argos.web.models as models
 
 from argos.datastore import db
-from argos.web.app import app
-from argos.web.routes import api, fields
-from argos.web.routes.errors import not_found, unauthorized
+from argos.web.api import api, fields
+from argos.web.api.errors import not_found, unauthorized
 
 from flask_security.core import current_user
 from flask.ext.restful import Resource, marshal_with, reqparse

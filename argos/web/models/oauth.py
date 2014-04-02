@@ -1,4 +1,3 @@
-from argos.web.app import app
 from argos.datastore import db, Model
 
 class InvalidScope(Exception):

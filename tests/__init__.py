@@ -1,18 +1,30 @@
 import unittest
+import time
+import socket
+import subprocess
 from unittest.mock import patch
-
-import time, socket, subprocess, tempfile
-
-from tests.patches import patch_knowledge, patch_concepts, patch_aws
-
-from jobs import workers
 from json import loads
-from tests import helpers
 
-from argos.web.app import app
+from argos import web
+from argos.web import api, front
 from argos.datastore import db
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from jobs import workers
+
+from tests.patches import patch_knowledge, patch_concepts, patch_aws
+from tests import helpers
+
+test_config = {
+        'SQLALCHEMY_DATABASE_URI': 'postgresql://argos_user:password@localhost:5432/argos_test'
+}
+
+bare_app = web.create_app(**test_config)
+api_app = api.create_app(**test_config)
+front_app = front.create_app(**test_config)
+
+for app in [api_app, front_app]:
+    app.register_blueprint(helpers.blueprint)
+
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):
@@ -27,9 +39,9 @@ class RequiresMocks(unittest.TestCase):
         self.addCleanup(patcher.stop)
         return thing
 
-class RequiresApp(RequiresMocks):
+class RequiresDatabase(RequiresMocks):
     """
-    This class will setup a database server
+    This class will setup a database
     for the duration of its tests.
 
     Much of this is ported from the flask-testing library.
@@ -51,6 +63,7 @@ class RequiresApp(RequiresMocks):
         to call setUp.
         """
         try:
+            self._setup_app()
             self._pre_setup()
             self.patchers = []
             if self.patch_knowledge:
@@ -63,9 +76,10 @@ class RequiresApp(RequiresMocks):
         finally:
             self._post_teardown()
 
-    def _pre_setup(self):
-        self.app = app
+    def _setup_app(self):
+        self.app = bare_app
 
+    def _pre_setup(self):
         self.client = self.app.test_client()
 
         self._ctx = self.app.test_request_context()
@@ -73,7 +87,8 @@ class RequiresApp(RequiresMocks):
 
         self.db = db
 
-        self.db.create_all()
+        with self.app.app_context():
+            self.db.create_all()
 
     def _post_teardown(self):
         for patcher in self.patchers:
@@ -82,12 +97,14 @@ class RequiresApp(RequiresMocks):
         if self._ctx is not None:
             self._ctx.pop()
 
+        with self.app.app_context():
+            self.db.session.remove()
+            self.db.drop_all()
+
         del self.app
         del self.client
         del self._ctx
 
-        self.db.session.remove()
-        self.db.drop_all()
 
     def json(self, resp):
         """
@@ -95,8 +112,15 @@ class RequiresApp(RequiresMocks):
         """
         return loads(resp.data.decode('utf-8'))
 
+class RequiresAPI(RequiresDatabase):
+    def  _setup_app(self):
+        self.app = api_app
 
-class RequiresWorkers(RequiresApp):
+class RequiresFront(RequiresDatabase):
+    def  _setup_app(self):
+        self.app = front_app
+
+class RequiresWorkers(RequiresDatabase):
     """
     This class will setup a RabbitMQ server
     and a Celery worker for the duration of its tests.

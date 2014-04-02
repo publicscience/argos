@@ -1,4 +1,4 @@
-from tests import RequiresMocks, RequiresApp
+from tests import RequiresMocks, RequiresDatabase
 import tests.factories as fac
 from unittest.mock import MagicMock
 from datetime import datetime
@@ -75,7 +75,7 @@ full_text = """
 html_doc = open('tests/data/article.html', 'rb').read()
 
 
-class FeedTest(RequiresApp):
+class FeedTest(RequiresDatabase):
     def setUp(self):
         # Mock finding feeds.
         self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
@@ -98,7 +98,7 @@ class FeedTest(RequiresApp):
         feed.load_sources_from_file()
         self.assertTrue(Source.query.count() > 1)
 
-class ExtractorTest(RequiresApp):
+class ExtractorTest(RequiresDatabase):
     # We patch it ourselves here.
     patch_aws = False
 
@@ -253,7 +253,7 @@ class FeedFinderTest(RequiresMocks):
         self.assertFalse(feedfinder._is_feed('http://test.com/'))
 
 
-class CollectorTest(RequiresApp):
+class CollectorTest(RequiresDatabase):
     patch_knowledge = True
     patch_concepts = True
 
@@ -367,7 +367,7 @@ class CollectorTest(RequiresApp):
         self.assertEquals(len(articles), 0)
 
 
-class EvaluatorTest(RequiresApp):
+class EvaluatorTest(RequiresDatabase):
     url = 'test'
 
     def test_facebook(self):

@@ -1,9 +1,9 @@
-from tests import RequiresApp
+from tests import RequiresDatabase
 from datetime import datetime, timedelta
 
 from argos.core.models import Article, Event
 
-class EventTest(RequiresApp):
+class EventTest(RequiresDatabase):
     """
     Note this tests the abstract Cluster class's methods as well.
     A Cluster instance can't be instantiated since it is abstract,

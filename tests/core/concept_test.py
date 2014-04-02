@@ -1,9 +1,9 @@
-from tests import RequiresApp
+from tests import RequiresDatabase
 import tests.factories as fac
 from tests.helpers import save
 from argos.core.models.concept import Concept, Alias, ConceptConceptAssociation
 
-class ConceptTest(RequiresApp):
+class ConceptTest(RequiresDatabase):
     def setUp(self):
         self.uri = 'http://fauxpedia.org/resource/argos_argos'
 

@@ -1,15 +1,14 @@
 from argos.web.models import User
 from argos.datastore import db
-from argos.web.app import app
 from flask_security.utils import login_user
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 
-@app.route('/test_login', methods=['POST'])
+blueprint = Blueprint('tests', __name__)
+
+@blueprint.route('/test_login', methods=['POST'])
 def test_login():
     """
-    A route for logging in users, for testing,
-    since right now users are exclusively authenticated
-    via third-party providers.
+    A route for logging in users, for testing.
     """
     id = request.form['id']
     user = User.query.get(id)

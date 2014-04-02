@@ -1,9 +1,9 @@
 from datetime import datetime
 from Crypto.Cipher import AES
 
-from argos.web.app import app
 from argos.datastore import db, Model
 
+from flask import current_app
 from flask.ext.security import Security, UserMixin, RoleMixin
 
 # Table connecting users and roles
@@ -90,13 +90,13 @@ class Auth(Model):
     @property
     def access_token_secret(self):
         if self._access_token_secret is not None:
-            dec = AES.new(app.config['AES_KEY'], AES.MODE_CFB, app.config['AES_IV'])
+            dec = AES.new(current_app.config['AES_KEY'], AES.MODE_CFB, current_app.config['AES_IV'])
             return dec.decrypt(self._access_token_secret).decode('utf-8')
 
     @access_token_secret.setter
     def access_token_secret(self, value):
         if value is not None:
-            enc = AES.new(app.config['AES_KEY'], AES.MODE_CFB, app.config['AES_IV'])
+            enc = AES.new(current_app.config['AES_KEY'], AES.MODE_CFB, current_app.config['AES_IV'])
             self._access_token_secret = enc.encrypt(value)
 
     @staticmethod

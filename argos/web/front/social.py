@@ -1,31 +1,32 @@
-from argos.web.app import app
 from argos.datastore import db
 
 from argos.web.models.user import User, Auth, AuthExistsForUserException
 
-from flask import session, request, url_for, jsonify, g
+from flask import Blueprint, session, request, url_for, jsonify, g
 from flask_oauthlib.client import OAuth
 from flask_security.utils import logout_user, login_user
 
-oauth = OAuth(app)
+oauth = OAuth()
+
+bp = Blueprint('social', __name__, url_prefix='/social')
 
 twitter = oauth.remote_app('twitter', app_key='TWITTER')
 facebook = oauth.remote_app('facebook', app_key='FACEBOOK')
 google = oauth.remote_app('google', app_key='GOOGLE')
 
-@app.route('/oauth/twitter')
+@bp.route('/twitter')
 def twitter_authorize():
     return twitter.authorize(callback=url_for('twitter_authorized', _external=True))
 
-@app.route('/oauth/facebook')
+@bp.route('/facebook')
 def facebook_authorize():
     return facebook.authorize(callback=url_for('facebook_authorized', _external=True))
 
-@app.route('/oauth/google')
+@bp.route('/google')
 def google_authorize():
     return google.authorize(callback=url_for('google_authorized', _external=True))
 
-@app.route('/logout')
+@bp.route('/logout')
 def logout():
     for token in ['twitter', 'facebook', 'google']:
         session.pop('{0}_oauth'.format(token), None)
@@ -43,7 +44,7 @@ def get_facebook_token():
 def get_google_token():
     return session.get('google_oauth')
 
-@app.route('/oauth/twitter/callback')
+@bp.route('/twitter/callback')
 @twitter.authorized_handler
 def twitter_authorized(resp):
     if resp is None:
@@ -58,7 +59,7 @@ def twitter_authorized(resp):
         }
         _process_user('twitter', me['id_str'], resp['oauth_token'], None, userdata)
 
-@app.route('/oauth/facebook/callback')
+@bp.route('/facebook/callback')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None:
@@ -73,7 +74,7 @@ def facebook_authorized(resp):
         }
         _process_user('facebook', me['id'], resp['access_token'], None, userdata)
 
-@app.route('/oauth/google/callback')
+@bp.route('/google/callback')
 @google.authorized_handler
 def google_authorized(resp):
     if resp is None:

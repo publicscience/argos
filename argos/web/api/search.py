@@ -1,10 +1,9 @@
 import argos.web.models as models
 
 from argos.datastore import db
-from argos.web.app import app
-from argos.web.routes import api, fields
-from argos.web.routes.errors import not_found
-from argos.web.routes.resources import page_parser, collection, PER_PAGE
+from argos.web.api import api, fields
+from argos.web.api.errors import not_found
+from argos.web.api.resources import page_parser, collection, PER_PAGE
 from flask import url_for
 from flask.ext.restful import Resource, reqparse
 

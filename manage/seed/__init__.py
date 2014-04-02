@@ -5,7 +5,7 @@ Seed
 Create some seed data.
 """
 
-from argos.web.app import app
+#from argos.web.app import app
 from argos.datastore import db
 from argos.core.models import Concept, Article, Event, Story, Source
 from argos.util.progress import progress_bar

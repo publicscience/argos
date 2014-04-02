@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from tests import RequiresApp, RequiresMocks
+from tests import RequiresDatabase, RequiresMocks
 
 from argos.core.digester import Digester
 from argos.core.digester.wikidigester import WikiDigester
@@ -26,7 +26,7 @@ class DigesterTest(unittest.TestCase):
             self.assertIsNotNone(page)
 
 
-class WikiDigesterTest(RequiresApp):
+class WikiDigesterTest(RequiresDatabase):
     def setUp(self):
         # Create the WikiDigester.
         self.w = WikiDigester('tests/data/article.xml', db='test')

@@ -1,10 +1,10 @@
-from tests import RequiresApp
+from tests import RequiresDatabase
 import tests.factories as fac
 from datetime import datetime, timedelta
 
 from argos.core.models import Article, Concept
 
-class ArticleTest(RequiresApp):
+class ArticleTest(RequiresDatabase):
     def test_identical_similarity(self):
         # Identical
         a = fac.article()

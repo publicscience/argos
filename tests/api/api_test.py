@@ -1,9 +1,9 @@
 import tests.factories as fac
 from tests.helpers import save
 
-from tests import RequiresApp
+from tests import RequiresAPI
 
-class APITest(RequiresApp):
+class APITest(RequiresAPI):
     def test_404(self):
         r = self.client.get('/does_not_exist')
         self.assertTrue(r.data)

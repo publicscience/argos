@@ -1,9 +1,9 @@
 import argos.web.models as models
 
 from argos.datastore import db
-from argos.web.routes import api, fields
-from argos.web.routes.resources import page_parser, collection, PER_PAGE
-from argos.web.routes.errors import not_found, unauthorized
+from argos.web.api import api, fields
+from argos.web.api.resources import page_parser, collection, PER_PAGE
+from argos.web.api.errors import not_found, unauthorized
 
 from flask import request, abort
 from flask_security.core import current_user
@@ -157,5 +157,3 @@ class Users(Resource):
         count = models.User.query.count()
         return results, count or not_found()
 api.add_resource(Users, '/users')
-
-

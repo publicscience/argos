@@ -1,32 +1,99 @@
-from argos.web.app import app
 from argos.web.models.oauth import Grant, Client, Token, InvalidScope, InvalidGrantType
 from argos.web.models.user import User
 from argos.datastore import db
 
-from flask import jsonify, request, render_template, abort, redirect, url_for
+from flask import Blueprint, jsonify, request, render_template, abort, redirect, url_for
 from flask_oauthlib.provider import OAuth2Provider
-from flask_security.core import current_user
-from flask.ext.security import login_required, LoginForm
-from flask_security.utils import login_user
+from flask.ext.security import login_required, login_user, current_user, LoginForm
 from werkzeug.security import gen_salt
 from werkzeug import MultiDict
 
 from datetime import datetime, timedelta
 
-oauth = OAuth2Provider(app)
+oauth = OAuth2Provider()
+
+bp = Blueprint('oauth', __name__, url_prefix='/oauth')
+
 GRANT_LIFETIME = 3600
 
-@app.errorhandler(InvalidScope)
+@bp.app_errorhandler(InvalidScope)
 def handle_invalid_scope(error):
     response = jsonify({'message': error.message})
     response.status_code = error.status_code
     return response
 
-@app.errorhandler(InvalidGrantType)
+@bp.app_errorhandler(InvalidGrantType)
 def handle_invalid_grant_type(error):
     response = jsonify({'message': error.message})
     response.status_code = error.status_code
     return response
+
+@bp.route('/token', methods=['GET', 'POST'])
+@oauth.token_handler
+def access_token():
+    return None
+
+@bp.route('/authorize', methods=['GET', 'POST'])
+@login_required
+@oauth.authorize_handler
+def authorize(*args, **kwargs):
+    """
+    Authorization endpoint for OAuth2.
+    Successful interaction with this endpoint yields an access token
+    for the requesting client.
+
+    Mobile applications are considered "public" clients because their client
+    credentials (client id and client secret) cannot reliably be kept secure,
+    since if they are bundled with the application they are potentially accessible
+    to anyone who has the app on their phone.
+    """
+
+    if request.method == 'GET':
+        # NB: request.values refers to values from both
+        # the response body and the url parameters.
+        client_id = kwargs.get('client_id')
+        client = Client.query.get(client_id)
+        grant_type = request.values.get('grant_type')
+
+        # Check to see if the requested scope(s) are permitted
+        # for this client.
+        client.validate_scopes(kwargs.get('scopes'))
+
+        # Check to see if the requested grant type is permitted
+        # for this client.
+        client.validate_grant_type(grant_type)
+        kwargs['client'] = client
+
+        # The user must authenticate herself,
+        # if not already authenticated.
+        if not current_user.is_authenticated():
+            return redirect(url_for('security.login', next=url_for('authorize')))
+
+        kwargs['user'] = current_user
+        return render_template('authorize.html', **kwargs)
+
+    confirm = request.form.get('confirm', 'no')
+    return confirm == 'yes'
+
+@bp.route('/client')
+@login_required
+def client():
+    if not current_user.is_authenticated():
+        return redirect('/')
+    client = Client(
+        client_id=gen_salt(40),
+        client_secret=gen_salt(50),
+        _redirect_uris='http://localhost:5000/authorized',
+        _default_scopes='userinfo',
+        _allowed_grant_types='authorization_code refresh_token',
+        user_id=current_user.id,
+    )
+    db.session.add(client)
+    db.session.commit()
+    return jsonify(
+        client_id=client.client_id,
+        client_secret=client.client_secret,
+    )
 
 @oauth.clientgetter
 def load_client(client_id):
@@ -84,11 +151,6 @@ def save_token(token, request, *args, **kwargs):
     db.session.commit()
     return token
 
-@app.route('/oauth/token', methods=['GET', 'POST'])
-@oauth.token_handler
-def access_token():
-    return None
-
 @oauth.usergetter
 def get_user(username, password, *args, **kwargs):
     # This is only necessary for the `password` grant type.
@@ -96,66 +158,3 @@ def get_user(username, password, *args, **kwargs):
     if form.validate_on_submit():
         return User.query.filter_by(email=username).first()
     return None
-
-@app.route('/oauth/authorize', methods=['GET', 'POST'])
-@login_required
-@oauth.authorize_handler
-def authorize(*args, **kwargs):
-    """
-    Authorization endpoint for OAuth2.
-    Successful interaction with this endpoint yields an access token
-    for the requesting client.
-
-    Mobile applications are considered "public" clients because their client
-    credentials (client id and client secret) cannot reliably be kept secure,
-    since if they are bundled with the application they are potentially accessible
-    to anyone who has the app on their phone.
-    """
-
-    if request.method == 'GET':
-        # NB: request.values refers to values from both
-        # the response body and the url parameters.
-        client_id = kwargs.get('client_id')
-        client = Client.query.get(client_id)
-        grant_type = request.values.get('grant_type')
-
-        # Check to see if the requested scope(s) are permitted
-        # for this client.
-        client.validate_scopes(kwargs.get('scopes'))
-
-        # Check to see if the requested grant type is permitted
-        # for this client.
-        client.validate_grant_type(grant_type)
-        kwargs['client'] = client
-
-        # The user must authenticate herself,
-        # if not already authenticated.
-        if not current_user.is_authenticated():
-            return redirect(url_for('security.login', next=url_for('authorize')))
-
-        kwargs['user'] = current_user
-        return render_template('authorize.html', **kwargs)
-
-    confirm = request.form.get('confirm', 'no')
-    return confirm == 'yes'
-
-
-@app.route('/client')
-@login_required
-def client():
-    if not current_user.is_authenticated():
-        return redirect('/')
-    client = Client(
-        client_id=gen_salt(40),
-        client_secret=gen_salt(50),
-        _redirect_uris='http://localhost:5000/authorized',
-        _default_scopes='userinfo',
-        _allowed_grant_types='authorization_code refresh_token',
-        user_id=current_user.id,
-    )
-    db.session.add(client)
-    db.session.commit()
-    return jsonify(
-        client_id=client.client_id,
-        client_secret=client.client_secret,
-    )

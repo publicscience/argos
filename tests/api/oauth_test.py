@@ -1,4 +1,4 @@
-from tests import RequiresApp
+from tests import RequiresAPI
 
 from argos.web.models.user import User
 from argos.web.models.oauth import Client, Token, Grant
@@ -6,7 +6,7 @@ from flask_security.registerable import register_user
 
 from urllib.parse import quote_plus
 
-class OAuthTest(RequiresApp):
+class OAuthTest(RequiresAPI):
     userdata = {
             'name': 'Hubble Bubble',
             'email': 'hubbubs@mail.com',
@@ -23,7 +23,7 @@ class OAuthTest(RequiresApp):
         self.client.post('/test_login', data={'id': 1})
 
     def create_client(self, allowed_grant_types='authorization_code'):
-        r = self.client.get('/client')
+        r = self.client.get('/oauth/client')
         oauth_client_credentials = self.json(r)
 
         oauth_client_ = Client.query.get(oauth_client_credentials['client_id'])
@@ -60,7 +60,7 @@ class OAuthTest(RequiresApp):
     def test_client_creation(self):
         # Create the client and gets its id and secret.
         self.assertEqual(Client.query.count(), 0)
-        r = self.client.get('/client')
+        r = self.client.get('/oauth/client')
         oauth_client_credentials = self.json(r)
         self.assertGreater(len(oauth_client_credentials['client_id']), 0)
         self.assertGreater(len(oauth_client_credentials['client_secret']), 0)

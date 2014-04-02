@@ -1,9 +1,9 @@
-from tests import RequiresApp
+from tests import RequiresDatabase
 import tests.factories as fac
 
 from argos.core.models import Story, Event
 
-class StoryTest(RequiresApp):
+class StoryTest(RequiresDatabase):
     def test_story_conceptize(self):
         story = fac.story()
 
