@@ -18,8 +18,6 @@ from argos.datastore import db
 from argos.core.models import Source
 from argos.core.membrane import feedfinder
 
-import json
-
 from argos.util.logger import logger
 logger = logger(__name__)
 
@@ -125,19 +123,3 @@ def collect_sources(url, name):
     """
     feeds = find_feeds(url)
     add_sources([{'name': name, 'url': f} for f in feeds])
-
-
-def load_sources_from_file(filepath='manage/sources.json'):
-    """
-    Load feeds from a JSON file.
-    It should consist of an array of arrays like so::
-
-        [
-            ["The Atlantic", "http://feeds.feedburner.com/AtlanticNational"],
-            ["The New York Times", "http://www.nytimes.com/services/xml/rss/nyt/World.xml"]
-        ]
-    """
-    logger.info('Loading sources from file. This may take awhile...')
-    sources = open(filepath, 'r')
-    raw_sources = json.load(sources)
-    add_sources([{'name': src[0], 'url': src[1]} for src in raw_sources])

@@ -6,8 +6,6 @@ collected articles by keywords.
 import json
 from os import path
 
-from manage import load_articles
-
 from argos.core.brain import tokenize
 from argos.util.progress import progress_bar
 
@@ -27,6 +25,12 @@ def generate(keywords, num=5000):
     # Store articles into separate text files.
     for article in results:
         #print(json.dumps(article, sort_keys=True, indent=4))
-        article_path = 'unorganized_articles/{0}.txt'.format(article['title'])
-        f = open(path.join(this_dir, article_path), 'wb')
+        article_path = 'manage/data/unorganized_articles/{0}.txt'.format(article['title'])
+        f = open(article_path, 'wb')
         f.write(article['text'].encode('utf-8'))
+
+def load_articles():
+    base_path = path.expanduser('../')
+    this_dir = path.dirname(__file__)
+    dump = open(path.join(base_path,'articles.json'), 'r')
+    return json.load(dump)

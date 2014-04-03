@@ -91,13 +91,6 @@ class FeedTest(RequiresDatabase):
         feed.add_source(url, 'source name')
         self.assertEquals(Source.query.count(), 1)
 
-    def test_load_sources_from_file(self):
-        url = 'sup'
-        self.mock_find_feed.return_value = url
-
-        feed.load_sources_from_file()
-        self.assertTrue(Source.query.count() > 1)
-
 class ExtractorTest(RequiresDatabase):
     # We patch it ourselves here.
     patch_aws = False
@@ -316,19 +309,6 @@ class CollectorTest(RequiresDatabase):
         articles = [a for a in collector.collect()]
 
         self.assertEquals(self.source.errors, 1)
-
-    def test_ponder(self):
-        self.assertEquals(Article.query.count(), 0)
-
-        self.mock_articles()
-        collector.ponder()
-
-        self.assertEquals(Article.query.count(), 1)
-        self.assertEquals(Event.query.count(), 1)
-        self.assertEquals(Story.query.count(), 1)
-
-        article = Article.query.first()
-        self.assertEquals(article.title, 'Foo')
 
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, collector.get_articles, self.source)

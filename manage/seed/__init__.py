@@ -5,7 +5,6 @@ Seed
 Create some seed data.
 """
 
-#from argos.web.app import app
 from argos.datastore import db
 from argos.core.models import Concept, Article, Event, Story, Source
 from argos.util.progress import progress_bar
@@ -14,6 +13,7 @@ from werkzeug.security import gen_salt
 
 # For creating a test user.
 from flask_security.registerable import register_user
+from flask import current_app
 
 import os, json
 
@@ -25,20 +25,11 @@ import random
 # Boto outputs a lot of deprecation warnings (because it is
 # still in the process of being ported to Py3).
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
-
-def create_sources():
-    this_dir = os.path.dirname(__file__)
-    sources = open(os.path.join(this_dir, 'seed_sources.json'), 'r')
-
-    for source in json.load(sources):
-        s = Source(ext_url=source[1], name=source[0])
-        db.session.add(s)
-    db.session.commit()
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def seed(debug=False):
     this_dir = os.path.dirname(__file__)
-    seeds = open(os.path.join(this_dir, 'seed.json'), 'r')
+    seeds = open('manage/data/seed.json', 'r')
 
     sample_images = [
         'https://upload.wikimedia.org/wikipedia/commons/d/d5/Michael_Rogers_-_Herbiers_2004.jpg',
@@ -123,8 +114,8 @@ def seed(debug=False):
     print('From {0} sources, seeded {1} articles, found {2} concepts, created {3} events and {4} stories.'.format(num_sources, num_articles, num_concepts, num_events, num_stories))
     print('==============================================\n\n')
 
-    client = app.test_client()
-    ctx = app.test_request_context()
+    client = current_app.test_client()
+    ctx = current_app.test_request_context()
     ctx.push()
     register_user(email='t@t.c', password='password')
     ctx.pop()
@@ -150,3 +141,10 @@ def seed(debug=False):
     print('==============================================\n\n')
 
 
+def create_sources():
+    sources = open('manage/data/seed_sources.json', 'r')
+
+    for source in json.load(sources):
+        s = Source(ext_url=source[1], name=source[0])
+        db.session.add(s)
+    db.session.commit()

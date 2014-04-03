@@ -1,10 +1,6 @@
-import json
-from os import path
-
-from argos.datastore import db
-
-def load_articles():
-    base_path = path.expanduser('../')
-    this_dir = path.dirname(__file__)
-    dump = open(path.join(base_path,'articles.json'), 'r')
-    return json.load(dump)
+from manage.ponder import *
+from manage.sources import *
+from manage.client import *
+from manage.seed import *
+from manage.evaluate import *
+from manage.profile import *

@@ -1,7 +1,6 @@
 import os
 import cProfile, pstats
 
-
 from argos.datastore import db
 from argos.core.models import Event, Article
 from argos.util.logger import logger
@@ -9,7 +8,6 @@ from argos.util.progress import progress_bar
 
 # Logging.
 logger = logger(__name__)
-
 
 def evaluate_clustering():
     """
@@ -22,7 +20,7 @@ def evaluate_clustering():
     all_files = []
 
     # Collect all appropriate files.
-    for dir, subdir, files in os.walk('manage/evaluate/organized_articles'):
+    for dir, subdir, files in os.walk('manage/data/organized_articles'):
         for file in files:
             filepath = os.path.join(dir, file)
             name, ext = os.path.splitext(filepath)
