@@ -64,6 +64,18 @@ Then when you're done, kill it with:
 $ kill <pid>
 ```
 
+You can setup seed data to work with:
+```bash
+$ source dev-env/bin/activate
+$ python manage.py seed
+```
+
+And then run the API server:
+```bash
+$ source dev-env/bin/activate
+$ python manage.py server
+```
+
 ### Tests, Performance, Evaluation
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
@@ -76,15 +88,17 @@ You can also profile some of the more intensive parts to identify
 bottlenecks:
 ```
 $ source dev-env/bin/activate
-$ ./run profile
+$ python manage.py profile
 ```
+*Note: don't run this in production as it modifies your database.*
 
 You can also evaluate the quality of some of the algorithms, such as
 clustering:
 ```
 $ source dev-env/bin/activate
-$ ./run evaluate
+$ python manage.py evaluate
 ```
+*Note: don't run this in production as it modifies your database.*
 
 *Note: If you are having import errors or the packages seem to be
 missing, fear not ~ it may be because some package failed to install and
@@ -92,8 +106,9 @@ pip rolled back the installs of everything else. Check your pip logs at
 `~/.pip/pip.log`. I'd wager it is `scipy` which ran into a missing
 dependency.*
 
-You can optionally setup the default ~436 sources for collecting
+You can optionally setup the default sources for collecting
 articles by doing (make sure Postgres is running):
 ```bash
-$ ./manage/load_sources
+$ source dev-env/bin/activate
+$ python manage.py create:sources
 ```

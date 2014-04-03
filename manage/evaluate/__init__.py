@@ -6,8 +6,20 @@ from argos.core.models import Event, Article
 from argos.util.logger import logger
 from argos.util.progress import progress_bar
 
+from flask.ext.script import Command
+
 # Logging.
 logger = logger(__name__)
+
+class EvaluateCommand(Command):
+    """
+    Evaluates the precision and accuracy
+    of clustering in the application.
+    Running this in a production environment
+    is not recommended as it modifies the database.
+    """
+    def run(self):
+        evaluate()
 
 def evaluate_clustering():
     """
@@ -59,14 +71,4 @@ def evaluate_clustering():
 
 
 def evaluate():
-    if os.environ.get('FLASK_ENV') == 'TESTING':
-        logger.info('Preparing evaluation database...')
-        db.create_all()
-
-        evaluate_clustering()
-
-        logger.info('Cleaning up evaluation database...')
-        db.session.remove()
-        db.drop_all()
-    else:
-        logger.error('This function must be run with FLASK_ENV=TESTING.')
+    evaluate_clustering()

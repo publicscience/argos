@@ -15,7 +15,9 @@ from werkzeug.security import gen_salt
 from flask_security.registerable import register_user
 from flask import current_app
 
-import os, json
+from flask.ext.script import Command
+
+import json
 
 from datetime import datetime
 from dateutil.parser import parse
@@ -27,8 +29,17 @@ import random
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+class SeedCommand(Command):
+    """
+    Creates seed data for development,
+    including Sources, Articles, Events,
+    Stories, Concepts, and a test User
+    and Client.
+    """
+    def run(self):
+        seed()
+
 def seed(debug=False):
-    this_dir = os.path.dirname(__file__)
     seeds = open('manage/data/seed.json', 'r')
 
     sample_images = [

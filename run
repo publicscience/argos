@@ -72,27 +72,6 @@ then
     shift # to pass the rest of the args
     nosetests $@
 
-elif [ $1 == 'evaluate' ]
-then
-    FLASK_ENV=TESTING python -c "from manage.evaluate import evaluate; evaluate()"
-
-elif [ $1 == 'evaluate:generate' ]
-then
-    if [ -z $2 ]
-    then
-        echo -e "Please specify some keywords to filter on."
-    else
-        # Assemble the Python array.
-        keywords="["
-        for var in "${@:2}"; do keywords+=\'$var\'; done
-        keywords+="]"
-        python -c "from manage.evaluate.generate import generate; generate($keywords)"
-    fi
-
-elif [ $1 == 'profile' ]
-then
-    FLASK_ENV=TESTING python -c "from manage.profile import profile; profile()"
-
 elif [ $1 == 'doc' ]
 then
     echo -e "\n\n\n"
@@ -104,15 +83,6 @@ then
     make clean
     make html
     cd ..
-
-elif [ $1 == 'server' ]
-then
-    source dev-env/bin/activate
-    python application.py
-
-elif [ $1 == 'db:seed' ]
-then
-    python -c "from manage.seed import seed; seed()"
 
 elif [ $1 == 'db:create' ]
 then

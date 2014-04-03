@@ -7,14 +7,14 @@ from flask.ext.script import Command
 from argos.util.logger import logger
 logger = logger(__name__)
 
-class LoadSourcesCommand(Command):
+class CreateSourcesCommand(Command):
     """
-    Loads the default set of Sources.
+    Creates the default set of Sources.
     """
     def run(self):
-        load_sources()
+        create_sources()
 
-def load_sources(filepath='manage/data/sources.json'):
+def create_sources(filepath='manage/data/sources.json'):
     """
     Load feeds from a JSON file.
     It should consist of an array of arrays like so::

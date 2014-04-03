@@ -1,7 +1,17 @@
 from argos.datastore import db
 from argos.web.models.oauth import Client
 
+from flask.ext.script import Command
+
 from werkzeug.security import gen_salt
+
+class CreateClientCommand(Command):
+    """
+    Creates an official Client and
+    prints its client id and secret.
+    """
+    def run(self):
+        create_client()
 
 def create_client():
     client = Client(

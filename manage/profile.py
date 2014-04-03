@@ -16,6 +16,17 @@ from argos.core.brain import vectorize
 from argos.core.brain.summarize import summarize, multisummarize
 from argos.core.models import Article, Event
 
+from flask.ext.script import Command
+
+class ProfileCommand(Command):
+    """
+    Profiles various parts of the application.
+    Running this in a production environment
+    is not recommended as it modifies the database.
+    """
+    def run(self):
+        profile()
+
 def profile_wikidigester():
     # Create a WikiDigester
     part = 'http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2'

@@ -9,13 +9,13 @@ class ManageTest(RequiresDatabase):
     patch_knowledge = True
     patch_concepts = True
 
-    def test_load_sources(self):
+    def test_create_sources(self):
         mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
 
         url = 'sup'
         mock_find_feed.return_value = url
 
-        manage.load_sources()
+        manage.create_sources()
         self.assertTrue(Source.query.count() > 1)
 
     def test_ponder(self):
