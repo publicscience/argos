@@ -39,6 +39,9 @@ Unidecode==0.04.14
 pycrypto==2.6.1
 xmltodict==0.8.6
 chardet==2.2.1
+webassets==0.9
+Flask-Assets==0.9
+pyjade==2.2.0
 
 # Use latest feedparser.
 # Although feedparser says it supports Py3.3,

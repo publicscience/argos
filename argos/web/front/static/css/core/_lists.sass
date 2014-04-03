@@ -1,0 +1,39 @@
+// ========================================== LISTS
+ul, li
+    margin: 0
+    padding: 0
+    list-style-type: none
+
+.list__horizontal
+    > li
+        vertical-align: top
+        display: inline-block
+
+.list__horizontal__center
+    @extend .list__horizontal
+    text-align: center
+
+/*  Horizontal justified lists.
+    http://goo.gl/bFGl9A
+    If you have having issues with vertical spacing,
+    set the ul's font-size to 0, and define a px font
+    for the li's.
+    Also try adjusting the li's line-height. */
+
+.list__horizontal__justify
+    @extend .list__horizontal
+    text-align: justify
+    &:before
+        content: ''
+        display: block
+        width: 100%
+    &:after
+        content: ''
+        display: inline-block
+        width: 100%
+    > li
+        position: relative
+        &:last-child
+            margin-right: 0
+        &:first-child
+            margin-left: 0

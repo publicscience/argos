@@ -1,0 +1,71 @@
+/* ==========================================
+	 Config
+	 ========================================== */
+$primary-color: #2b7fdc
+$header-color: #20232d
+$secondary-color: #86d886
+$muted-color: #bbbdbf
+$background-color: #fcfcfc
+$error-color: #DD4343
+$warning-color: #E2E942
+$success-color: #32b375
+$primary-type: 'Graphik Web', Verdana, Geneva, sans-serif
+$primary-type-color: #323232
+$selection-background: #222
+$max-width: 1080px
+
+@import "core/core"
+
+/* ==========================================
+	 Extensions
+	 ========================================== */
+@import "exts/icons"
+@import "exts/fonts"
+
+/* ==========================================
+	 Modules
+	 ========================================== */
+
+@import "modules/header"
+@import "modules/item"
+@import "modules/session"
+
+
+/* ==========================================
+	 Your Styles
+	 ========================================== */
+
+html, body
+    font-family: $primary-type
+    color: $primary-type-color
+    background: $background-color
+
+.bounds
+    max-width: $max-width
+    padding: 0 1em
+    margin: 0 auto
+
+a, a:visited
+    text-decoration: underline
+    color: $primary-color
+
+input[type=text],
+input[type=password]
+    border: none
+    padding: 0.5em 1em
+
+label
+    cursor: pointer
+    display: block
+
+input[type=submit]
+    padding: 0.5em 1em
+    border: none
+
+.form--actions
+    text-align: center
+
+.page--header
+    background: $primary-color
+    color: #fff
+    padding: 0.8em 0
