@@ -11,7 +11,7 @@ $warning-color: #E2E942
 $success-color: #32b375
 $primary-type: 'Graphik Web', Verdana, Geneva, sans-serif
 $primary-type-color: #323232
-$selection-background: #222
+$selection-background: $secondary-color
 $max-width: 1080px
 
 @import "core/core"
@@ -21,15 +21,6 @@ $max-width: 1080px
 	 ========================================== */
 @import "exts/icons"
 @import "exts/fonts"
-
-/* ==========================================
-	 Modules
-	 ========================================== */
-
-@import "modules/header"
-@import "modules/item"
-@import "modules/session"
-
 
 /* ==========================================
 	 Your Styles
@@ -65,7 +56,23 @@ input[type=submit]
 .form--actions
     text-align: center
 
-.page--header
+.heading
     background: $primary-color
     color: #fff
     padding: 0.8em 0
+
+.subheading
+    color: #aaaaaa
+    border-bottom: 1px solid #cccccc
+    font-size: 0.8em
+
+
+/* ==========================================
+	 Modules
+	 ========================================== */
+
+@import "modules/header"
+@import "modules/item"
+@import "modules/session"
+@import "modules/entity"
+

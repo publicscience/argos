@@ -450,13 +450,13 @@ textarea {
  */
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/core\/_h5bp\.scss}line{font-family:\0000333}}
 ::-moz-selection {
-  background: #222222;
+  background: #86d886;
   text-shadow: none;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/core\/_h5bp\.scss}line{font-family:\0000338}}
 ::selection {
-  background: #222222;
+  background: #86d886;
   text-shadow: none;
 }
 
@@ -980,6 +980,67 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 }
 
 /* ==========================================
+ * Your Styles
+ * ========================================== */
+@media -sass-debug-info{filename{}line{font-family:\0000329}}
+html, body {
+  font-family: "Graphik Web", Verdana, Geneva, sans-serif;
+  color: #323232;
+  background: #fcfcfc;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000334}}
+.bounds {
+  max-width: 1080px;
+  padding: 0 1em;
+  margin: 0 auto;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000339}}
+a, a:visited {
+  text-decoration: underline;
+  color: #2b7fdc;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000343}}
+input[type=text],
+input[type=password] {
+  border: none;
+  padding: 0.5em 1em;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000348}}
+label {
+  cursor: pointer;
+  display: block;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000352}}
+input[type=submit] {
+  padding: 0.5em 1em;
+  border: none;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000356}}
+.form--actions {
+  text-align: center;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000359}}
+.heading {
+  background: #2b7fdc;
+  color: white;
+  padding: 0.8em 0;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000364}}
+.subheading {
+  color: #aaaaaa;
+  border-bottom: 1px solid #cccccc;
+  font-size: 0.8em;
+}
+
+/* ==========================================
  * Modules
  * ========================================== */
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\000031}}
@@ -1020,6 +1081,13 @@ nav [class^="icon-"], nav [class*=" icon-"] {
   font-size: 2.5em;
   vertical-align: middle;
   color: white;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000329}}
+.protoflag {
+  font-size: 0.6em;
+  padding: 0 0.5em;
+  color: #86d886;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\000031}}
@@ -1205,56 +1273,217 @@ nav [class^="icon-"], nav [class*=" icon-"] {
   padding: 1em;
 }
 
-/* ==========================================
- * Your Styles
- * ========================================== */
-@media -sass-debug-info{filename{}line{font-family:\0000338}}
-html, body {
-  font-family: "Graphik Web", Verdana, Geneva, sans-serif;
-  color: #323232;
-  background: #fcfcfc;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\000031}}
+.entity {
+  padding: 0 0 8em 0;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000343}}
-.bounds {
-  max-width: 1080px;
-  padding: 0 1em;
-  margin: 0 auto;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\000034}}
+.entity--hero {
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000348}}
-a, a:visited {
-  text-decoration: underline;
-  color: #2b7fdc;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000311}}
+.entity--content {
+  width: 70%;
+  float: left;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000314}}
+.entity--content section, .entity--content header {
+  padding-right: 2em;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000352}}
-input[type=text],
-input[type=password] {
-  border: none;
-  padding: 0.5em 1em;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000317}}
+.entity--mentions {
+  width: 30%;
+  float: right;
+  background: #f6f6f6;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000357}}
-label {
-  cursor: pointer;
-  display: block;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000322}}
+.entity--title {
+  font-weight: bold;
+  font-size: 1.6em;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000361}}
-input[type=submit] {
-  padding: 0.5em 1em;
-  border: none;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000326}}
+.entity--meta {
+  color: #bbbdbf;
+  font-size: 0.6em;
+  margin: 0.5em 0 3em 0;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000365}}
-.form--actions {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000331}}
+.entity--tags {
+  float: left;
+  text-transform: uppercase;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000335}}
+.entity--time {
+  float: right;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000338}}
+.entity--summary {
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000341}}
+.entity--summary p:first-child {
+  margin-top: 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000343}}
+.entity--summary .entity--meta {
+  text-align: right;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000347}}
+.entity--mentions .heading {
+  padding: 1.6em 1.2em;
+  font-size: 0.8em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000351}}
+.entity--mention--image {
+  height: 150px;
+  width: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000358}}
+.entity--mention--content {
+  padding: 1em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000360}}
+.entity--mention--content p {
+  font-size: 0.7em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000363}}
+.entity--mention--title {
+  font-weight: bold;
+  font-size: 0.8em;
+  margin: 0 0 1em 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000369}}
+.entity--articles li {
+  border-bottom: 1px solid #eeeeee;
+  padding: 1em 0;
+  position: relative;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000373}}
+.entity--articles li:last-of-type {
+  border-bottom: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000376}}
+.entity--articles--more {
+  border: 1px solid #cccccc;
+  color: #bbbdbf;
   text-align: center;
+  font-size: 0.8em;
+  padding: 1em;
+  font-style: italic;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000368}}
-.page--header {
-  background: #2b7fdc;
-  color: white;
-  padding: 0.8em 0;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000384}}
+.article--source--icon {
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  left: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000390}}
+.article--info {
+  padding-left: 64px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000393}}
+.article--title {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\0000397}}
+.article--meta {
+  color: #bbbdbf;
+  font-size: 0.6em;
+  margin: 0.5em 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003102}}
+.article--source {
+  float: left;
+  text-transform: uppercase;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003106}}
+.article--time {
+  float: right;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003109}}
+.entity--story--heading {
+  margin: 2em 0 0 0;
+  padding: 1em;
+  font-weight: bold;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003113}}
+.entity--story {
+  margin: 0 0 2em 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003115}}
+.entity--story li {
+  padding: 2em 0;
+  border-bottom: 1px solid #eeeeee;
+  position: relative;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003119}}
+.entity--story li p {
+  font-size: 0.8em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003122}}
+.event--thumb img {
+  width: 320px;
+  position: absolute;
+  left: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003127}}
+.event--info {
+  padding-left: 340px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003130}}
+.event--title {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003134}}
+.event--meta {
+  color: #bbbdbf;
+  font-size: 0.6em;
+  margin: 0.5em 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003139}}
+.view-full-timeline {
+  text-transform: uppercase;
+  text-decoration: underline;
+  float: right;
+  font-size: 0.6em;
+  font-weight: normal;
+  margin-top: -1.6em;
 }
