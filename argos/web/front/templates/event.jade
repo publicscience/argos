@@ -3,7 +3,7 @@ extends layouts/main.jade
 block content
     .bounds
         article.entity.clearfix
-            .entity--hero(style='background-image:url(/dev/header.jpg)')
+            .entity--hero(style='background-image:url("'+event.image+'")')
             .entity--body.clearfix
                 .entity--content
                     section
@@ -24,35 +24,29 @@ block content
                                 span.icon-promote
                                 | Promote
                     header.entity--header
-                        .entity--title Assad allegedly used chemical weapons against the Syrian people
+                        .entity--title= event.title
                         .entity--meta.clearfix
-                            .entity--tags The Syrian Civil War
-                            .entity--time 1 day ago
+                            .entity--tags= event.stories|join(', ', attribute='title')
+                            .entity--time= event.updated_at|naturaltime
                     section.entity--summary
-                        p <a href="#">Japan</a> is weighing its options after the <a href="#">International Court of Justice</a> ordered a halt to Japan's whaling program Monday, saying Japan had failed to prove a scientific rationale. Senior <a href="#">Palestinians</a> said the move was taken in response to Israel's failure to release a final batch of Palestinian prisoners as part of releases it committed to before negotiations resumed in July.
-                        p <a href="#">Japan</a> is weighing its options after the <a href="#">International Court of Justice</a> ordered a halt to Japan's whaling program Monday, saying Japan had failed to prove a scientific rationale. Senior <a href="#">Palestinians</a> said the move was taken in response to Israel's failure to release a final batch of Palestinian prisoners as part of releases it committed to before negotiations resumed in July.
+                        p= event.summary
                         .entity--meta This summary was automatically generated from the articles below.
 
                     section.entity--articles
                         .subheading In Greater Depth
                         ul
-                            li
-                                .article--source--icon
-                                    img(src='/dev/source.png')
-                                .article--info
-                                    .article--title An end to Syrian conflict?
-                                    .article--meta.clearfix
-                                        .article--source New York Times
-                                        .article--time 1 day ago
-                            li
-                                .article--source--icon
-                                    img(src='/dev/source.png')
-                                .article--info
-                                    .article--title An end to Syrian conflict?
-                                    .article--meta.clearfix
-                                        .article--source New York Times
-                                        .article--time 1 day ago
-                        .entity--articles--more 3 more articles
+                            for article in event.articles[:5]
+                                li
+                                    .article--source--icon
+                                        img(src='/dev/source.png')
+                                    .article--info
+                                        .article--title
+                                            a(href=article.ext_url)= article.title
+                                        .article--meta.clearfix
+                                            .article--source= article.source.name
+                                            .article--time= article.updated_at|naturaltime
+                        if event.articles|count > 5
+                            .entity--articles--more 3 more articles
 
                     .heading.entity--story--heading
                         | Previously in this story
@@ -77,13 +71,11 @@ block content
                 section.entity--mentions
                     .heading Mentioned in this event
                     ul
-                        li.entity--mention
-                            .entity--mention--image(style='background-image:url(/dev/mention.jpg)')
-                            .entity--mention--content
-                                .entity--mention--title Minke whale
-                                p Minke whale, or lesser rorqual, is a name given to two species of marine mammal belonging to a clade within the suborder of baleen whales. The minke whale was given its official designation by Lacepède in 1804, who described a juvenile specimen of Balænoptera acuto-rostrata.
-                        li.entity--mention
-                            .entity--mention--image(style='background-image:url(/dev/mention.jpg)')
-                            .entity--mention--content
-                                .entity--mention--title Minke whale
-                                p Minke whale, or lesser rorqual, is a name given to two species of marine mammal belonging to a clade within the suborder of baleen whales. The minke whale was given its official designation by Lacepède in 1804, who described a juvenile specimen of Balænoptera acuto-rostrata.
+                        for concept in event.concepts
+                            li.entity--mention
+                                if concept.image
+                                    .entity--mention--image(style='background-image:url("'+concept.image+'")')
+                                .entity--mention--content
+                                    .entity--mention--title= concept.name
+                                    if concept.summary
+                                        p= concept.summary|truncate

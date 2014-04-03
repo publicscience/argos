@@ -5,70 +5,45 @@ block content
         h4.bounds The latest events
 
     .bounds
-        article.entity-item.clearfix
-            .item--thumb
-                img(src='/dev/item_thumb.jpg')
-            .item--content
-                header.item--header
-                    .item--title Assad allegedly used chemical weapons against the Syrian people
-                    .item--meta.clearfix
-                        .item--tags The Syrian Civil War
-                        .item--time 1 day ago
-                ul.item--actions.list__horizontal__justify
-                    li
-                        span.icon-watch
-                        | Watch
-                    li
+        for event in events
+            article.entity-item.clearfix
+                .item--notations
+                    .item--bookmark
                         span.icon-bookmark
-                        | Bookmark
-                    li
-                        span.icon-discuss
-                        | Discuss
-                    li
-                        span.icon-share
-                        | Share
-                    li
-                        span.icon-promote
-                        | Promote
-                .item--summary
-                    p <a href="#">Japan</a> is weighing its options after the <a href="#">International Court of Justice</a> ordered a halt to Japan's whaling program Monday, saying Japan had failed to prove a scientific rationale. Senior <a href="#">Palestinians</a> said the move was taken in response to Israel's failure to release a final batch of Palestinian prisoners as part of releases it committed to before negotiations resumed in July.
-
-        article.entity-item.clearfix
-            .item--notations
-                .item--bookmark
-                    span.icon-bookmark
-                .item--promotions
-                    .item--notation Promoted by
-                    ul.item--promoters
+                    .item--promotions
+                        .item--notation Promoted by
+                        ul.item--promoters
+                            li
+                                img(src='/dev/user.jpg')
+                        .item--notation--extra + 5 more
+                .item--thumb
+                    a(href=url_for('main.events', id=event.id))
+                        img(src=event.image)
+                .item--content
+                    header.item--header
+                        .item--title
+                            a(href=url_for('main.events', id=event.id))= event.title
+                        .item--meta.clearfix
+                            .item--tags= event.stories|join(', ', attribute='title')
+                            .item--time= event.updated_at|naturaltime
+                    ul.item--actions.list__horizontal__justify
                         li
-                            img(src='/dev/user.jpg')
-                    .item--notation--extra + 5 more
-            .item--thumb
-                img(src='/dev/item_thumb.jpg')
-            .item--content
-                header.item--header
-                    .item--title Assad allegedly used chemical weapons against the Syrian people
-                    .item--meta.clearfix
-                        .item--tags The Syrian Civil War
-                        .item--time 1 day ago
-                ul.item--actions.list__horizontal__justify
-                    li
-                        span.icon-watch
-                        | Watch
-                    li
-                        span.icon-bookmark
-                        | Bookmark
-                    li
-                        span.icon-discuss
-                        | Discuss
-                    li
-                        span.icon-share
-                        | Share
-                    li
-                        span.icon-promote
-                        | Promote
-                .item--summary
-                    p <a href="#">Japan</a> is weighing its options after the <a href="#">International Court of Justice</a> ordered a halt to Japan's whaling program Monday, saying Japan had failed to prove a scientific rationale. Senior <a href="#">Palestinians</a> said the move was taken in response to Israel's failure to release a final batch of Palestinian prisoners as part of releases it committed to before negotiations resumed in July.
+                            span.icon-watch
+                            | Watch
+                        li
+                            span.icon-bookmark
+                            | Bookmark
+                        li
+                            span.icon-discuss
+                            | Discuss
+                        li
+                            span.icon-share
+                            | Share
+                        li
+                            span.icon-promote
+                            | Promote
+                    .item--summary
+                        p= event.summary
 
 
 

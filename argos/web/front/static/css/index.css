@@ -907,36 +907,41 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000373}}
+.icon-login:before {
+  content: "\f10a";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000374}}
 .icon-logo:before {
   content: "\f102";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000375}}
 .icon-logout:before {
   content: "\f103";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000375}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000376}}
 .icon-promote:before {
   content: "\f104";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000376}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000377}}
 .icon-settings:before {
   content: "\f105";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000377}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000378}}
 .icon-share:before {
   content: "\f106";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000379}}
 .icon-trending:before {
   content: "\f109";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000379}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000380}}
 .icon-watch:before {
   content: "\f107";
 }
@@ -1040,6 +1045,12 @@ input[type=submit] {
   font-size: 0.8em;
 }
 
+@media -sass-debug-info{filename{}line{font-family:\0000370}}
+[class$="--title"] a, [class$="--title"] a:visited {
+  text-decoration: none;
+  color: #323232;
+}
+
 /* ==========================================
  * Modules
  * ========================================== */
@@ -1050,40 +1061,51 @@ input[type=submit] {
   padding: 0.5em 0;
   overflow: hidden;
 }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\000036}}
+.header__primary a, .header__primary a:visited {
+  text-decoration: none;
+}
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\000037}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\000039}}
 .header__primary--title {
   float: left;
 }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000311}}
+.header__primary--title a, .header__primary--title a:visited {
+  color: white;
+}
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000310}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000314}}
 .logo {
   font-size: 1.6em;
   vertical-align: middle;
   margin: 0 0.2em 0 -1.2em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000315}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000319}}
 nav {
   text-transform: uppercase;
   font-size: 0.6em;
   float: right;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000319}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000323}}
 nav li {
   vertical-align: middle !important;
   line-height: 1.4;
-  color: #7783a0;
   margin-left: 2.2em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000324}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000327}}
+nav li a, nav li a:visited {
+  color: #7783a0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000329}}
 nav [class^="icon-"], nav [class*=" icon-"] {
   font-size: 2.5em;
   vertical-align: middle;
   color: white;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000329}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_header\.sass}line{font-family:\0000334}}
 .protoflag {
   font-size: 0.6em;
   padding: 0 0.5em;

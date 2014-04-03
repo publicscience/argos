@@ -25,29 +25,39 @@ html(lang="en")
             header.header__primary
                 .bounds
                     .header__primary--title
-                        span.icon-logo.logo
-                        | Argos
-                        span.protoflag [PROTO]
+                        a(href='/')
+                            span.icon-logo.logo
+                            | Argos
+                            span.protoflag [PROTO]
                     nav
                         ul.list__horizontal
                             li
-                                span.icon-latest
-                                | Latest
+                                a(href='/latest')
+                                    span.icon-latest
+                                    | Latest
                             li
-                                span.icon-trending
-                                | Trending
-                            li
-                                span.icon-watch
-                                | Watching
-                            li
-                                span.icon-bookmark
-                                | Bookmarked
-                            li
-                                span.icon-settings
+                                a(href='/trending')
+                                    span.icon-trending
+                                    | Trending
+                            if current_user.is_authenticated()
+                                li
+                                    span.icon-watch
+                                    | Watching
+                                li
+                                    span.icon-bookmark
+                                    | Bookmarked
+                                li
+                                    span.icon-settings
                                 | Settings
-                            li
-                                span.icon-logout
-                                | Logout
+                                li
+                                    a(href='/logout')
+                                        span.icon-logout
+                                        | Logout
+                            else
+                                li
+                                    a(href='/login')
+                                        span.icon-login
+                                        | Login
 
             //- Display notifications, if any.
             - with messages = get_flashed_messages()
