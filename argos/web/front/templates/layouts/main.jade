@@ -1,3 +1,8 @@
+mixin nav_link(endpoint, icon, title)
+    a(href=url_for(endpoint), class='active' if request.endpoint == endpoint else '')
+        span(class=icon)
+        = title
+
 doctype html
 //if lt IE 7
     <html class="no-js lt-ie9 lt-ie8 lt-ie7">
@@ -32,34 +37,22 @@ html(lang="en")
                     nav
                         ul.list__horizontal
                             li
-                                a(href='/latest')
-                                    span.icon-latest
-                                    | Latest
+                                +nav_link('main.latest', 'icon-latest', 'Latest')
                             li
-                                a(href='/trending')
-                                    span.icon-trending
-                                    | Trending
+                                +nav_link('main.trending', 'icon-trending', 'Trending')
                             if current_user.is_authenticated()
                                 li
-                                    a(href='/watching')
-                                        span.icon-watch
-                                        | Watching
+                                    +nav_link('main.watching', 'icon-watch', 'Watching')
                                 li
-                                    a(href='/bookmarked')
-                                        span.icon-bookmark
-                                        | Bookmarked
+                                    +nav_link('main.bookmarked', 'icon-bookmark', 'Bookmarked')
                                 li
                                     span.icon-settings
                                 | Settings
                                 li
-                                    a(href='/logout')
-                                        span.icon-logout
-                                        | Logout
-                            else
+                                    +nav_link('security.logout', 'icon-logout', 'Logout')
+                            else:
                                 li
-                                    a(href='/login')
-                                        span.icon-login
-                                        | Login
+                                    +nav_link('security.login', 'icon-login', 'Login')
 
             //- Display notifications, if any.
             - with messages = get_flashed_messages()

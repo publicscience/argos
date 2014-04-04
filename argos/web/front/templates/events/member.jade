@@ -25,12 +25,12 @@ block content
                                 | Promote
                     header.entity--header
                         .entity--title= event.title
-                        .entity--meta.clearfix
+                        .entity--meta.meta
                             .entity--tags= event.stories|join(', ', attribute='title')
                             .entity--time= event.updated_at|naturaltime
                     section.entity--summary
                         p= event.summary
-                        .entity--meta This summary was automatically generated from the articles below.
+                        .entity--meta.meta This summary was automatically generated from the articles below.
 
                     section.entity--articles
                         .subheading In Greater Depth
@@ -42,15 +42,16 @@ block content
                                     .article--info
                                         .article--title
                                             a(href=article.ext_url)= article.title
-                                        .article--meta.clearfix
+                                        .meta
                                             .article--source= article.source.name
                                             .article--time= article.updated_at|naturaltime
                         if event.articles|count > 5
                             .entity--articles--more 3 more articles
 
+                    //- TO DO: what about events which belong to multiple stories?
                     .heading.entity--story--heading
                         | Previously in this story
-                        .view-full-timeline View the full timeline
+                        a(href=url_for('main.story', id=event.stories[0].id)) View the full timeline
                     section.entity--story
                         ul
                             li
@@ -58,14 +59,14 @@ block content
                                     img(src='/dev/event.jpg')
                                 .event--info
                                     .event--title Syrian cities in rubble as conflict intensifies
-                                    .event--meta 1 day ago
+                                    .meta 1 day ago
                                     p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
                             li
                                 .event--thumb
                                     img(src='/dev/event.jpg')
                                 .event--info
                                     .event--title Syrian cities in rubble as conflict intensifies
-                                    .event--meta 1 day ago
+                                    .meta 1 day ago
                                     p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
 
                 section.entity--mentions

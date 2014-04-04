@@ -20,14 +20,18 @@ block content
                                     img(src='/dev/user.jpg')
                             .item--notation--extra + 5 more
                     .item--thumb
-                        a(href=url_for('main.events', id=event.id))
+                        a(href=url_for('main.event', id=event.id))
                             img(src=event.image)
                     .item--content
                         header.item--header
                             .item--title
-                                a(href=url_for('main.events', id=event.id))= event.title
-                            .item--meta.clearfix
-                                .item--tags= event.stories|join(', ', attribute='title')
+                                a(href=url_for('main.event', id=event.id))= event.title
+                            .meta
+                                .item--tags
+                                    for story in event.stories
+                                        a(href=url_for('main.story', id=story.id))= story.title
+                                        if not loop.last
+                                            ,
                                 .item--time= event.updated_at|naturaltime
                         ul.item--actions.list__horizontal__justify
                             li

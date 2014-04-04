@@ -25,9 +25,14 @@ def trending():
     return render_template('events/collection.jade', events=events, title='The latest, most shared events')
 
 @bp.route('/events/<int:id>')
-def events(id):
+def event(id):
     event = models.Event.query.get(id)
     return render_template('events/member.jade', event=event)
+
+@bp.route('/stories/<int:id>')
+def story(id):
+    story = models.Story.query.get(id)
+    return render_template('stories/member.jade', story=story)
 
 @bp.route('/watching')
 def watching():

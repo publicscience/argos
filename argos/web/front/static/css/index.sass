@@ -60,6 +60,14 @@ input[type=submit]
     background: $primary-color
     color: #fff
     padding: 0.8em 0
+    a, a:visited
+        text-transform: uppercase
+        text-decoration: none
+        color: rgba(255,255,255,0.8)
+        float: right
+        font-size: 0.6em
+        font-weight: normal
+        line-height: 2
 
 .subheading
     color: #aaaaaa
@@ -76,6 +84,17 @@ input[type=submit]
     a, a:visited
         text-decoration: none
         color: $primary-type-color
+
+.meta
+    @extend .clearfix
+    color: $muted-color
+    font-size: 0.6em
+    margin: 0.5em 0
+    a, a:visited
+        color: $muted-color
+        text-decoration: none
+        &:hover
+            color: darken($muted-color, 6%)
 
 
 /* ==========================================

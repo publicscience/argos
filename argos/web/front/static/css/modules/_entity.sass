@@ -24,8 +24,6 @@
     font-size: 1.6em
 
 .entity--meta
-    color: $muted-color
-    font-size: 0.6em
     margin: 0.5em 0 3em 0
 
 .entity--tags
@@ -49,10 +47,10 @@
         font-size: 0.8em
 
 .entity--mention--image
-    height: 150px
+    height: 200px
     width: 100%
     background-size: cover
-    background-position: center center
+    background-position: center 20%
     background-repeat: no-repeat
 
 .entity--mention--content
@@ -94,11 +92,6 @@
     font-weight: bold
     font-size: 1.1em
 
-.article--meta
-    color: $muted-color
-    font-size: 0.6em
-    margin: 0.5em 0
-
 .article--source
     float: left
     text-transform: uppercase
@@ -131,15 +124,23 @@
     font-weight: bold
     font-size: 1.2em
 
-.event--meta
-    color: $muted-color
-    font-size: 0.6em
-    margin: 0.5em 0
-
-.view-full-timeline
-    text-transform: uppercase
-    text-decoration: underline
-    float: right
-    font-size: 0.6em
-    font-weight: normal
-    margin-top: -1.6em
+.entity--timeline
+    margin: 0em 0 2em 0
+    .subheading
+        color: $primary-type-color
+        border-bottom: 2px solid $primary-color
+        padding-left: 1em
+    .entity--timeline-date
+        margin: 2em 0
+    ul
+        border-left: 2px solid #ddd
+    li
+        padding: 2em 0 2em 1em
+        border-bottom: 1px solid #eeeeee
+        position: relative
+        &:last-child
+            border-bottom: none
+        p
+            font-size: 0.8em
+    .event--thumb img
+        left: 1em
