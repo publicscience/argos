@@ -85,11 +85,13 @@ require(['config'], function() {
             $notification
                 .stop(true)
                 .animate({
-                    bottom: 0
+                    bottom: 0,
+                    opacity: 1
                 })
                 .delay(2000)
                 .animate({
-                    bottom: -$notification.outerHeight()
+                    bottom: -$notification.outerHeight(),
+                    opacity: 0
                 });
 
         }
