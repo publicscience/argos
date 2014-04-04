@@ -1137,6 +1137,14 @@ input[type=submit] {
   color: #2b7fdc;
 }
 
+@media -sass-debug-info{filename{}line{font-family:\00003134}}
+.empty {
+  color: #bbbdbf;
+  font-style: italic;
+  text-align: center;
+  margin: 4em 0;
+}
+
 /* ==========================================
  * Modules
  * ========================================== */

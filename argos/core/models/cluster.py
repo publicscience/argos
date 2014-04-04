@@ -113,6 +113,7 @@ class Cluster(Clusterable):
         return db.relationship(args['class_name'],
                 secondary=args['secondary'],
                 backref=db.backref(args['backref_name']),
+                lazy='dynamic',
                 order_by='{0}.created_at'.format(args['class_name'])) # order relationships by `created_at`.
 
     @staticmethod

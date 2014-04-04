@@ -38,7 +38,7 @@ class Event(Cluster):
         """
         Convenience :)
         """
-        return self.members
+        return self.members.all()
 
     @articles.setter
     def articles(self, value):
@@ -87,7 +87,7 @@ class Event(Cluster):
         """
         Generate a summary for this cluster.
         """
-        if len(self.members) == 1:
+        if self.members.count() == 1:
             member = self.members[0]
             self.summary = ' '.join(summarize.summarize(member.title, member.text))
         else:

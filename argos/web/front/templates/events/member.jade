@@ -42,24 +42,22 @@ block content
                     +articles('In Greater Depth', event.articles)
 
                     //- TO DO: what about events which belong to multiple stories?
+                    - var story_events = event.stories[0].events_before(event.created_at).remove(event)
                     .heading.entity--story--heading
                         | Previously in this story
                         a(href=url_for('main.story', id=event.stories[0].id)) View the full timeline
-                    section.entity--story
-                        ul
-                            li
-                                .event--thumb
-                                    img(src='/dev/event.jpg')
-                                .event--info
-                                    .event--title Syrian cities in rubble as conflict intensifies
-                                    .meta 1 day ago
-                                    p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
-                            li
-                                .event--thumb
-                                    img(src='/dev/event.jpg')
-                                .event--info
-                                    .event--title Syrian cities in rubble as conflict intensifies
-                                    .meta 1 day ago
-                                    p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
+                    if story_events
+                        section.entity--story
+                            ul
+                                for rel_event in story_events
+                                    li
+                                        .event--thumb
+                                            img(src=rel_event.image)
+                                        .event--info
+                                            .event--title= rel_event.title
+                                            .meta= rel_event.updated_at|naturaltime
+                                            p= rel_event.summary|truncate(length=400)|highlight_mentions(rel_event.mentions)|sanitize_html
+                    else
+                        .empty There are no other events in this story yet.
 
                 +mentions('Mentioned in this event', event.concepts)

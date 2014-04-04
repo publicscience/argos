@@ -6,7 +6,7 @@ block content
 
     .bounds
         if events|count == 0 and empty_msg
-            .notification= empty_msg
+            .empty= empty_msg
         else
             for event in events
                 article.entity-item.clearfix

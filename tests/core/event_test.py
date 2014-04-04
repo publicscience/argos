@@ -80,24 +80,26 @@ class EventTest(RequiresDatabase):
         self.assertFalse(self.event.active)
 
     def test_clusters_similar(self):
-        self.prepare_event()
         members = self.prepare_articles(type='duplicate')
-        self.event.members = members
+        event = Event(members)
+        self.db.session.add(event)
+        self.db.session.commit()
 
         Event.cluster([self.article])
-        self.assertEqual(len(self.event.members), 3)
+        self.assertEqual(event.members.count(), 3)
 
     def test_does_not_cluster_if_no_shared_concepts(self):
-        self.prepare_event()
         members = [Article(
             title='Robots',
             text='dinosaurs are cool, Reagan',
             created_at=datetime.utcnow()
         )]
-        self.event.members = members
+        event = Event(members)
+        self.db.session.add(event)
+        self.db.session.commit()
 
         Event.cluster([self.article])
-        self.assertEqual(len(self.event.members), 1)
+        self.assertEqual(event.members.count(), 1)
 
     def test_does_not_cluster_not_similar(self):
         self.prepare_event()
@@ -107,7 +109,7 @@ class EventTest(RequiresDatabase):
                 created_at=datetime.utcnow()
         )
         Event.cluster([article])
-        self.assertEqual(len(self.event.members), 2)
+        self.assertEqual(self.event.members.count(), 2)
 
     def test_no_matching_cluster_creates_new_cluster(self):
         article = Article(

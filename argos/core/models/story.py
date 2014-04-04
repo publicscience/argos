@@ -1,5 +1,5 @@
 from argos.datastore import db
-from argos.core.models import Concept
+from argos.core.models import Concept, Event
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
@@ -32,11 +32,32 @@ class Story(Cluster):
         """
         Convenience :)
         """
-        return self.members
+        return self.members.all()
 
     @events.setter
     def events(self, value):
         self.members = value
+
+    def events_before(self, dt):
+        """
+        Returns all events in this story
+        created *at or before* the specified datetime.
+        """
+        return self.members.filter(Event.created_at <= dt).all()
+
+    def events_after(self, dt):
+        """
+        Returns all events in this story
+        created *at or after* the specified datetime.
+        """
+        return self.members.filter(Event.created_at >= dt).all()
+
+    def events_by_date(self):
+        """
+        Returns all events in this story,
+        grouped by dates.
+        """
+        pass
 
     @property
     def images(self):
@@ -49,7 +70,7 @@ class Story(Cluster):
         """
         Generate a summary for this cluster.
         """
-        if len(self.members) == 1:
+        if self.members.count() == 1:
             self.summary = self.members[0].summary
         else:
             self.summary = ' '.join(multisummarize([m.summary for m in self.members]))

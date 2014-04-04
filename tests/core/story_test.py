@@ -29,7 +29,7 @@ class StoryTest(RequiresDatabase):
         event = fac.event()
 
         Story.cluster([event])
-        self.assertEqual(len(story.members), 3)
+        self.assertEqual(story.members.count(), 3)
 
     def test_story_clustering_without_matching_concepts(self):
         story = fac.story()
@@ -40,7 +40,7 @@ class StoryTest(RequiresDatabase):
         event = Event([article])
 
         Story.cluster([event])
-        self.assertEqual(len(story.members), 2)
+        self.assertEqual(story.members.count(), 2)
         self.assertEqual(Story.query.count(), 2)
 
     def test_story_summarize(self):
