@@ -1,0 +1,58 @@
+extends layouts/main.jade
+
+block content
+    .heading
+        h6.bounds= title
+
+    .bounds
+        if events|count == 0 and empty_msg
+            .notification= empty_msg
+        else
+            for event in events
+                article.entity-item.clearfix
+                    .item--notations
+                        .item--bookmark
+                            span.icon-bookmark
+                        .item--promotions
+                            .item--notation Promoted by
+                            ul.item--promoters
+                                li
+                                    img(src='/dev/user.jpg')
+                            .item--notation--extra + 5 more
+                    .item--thumb
+                        a(href=url_for('main.event', id=event.id))
+                            img(src=event.image)
+                    .item--content
+                        header.item--header
+                            .item--title
+                                a(href=url_for('main.event', id=event.id))= event.title
+                            .meta
+                                .item--tags
+                                    for story in event.stories
+                                        a(href=url_for('main.story', id=story.id))= story.title
+                                        if not loop.last
+                                            ,
+                                .item--time= event.updated_at|naturaltime
+                        ul.item--actions.list__horizontal__justify
+                            li
+                                span.icon-watch
+                                | Watch
+                            li
+                                span.icon-bookmark
+                                | Bookmark
+                            li
+                                span.icon-discuss
+                                | Discuss
+                            li
+                                span.icon-share
+                                | Share
+                            li
+                                span.icon-promote
+                                | Promote
+                        .item--summary
+                            p= event.summary
+
+
+
+
+

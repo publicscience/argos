@@ -1,0 +1,60 @@
+- from 'mixins/mentions.jade' import mentions
+- from 'mixins/articles.jade' import articles
+
+extends layouts/main.jade
+
+block content
+    .bounds
+        article.entity.clearfix
+            .entity--hero(style='background-image:url("'+concept.image+'")')
+            .entity--body.clearfix
+                .entity--content
+                    section
+                        ul.item--actions.list__horizontal__justify
+                            li
+                                span.icon-watch
+                                | Watch
+                            li
+                                span.icon-bookmark
+                                | Bookmark
+                            li
+                                span.icon-discuss
+                                | Discuss
+                            li
+                                span.icon-share
+                                | Share
+                            li
+                                span.icon-promote
+                                | Promote
+                    header.entity--header
+                        .entity--title= concept.name
+                        .entity--meta.meta
+                            .entity--tags foo
+                            .entity--time Last updated {{ concept.updated_at|naturaltime }}
+                    section.entity--summary
+                        p= concept.summary
+                        .entity--meta.meta Data provided by DBPedia and Wikipedia.
+
+                    +articles('Articles mentioning '+concept.name, concept.articles)
+
+                    //- TO DO: what about concepts which belong to multiple stories?
+                    .heading.entity--story--heading
+                        | Stories involving {{ concept.name }}
+                    section.entity--story
+                        ul
+                            li
+                                .concept--thumb
+                                    img(src='/dev/concept.jpg')
+                                .concept--info
+                                    .concept--title Syrian cities in rubble as conflict intensifies
+                                    .meta 1 day ago
+                                    p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
+                            li
+                                .concept--thumb
+                                    img(src='/dev/concept.jpg')
+                                .concept--info
+                                    .concept--title Syrian cities in rubble as conflict intensifies
+                                    .meta 1 day ago
+                                    p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
+
+                +mentions('Related concepts', concept.concepts)

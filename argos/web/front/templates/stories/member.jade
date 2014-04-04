@@ -1,0 +1,65 @@
+- from 'mixins/mentions.jade' import mentions
+- from 'mixins/articles.jade' import articles
+
+extends layouts/main.jade
+
+block content
+    .bounds
+        article.entity.clearfix
+            .entity--hero(style='background-image:url("'+story.image+'")')
+            .entity--body.clearfix
+                .entity--content
+                    section
+                        ul.item--actions.list__horizontal__justify
+                            li
+                                span.icon-watch
+                                | Watch
+                            li
+                                span.icon-bookmark
+                                | Bookmark
+                            li
+                                span.icon-discuss
+                                | Discuss
+                            li
+                                span.icon-share
+                                | Share
+                            li
+                                span.icon-promote
+                                | Promote
+                    header.entity--header
+                        .entity--title= story.title
+                        .entity--meta.meta
+                            .entity--tags foo
+                            .entity--time Last updated {{ story.updated_at|naturaltime }}
+                    section.entity--summary
+                        p= story.summary
+                        .entity--meta.meta This summary was automatically generated from the articles below.
+
+                    //- TO DO: right now this just grabs from the first event,
+                    //- but it should be across all of this story's events.
+                    +articles('Most shared articles in this story', story.events[0].articles)
+
+                    .heading.entity--story--heading
+                        | The full timeline
+                        if request.args.get('order', 'desc') == 'desc'
+                            a(href='?order=asc') Most recent to oldest ⇅
+                        else:
+                            a(href='?order=desc') Oldest to most recent ⇅
+                    section.entity--timeline
+                        .entity--timeline-date
+                            .subheading January 2, 2014 (2 days ago)
+                            ul
+                                li
+                                    .event--thumb
+                                        img(src='/dev/event.jpg')
+                                    .event--info
+                                        .event--title Syrian cities in rubble as conflict intensifies
+                                        p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
+                                li
+                                    .event--thumb
+                                        img(src='/dev/event.jpg')
+                                    .event--info
+                                        .event--title Syrian cities in rubble as conflict intensifies
+                                        p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
+
+                +mentions('Mentioned in this story', story.concepts)

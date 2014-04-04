@@ -6,7 +6,7 @@ from argos.web.api.resources import page_parser, collection, PER_PAGE
 from argos.web.api.errors import not_found, unauthorized
 
 from flask import request, abort
-from flask_security.core import current_user
+from flask.ext.security import current_user
 from flask.ext.restful import Resource, marshal_with, reqparse
 
 parser = reqparse.RequestParser()

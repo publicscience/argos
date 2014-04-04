@@ -9,7 +9,7 @@ import pkgutil
 import importlib
 
 def create_app(package_name=__name__, package_path=__path__, **config_overrides):
-    app = Flask(package_name)
+    app = Flask(package_name, static_url_path='')
     app.config.update(APP)
 
     # Apply overrides.

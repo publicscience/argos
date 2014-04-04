@@ -17,3 +17,4 @@ config.py
 ner/
 jena/
 *.rdb
+.webassets-cache

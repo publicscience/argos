@@ -1,0 +1,67 @@
+mixin nav_link(endpoint, icon, title)
+    a(href=url_for(endpoint), class='active' if request.endpoint == endpoint else '')
+        span(class=icon)
+        = title
+
+doctype html
+//if lt IE 7
+    <html class="no-js lt-ie9 lt-ie8 lt-ie7">
+//if IE 7
+    <html class="no-js lt-ie9 lt-ie8">
+//if IE 8
+    <html class="no-js lt-ie9">
+// [if gt IE 8] <!
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
+        meta(name="viewport", content="width=device-width,initial-scale=1")
+        meta(name="description", content="Argos intelligently navigates the news for you. [tentative]")
+        title Argos | Know more with less.
+
+        - assets 'css_all'
+            link(rel="stylesheet", href="{{ ASSET_URL }}")
+        - endassets
+
+    body
+        //if lt IE 7
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        main(role="main",id="main")
+            header.header__primary
+                .bounds
+                    .header__primary--title
+                        a(href='/')
+                            span.icon-logo.logo
+                            | Argos
+                            span.protoflag [PROTO]
+                    nav
+                        ul.list__horizontal
+                            li
+                                +nav_link('main.latest', 'icon-latest', 'Latest')
+                            li
+                                +nav_link('main.trending', 'icon-trending', 'Trending')
+                            if current_user.is_authenticated()
+                                li
+                                    +nav_link('main.watching', 'icon-watch', 'Watching')
+                                li
+                                    +nav_link('main.bookmarked', 'icon-bookmark', 'Bookmarked')
+                                li
+                                    span.icon-settings
+                                | Settings
+                                li
+                                    +nav_link('security.logout', 'icon-logout', 'Logout')
+                            else:
+                                li
+                                    +nav_link('security.login', 'icon-login', 'Login')
+
+            //- Display notifications, if any.
+            - with messages = get_flashed_messages()
+                if messages
+                    .notifications
+                        for message in messages
+                            {{ message }}
+
+            //- Yield for other templates.
+            block content
+
+        script(type="text/javascript",src="/js/vendor/bower/requirejs/require.js",data-main="/js/main")

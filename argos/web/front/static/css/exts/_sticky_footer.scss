@@ -1,0 +1,29 @@
+// ========================================== STICKY FOOTER
+
+$sticky-footer: false;
+$footer-height: 6em;
+
+html, body {
+	height:100%;
+	position:relative;
+}
+
+.container {
+	position:relative;
+	height:auto !important;
+	height:100%;
+	min-height:100%;
+}
+
+.main {
+	@if $sticky-footer {
+		padding:2em 4em ($footer-height + 2em);
+	}
+}
+
+footer {
+	height:$footer-height;
+	position:absolute;
+	width:100%;
+	bottom:0;
+}

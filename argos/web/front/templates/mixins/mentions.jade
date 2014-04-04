@@ -1,0 +1,13 @@
+mixin mentions(title, concepts)
+    section.entity--mentions
+        .heading= title
+        ul
+            for concept in concepts
+                li.entity--mention
+                    if concept.image
+                        .entity--mention--image(style='background-image:url("'+concept.image+'")')
+                    .entity--mention--content
+                        .entity--mention--title
+                            a(href=url_for('main.concept', slug=concept.slug))= concept.name
+                        if concept.summary
+                            p= concept.summary|truncate
