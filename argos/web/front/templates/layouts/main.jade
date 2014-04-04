@@ -41,11 +41,13 @@ html(lang="en")
                                     | Trending
                             if current_user.is_authenticated()
                                 li
-                                    span.icon-watch
-                                    | Watching
+                                    a(href='/watching')
+                                        span.icon-watch
+                                        | Watching
                                 li
-                                    span.icon-bookmark
-                                    | Bookmarked
+                                    a(href='/bookmarked')
+                                        span.icon-bookmark
+                                        | Bookmarked
                                 li
                                     span.icon-settings
                                 | Settings
