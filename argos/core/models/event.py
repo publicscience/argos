@@ -8,7 +8,7 @@ from argos.util.logger import logger
 
 from datetime import datetime
 from math import log
-from sqlalchemy import event
+from sqlalchemy import event, inspect
 
 events_articles = db.Table('events_articles',
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
@@ -146,13 +146,15 @@ class Event(Cluster):
 
 @event.listens_for(Event, 'before_update')
 def receive_before_update(mapper, connection, target):
-    # Calculate the raw score.
-    target.raw_score = sum([member.score for member in target.members])
+    # Only make these changes if the articles have changed.
+    if inspect(target).attrs.members.history.has_changes():
+        # Calculate the raw score.
+        target.raw_score = sum([member.score for member in target.members])
 
-    # Cache a score.
-    target._score = target.calculate_score()
+        # Cache a score.
+        target._score = target.calculate_score()
 
-    target.updated_at = datetime.utcnow()
+        target.updated_at = datetime.utcnow()
 
 @event.listens_for(Event, 'before_insert')
 def receive_before_insert(mapper, connection, target):

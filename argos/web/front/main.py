@@ -1,4 +1,5 @@
 import argos.web.models as models
+from argos.datastore import db
 
 from datetime import datetime
 
@@ -49,6 +50,50 @@ def watching():
     else:
         flash('You need to be logged in')
         return redirect(url_for('security.login'))
+
+@bp.route('/watch', methods=['POST', 'DELETE'])
+def watch():
+    if current_user.is_authenticated():
+        id = request.args.get('story_id', None)
+        if id is None:
+            return 'You must specify an story_id', 400
+
+        story = models.Story.query.get(id)
+        if not story:
+            return 'No story by that id', 404
+
+        if request.method == 'POST':
+            current_user.watching.append(story)
+            db.session.commit()
+            return 'Success', 201
+        elif request.method == 'DELETE':
+            current_user.watching.remove(story)
+            db.session.commit()
+            return 'Success', 204
+    else:
+        return 'You must be logged in', 401
+
+@bp.route('/bookmark', methods=['POST', 'DELETE'])
+def bookmark():
+    if current_user.is_authenticated():
+        id = request.args.get('event_id', None)
+        if id is None:
+            return 'You must specify an event_id', 400
+
+        event = models.Event.query.get(id)
+        if not event:
+            return 'No event by that id', 404
+
+        if request.method == 'POST':
+            current_user.bookmarked.append(event)
+            db.session.commit()
+            return 'Success', 201
+        elif request.method == 'DELETE':
+            current_user.bookmarked.remove(event)
+            db.session.commit()
+            return 'Success', 204
+    else:
+        return 'You must be logged in', 401
 
 @bp.route('/bookmarked')
 def bookmarked():

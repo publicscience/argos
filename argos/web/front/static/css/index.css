@@ -1047,16 +1047,17 @@ input[type=submit] {
   font-size: 0.6em;
   font-weight: normal;
   line-height: 2;
+  margin-right: 1.5em;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000372}}
+@media -sass-debug-info{filename{}line{font-family:\0000373}}
 .subheading {
   color: #aaaaaa;
   border-bottom: 1px solid #cccccc;
   font-size: 0.8em;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000377}}
+@media -sass-debug-info{filename{}line{font-family:\0000378}}
 .notifications {
   background: #2b7fdc;
   color: white;
@@ -1064,26 +1065,76 @@ input[type=submit] {
   text-align: center;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000384}}
+@media -sass-debug-info{filename{}line{font-family:\0000385}}
 [class$="--title"] a, [class$="--title"] a:visited {
   text-decoration: none;
   color: #323232;
 }
 
-@media -sass-debug-info{filename{}line{font-family:\0000388}}
+@media -sass-debug-info{filename{}line{font-family:\0000389}}
 .meta {
   color: #bbbdbf;
   font-size: 0.6em;
   margin: 0.5em 0;
 }
-@media -sass-debug-info{filename{}line{font-family:\0000393}}
+@media -sass-debug-info{filename{}line{font-family:\0000394}}
 .meta a, .meta a:visited {
   color: #bbbdbf;
   text-decoration: none;
 }
-@media -sass-debug-info{filename{}line{font-family:\0000396}}
+@media -sass-debug-info{filename{}line{font-family:\0000397}}
 .meta a:hover, .meta a:visited:hover {
   color: #abaeb0;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\00003100}}
+.popover-notification {
+  right: 0;
+  left: 0;
+  bottom: -100%;
+  text-align: center;
+  position: fixed;
+}
+@media -sass-debug-info{filename{}line{font-family:\00003106}}
+.popover-notification .popover-notification--content {
+  background: #f55041;
+  color: white;
+  width: 18em;
+  padding: 2em;
+  margin: 0 auto;
+  font-size: 0.8em;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\00003114}}
+.actions {
+  text-transform: uppercase;
+  font-size: 0.4em;
+  margin: 1.5em 0 0 0;
+}
+@media -sass-debug-info{filename{}line{font-family:\00003118}}
+.actions li {
+  vertical-align: middle !important;
+  line-height: 1.4;
+  color: #dddddd;
+}
+@media -sass-debug-info{filename{}line{font-family:\00003122}}
+.actions [class^="icon-"], .actions [class*=" icon-"] {
+  font-size: 3.5em;
+  vertical-align: middle;
+  color: #86d886;
+}
+@media -sass-debug-info{filename{}line{font-family:\00003126}}
+.actions a, .actions a:visited {
+  color: #a4a5a4;
+  text-decoration: none;
+}
+@media -sass-debug-info{filename{}line{font-family:\00003129}}
+.actions a:hover, .actions a:visited:hover {
+  color: #323232;
+}
+@media -sass-debug-info{filename{}line{font-family:\00003131}}
+.actions a.active, .actions a:visited.active {
+  color: #2b7fdc;
 }
 
 /* ==========================================
@@ -1236,30 +1287,11 @@ nav [class^="icon-"], nav [class*=" icon-"] {
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\0000360}}
-.item--actions {
-  text-transform: uppercase;
-  font-size: 0.4em;
-  margin: 1.5em 0 0 0;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\0000364}}
-.item--actions li {
-  vertical-align: middle !important;
-  line-height: 1.4;
-  color: #a4a5a4;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\0000368}}
-.item--actions [class^="icon-"], .item--actions [class*=" icon-"] {
-  font-size: 3.5em;
-  vertical-align: middle;
-  color: #86d886;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\0000373}}
 .item--summary {
   font-size: 0.8em;
   line-height: 1.6;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\0000376}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_item\.sass}line{font-family:\0000363}}
 .item--summary p:first-child {
   margin-top: 0;
 }

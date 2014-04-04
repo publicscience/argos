@@ -6,7 +6,7 @@ $header-color: #20232d
 $secondary-color: #86d886
 $muted-color: #bbbdbf
 $background-color: #fcfcfc
-$error-color: #DD4343
+$error-color: #f55041
 $warning-color: #E2E942
 $success-color: #32b375
 $primary-type: 'Graphik Web', Verdana, Geneva, sans-serif
@@ -68,6 +68,7 @@ input[type=submit]
         font-size: 0.6em
         font-weight: normal
         line-height: 2
+        margin-right: 1.5em
 
 .subheading
     color: #aaaaaa
@@ -96,6 +97,39 @@ input[type=submit]
         &:hover
             color: darken($muted-color, 6%)
 
+.popover-notification
+    right: 0
+    left: 0
+    bottom: -100%
+    text-align: center
+    position: fixed
+    .popover-notification--content
+        background: $error-color
+        color: #fff
+        width: 18em
+        padding: 2em
+        margin: 0 auto
+        font-size: 0.8em
+
+.actions
+    text-transform: uppercase
+    font-size: 0.4em
+    margin: 1.5em 0 0 0
+    li
+        vertical-align: middle !important
+        line-height: 1.4
+        color: #ddd
+    [class^="icon-"], [class*=" icon-"]
+        font-size: 3.5em
+        vertical-align: middle
+        color: $secondary-color
+    a, a:visited
+        color: #a4a5a4
+        text-decoration: none
+        &:hover
+            color: $primary-type-color
+        &.active
+            color: $primary-color
 
 /* ==========================================
 	 Modules
