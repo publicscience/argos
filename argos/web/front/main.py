@@ -34,6 +34,11 @@ def story(id):
     story = models.Story.query.get(id)
     return render_template('stories/member.jade', story=story)
 
+@bp.route('/concepts/<string:slug>')
+def concept(slug):
+    concept = models.Concept.query.get(slug)
+    return render_template('concepts/member.jade', concept=concept)
+
 @bp.route('/watching')
 def watching():
     if current_user.is_authenticated():

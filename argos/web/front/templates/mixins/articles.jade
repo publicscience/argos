@@ -1,0 +1,16 @@
+mixin articles(title, articles)
+    section.entity--articles
+        .subheading= title
+        ul
+            for article in articles[:5]
+                li
+                    .article--source--icon
+                        img(src='/dev/source.png')
+                    .article--info
+                        .article--title
+                            a(href=article.ext_url)= article.title
+                        .meta
+                            .article--source= article.source.name
+                            .article--time= article.updated_at|naturaltime
+        if articles|count > 5
+            .entity--articles--more {{ articles|count - 5 }} more articles

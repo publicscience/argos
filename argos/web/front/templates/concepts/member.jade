@@ -6,7 +6,7 @@ extends layouts/main.jade
 block content
     .bounds
         article.entity.clearfix
-            .entity--hero(style='background-image:url("'+event.image+'")')
+            .entity--hero(style='background-image:url("'+concept.image+'")')
             .entity--body.clearfix
                 .entity--content
                     section
@@ -27,39 +27,34 @@ block content
                                 span.icon-promote
                                 | Promote
                     header.entity--header
-                        .entity--title= event.title
+                        .entity--title= concept.name
                         .entity--meta.meta
-                            .entity--tags
-                                for story in event.stories
-                                    a(href=url_for('main.story', id=story.id))= story.title
-                                    if not loop.last
-                                        ,
-                            .entity--time= event.updated_at|naturaltime
+                            .entity--tags foo
+                            .entity--time Last updated {{ concept.updated_at|naturaltime }}
                     section.entity--summary
-                        p= event.summary
-                        .entity--meta.meta This summary was automatically generated from the articles below.
+                        p= concept.summary
+                        .entity--meta.meta Data provided by DBPedia and Wikipedia.
 
-                    +articles('In Greater Depth', event.articles)
+                    +articles('Articles mentioning '+concept.name, concept.articles)
 
-                    //- TO DO: what about events which belong to multiple stories?
+                    //- TO DO: what about concepts which belong to multiple stories?
                     .heading.entity--story--heading
-                        | Previously in this story
-                        a(href=url_for('main.story', id=event.stories[0].id)) View the full timeline
+                        | Stories involving {{ concept.name }}
                     section.entity--story
                         ul
                             li
-                                .event--thumb
-                                    img(src='/dev/event.jpg')
-                                .event--info
-                                    .event--title Syrian cities in rubble as conflict intensifies
+                                .concept--thumb
+                                    img(src='/dev/concept.jpg')
+                                .concept--info
+                                    .concept--title Syrian cities in rubble as conflict intensifies
                                     .meta 1 day ago
                                     p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
                             li
-                                .event--thumb
-                                    img(src='/dev/event.jpg')
-                                .event--info
-                                    .event--title Syrian cities in rubble as conflict intensifies
+                                .concept--thumb
+                                    img(src='/dev/concept.jpg')
+                                .concept--info
+                                    .concept--title Syrian cities in rubble as conflict intensifies
                                     .meta 1 day ago
                                     p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
 
-                +mentions('Mentioned in this event', event.concepts)
+                +mentions('Related concepts', concept.concepts)

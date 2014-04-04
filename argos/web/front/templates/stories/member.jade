@@ -1,3 +1,6 @@
+- from 'mixins/mentions.jade' import mentions
+- from 'mixins/articles.jade' import articles
+
 extends layouts/main.jade
 
 block content
@@ -32,23 +35,9 @@ block content
                         p= story.summary
                         .entity--meta.meta This summary was automatically generated from the articles below.
 
-                    section.entity--articles
-                        .subheading Most shared articles in this story
-                        ul
-                            //- TO DO: right now this just grabs from the first event,
-                            //- but it should be across all of this story's events.
-                            for article in story.events[0].articles[:5]
-                                li
-                                    .article--source--icon
-                                        img(src='/dev/source.png')
-                                    .article--info
-                                        .article--title
-                                            a(href=article.ext_url)= article.title
-                                        .meta
-                                            .article--source= article.source.name
-                                            .article--time= article.updated_at|naturaltime
-                        if story.articles|count > 5
-                            .entity--articles--more 3 more articles
+                    //- TO DO: right now this just grabs from the first event,
+                    //- but it should be across all of this story's events.
+                    +articles('Most shared articles in this story', story.events[0].articles)
 
                     .heading.entity--story--heading
                         | The full timeline
@@ -73,14 +62,4 @@ block content
                                         .event--title Syrian cities in rubble as conflict intensifies
                                         p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
 
-                section.entity--mentions
-                    .heading Mentioned in this story
-                    ul
-                        for concept in story.concepts
-                            li.entity--mention
-                                if concept.image
-                                    .entity--mention--image(style='background-image:url("'+concept.image+'")')
-                                .entity--mention--content
-                                    .entity--mention--title= concept.name
-                                    if concept.summary
-                                        p= concept.summary|truncate
+                +mentions('Mentioned in this story', story.concepts)
