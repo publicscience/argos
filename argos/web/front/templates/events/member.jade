@@ -36,7 +36,7 @@ block content
                                         ,
                             .entity--time= event.updated_at|naturaltime
                     section.entity--summary
-                        p= event.summary
+                        p= event.summary|highlight_mentions(event.mentions)|sanitize_html
                         .entity--meta.meta This summary was automatically generated from the articles below.
 
                     +articles('In Greater Depth', event.articles)

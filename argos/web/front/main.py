@@ -2,7 +2,9 @@ import argos.web.models as models
 
 from datetime import datetime
 
+import jinja2
 import humanize
+from lxml.html.clean import clean_html
 
 from flask import Blueprint, request, render_template, flash, redirect, url_for
 from flask.ext.security import current_user
@@ -60,7 +62,7 @@ def bookmarked():
 @bp.app_template_filter()
 def naturaltime(dt):
     """
-    A tempalte filter for rendering
+    A template filter for rendering
     datetimes in human-readable form,
     e.g. "1 hour ago", "5 days ago", etc.
 
@@ -69,3 +71,32 @@ def naturaltime(dt):
         div= event.updated_at|naturaltime
     """
     return humanize.naturaltime(datetime.utcnow() - dt)
+
+@bp.app_template_filter()
+def highlight_mentions(text, mentions):
+    """
+    A template filter for highlighting
+    mentions of concepts in a text.
+
+    The mentions are first sorted by name length.
+    """
+    sorted_mentions = sorted(mentions, key=lambda x: len(x.name), reverse=True)
+    for mention in sorted_mentions:
+        text = text.replace(
+                ' {name}'.format(name=mention.name),
+                ' <a href="{url}">{name}</a>'.format(
+                    url=url_for('main.concept', slug=mention.slug),
+                    name=mention.name)
+                )
+    return text
+
+@bp.app_template_filter()
+def sanitize_html(html):
+    """
+    A template filter for
+    sanitizing HTML.
+    """
+    # Wrap in jinja2.Markup so jinja doesn't
+    # re-escape the html.
+    return jinja2.Markup(clean_html(html))
+

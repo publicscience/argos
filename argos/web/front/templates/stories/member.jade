@@ -32,7 +32,7 @@ block content
                             .entity--tags foo
                             .entity--time Last updated {{ story.updated_at|naturaltime }}
                     section.entity--summary
-                        p= story.summary
+                        p= story.summary|highlight_mentions(story.mentions)|sanitize_html
                         .entity--meta.meta This summary was automatically generated from the articles below.
 
                     //- TO DO: right now this just grabs from the first event,

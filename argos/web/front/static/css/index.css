@@ -938,16 +938,11 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000379}}
-.icon-swap:before {
-  content: "\f10b";
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000380}}
 .icon-trending:before {
   content: "\f109";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000381}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/exts\/_icons\.scss}line{font-family:\0000380}}
 .icon-watch:before {
   content: "\f107";
 }
