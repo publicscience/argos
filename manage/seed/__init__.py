@@ -18,11 +18,10 @@ from flask import current_app
 from flask.ext.script import Command
 
 import json
-
+import os
+import random
 from datetime import datetime
 from dateutil.parser import parse
-
-import random
 
 # Boto outputs a lot of deprecation warnings (because it is
 # still in the process of being ported to Py3).
@@ -96,12 +95,39 @@ def seed(debug=False):
                 created_at = parse(entry['published']),
                 updated_at = parse(entry['updated']),
                 image=random.choice(sample_images), # fake image
-                score=random.random() * 100 # fake score
+                score=random.random() * 100         # fake score
         )
         articles.append(a)
         db.session.add(a)
 
         progress_bar(len(articles) / len(entries) * 100)
+
+    print('Creating additional articles...')
+
+    # Collect all appropriate files.
+    all_files = []
+    for dir, subdir, files in os.walk('manage/data/organized_articles'):
+        for file in files:
+            filepath = os.path.join(dir, file)
+            name, ext = os.path.splitext(filepath)
+            if ext == '.txt':
+                all_files.append((dir, name, filepath))
+
+    # Create articles for appropriate files.
+    for dir, name, filepath in all_files:
+        category = dir.split('/')[-1]
+        f = open(filepath, 'r')
+        article = Article(
+                text=f.read(),
+                title=name.split('/')[-1],
+                ext_url='http://fauxurl/',
+                source = Source.query.get(1),       # fake source
+                image=random.choice(sample_images), # fake image
+                score=random.random() * 100         # fake score
+        )
+        db.session.add(article)
+        articles.append(article)
+        progress_bar(len(articles)/len(all_files) * 100)
 
     db.session.commit()
 

@@ -10,8 +10,8 @@ from argos.core.brain import tokenize
 from argos.util.progress import progress_bar
 
 def generate(keywords, num=5000):
-    this_dir = path.dirname(__file__)
-    articles = load_articles()
+    dump = open('../articles.json', 'r')
+    articles = json.load(dump)
 
     # Filter down to articles from the specified sources.
     results = []
