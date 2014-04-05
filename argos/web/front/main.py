@@ -2,7 +2,7 @@ import argos.web.models as models
 from argos.datastore import db
 
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import jinja2
 import humanize
@@ -10,6 +10,7 @@ from lxml.html.clean import clean_html
 
 from flask import Blueprint, request, render_template, flash, redirect, url_for
 from flask.ext.security import current_user
+from flask.ext import babel
 
 bp = Blueprint('main', __name__)
 
@@ -106,7 +107,7 @@ def bookmarked():
         return redirect(url_for('security.login'))
 
 @bp.app_template_filter()
-def naturaltime(dt):
+def natural_datetime(dt):
     """
     A template filter for rendering
     datetimes in human-readable form,
@@ -114,9 +115,34 @@ def naturaltime(dt):
 
     Example usage (in `pyjade`)::
 
-        div= event.updated_at|naturaltime
+        div= event.updated_at|natural_datetime
     """
     return humanize.naturaltime(datetime.utcnow() - dt)
+
+@bp.app_template_filter()
+def natural_date(date):
+    """
+    A template filter for rendering
+    dates in human-readable form,
+    e.g. "5 days ago", etc.
+
+    Example usage (in `pyjade`)::
+
+        div= event.updated_at.date()|natural_date
+    """
+    dt = datetime.combine(date, datetime.min.time())
+    diff = datetime.utcnow() - dt
+    if diff <= timedelta(days=2):
+        return humanize.naturalday(diff)
+    return humanize.naturaltime(diff)
+
+@bp.app_template_filter()
+def format_date(date):
+    format = 'MMMM d'
+    dt = datetime.combine(date, datetime.min.time())
+    if (datetime.utcnow() - dt).days > 365:
+        format += ' y'
+    return babel.format_date(date, format)
 
 @bp.app_template_filter()
 def highlight_mentions(text, mentions):
@@ -145,4 +171,3 @@ def sanitize_html(html):
     # Wrap in jinja2.Markup so jinja doesn't
     # re-escape the html.
     return jinja2.Markup(clean_html(html))
-

@@ -1571,21 +1571,21 @@ nav [class^="icon-"], nav [class*=" icon-"] {
   margin: 2em 0;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003135}}
-.entity--timeline ul {
+.entity--timeline .story--event-group {
   border-left: 2px solid #dddddd;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003137}}
-.entity--timeline li {
+.entity--timeline .story--event-group > li {
   padding: 2em 0 2em 1em;
   border-bottom: 1px solid #eeeeee;
   position: relative;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003141}}
-.entity--timeline li:last-child {
+.entity--timeline .story--event-group > li:last-child {
   border-bottom: none;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003143}}
-.entity--timeline li p {
+.entity--timeline .story--event-group > li p {
   font-size: 0.8em;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_entity\.sass}line{font-family:\00003145}}
