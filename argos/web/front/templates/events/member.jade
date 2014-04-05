@@ -1,77 +1,52 @@
 - from 'mixins/mentions.jade' import mentions
 - from 'mixins/articles.jade' import articles
+- from 'mixins/actions.jade' import actions
+- from 'mixins/events.jade' import event_item
 
 extends layouts/main.jade
 
 block content
     .bounds
-        article.entity.clearfix
-            .item--notations
-                .item--bookmark(style=('' if event in current_user.bookmarked else 'display:none;'))
+        article.page.clearfix
+            .page-notations.notations
+                .bookmark-flag(style=('' if event in current_user.bookmarked else 'display:none;'))
                     span.icon-bookmark
-                .item--promotions
-                    .item--notation Promoted by
-                    ul.item--promoters
+                .promotions
+                    .notation Promoted by
+                    ul.promoters
                         li
                             img(src='/dev/user.jpg')
-                    .item--notation--extra + 5 more
-            .entity--hero(style='background-image:url("'+event.image+'")')
-            .entity--body.clearfix
-                .entity--content
+                    .notation-meta + 5 more
+            .page-hero(style='background-image:url("'+event.image+'")')
+            .page-body.clearfix
+                .page-content
                     section
-                        ul.actions.list__horizontal__justify
-                            li
-                                span.icon-watch
-                                | Watch
-                            li
-                                if event in current_user.bookmarked
-                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='DELETE', data-mapping='bookmark').active
-                                        span.icon-bookmark
-                                        span.action-label Bookmarked
-                                else
-                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='POST', data-mapping='bookmark')
-                                        span.icon-bookmark
-                                        span.action-label Bookmark
-                            li
-                                span.icon-discuss
-                                | Discuss
-                            li
-                                span.icon-share
-                                | Share
-                            li
-                                span.icon-promote
-                                | Promote
-                    header.entity--header
-                        .entity--title= event.title
-                        .entity--meta.meta
-                            .entity--tags
+                        //- TO DO: which story do you watch if it is multiple stories?
+                        +actions(['watch', 'bookmark', 'discuss', 'share', 'promote'], user=current_user, event=event, story=event.stories[0])
+                    header.page-header
+                        .page-title.title= event.title
+                        .page-meta.meta
+                            .meta-tags
                                 for story in event.stories
                                     a(href=url_for('main.story', id=story.id))= story.title
                                     if not loop.last
                                         ,
-                            .entity--time= event.updated_at|natural_datetime
-                    section.entity--summary
+                            .meta-time= event.updated_at|natural_datetime
+                    section.page-summary
                         p= event.summary|highlight_mentions(event.mentions)|sanitize_html
-                        .entity--meta.meta This summary was automatically generated from the articles below.
+                        .page-meta.meta This summary was automatically generated from the articles below.
 
                     +articles('In Greater Depth', event.articles)
 
                     //- TO DO: what about events which belong to multiple stories?
                     - var story_events = event.stories[0].events_before(event.created_at).remove(event)
-                    .heading.entity--story--heading
+                    .heading.page-heading
                         | Previously in this story
                         a(href=url_for('main.story', id=event.stories[0].id)) View the full timeline
                     if story_events
-                        section.entity--story
-                            ul
-                                for rel_event in story_events
-                                    li
-                                        .event--thumb
-                                            img(src=rel_event.image)
-                                        .event--info
-                                            .event--title= rel_event.title
-                                            .meta= rel_event.updated_at|natural_datetime
-                                            p= rel_event.summary|truncate(length=400)|highlight_mentions(rel_event.mentions)|sanitize_html
+                        section.events
+                            for rel_event in story_events
+                                +event_item(rel_event, current_user, summary_length=400)
                     else
                         .empty There are no other events in this story yet.
 

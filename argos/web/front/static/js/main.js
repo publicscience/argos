@@ -20,13 +20,13 @@ require(['config'], function() {
                     el.find('.action-label').text('Bookmarked');
                     el.addClass('active');
 
-                    el.closest('article').find('.item--bookmark').show();
+                    el.closest('article').find('.bookmark-flag').show();
                 } else {
                     el.data('method', 'POST');
                     el.find('.action-label').text('Bookmark');
                     el.removeClass('active');
 
-                    el.closest('article').find('.item--bookmark').hide();
+                    el.closest('article').find('.bookmark-flag').hide();
                 }
             },
 
@@ -71,11 +71,11 @@ require(['config'], function() {
             // Use an existing element if possible.
             if ( $('.popover-notification').length > 0 ) {
                 $notification = $('.popover-notification');
-                $notification.find('.popover-notification--content').text(msg);
+                $notification.find('.popover-notification-content').text(msg);
 
             // Create a new one if needed.
             } else {
-                $notification = $('<div class="popover-notification"><div class="popover-notification--content">'+msg+'</div></div>');
+                $notification = $('<div class="popover-notification"><div class="popover-notification-content">'+msg+'</div></div>');
                 $('body').append($notification);
                 $notification.css({
                     bottom: -$notification.outerHeight()
