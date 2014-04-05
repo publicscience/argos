@@ -6,8 +6,10 @@
 extends layouts/main.jade
 
 block content
-    .bounds
-        article.page.clearfix
+    article.page.clearfix
+        .bounds.bounds-collapse-both
+            .page-hero(style='background-image:url("'+event.image+'")')
+        .page-body.clearfix.bounds.bounds-collapse-right
             .page-notations.notations
                 .bookmark-flag(style=('' if event in current_user.bookmarked else 'display:none;'))
                     span.icon-bookmark
@@ -17,37 +19,35 @@ block content
                         li
                             img(src='/dev/user.jpg')
                     .notation-meta + 5 more
-            .page-hero(style='background-image:url("'+event.image+'")')
-            .page-body.clearfix
-                .page-content
-                    section
-                        //- TO DO: which story do you watch if it is multiple stories?
-                        +actions(['watch', 'bookmark', 'discuss', 'share', 'promote'], user=current_user, event=event, story=event.stories[0])
-                    header.page-header
-                        .page-title.title= event.title
-                        .page-meta.meta
-                            .meta-tags
-                                for story in event.stories
-                                    a(href=url_for('main.story', id=story.id))= story.title
-                                    if not loop.last
-                                        ,
-                            .meta-time= event.updated_at|natural_datetime
-                    section.page-summary
-                        p= event.summary|highlight_mentions(event.mentions)|sanitize_html
-                        .page-meta.meta This summary was automatically generated from the articles below.
+            .page-content
+                section
+                    //- TO DO: which story do you watch if it is multiple stories?
+                    +actions(['watch', 'bookmark', 'discuss', 'share', 'promote'], user=current_user, event=event, story=event.stories[0])
+                header.page-header
+                    .page-title.title= event.title
+                    .page-meta.meta
+                        .meta-tags
+                            for story in event.stories
+                                a(href=url_for('main.story', id=story.id))= story.title
+                                if not loop.last
+                                    ,
+                        .meta-time= event.updated_at|natural_datetime
+                section.page-summary
+                    p= event.summary|highlight_mentions(event.mentions)|sanitize_html
+                    .page-meta.meta This summary was automatically generated from the articles below.
 
-                    +articles('In Greater Depth', event.articles)
+                +articles('In Greater Depth', event.articles)
 
-                    //- TO DO: what about events which belong to multiple stories?
-                    - var story_events = event.stories[0].events_before(event.created_at).remove(event)
-                    .heading.page-heading
-                        | Previously in this story
-                        a(href=url_for('main.story', id=event.stories[0].id)) View the full timeline
-                    if story_events
-                        section.events
-                            for rel_event in story_events
-                                +event_item(rel_event, current_user, summary_length=400)
-                    else
-                        .empty There are no other events in this story yet.
+                //- TO DO: what about events which belong to multiple stories?
+                - var story_events = event.stories[0].events_before(event.created_at).remove(event)
+                .heading.page-heading
+                    | Previously in this story
+                    a(href=url_for('main.story', id=event.stories[0].id)) View the full timeline
+                if story_events
+                    section.events
+                        for rel_event in story_events
+                            +event_item(rel_event, current_user, summary_length=400)
+                else
+                    .empty There are no other events in this story yet.
 
-                +mentions('Mentioned in this event', event.concepts)
+            +mentions('Mentioned in this event', event.concepts)

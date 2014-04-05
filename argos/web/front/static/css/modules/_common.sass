@@ -4,6 +4,7 @@ html, body
     background: $background-color
 
 .bounds
+    @include transition
     max-width: $max-width
     padding: 0 1em
     margin: 0 auto
@@ -101,3 +102,8 @@ a, a:visited
     text-align: center
     margin: 4em 0
 
+@media only screen and (max-width : 1080px)
+    .bounds-collapse-both
+        padding: 0
+    .bounds-collapse-right
+        padding-right: 0

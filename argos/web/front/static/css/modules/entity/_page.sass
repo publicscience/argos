@@ -1,9 +1,12 @@
 .page
     padding: 0 0 8em 0
+
+.page-body
     position: relative
 
 .page-notations
-    top: 1em
+    top: -24em // hacky
+    left: -4em
 
 .page-header
     padding-right: 2em
@@ -42,3 +45,17 @@
 
 .events
     margin: 0 0 2em 0
+
+@media only screen and (max-width : 1220px)
+    .page-notations
+        left: 1em
+        .bookmark-flag,
+        .notation
+            text-align: right
+        .promoters li,
+        .notation-meta
+            padding-right: 0
+
+@media only screen and (max-width : 1080px)
+    .page-notations
+        left: 0
