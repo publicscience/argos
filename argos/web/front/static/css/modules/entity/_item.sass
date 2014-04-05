@@ -6,13 +6,18 @@
     &:last-child
         border-bottom: none
 
-.item-thumb
+.item-notations
+    top: 1em
+
+.item-extra
     float: left
     width: 30%
-    img
-        width: 100%
 
-.item-content
+.item-thumb
+    width: 100%
+
+.item-header,
+.item-summary
     float: left
     padding-left: 2em
     width: 70%
@@ -25,3 +30,55 @@
     line-height: 1.6
     p:first-child
         margin-top: 0
+
+@media only screen and (max-width : 1220px)
+    .item-notations
+        position: static
+        width: auto
+        left: auto
+        top: auto
+        clear: both
+        .bookmark-flag
+            top: 1em
+            position: absolute
+            width: 2em
+            text-align: right
+        .promotions
+            padding: 0.5em 0 0 0
+        .promoters li
+            display: inline-block
+
+@media only screen and (max-width : 720px)
+    .item-summary
+        width: 100%
+        float: none
+        padding: 1em 0
+        clear: both
+    .item
+        padding-top: 4em
+    .item-notations
+        position: absolute
+        top: 0
+        .bookmark-flag
+            position: relative
+            text-align: center
+            font-size: 1.35em
+            width: 1.5em
+            margin-right: 0.4em
+            float: left
+            padding: 0.1em 0 0 0
+        .promotions
+            float: left
+            padding: 0.1em 0 0 0
+        .promoters,
+        .notation-meta
+            display: inline-block
+
+
+@media only screen and (max-width : 480px)
+    .item-extra,
+    .item-header
+        width: 100%
+        float: none
+    .item-header
+        padding: 1em 0 0 0
