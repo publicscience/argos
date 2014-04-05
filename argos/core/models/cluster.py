@@ -41,7 +41,8 @@ class Clusterable(Model):
 
         return db.relationship(args['association_model'],
                 backref=db.backref(args['backref_name']),
-                cascade='all, delete-orphan')
+                cascade='all, delete-orphan',
+                order_by=args['association_model'].score.desc())
 
     @property
     def concepts(self):
@@ -60,6 +61,14 @@ class Clusterable(Model):
             assoc.concept.score = assoc.score
             return assoc.concept
         return list(map(with_score, self.concept_associations))
+
+    @property
+    def ranked_concepts(self):
+        """
+        Returns concepts for this entity ordered by score,
+        descending.
+        """
+        return [ca.concept for ca in self.concept_associations]
 
     @declared_attr
     def mentions(cls):
