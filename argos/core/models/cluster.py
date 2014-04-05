@@ -62,14 +62,6 @@ class Clusterable(Model):
             return assoc.concept
         return list(map(with_score, self.concept_associations))
 
-    @property
-    def ranked_concepts(self):
-        """
-        Returns concepts for this entity ordered by score,
-        descending.
-        """
-        return [ca.concept for ca in self.concept_associations]
-
     @declared_attr
     def mentions(cls):
         """
