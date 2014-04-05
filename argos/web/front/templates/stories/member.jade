@@ -10,7 +10,7 @@ block content
             .entity--body.clearfix
                 .entity--content
                     section
-                        ul.item--actions.list__horizontal__justify
+                        ul.actions.list__horizontal__justify
                             li
                                 span.icon-watch
                                 | Watch
@@ -32,7 +32,7 @@ block content
                             .entity--tags foo
                             .entity--time Last updated {{ story.updated_at|naturaltime }}
                     section.entity--summary
-                        p= story.summary
+                        p= story.summary|highlight_mentions(story.mentions)|sanitize_html
                         .entity--meta.meta This summary was automatically generated from the articles below.
 
                     //- TO DO: right now this just grabs from the first event,

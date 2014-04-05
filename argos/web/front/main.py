@@ -1,8 +1,12 @@
 import argos.web.models as models
+from argos.datastore import db
 
+import re
 from datetime import datetime
 
+import jinja2
 import humanize
+from lxml.html.clean import clean_html
 
 from flask import Blueprint, request, render_template, flash, redirect, url_for
 from flask.ext.security import current_user
@@ -48,6 +52,50 @@ def watching():
         flash('You need to be logged in')
         return redirect(url_for('security.login'))
 
+@bp.route('/watch', methods=['POST', 'DELETE'])
+def watch():
+    if current_user.is_authenticated():
+        id = request.args.get('story_id', None)
+        if id is None:
+            return 'You must specify an story_id', 400
+
+        story = models.Story.query.get(id)
+        if not story:
+            return 'No story by that id', 404
+
+        if request.method == 'POST':
+            current_user.watching.append(story)
+            db.session.commit()
+            return 'Success', 201
+        elif request.method == 'DELETE':
+            current_user.watching.remove(story)
+            db.session.commit()
+            return 'Success', 204
+    else:
+        return 'You must be logged in', 401
+
+@bp.route('/bookmark', methods=['POST', 'DELETE'])
+def bookmark():
+    if current_user.is_authenticated():
+        id = request.args.get('event_id', None)
+        if id is None:
+            return 'You must specify an event_id', 400
+
+        event = models.Event.query.get(id)
+        if not event:
+            return 'No event by that id', 404
+
+        if request.method == 'POST':
+            current_user.bookmarked.append(event)
+            db.session.commit()
+            return 'Success', 201
+        elif request.method == 'DELETE':
+            current_user.bookmarked.remove(event)
+            db.session.commit()
+            return 'Success', 204
+    else:
+        return 'You must be logged in', 401
+
 @bp.route('/bookmarked')
 def bookmarked():
     if current_user.is_authenticated():
@@ -60,7 +108,7 @@ def bookmarked():
 @bp.app_template_filter()
 def naturaltime(dt):
     """
-    A tempalte filter for rendering
+    A template filter for rendering
     datetimes in human-readable form,
     e.g. "1 hour ago", "5 days ago", etc.
 
@@ -69,3 +117,32 @@ def naturaltime(dt):
         div= event.updated_at|naturaltime
     """
     return humanize.naturaltime(datetime.utcnow() - dt)
+
+@bp.app_template_filter()
+def highlight_mentions(text, mentions):
+    """
+    A template filter for highlighting
+    mentions of concepts in a text.
+
+    The mentions are first sorted by name length.
+    """
+    sorted_mentions = sorted(mentions, key=lambda x: len(x.name), reverse=True)
+    for mention in sorted_mentions:
+        text = re.sub(
+                r' {name}(?!</a>)'.format(name=mention.name),
+                ' <a href="{url}">{name}</a>'.format(
+                    url=url_for('main.concept', slug=mention.slug),
+                    name=mention.name),
+                text)
+    return text
+
+@bp.app_template_filter()
+def sanitize_html(html):
+    """
+    A template filter for
+    sanitizing HTML.
+    """
+    # Wrap in jinja2.Markup so jinja doesn't
+    # re-escape the html.
+    return jinja2.Markup(clean_html(html))
+

@@ -5,7 +5,8 @@ mixin mentions(title, concepts)
             for concept in concepts
                 li.entity--mention
                     if concept.image
-                        .entity--mention--image(style='background-image:url("'+concept.image+'")')
+                        a(href=url_for('main.concept', slug=concept.slug))
+                            .entity--mention--image(style='background-image:url("'+concept.image+'")')
                     .entity--mention--content
                         .entity--mention--title
                             a(href=url_for('main.concept', slug=concept.slug))= concept.name

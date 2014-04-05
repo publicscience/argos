@@ -94,7 +94,7 @@ class CurrentUserFeed(Resource):
         if current_user.is_authenticated():
             # Get all the events which belong to stories that the user is watching.
             # This is so heinous, and probably very slow – but it works for now.
-            return models.Event.query.join(models.Event.stories).filter(models.Event.stories.any(models.Story.id.in_([story.id for story in current_user.watching]))).all()
+            return models.Event.query.join(models.Event.stories).filter(models.Event.stories.any(models.Story.id.in_([story.id for story in current_user.watching]))).order_by(models.Event.created_at.desc()).all()
         else:
             return unauthorized()
 api.add_resource(CurrentUserFeed, '/user/feed')

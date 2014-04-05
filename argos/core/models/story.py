@@ -1,9 +1,11 @@
 from argos.datastore import db
-from argos.core.models import Concept
+from argos.core.models import Concept, Event
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
 from argos.core.brain.summarize import multisummarize
+
+import itertools
 
 from argos.util.logger import logger
 
@@ -32,11 +34,39 @@ class Story(Cluster):
         """
         Convenience :)
         """
-        return self.members
+        return self.members.order_by(Event.created_at.desc()).all()
 
     @events.setter
     def events(self, value):
         self.members = value
+
+    def events_before(self, dt):
+        """
+        Returns all events in this story
+        created *at or before* the specified datetime.
+        """
+        return self.members.filter(Event.created_at <= dt).all()
+
+    def events_after(self, dt):
+        """
+        Returns all events in this story
+        created *at or after* the specified datetime.
+        """
+        return self.members.filter(Event.created_at >= dt).all()
+
+    def events_by_date(self, sort='desc'):
+        """
+        Returns all events in this story,
+        grouped by created at dates.
+        """
+        if sort == 'asc':
+            events = self.members.order_by(Event.created_at.asc()).all()
+        else:
+            events = self.members.order_by(Event.created_at.desc()).all()
+        results = []
+        for date, group in itertools.groupby(events, lambda x: x.created_at.date()):
+            results.append((date, list(group)))
+        return results
 
     @property
     def images(self):
@@ -49,7 +79,7 @@ class Story(Cluster):
         """
         Generate a summary for this cluster.
         """
-        if len(self.members) == 1:
+        if self.members.count() == 1:
             self.summary = self.members[0].summary
         else:
             self.summary = ' '.join(multisummarize([m.summary for m in self.members]))

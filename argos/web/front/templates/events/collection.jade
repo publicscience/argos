@@ -6,12 +6,12 @@ block content
 
     .bounds
         if events|count == 0 and empty_msg
-            .notification= empty_msg
+            .empty= empty_msg
         else
             for event in events
                 article.entity-item.clearfix
                     .item--notations
-                        .item--bookmark
+                        .item--bookmark(style=('' if event in current_user.bookmarked else 'display:none;'))
                             span.icon-bookmark
                         .item--promotions
                             .item--notation Promoted by
@@ -33,13 +33,26 @@ block content
                                         if not loop.last
                                             ,
                                 .item--time= event.updated_at|naturaltime
-                        ul.item--actions.list__horizontal__justify
+                        ul.actions.list__horizontal__justify
                             li
-                                span.icon-watch
-                                | Watch
+                                //- TO DO: which story do you watch if it is multiple stories?
+                                if event.stories[0] in current_user.watching
+                                    a(href=url_for('main.watch', story_id=event.stories[0].id), data-method='DELETE', data-mapping='watch').active
+                                        span.icon-watch
+                                        span.action-label Watching
+                                else
+                                    a(href=url_for('main.watch', story_id=event.stories[0].id), data-method='POST', data-mapping='watch')
+                                        span.icon-watch
+                                        span.action-label Watch
                             li
-                                span.icon-bookmark
-                                | Bookmark
+                                if event in current_user.bookmarked
+                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='DELETE', data-mapping='bookmark').active
+                                        span.icon-bookmark
+                                        span.action-label Bookmarked
+                                else
+                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='POST', data-mapping='bookmark')
+                                        span.icon-bookmark
+                                        span.action-label Bookmark
                             li
                                 span.icon-discuss
                                 | Discuss

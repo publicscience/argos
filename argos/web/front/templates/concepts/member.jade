@@ -10,7 +10,7 @@ block content
             .entity--body.clearfix
                 .entity--content
                     section
-                        ul.item--actions.list__horizontal__justify
+                        ul.actions.list__horizontal__justify
                             li
                                 span.icon-watch
                                 | Watch
@@ -32,7 +32,10 @@ block content
                             .entity--tags foo
                             .entity--time Last updated {{ concept.updated_at|naturaltime }}
                     section.entity--summary
-                        p= concept.summary
+                        if concept.summary
+                            p= concept.summary
+                        else
+                            p No summary yet
                         .entity--meta.meta Data provided by DBPedia and Wikipedia.
 
                     +articles('Articles mentioning '+concept.name, concept.articles)
