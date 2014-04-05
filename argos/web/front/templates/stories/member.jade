@@ -11,9 +11,14 @@ block content
                 .entity--content
                     section
                         ul.actions.list__horizontal__justify
-                            li
-                                span.icon-watch
-                                | Watch
+                            if story in current_user.watching
+                                a(href=url_for('main.watch', story_id=story.id), data-method='DELETE', data-mapping='watch').active
+                                    span.icon-watch
+                                    span.action-label Watching
+                            else
+                                a(href=url_for('main.watch', story_id=story.id), data-method='POST', data-mapping='watch')
+                                    span.icon-watch
+                                    span.action-label Watch
                             li
                                 span.icon-bookmark
                                 | Bookmark
@@ -52,6 +57,15 @@ block content
                                 ul.story--event-group
                                     for event in group[1]
                                         li
+                                            .item--notations
+                                                .item--bookmark(style=('' if event in current_user.bookmarked else 'display:none;'))
+                                                    span.icon-bookmark
+                                                .item--promotions
+                                                    .item--notation Promoted by
+                                                    ul.item--promoters
+                                                        li
+                                                            img(src='/dev/user.jpg')
+                                                    .item--notation--extra + 5 more
                                             .event--thumb
                                                 img(src=event.image)
                                             .event--info
