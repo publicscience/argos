@@ -1,8 +1,9 @@
-mixin mentions(title, concepts, max=5)
+mixin mentions(title, concepts, mentions_url=None, max=5)
     section.mentions
         .heading= title
         ul
-            for concept in concepts[:max]
+            - var _concepts = concepts[:max] if max else concepts
+            for concept in _concepts
                 li.mention
                     a(href=url_for('main.concept', slug=concept.slug))
                         if concept.image
@@ -16,5 +17,5 @@ mixin mentions(title, concepts, max=5)
                             p= concept.summary|truncate
                         else
                             p We're missing a summary for this concept. Please help us by submitting one.
-        if concepts|count > max
-            .more {{ concepts|count - max }} more mentions
+        if concepts|count > max and max > 0 and mentions_url
+            a(href=mentions_url).more {{ concepts|count - max }} more mentions

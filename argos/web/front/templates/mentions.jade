@@ -1,0 +1,8 @@
+- from 'mixins/mentions.jade' import mentions
+
+extends layouts/main.jade
+
+block content
+    article.page.clearfix.all-mentions
+        .bounds
+            +mentions('All mentions for '+entity.title, entity.concepts, max=0)

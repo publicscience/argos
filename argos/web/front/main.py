@@ -23,12 +23,32 @@ def event(id):
     event = models.Event.query.get(id)
     return render_template('events/member.jade', event=event)
 
+@bp.route('/events/<int:id>/articles')
+def event_articles(id):
+    event = models.Event.query.get(id)
+    return render_template('articles.jade', entity=event)
+
+@bp.route('/events/<int:id>/mentions')
+def event_mentions(id):
+    event = models.Event.query.get(id)
+    return render_template('mentions.jade', entity=event)
+
 @bp.route('/stories/<int:id>')
 def story(id):
     story = models.Story.query.get(id)
     return render_template('stories/member.jade', story=story)
 
+@bp.route('/stories/<int:id>/mentions')
+def story_mentions(id):
+    story = models.Story.query.get(id)
+    return render_template('mentions.jade', entity=story)
+
 @bp.route('/concepts/<string:slug>')
 def concept(slug):
     concept = models.Concept.query.get(slug)
     return render_template('concepts/member.jade', concept=concept)
+
+@bp.route('/concepts/<string:slug>/articles')
+def concept_articles(slug):
+    concept = models.Concept.query.get(slug)
+    return render_template('articles.jade', entity=concept)

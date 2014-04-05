@@ -8,8 +8,9 @@ extends layouts/main.jade
 block content
     .bounds
         article.page.clearfix
-            .page-hero(style='background-image:url("'+concept.image+'")')
-            .page-body.clearfix
+            .bounds.bounds-collapse-both
+                .page-hero(style='background-image:url("'+concept.image+'")')
+            .page-body.clearfix.bounds.bounds-collapse-right
                 .page-content
                     section
                         +actions(['discuss', 'share', 'promote'])
@@ -25,7 +26,7 @@ block content
                             p No summary yet
                         .page-meta.meta Data provided by DBPedia and Wikipedia.
 
-                    +articles('Articles mentioning '+concept.name, concept.articles)
+                    +articles('Articles mentioning '+concept.name, concept.articles, articles_url=url_for('main.concept_articles', slug=concept.slug))
 
                     .heading.page-heading
                         | Latest events involving {{ concept.name }}

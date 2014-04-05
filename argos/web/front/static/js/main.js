@@ -44,7 +44,7 @@ require(['config'], function() {
             }
         }
 
-        // To handle AJAX links.
+        // For handling AJAX links.
         $('a[data-method]').on('click', function(e) {
             e.preventDefault();
 
@@ -58,6 +58,31 @@ require(['config'], function() {
                 type: method,
                 success: function(data, status, xhr) {
                     successMappings[mapping](el);
+                },
+                error: function(xhr, status, error) {
+                    showNotification(xhr.responseText);
+                }
+            });
+        });
+
+        var moreMappings = {
+            'articles': function(el, data) {
+                var articles = $(data).find('.articles ul').html()
+                el.closest('.articles').find('ul').html(articles);
+            }
+        }
+
+        // For handling "more" buttons.
+        $('.js-more').on('click', function() {
+            var el      = $(this),
+                url     = $(this).data('href'),
+                mapping = $(this).data('mapping');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data, status, xhr) {
+                    moreMappings[mapping](el, data);
                 },
                 error: function(xhr, status, error) {
                     showNotification(xhr.responseText);

@@ -36,7 +36,7 @@ block content
                     p= event.summary|highlight_mentions(event.mentions)|sanitize_html
                     .page-meta.meta This summary was automatically generated from the articles below.
 
-                +articles('In Greater Depth', event.articles)
+                +articles('In Greater Depth', event.articles, articles_url=url_for('main.event_articles', id=event.id))
 
                 //- TO DO: what about events which belong to multiple stories?
                 - var story_events = event.stories[0].events_before(event.created_at).remove(event)
@@ -50,4 +50,4 @@ block content
                 else
                     .empty There are no other events in this story yet.
 
-            +mentions('Mentioned in this event', event.concepts)
+            +mentions('Mentioned in this event', event.concepts, mentions_url=url_for('main.event_mentions', id=event.id))

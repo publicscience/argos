@@ -8,8 +8,9 @@ extends layouts/main.jade
 block content
     .bounds
         article.page.clearfix
-            .page-hero(style='background-image:url("'+story.image+'")')
-            .page-body.clearfix
+            .bounds.bounds-collapse-both
+                .page-hero(style='background-image:url("'+story.image+'")')
+            .page-body.clearfix.bounds.bounds-collapse-right
                 .page-content
                     section
                         +actions(['watch', 'discuss', 'share', 'promote'], user=current_user, story=story)
@@ -24,7 +25,7 @@ block content
 
                     //- TO DO: right now this just grabs from the first event,
                     //- but it should be across all of this story's events.
-                    +articles('Most shared articles in this story', story.events[0].articles)
+                    +articles('Most shared articles in this story', story.events[0].articles, articles_url=url_for('main.event_articles', id=story.events[0].id))
 
                     .heading.page-heading
                         | The full timeline
@@ -40,4 +41,4 @@ block content
                                     for event in group[1]
                                         +event_item(event, current_user)
 
-                +mentions('Mentioned in this story', story.concepts)
+                +mentions('Mentioned in this story', story.concepts, mentions_url=url_for('main.story_mentions', id=story.id))

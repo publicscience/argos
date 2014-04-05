@@ -1,8 +1,9 @@
-mixin articles(title, articles, max=5)
+mixin articles(title, articles, articles_url=None, max=5)
     section.articles
         .subheading= title
         ul
-            for article in articles[:max]
+            - var _articles = articles[:max] if max else articles
+            for article in _articles
                 li
                     .article-icon
                         img(src='/dev/source.png')
@@ -12,5 +13,5 @@ mixin articles(title, articles, max=5)
                         .meta
                             .meta-tags= article.source.name
                             .meta-time= article.updated_at|natural_datetime
-        if articles|count > max
-            .more {{ articles|count - max }} more articles
+        if articles|count > max and max > 0 and articles_url
+            .more.js-more(data-mapping='articles', data-href=articles_url) {{ articles|count - max }} more articles

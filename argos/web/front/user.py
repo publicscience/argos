@@ -12,7 +12,7 @@ PER_PAGE = 20
 def feed():
     page = request.args.get('page', 1)
 
-    if current_user.is_authenticated and len(current_user.watching) > 0:
+    if current_user.is_authenticated() and len(current_user.watching) > 0:
         # Get all the events which belong to stories that the user is watching.
         # This is so heinous, and probably very slow – but it works for now.
         # Eventually this will also have highly-promoted stories as well.

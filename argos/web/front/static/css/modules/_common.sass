@@ -67,7 +67,7 @@ a, a:visited
     bottom: -100%
     text-align: center
     position: fixed
-    .popover-notification--content
+    .popover-notification-content
         background: $error-color
         color: #fff
         width: 18em
@@ -102,13 +102,15 @@ a, a:visited
     text-align: center
     margin: 4em 0
 
-.more
+.more, a.more, a:visited.more
     border: 1px solid #cccccc
     color: $muted-color
     text-align: center
     font-size: 0.8em
     padding: 1em
     font-style: italic
+    cursor: pointer
+    display: block
 
 @media only screen and (max-width : 1080px)
     .bounds-collapse-both
