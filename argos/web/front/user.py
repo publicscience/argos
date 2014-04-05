@@ -21,7 +21,9 @@ def feed():
 
     # Default to trending events
     else:
-        events = models.Event.query.order_by(models.Event._score.desc()).paginate(page, per_page=PER_PAGE).items
+        # Filter to only show events which have been clustered
+        # (i.e. they belong to at least one story)
+        events = models.Event.query.filter(models.Event.stories).order_by(models.Event._score.desc()).paginate(page, per_page=PER_PAGE).items
         title = 'The latest, most shared events'
     return render_template('events/collection.jade', events=events, title=title)
 
