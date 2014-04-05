@@ -5,6 +5,8 @@ from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
 from argos.core.brain.summarize import multisummarize
 
+import itertools
+
 from argos.util.logger import logger
 
 stories_events = db.Table('stories_events',
@@ -32,7 +34,7 @@ class Story(Cluster):
         """
         Convenience :)
         """
-        return self.members.all()
+        return self.members.order_by(Event.created_at.desc()).all()
 
     @events.setter
     def events(self, value):
@@ -52,12 +54,19 @@ class Story(Cluster):
         """
         return self.members.filter(Event.created_at >= dt).all()
 
-    def events_by_date(self):
+    def events_by_date(self, sort='desc'):
         """
         Returns all events in this story,
-        grouped by dates.
+        grouped by created at dates.
         """
-        pass
+        if sort == 'asc':
+            events = self.members.order_by(Event.created_at.asc()).all()
+        else:
+            events = self.members.order_by(Event.created_at.desc()).all()
+        results = []
+        for date, group in itertools.groupby(events, lambda x: x.created_at.date()):
+            results.append((date, list(group)))
+        return results
 
     @property
     def images(self):

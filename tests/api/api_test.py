@@ -86,7 +86,7 @@ class APITest(RequiresAPI):
             'score': '0.5'
         } for concept in story.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in story.mentions]
-        for member in story.members:
+        for member in story.events:
             expected_members.append({
                 'id': member.id,
                 'url': '/events/{0}'.format(member.id)
@@ -103,7 +103,7 @@ class APITest(RequiresAPI):
                 'title': story.title,
                 'summary': story.summary,
                 'image': story.image,
-                'images': ['http://foo.jpg', 'http://foo2.jpg'],
+                'images': ['http://foo2.jpg', 'http://foo.jpg'],
                 'updated_at': story.updated_at.isoformat(),
                 'created_at': story.created_at.isoformat(),
                 'events': expected_members,
@@ -114,6 +114,8 @@ class APITest(RequiresAPI):
 
         r = self.client.get('/stories/{0}'.format(story.id))
 
+        print(self.json(r))
+        print(expected)
         self.assertEqual(self.json(r), expected)
 
     def test_GET_story_watchers(self):
