@@ -1,0 +1,34 @@
+mixin actions(actions, user=None, event=None, story=None)
+    ul.actions.list__horizontal__justify
+        if 'watch' in actions
+            li
+                if story in user.watching
+                    a(href=url_for('user.watch', story_id=story.id), data-method='DELETE', data-mapping='watch').active
+                        span.icon-watch
+                        span.action-label Watching
+                else
+                    a(href=url_for('user.watch', story_id=story.id), data-method='POST', data-mapping='watch')
+                        span.icon-watch
+                        span.action-label Watch
+        if 'bookmark' in actions
+            li
+                if event in user.bookmarked
+                    a(href=url_for('user.bookmark', event_id=event.id), data-method='DELETE', data-mapping='bookmark').active
+                        span.icon-bookmark
+                        span.action-label Bookmarked
+                else
+                    a(href=url_for('user.bookmark', event_id=event.id), data-method='POST', data-mapping='bookmark')
+                        span.icon-bookmark
+                        span.action-label Bookmark
+        if 'discuss' in actions
+            li
+                span.icon-discuss
+                | Discuss
+        if 'share' in actions
+            li
+                span.icon-share
+                | Share
+        if 'promote' in actions
+            li
+                span.icon-promote
+                | Promote

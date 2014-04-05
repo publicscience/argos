@@ -1,3 +1,5 @@
+- from 'mixins/events.jade' import event_item
+
 extends layouts/main.jade
 
 block content
@@ -9,63 +11,4 @@ block content
             .empty= empty_msg
         else
             for event in events
-                article.entity-item.clearfix
-                    .item--notations
-                        .item--bookmark(style=('' if event in current_user.bookmarked else 'display:none;'))
-                            span.icon-bookmark
-                        .item--promotions
-                            .item--notation Promoted by
-                            ul.item--promoters
-                                li
-                                    img(src='/dev/user.jpg')
-                            .item--notation--extra + 5 more
-                    .item--thumb
-                        a(href=url_for('main.event', id=event.id))
-                            img(src=event.image)
-                    .item--content
-                        header.item--header
-                            .item--title
-                                a(href=url_for('main.event', id=event.id))= event.title
-                            .meta
-                                .item--tags
-                                    for story in event.stories
-                                        a(href=url_for('main.story', id=story.id))= story.title
-                                        if not loop.last
-                                            ,
-                                .item--time= event.updated_at|natural_datetime
-                        ul.actions.list__horizontal__justify
-                            li
-                                //- TO DO: which story do you watch if it is multiple stories?
-                                if event.stories[0] in current_user.watching
-                                    a(href=url_for('main.watch', story_id=event.stories[0].id), data-method='DELETE', data-mapping='watch').active
-                                        span.icon-watch
-                                        span.action-label Watching
-                                else
-                                    a(href=url_for('main.watch', story_id=event.stories[0].id), data-method='POST', data-mapping='watch')
-                                        span.icon-watch
-                                        span.action-label Watch
-                            li
-                                if event in current_user.bookmarked
-                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='DELETE', data-mapping='bookmark').active
-                                        span.icon-bookmark
-                                        span.action-label Bookmarked
-                                else
-                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='POST', data-mapping='bookmark')
-                                        span.icon-bookmark
-                                        span.action-label Bookmark
-                            li
-                                span.icon-discuss
-                                | Discuss
-                            li
-                                span.icon-share
-                                | Share
-                            li
-                                span.icon-promote
-                                | Promote
-                        .item--summary
-                            p= event.summary
-
-
-
-
-
+                +event_item(event, current_user)

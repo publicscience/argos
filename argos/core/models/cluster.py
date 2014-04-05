@@ -41,7 +41,8 @@ class Clusterable(Model):
 
         return db.relationship(args['association_model'],
                 backref=db.backref(args['backref_name']),
-                cascade='all, delete-orphan')
+                cascade='all, delete-orphan',
+                order_by=args['association_model'].score.desc())
 
     @property
     def concepts(self):

@@ -12,6 +12,7 @@
         color: #fff
 
 .logo
+    @include transition
     font-size: 1.6em
     vertical-align: middle
     margin: 0 0.2em 0 -1.2em
@@ -37,3 +38,7 @@ nav
     font-size: 0.6em
     padding: 0 0.5em
     color: $secondary-color
+
+@media only screen and (max-width : 1220px)
+    .logo
+        margin-left: 0

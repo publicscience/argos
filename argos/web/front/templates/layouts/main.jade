@@ -42,9 +42,9 @@ html(lang="en")
                                 +nav_link('main.trending', 'icon-trending', 'Trending')
                             if current_user.is_authenticated()
                                 li
-                                    +nav_link('main.watching', 'icon-watch', 'Watching')
+                                    +nav_link('user.watching', 'icon-watch', 'Watching')
                                 li
-                                    +nav_link('main.bookmarked', 'icon-bookmark', 'Bookmarked')
+                                    +nav_link('user.bookmarks', 'icon-bookmark', 'Bookmarks')
                                 li
                                     span.icon-settings
                                 | Settings

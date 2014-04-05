@@ -1,14 +1,20 @@
-mixin mentions(title, concepts)
-    section.entity--mentions
+mixin mentions(title, concepts, max=5)
+    section.mentions
         .heading= title
         ul
-            for concept in concepts
-                li.entity--mention
-                    if concept.image
-                        a(href=url_for('main.concept', slug=concept.slug))
-                            .entity--mention--image(style='background-image:url("'+concept.image+'")')
-                    .entity--mention--content
-                        .entity--mention--title
+            for concept in concepts[:max]
+                li.mention
+                    a(href=url_for('main.concept', slug=concept.slug))
+                        if concept.image
+                            .mention-image(style='background-image:url("'+concept.image+'")')
+                        else:
+                            .mention-image(style='background-image:url(/img/missing.png)')
+                    .mention-content
+                        .mention-title.title
                             a(href=url_for('main.concept', slug=concept.slug))= concept.name
                         if concept.summary
                             p= concept.summary|truncate
+                        else
+                            p We're missing a summary for this concept. Please help us by submitting one.
+        if concepts|count > max
+            .more {{ concepts|count - max }} more mentions

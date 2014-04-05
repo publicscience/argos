@@ -1,0 +1,43 @@
+.mentions
+    width: 30%
+    float: right
+    background: #f6f6f6
+    .heading
+        padding: 1.6em 1.2em
+        font-size: 0.8em
+
+.mention-image
+    height: 200px
+    width: 100%
+    background-size: cover
+    background-position: center 20%
+    background-repeat: no-repeat
+
+.mention
+    margin-bottom: 2em
+
+.mention-content
+    padding: 1em
+    p
+        font-size: 0.7em
+
+.mention-title
+    font-size: 0.8em
+    margin: 0 0 1em 0
+
+@media only screen and (max-width : 980px)
+    .mentions
+        width: 100%
+        float: none
+    .mention
+        width: 33.33%
+        margin-bottom: 4em
+        float: left
+
+@media only screen and (max-width : 760px)
+    .mention
+        width: 50%
+
+@media only screen and (max-width : 480px)
+    .mention
+        width: 100%
