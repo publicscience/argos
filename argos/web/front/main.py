@@ -2,7 +2,7 @@ import argos.web.models as models
 from argos.datastore import db
 
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import jinja2
 import humanize
@@ -10,12 +10,29 @@ from lxml.html.clean import clean_html
 
 from flask import Blueprint, request, render_template, flash, redirect, url_for
 from flask.ext.security import current_user
+from flask.ext import babel
 
 bp = Blueprint('main', __name__)
 
 PER_PAGE = 20
 
 @bp.route('/')
+def feed():
+    page = request.args.get('page', 1)
+
+    if current_user.is_authenticated and len(current_user.watching) > 0:
+        # Get all the events which belong to stories that the user is watching.
+        # This is so heinous, and probably very slow – but it works for now.
+        # Eventually this will also have highly-promoted stories as well.
+        events = models.Event.query.join(models.Event.stories).filter(models.Event.stories.any(models.Story.id.in_([story.id for story in current_user.watching]))).order_by(models.Event.created_at.desc()).all()
+        title = 'Your latest events'
+
+    # Default to trending events
+    else:
+        events = models.Event.query.order_by(models.Event._score.desc()).paginate(page, per_page=PER_PAGE).items
+        title = 'The latest, most shared events'
+    return render_template('events/collection.jade', events=events, title=title)
+
 @bp.route('/latest')
 def latest():
     page = request.args.get('page', 1)
@@ -106,7 +123,7 @@ def bookmarked():
         return redirect(url_for('security.login'))
 
 @bp.app_template_filter()
-def naturaltime(dt):
+def natural_datetime(dt):
     """
     A template filter for rendering
     datetimes in human-readable form,
@@ -114,9 +131,34 @@ def naturaltime(dt):
 
     Example usage (in `pyjade`)::
 
-        div= event.updated_at|naturaltime
+        div= event.updated_at|natural_datetime
     """
     return humanize.naturaltime(datetime.utcnow() - dt)
+
+@bp.app_template_filter()
+def natural_date(date):
+    """
+    A template filter for rendering
+    dates in human-readable form,
+    e.g. "5 days ago", etc.
+
+    Example usage (in `pyjade`)::
+
+        div= event.updated_at.date()|natural_date
+    """
+    dt = datetime.combine(date, datetime.min.time())
+    diff = datetime.utcnow() - dt
+    if diff <= timedelta(days=2):
+        return humanize.naturalday(diff)
+    return humanize.naturaltime(diff)
+
+@bp.app_template_filter()
+def format_date(date):
+    format = 'MMMM d'
+    dt = datetime.combine(date, datetime.min.time())
+    if (datetime.utcnow() - dt).days > 365:
+        format += ' y'
+    return babel.format_date(date, format)
 
 @bp.app_template_filter()
 def highlight_mentions(text, mentions):
@@ -145,4 +187,3 @@ def sanitize_html(html):
     # Wrap in jinja2.Markup so jinja doesn't
     # re-escape the html.
     return jinja2.Markup(clean_html(html))
-

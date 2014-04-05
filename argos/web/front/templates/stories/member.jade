@@ -11,9 +11,14 @@ block content
                 .entity--content
                     section
                         ul.actions.list__horizontal__justify
-                            li
-                                span.icon-watch
-                                | Watch
+                            if story in current_user.watching
+                                a(href=url_for('main.watch', story_id=story.id), data-method='DELETE', data-mapping='watch').active
+                                    span.icon-watch
+                                    span.action-label Watching
+                            else
+                                a(href=url_for('main.watch', story_id=story.id), data-method='POST', data-mapping='watch')
+                                    span.icon-watch
+                                    span.action-label Watch
                             li
                                 span.icon-bookmark
                                 | Bookmark
@@ -30,7 +35,7 @@ block content
                         .entity--title= story.title
                         .entity--meta.meta
                             .entity--tags foo
-                            .entity--time Last updated {{ story.updated_at|naturaltime }}
+                            .entity--time Last updated {{ story.updated_at|natural_datetime }}
                     section.entity--summary
                         p= story.summary|highlight_mentions(story.mentions)|sanitize_html
                         .entity--meta.meta This summary was automatically generated from the articles below.
@@ -47,19 +52,45 @@ block content
                             a(href='?order=desc') Oldest to most recent ⇅
                     section.entity--timeline
                         .entity--timeline-date
-                            .subheading January 2, 2014 (2 days ago)
-                            ul
-                                li
-                                    .event--thumb
-                                        img(src='/dev/event.jpg')
-                                    .event--info
-                                        .event--title Syrian cities in rubble as conflict intensifies
-                                        p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
-                                li
-                                    .event--thumb
-                                        img(src='/dev/event.jpg')
-                                    .event--info
-                                        .event--title Syrian cities in rubble as conflict intensifies
-                                        p Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate. Whaling in Japan, in the sense of non-industrial whale hunting, began in the 12th century, but Japanese whaling in the modern sense began in the 1890s when Japan began to participate...
+                            for group in story.events_by_date()
+                                .subheading {{ group[0]|format_date }} ({{ group[0]|natural_date }})
+                                ul.story--event-group
+                                    for event in group[1]
+                                        li
+                                            .item--notations
+                                                .item--bookmark(style=('' if event in current_user.bookmarked else 'display:none;'))
+                                                    span.icon-bookmark
+                                                .item--promotions
+                                                    .item--notation Promoted by
+                                                    ul.item--promoters
+                                                        li
+                                                            img(src='/dev/user.jpg')
+                                                    .item--notation--extra + 5 more
+                                            .event--thumb
+                                                img(src=event.image)
+                                            .event--info
+                                                .event--title
+                                                    a(href=url_for('main.event', id=event.id))= event.title
+                                                ul.actions.list__horizontal__justify
+
+                                                    li
+                                                        if event in current_user.bookmarked
+                                                            a(href=url_for('main.bookmark', event_id=event.id), data-method='DELETE', data-mapping='bookmark').active
+                                                                span.icon-bookmark
+                                                                span.action-label Bookmarked
+                                                        else
+                                                            a(href=url_for('main.bookmark', event_id=event.id), data-method='POST', data-mapping='bookmark')
+                                                                span.icon-bookmark
+                                                                span.action-label Bookmark
+                                                    li
+                                                        span.icon-discuss
+                                                        | Discuss
+                                                    li
+                                                        span.icon-share
+                                                        | Share
+                                                    li
+                                                        span.icon-promote
+                                                        | Promote
+                                                p= event.summary|highlight_mentions(event.mentions)|sanitize_html
 
                 +mentions('Mentioned in this story', story.concepts)

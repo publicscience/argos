@@ -30,7 +30,7 @@ block content
                         .entity--title= concept.name
                         .entity--meta.meta
                             .entity--tags foo
-                            .entity--time Last updated {{ concept.updated_at|naturaltime }}
+                            .entity--time Last updated {{ concept.updated_at|natural_datetime }}
                     section.entity--summary
                         if concept.summary
                             p= concept.summary

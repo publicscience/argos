@@ -6,6 +6,15 @@ extends layouts/main.jade
 block content
     .bounds
         article.entity.clearfix
+            .item--notations
+                .item--bookmark(style=('' if event in current_user.bookmarked else 'display:none;'))
+                    span.icon-bookmark
+                .item--promotions
+                    .item--notation Promoted by
+                    ul.item--promoters
+                        li
+                            img(src='/dev/user.jpg')
+                    .item--notation--extra + 5 more
             .entity--hero(style='background-image:url("'+event.image+'")')
             .entity--body.clearfix
                 .entity--content
@@ -15,8 +24,14 @@ block content
                                 span.icon-watch
                                 | Watch
                             li
-                                span.icon-bookmark
-                                | Bookmark
+                                if event in current_user.bookmarked
+                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='DELETE', data-mapping='bookmark').active
+                                        span.icon-bookmark
+                                        span.action-label Bookmarked
+                                else
+                                    a(href=url_for('main.bookmark', event_id=event.id), data-method='POST', data-mapping='bookmark')
+                                        span.icon-bookmark
+                                        span.action-label Bookmark
                             li
                                 span.icon-discuss
                                 | Discuss
@@ -34,7 +49,7 @@ block content
                                     a(href=url_for('main.story', id=story.id))= story.title
                                     if not loop.last
                                         ,
-                            .entity--time= event.updated_at|naturaltime
+                            .entity--time= event.updated_at|natural_datetime
                     section.entity--summary
                         p= event.summary|highlight_mentions(event.mentions)|sanitize_html
                         .entity--meta.meta This summary was automatically generated from the articles below.
@@ -55,7 +70,7 @@ block content
                                             img(src=rel_event.image)
                                         .event--info
                                             .event--title= rel_event.title
-                                            .meta= rel_event.updated_at|naturaltime
+                                            .meta= rel_event.updated_at|natural_datetime
                                             p= rel_event.summary|truncate(length=400)|highlight_mentions(rel_event.mentions)|sanitize_html
                     else
                         .empty There are no other events in this story yet.

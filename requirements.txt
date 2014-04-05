@@ -42,6 +42,7 @@ chardet==2.2.1
 webassets==0.9
 Flask-Assets==0.9
 pyjade==2.2.0
+Babel==1.3
 
 # Use latest feedparser.
 # Although feedparser says it supports Py3.3,
