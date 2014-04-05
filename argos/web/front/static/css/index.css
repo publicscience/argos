@@ -1154,13 +1154,29 @@ a, a:visited {
   display: block;
 }
 
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003115}}
+footer {
+  background: #20232d;
+  padding: 3em 2em 4em 2em;
+  text-align: center;
+  color: #42485d;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003120}}
+footer .bounds {
+  max-width: 480px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003122}}
+footer p {
+  font-size: 0.7em;
+}
+
 @media only screen and (max-width: 1080px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003116}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003126}}
   .bounds-collapse-both {
     padding: 0;
   }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003118}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/ftseng\/Desktop\/projects\/argos\/argos\/argos\/web\/front\/static\/css\/modules\/_common\.sass}line{font-family:\00003128}}
   .bounds-collapse-right {
     padding-right: 0;
   }
