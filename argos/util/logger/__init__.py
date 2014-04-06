@@ -21,17 +21,18 @@ def logger(name):
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # Output to file.
-    fh = logging.FileHandler(log_path)
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    if APP['DEBUG']:
+        # Output to file, if DEBUG=True
+        fh = logging.FileHandler(log_path)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
-    # Output to console.
-    ch = logging.StreamHandler()
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+        # Output to console.
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
 
-    if not APP['DEBUG']:
+    else:
         # Output to email.
         mh = handlers.SMTPHandler(
                 (APP['EMAIL_HOST'], APP['EMAIL_PORT']),
