@@ -19,3 +19,4 @@ jena/
 *.rdb
 .webassets-cache
 bower/
+index.css
