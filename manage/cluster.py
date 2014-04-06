@@ -32,10 +32,10 @@ def cluster_articles():
         logger.info('Clustering in {0} batches...'.format(pages))
 
         for page in range(1, pages):
-            logger.info('Clustering {0}% complete.'.format(page/pages * 100))
             # Pages are 1-indexed.
             articles = Article.query.filter(~Article.events.any()).paginate(page, per_page=per_page).items
             Event.cluster(articles, threshold=0.1)
+            logger.info('Clustering {0}% complete.'.format(page/pages * 100))
 
         logger.info('Clustering complete.')
     else:
@@ -57,10 +57,9 @@ def cluster_events():
         logger.info('Clustering in {0} batches...'.format(pages))
 
         for page in range(1, pages):
-            logger.info('Clustering {0}% complete.'.format(page/pages * 100))
             events = Event.query.filter(~Event.stories.any()).paginate(page, per_page=per_page).items
-
             Story.cluster(events, threshold=0.1)
+            logger.info('Clustering {0}% complete.'.format(page/pages * 100))
 
         logger.info('Clustering complete.')
     else:
