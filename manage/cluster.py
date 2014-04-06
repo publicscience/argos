@@ -20,7 +20,7 @@ def cluster_articles():
     Batch cluster all articles => events
     which do not already belong to events.
     """
-    total_articles = Article.query.filter(not Article.events).count()
+    total_articles = Article.query.filter(~Article.events.any()).count()
 
     if total_articles:
         logger.info('Clustering {0} orphaned articles...'.format(total_articles))
@@ -34,7 +34,7 @@ def cluster_articles():
         for page in range(1, pages):
             logger.info('Clustering {0}% complete.'.format(page/pages * 100))
             # Pages are 1-indexed.
-            articles = Article.query.filter(not Article.events).paginate(page, per_page=per_page).items
+            articles = Article.query.filter(~Article.events.any()).paginate(page, per_page=per_page).items
             Event.cluster(articles, threshold=0.1)
 
         logger.info('Clustering complete.')
@@ -46,7 +46,7 @@ def cluster_events():
     Batch cluster all events => stories
     which do not already belong to stories.
     """
-    total_events = Event.query.filter(not Event.stories).count()
+    total_events = Event.query.filter(~Event.stories.any()).count()
 
     if total_events:
         logger.info('Clustering {0} orphaned events...'.format(total_events))
@@ -58,7 +58,7 @@ def cluster_events():
 
         for page in range(1, pages):
             logger.info('Clustering {0}% complete.'.format(page/pages * 100))
-            events = Event.query.filter(not Event.stories).paginate(page, per_page=per_page).items
+            events = Event.query.filter(~Event.stories.any()).paginate(page, per_page=per_page).items
 
             Story.cluster(events, threshold=0.1)
 
