@@ -67,7 +67,7 @@ class Article(Clusterable):
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
             bow_vec = brain.vectorize(self.text)
-            ent_vec = brain.vectorize(' '.join(brain.concepts(self.text)))
+            ent_vec = brain.vectorize(' '.join([c.slug for c in self.concepts]))
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
