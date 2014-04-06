@@ -9,6 +9,8 @@ BROKER_CONNECTION_MAX_RETRIES = None
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # What modules to import on start.
+# Note that in production environments you will want to
+# remove the 'tests' tasks module.
 CELERY_IMPORTS = ('tests.util.tasks_test', 'argos.tasks', 'argos.core.digester.wikidigester',)
 
 # Propagate chord errors when they come up.
@@ -31,3 +33,13 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'argos.bot@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-pass'
+
+# If enabled pid and log directories will be created if missing.
+CELERY_CREATE_DIRS=1
+
+# Setting a maximum amount of tasks per worker
+# so the worker processes get regularly killed
+# (to reclaim memory). Not sure if this is the best
+# approach, but see:
+# https://github.com/publicscience/argos/issues/112
+CELERYD_MAX_TASKS_PER_CHILD=100
