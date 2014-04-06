@@ -8,8 +8,7 @@ from json import loads
 from argos import web
 from argos.web import api, front
 from argos.datastore import db
-
-from jobs import workers
+from argos.jobs import workers
 
 from tests.patches import patch_knowledge, patch_concepts, patch_aws
 from tests import helpers
