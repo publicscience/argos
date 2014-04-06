@@ -1,9 +1,9 @@
 import unittest
 from tests import RequiresWorkers
-
 import math, time
 from celery import chord
-from jobs import celery, workers
+
+from argos.tasks import celery, workers
 
 class TasksTest(RequiresWorkers):
     def test_chord(self):

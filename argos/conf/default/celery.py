@@ -9,7 +9,7 @@ BROKER_CONNECTION_MAX_RETRIES = None
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # What modules to import on start.
-CELERY_IMPORTS = ('tests.util.tasks_test', 'jobs', 'argos.core.digester.wikidigester',)
+CELERY_IMPORTS = ('tests.util.tasks_test', 'argos.tasks', 'argos.core.digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
