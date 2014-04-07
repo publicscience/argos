@@ -11,7 +11,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 # What modules to import on start.
 # Note that in production environments you will want to
 # remove the 'tests' tasks module.
-CELERY_IMPORTS = ('tests.util.tasks_test', 'argos.tasks', 'argos.core.digester.wikidigester',)
+CELERY_IMPORTS = ('tests.util.tasks_test', 'argos.tasks', 'argos.tasks.periodic', 'argos.core.digester.wikidigester',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True
@@ -33,6 +33,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'argos.bot@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-pass'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
 
 # If enabled pid and log directories will be created if missing.
 CELERY_CREATE_DIRS=1
@@ -44,10 +46,10 @@ CELERY_CREATE_DIRS=1
 # https://github.com/publicscience/argos/issues/112
 CELERYD_MAX_TASKS_PER_CHILD=100
 
-CELERY_TIMEZONE = 'UTC'
 
 from celery.schedules import crontab
 
+CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULE = {
     'collect-articles': {
         'task': 'argos.tasks.periodic.collect',
@@ -66,4 +68,15 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=30, hour='*'),
         'args': ('this is a beat test')
     }
+}
+
+from kombu.common import Broadcast
+
+# Create a broadcast queue so the tasks are sent to
+# *all* workers (that are listening to that queue).
+CELERY_QUEUES = (Broadcast('broadcast_tasks'), )
+CELERY_ROUTES = {
+        'argos.tasks.periodic.collect': {'queue': 'broadcast_tasks'},
+        'argos.tasks.periodic.cluster_articles': {'queue': 'broadcast_tasks'},
+        'argos.tasks.periodic.cluster_events': {'queue': 'broadcast_tasks'}
 }
