@@ -11,7 +11,7 @@ It's assumed that when factories are used, you aren't testing the lower-level fu
 
 from tests.helpers import save
 from tests.patches import requires_patches
-from argos.core.models import Concept, Article, Event, Story, Source
+from argos.core.models import Concept, Article, Event, Story, Source, Feed
 from argos.web.models import User
 from argos.datastore import db
 
@@ -59,9 +59,9 @@ def concept(num=1):
 
 def source(num=1):
     args = [
-        {'ext_url': 'foo', 'name': 'The Times'},
-        {'ext_url': 'bar', 'name': 'The Post'},
-        {'ext_url': 'sup', 'name': 'The Journal'}
+        {'feeds': [Feed(ext_url='foo')], 'name': 'The Times'},
+        {'feeds': [Feed(ext_url='bar')], 'name': 'The Post'},
+        {'feeds': [Feed(ext_url='sup')], 'name': 'The Journal'}
     ]
     s_s = [Source(**args[i]) for i in range(num)]
 

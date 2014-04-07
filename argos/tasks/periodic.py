@@ -1,6 +1,6 @@
 from argos.tasks import celery, notify
 
-from argos.core.models import Source, Article, Event
+from argos.core.models import Feed, Article, Event
 from argos.core.membrane import collector
 from argos.datastore import db
 
@@ -17,27 +17,27 @@ def collect():
     updated in at least an hour
     and fetches new articles for it.
     """
-    # Get a source which has not yet been updated
+    # Get a feed which has not yet been updated
     # and is not currently being updated.
-    source = Source.query.filter(Source.updated_at < datetime.utcnow() - timedelta(hours=1) and not Source.updating).first()
+    feed = Feed.query.filter(Feed.updated_at < datetime.utcnow() - timedelta(hours=1) and not Feed.updating).first()
 
-    # "Claim" this source,
+    # "Claim" this feed,
     # so other workers won't pick it.
-    source.updating = True
+    feed.updating = True
     db.session.commit()
 
     try:
-        collector.collect(source)
-        source.updated_at = datetime.utcnow()
+        collector.collect(feed)
+        feed.updated_at = datetime.utcnow()
 
     except Exception:
-        logger.exception('Exception while collecting for source {0}'.format(source.name))
+        logger.exception('Exception while collecting for feed {0}'.format(feed.name))
         raise
 
     finally:
-        source.updating = False
+        feed.updating = False
         db.session.commit()
-        notify('Collecting for source {0} is complete.'.format(source.name))
+        notify('Collecting for feed {0} is complete.'.format(feed.name))
 
 @celery.task
 def cluster_articles(batch_size=20, threshold=0.05):
