@@ -34,7 +34,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'argos.bot@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-pass'
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = True
 
 # If enabled pid and log directories will be created if missing.
 CELERY_CREATE_DIRS=1

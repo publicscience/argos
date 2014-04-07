@@ -93,7 +93,7 @@ def notify(body):
     """
     Send an e-mail notification.
     """
-    from_addr = CELERY.EMAIL_HOST_USER
+    from_addr = CELERY['EMAIL_HOST_USER']
 
     # Construct the message.
     msg = MIMEMultipart()
@@ -102,11 +102,11 @@ def notify(body):
     msg.attach(MIMEText(body, 'plain'))
 
     # Connect to the mail server.
-    server = smtplib.SMTP(CELERY.EMAIL_HOST, CELERY.EMAIL_PORT)
+    server = smtplib.SMTP(CELERY['EMAIL_HOST'], CELERY['EMAIL_PORT'])
     server.starttls()
-    server.login(from_addr, CELERY.EMAIL_HOST_PASSWORD)
+    server.login(from_addr, CELERY['EMAIL_HOST_PASSWORD'])
 
-    for target in CELERY.ADMINS:
+    for target in CELERY['ADMINS']:
         msg['To'] = target[1]
         server.sendmail(from_addr, target[1], msg.as_string())
 
