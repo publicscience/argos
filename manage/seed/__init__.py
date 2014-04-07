@@ -7,6 +7,7 @@ Create some seed data.
 
 from argos.datastore import db
 from argos.core.models import Concept, Article, Event, Story, Source
+from argos.core.membrane import feed
 from argos.util.progress import progress_bar
 from argos.web.models.oauth import Client
 from werkzeug.security import gen_salt
@@ -180,8 +181,5 @@ def seed(debug=False):
 
 def create_sources():
     sources = open('manage/data/seed_sources.json', 'r')
-
-    for source in json.load(sources):
-        s = Source(ext_url=source[1], name=source[0])
-        db.session.add(s)
-    db.session.commit()
+    raw_sources = json.load(sources)
+    feed.add_sources(raw_sources)

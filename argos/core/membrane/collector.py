@@ -7,7 +7,7 @@ articles for training and/or testing.
 """
 
 from argos.datastore import db
-from argos.core.models import Source, Article
+from argos.core.models import Article
 from argos.core.membrane import evaluator, extractor
 
 from dateutil.parser import parse
@@ -21,18 +21,18 @@ from http.client import BadStatusLine
 from argos.util.logger import logger
 logger = logger(__name__)
 
-def collect(source):
+def collect(feed):
     """
-    Fetch articles from the specified source,
+    Fetch articles from the specified feed,
     and save to db.
 
     This is a generator which yields a list
-    of new Articles for the source.
+    of new Articles for the feed.
     """
 
     try:
-        logger.info('Fetching from {0}...'.format(source.ext_url))
-        new_articles = get_articles(source)
+        logger.info('Fetching from {0}...'.format(feed.ext_url))
+        new_articles = get_articles(feed)
 
         for article in new_articles:
             db.session.add(article)
@@ -42,16 +42,16 @@ def collect(source):
 
     except SAXException as e:
         # Error with the feed, make a note.
-        logger.info('Error fetching from {0}.'.format(source.ext_url))
-        source.errors += 1
+        logger.info('Error fetching from {0}.'.format(feed.ext_url))
+        feed.errors += 1
         db.session.commit()
 
         yield []
 
 
-def get_articles(source):
+def get_articles(feed):
     """
-    Parse a feed from the specified source,
+    Parse the specified feed,
     gathering the latest new articles.
 
     If an article matches one that already exists,
@@ -68,13 +68,13 @@ def get_articles(source):
     empty string.
 
     Args:
-        | source (Source)    -- the source to fetch from.
+        | feed (Feed)    -- the feed to fetch from.
 
     Returns:
         | list -- list of latest new Articles.
     """
     # Fetch the feed data.
-    data = feedparser.parse(source.ext_url)
+    data = feedparser.parse(feed.ext_url)
 
     # If the `bozo` value is anything
     # but 0, there was an error parsing (or connecting) to the feed.
@@ -127,7 +127,8 @@ def get_articles(source):
 
         articles.append(Article(
             ext_url=url,
-            source=source,
+            source=feed.source,
+            feed=feed,
             html=html,
             text=full_text,
             authors=extractor.extract_authors(entry),

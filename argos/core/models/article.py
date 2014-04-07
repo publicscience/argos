@@ -43,6 +43,7 @@ class Article(Clusterable):
     image       = db.Column(db.String)
     score       = db.Column(db.Float, default=0.0)
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
+    feed_id     = db.Column(db.Integer, db.ForeignKey('feed.id'))
     authors     = db.relationship('Author',
                     secondary=articles_authors,
                     backref=db.backref('articles', lazy='dynamic'))

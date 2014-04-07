@@ -15,7 +15,7 @@ Example::
 """
 
 from argos.datastore import db
-from argos.core.models import Source
+from argos.core.models import Source, Feed
 from argos.core.membrane import feedfinder
 
 from argos.util.logger import logger
@@ -50,22 +50,6 @@ def find_feeds(url):
     return feedfinder.feeds(url)
 
 
-def add_source(url, name):
-    """
-    Add a new source.
-
-    Args:
-        | url  (str)     -- where to look for the feed,
-                            or the feed itself.
-        | name (str)     -- the name for the source.
-    """
-    feed_url = find_feed(url)
-    if not Source.query.filter_by(ext_url=feed_url).count():
-        source = Source(ext_url=feed_url, name=name)
-        db.session.add(source)
-        db.session.commit()
-
-
 def add_sources(sources):
     """
     Add multiple sources.
@@ -74,52 +58,26 @@ def add_sources(sources):
         | sources (list)   -- list of dicts of urls to look for feeds, or
                               the feed urls themselves, and the source name::
 
-        [{
-            'name': 'The New York Times',
-            'url': 'http//www.nytimes.com/services/xml/rss/nyt/World.xml'
-        }]
+        {
+            'The New York Times': [
+                'http//www.nytimes.com/services/xml/rss/nyt/World.xml',
+                'http//www.nytimes.com/services/xml/rss/nyt/politics.xml'
+            ]
+        }
     """
-    for raw_source in sources:
-        feed_url = find_feed(raw_source['url'])
-        if not Source.query.filter_by(ext_url=feed_url).count():
-            source = Source(ext_url=feed_url, name=raw_source['name'])
+    for name, feeds in sources.items():
+
+        # Get/create the Source.
+        source = Source.query.filter_by(name=name).first()
+        if not source:
+            source = Source(name=name)
             db.session.add(source)
+
+        # Add the feeds.
+        for feed in feeds:
+            feed_url = find_feed(feed)
+            if not Feed.query.filter_by(ext_url=feed_url).count():
+                feed = Feed(ext_url=feed_url, source=source)
+                db.session.add(feed)
+
     db.session.commit()
-
-
-def remove_source(url, delete_articles=False):
-    """
-    Remove a source.
-
-    Args:
-        | url (str)                 -- where to look for the feed,
-                                       or the feed itself.
-        | delete_articles (bool)    -- whether or not to delete articles
-                                       from this source.
-    """
-    feed_url = find_feed(url)
-    source = Source.query.filter_by(ext_url=feed_url).first()
-
-    if source:
-        # If specified, delete articles associated with
-        # this source.
-        if delete_articles:
-            for article in source.articles:
-                db.session.delete(article)
-
-        db.session.delete(source)
-
-        db.session.commit()
-
-
-def collect_sources(url, name):
-    """
-    Collects feed sources from the specified url,
-    and adds them.
-
-    Args:
-        | url  (str)     -- where to look for feeds.
-        | name (str)     -- the name of the source.
-    """
-    feeds = find_feeds(url)
-    add_sources([{'name': name, 'url': f} for f in feeds])

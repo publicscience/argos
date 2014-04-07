@@ -132,6 +132,11 @@ source = {
     'articles': fields.Nested({
         'id': fields.Integer,
         'url': fields.Url('article')
+    }),
+    'feeds': fields.Nested({
+        'id': fields.Integer,
+        'url': fields.Url('feed'),
+        'ext_url': fields.String
     })
 }
 

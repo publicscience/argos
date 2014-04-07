@@ -9,7 +9,7 @@ import argos.core.membrane.collector as collector
 import argos.core.membrane.evaluator as evaluator
 import argos.core.membrane.extractor as extractor
 
-from argos.core.models import Source, Article, Author, Event, Story
+from argos.core.models import Source, Feed, Article, Author, Event, Story
 
 import os
 
@@ -80,15 +80,15 @@ class FeedTest(RequiresDatabase):
         # Mock finding feeds.
         self.mock_find_feed = self.create_patch('argos.core.membrane.feed.find_feed')
 
-    def test_add_source(self):
+    def test_add_sources(self):
         url = 'sup'
         self.mock_find_feed.return_value = url
 
-        feed.add_source(url, 'source name')
+        feed.add_sources({'the something times': ['some url']})
         self.assertEquals(Source.query.count(), 1)
 
         # Ensure duplicates aren't added.
-        feed.add_source(url, 'source name')
+        feed.add_sources({'the something times': ['some url']})
         self.assertEquals(Source.query.count(), 1)
 
 class ExtractorTest(RequiresDatabase):
@@ -252,7 +252,8 @@ class CollectorTest(RequiresDatabase):
 
     def setUp(self):
         # Add a fake source to work with.
-        self.source = Source(ext_url='foo')
+        self.feed = Feed(ext_url='foo')
+        self.source = Source(feeds=[self.feed])
         self.db.session.add(self.source)
         self.db.session.commit()
 
@@ -284,7 +285,7 @@ class CollectorTest(RequiresDatabase):
         self.assertEquals(Article.query.count(), 0)
 
         self.mock_articles()
-        articles = [a for a in collector.collect(self.source)]
+        articles = [a for a in collector.collect(self.feed)]
 
         self.assertEquals(Article.query.count(), 1)
 
@@ -294,21 +295,21 @@ class CollectorTest(RequiresDatabase):
     def test_collect_ignores_existing(self):
         self.mock_articles()
 
-        articles = [a for a in collector.collect(self.source)]
-        articles = [a for a in collector.collect(self.source)]
+        articles = [a for a in collector.collect(self.feed)]
+        articles = [a for a in collector.collect(self.feed)]
 
         self.assertEquals(Article.query.count(), 1)
 
     def test_collect_error(self):
         self.mock_articles()
 
-        self.assertEquals(self.source.errors, 0)
+        self.assertEquals(self.feed.errors, 0)
 
         self.mock_articles.side_effect = collector.SAXException('', None)
 
-        articles = [a for a in collector.collect(self.source)]
+        articles = [a for a in collector.collect(self.feed)]
 
-        self.assertEquals(self.source.errors, 1)
+        self.assertEquals(self.feed.errors, 1)
 
     def test_feed_error_if_no_full_text(self):
         self.assertRaises(Exception, collector.get_articles, self.source)
@@ -324,26 +325,26 @@ class CollectorTest(RequiresDatabase):
         self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
 
         self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, full_text))
-        articles = collector.get_articles(self.source)
+        articles = collector.get_articles(self.feed)
         self.assertEquals(len(articles), 1)
 
     def test_articles_skips_short_articles(self):
         extracted_data = MagicMock()
         extracted_data.cleaned_text = 'short full text'
         self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, 'short full text'))
-        articles = collector.get_articles(self.source)
+        articles = collector.get_articles(self.feed)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_404_articles(self):
         from urllib import error
         self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
-        articles = collector.get_articles(self.source)
+        articles = collector.get_articles(self.feed)
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_unreachable_articles(self):
         from urllib import error
         self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.URLError('unreachable'))
-        articles = collector.get_articles(self.source)
+        articles = collector.get_articles(self.feed)
         self.assertEquals(len(articles), 0)
 
 

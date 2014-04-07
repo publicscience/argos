@@ -27,4 +27,4 @@ def create_sources(filepath='manage/data/sources.json'):
     logger.info('Loading sources from file. This may take awhile...')
     sources = open(filepath, 'r')
     raw_sources = json.load(sources)
-    feed.add_sources([{'name': src[0], 'url': src[1]} for src in raw_sources])
+    feed.add_sources(raw_sources)
