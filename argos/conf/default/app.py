@@ -110,7 +110,7 @@ SECURITY_POST_CHANGE_VIEW = None
 
 # Note: If the following is None, defaults to HTTP 403 
 #       response
-SECURITY_UNAUTHORIZED_VIEW = None
+SECURITY_UNAUTHORIZED_VIEW = 'security.login'
 
 # ==============
 # Template Paths

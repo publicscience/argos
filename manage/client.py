@@ -1,5 +1,5 @@
 from argos.datastore import db
-from argos.web.models.oauth import Client
+from argos.web.models import Client
 
 from flask.ext.script import Command
 
