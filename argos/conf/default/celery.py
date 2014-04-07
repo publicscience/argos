@@ -43,3 +43,27 @@ CELERY_CREATE_DIRS=1
 # approach, but see:
 # https://github.com/publicscience/argos/issues/112
 CELERYD_MAX_TASKS_PER_CHILD=100
+
+CELERY_TIMEZONE = 'UTC'
+
+from celery.schedules import crontab
+
+CELERYBEAT_SCHEDULE = {
+    'collect-articles': {
+        'task': 'argos.tasks.periodic.collect',
+        'schedule': crontab(minute=0, hour='*')
+    },
+    'cluster-articles': {
+        'task': 'argos.tasks.periodic.cluster_articles',
+        'schedule': crontab(minute=30, hour='*')
+    },
+    'cluster-events': {
+        'task': 'argos.tasks.periodic.cluster_events',
+        'schedule': crontab(minute=30, hour='*')
+    },
+    'test-task': {
+        'task': 'argos.tasks.notify',
+        'schedule': crontab(minute=30, hour='*'),
+        'args': ('this is a beat test')
+    }
+}

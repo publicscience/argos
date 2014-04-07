@@ -1,5 +1,7 @@
 from argos.datastore import db, Model
 
+from datetime import datetime
+
 class Source(Model):
     """
     A feed source.
@@ -9,3 +11,5 @@ class Source(Model):
     name = db.Column(db.String(255))
     errors = db.Column(db.Integer, default=0)
     articles = db.relationship('Article', backref='source', lazy='dynamic')
+    updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    updating = db.Column(db.Boolean, default=False)

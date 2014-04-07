@@ -21,34 +21,32 @@ from http.client import BadStatusLine
 from argos.util.logger import logger
 logger = logger(__name__)
 
-def collect():
+def collect(source):
     """
-    Fetch articles from the sources,
+    Fetch articles from the specified source,
     and save to db.
 
     This is a generator which yields a list
-    of new Articles per Source.
+    of new Articles for the source.
     """
 
-    # Fetch entries for each source
-    for source in Source.query.all():
-        try:
-            logger.info('Fetching from {0}...'.format(source.ext_url))
-            new_articles = get_articles(source)
+    try:
+        logger.info('Fetching from {0}...'.format(source.ext_url))
+        new_articles = get_articles(source)
 
-            for article in new_articles:
-                db.session.add(article)
-            db.session.commit()
+        for article in new_articles:
+            db.session.add(article)
+        db.session.commit()
 
-            yield new_articles
+        yield new_articles
 
-        except SAXException as e:
-            # Error with the feed, make a note.
-            logger.info('Error fetching from {0}.'.format(source.ext_url))
-            source.errors += 1
-            db.session.commit()
+    except SAXException as e:
+        # Error with the feed, make a note.
+        logger.info('Error fetching from {0}.'.format(source.ext_url))
+        source.errors += 1
+        db.session.commit()
 
-            yield []
+        yield []
 
 
 def get_articles(source):
