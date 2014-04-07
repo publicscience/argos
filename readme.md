@@ -3,13 +3,13 @@ Argos
 
 ![Argos](https://raw.github.com/wiki/publicscience/argos/img/argos.png)
 
-Please consult the
-[wiki](https://github.com/publicscience/argos/wiki) for detailed information.
-
 # 0 to Argos
 
-*Note: In addition to this initial setup, you will need to [[configure
-AWS|AWS-Setup]] so that distributed processing works.*
+*Note: Most of the information here pertains to setting up an
+environment for developing Argos. For deploying Argos to other
+environments, such as staging or production, please refer to
+[argos.cloud](https://github.com/publicscience/argos.cloud), which is
+designed specifically for that purpose.*
 
 The setup process for Argos is fairly complex, but some scripts vastly simplify it.
 
@@ -41,6 +41,12 @@ $ ./run db:create
 This creates a Postgres user, `argos_user`, and sets up development and
 testing databases (`argos_dev`, and `argos_test`) respectively. (If you ran `./setup` already, this step should not be necessary.)
 
+You can optionally setup the default sources for collecting
+articles by doing (make sure Postgres is running):
+```bash
+(venv) $ python manage.py create:sources
+```
+
 ### Running & Development
 And then when you're ready to start developing/testing, run:
 ```bash
@@ -64,39 +70,55 @@ Then when you're done, kill it with:
 $ kill <pid>
 ```
 
+*Note: The following commands (those with `(venv)`) assume you are in
+your virtual environment. As a reminder, you can activate it like so:*
+```bash
+$ source /path/to/my/venv/bin/activate
+```
+
 You can setup seed data to work with:
 ```bash
-$ source dev-env/bin/activate
-$ python manage.py seed
+(venv) $ python manage.py seed
 ```
 
 And then run the API server:
 ```bash
-$ source dev-env/bin/activate
-$ python manage.py server
+(venv) $ python manage.py server
+```
+
+You can run the frontend ('front') server instead:
+```bash
+(venv) $ python front.py
+```
+
+If you make changes to the data model, make sure you create a migration:
+```bash
+(venv) $ python manage.py db migrate
+```
+
+And then run the migration:
+```bash
+(venv) $ python manage.py db upgrade
 ```
 
 ### Tests, Performance, Evaluation
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
-```
-$ source dev-env/bin/activate
-$ ./run test
+```bash
+(venv) $ ./run test
 ```
 
 You can also profile some of the more intensive parts to identify
 bottlenecks:
-```
-$ source dev-env/bin/activate
-$ python manage.py profile
+```bash
+(venv) $ python manage.py profile
 ```
 *Note: don't run this in production as it modifies your database.*
 
 You can also evaluate the quality of some of the algorithms, such as
 clustering:
-```
-$ source dev-env/bin/activate
-$ python manage.py evaluate
+```bash
+(venv) $ python manage.py evaluate
 ```
 *Note: don't run this in production as it modifies your database.*
 
@@ -106,9 +128,3 @@ pip rolled back the installs of everything else. Check your pip logs at
 `~/.pip/pip.log`. I'd wager it is `scipy` which ran into a missing
 dependency.*
 
-You can optionally setup the default sources for collecting
-articles by doing (make sure Postgres is running):
-```bash
-$ source dev-env/bin/activate
-$ python manage.py create:sources
-```
