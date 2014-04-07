@@ -9,7 +9,7 @@ from flask import Blueprint
 import pkgutil
 import importlib
 
-def create_app(package_name=__name__, package_path=__path__, **config_overrides):
+def create_app(package_name=__name__, package_path=__path__, has_blueprints=True, **config_overrides):
     app = Flask(package_name, static_url_path='')
     app.config.update(APP)
 
@@ -32,7 +32,8 @@ def create_app(package_name=__name__, package_path=__path__, **config_overrides)
         db.create_all()
 
     # Register blueprints.
-    register_blueprints(app, package_name, package_path)
+    if has_blueprints:
+        register_blueprints(app, package_name, package_path)
 
     return app
 
