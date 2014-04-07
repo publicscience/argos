@@ -70,11 +70,12 @@ CELERYBEAT_SCHEDULE = {
     }
 }
 
-from kombu.common import Broadcast
+from kombu.common import Broadcast, Queue
 
 # Create a broadcast queue so the tasks are sent to
 # *all* workers (that are listening to that queue).
-CELERY_QUEUES = (Broadcast('broadcast_tasks'), )
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_QUEUES = (Queue('default'), Broadcast('broadcast_tasks'), )
 CELERY_ROUTES = {
         'argos.tasks.periodic.collect': {'queue': 'broadcast_tasks'},
         'argos.tasks.periodic.cluster_articles': {'queue': 'broadcast_tasks'},
