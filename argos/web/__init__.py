@@ -3,6 +3,7 @@ from argos.datastore import db
 
 from flask import Flask
 from flask.ext.security import SQLAlchemyUserDatastore, Security
+from flask.ext.migrate import Migrate
 
 from flask import Blueprint
 import pkgutil
@@ -17,6 +18,7 @@ def create_app(package_name=__name__, package_path=__path__, **config_overrides)
 
     # Initialize the database and declarative Base class.
     db.init_app(app)
+    Migrate(app, db)
 
     # Setup security.
     from argos.web import models
