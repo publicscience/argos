@@ -79,28 +79,28 @@ def seed(debug=False):
     entries = json.load(seeds)
     print('Seeding {0} articles...'.format(len(entries)))
     articles = []
-    for entry in entries:
-        if debug:
-            print(json.dumps(entry, sort_keys=True, indent=4))
+    #for entry in entries:
+        #if debug:
+            #print(json.dumps(entry, sort_keys=True, indent=4))
 
-        source = Source.query.filter_by(ext_url=entry['source']).first()
+        #source = Source.query.filter_by(ext_url=entry['source']).first()
 
-        a = Article(
-                ext_url=entry['url'],
-                source=source,
-                html=entry['html'],
-                text=entry['text'],
-                tags=entry['tags'],
-                title=entry['title'],
-                created_at = parse(entry['published']),
-                updated_at = parse(entry['updated']),
-                image=random.choice(sample_images), # fake image
-                score=random.random() * 100         # fake score
-        )
-        articles.append(a)
-        db.session.add(a)
+        #a = Article(
+                #ext_url=entry['url'],
+                #source=source,
+                #html=entry['html'],
+                #text=entry['text'],
+                #tags=entry['tags'],
+                #title=entry['title'],
+                #created_at = parse(entry['published']),
+                #updated_at = parse(entry['updated']),
+                #image=random.choice(sample_images), # fake image
+                #score=random.random() * 100         # fake score
+        #)
+        #articles.append(a)
+        #db.session.add(a)
 
-        progress_bar(len(articles) / len(entries) * 100)
+        #progress_bar(len(articles) / len(entries) * 100)
 
     print('Creating additional articles...')
 
@@ -137,13 +137,13 @@ def seed(debug=False):
     print('Found {0} concepts.'.format(num_concepts))
 
     print('Clustering articles into events...')
-    Event.cluster(articles, threshold=0.02, debug=True)
+    Event.cluster(articles, threshold=0.04)
     num_events = Event.query.count()
     print('Created {0} event clusters.'.format(num_events))
 
     print('Clustering events into stories...')
     events = Event.query.all()
-    Story.cluster(events, threshold=0.02, debug=True)
+    Story.cluster(events, threshold=0.04)
     num_stories = Story.query.count()
     print('Created {0} story clusters.'.format(num_stories))
 
