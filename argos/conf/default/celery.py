@@ -66,7 +66,7 @@ CELERYBEAT_SCHEDULE = {
     'test-task': {
         'task': 'argos.tasks.notify',
         'schedule': crontab(minute=30, hour='*'),
-        'args': ('this is a beat test')
+        'args': ('this is a beat test', )
     }
 }
 
