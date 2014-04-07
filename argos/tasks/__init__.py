@@ -63,6 +63,7 @@ def active():
     logger.info('There are {0} executing tasks.'.format(len(active_tasks)))
     return active_tasks
 
+
 @celery.task
 def notify(body):
     """

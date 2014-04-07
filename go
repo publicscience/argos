@@ -28,7 +28,7 @@ KNOSV_PID=$!
 cd ../..
 
 source dev-env/bin/activate
-celery worker --loglevel=INFO --config=argos.conf.default.celery &
+celery worker --loglevel=DEBUG --app=argos.tasks.celery
 WORKR_PID=$!
 
 wait
