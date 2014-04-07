@@ -1,6 +1,6 @@
 from argos.tasks import celery, notify
 
-from argos.core.models import Feed, Article, Event
+from argos.core.models import Feed, Article, Event, Story
 from argos.core.membrane import collector
 from argos.datastore import db
 
