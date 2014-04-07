@@ -123,4 +123,4 @@ def close_session(*args, **kwargs):
 
 @task_prerun.connect
 def on_task_init(*args, **kwargs):
-    db.dispose()
+    db.engine.dispose()
