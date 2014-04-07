@@ -3,9 +3,6 @@ Argos
 
 ![Argos](https://raw.github.com/wiki/publicscience/argos/img/argos.png)
 
-Please consult the
-[wiki](https://github.com/publicscience/argos/wiki) for detailed information.
-
 # 0 to Argos
 
 *Note: Most of the information here pertains to setting up an
@@ -43,6 +40,12 @@ $ ./run db:create
 ```
 This creates a Postgres user, `argos_user`, and sets up development and
 testing databases (`argos_dev`, and `argos_test`) respectively. (If you ran `./setup` already, this step should not be necessary.)
+
+You can optionally setup the default sources for collecting
+articles by doing (make sure Postgres is running):
+```bash
+(venv) $ python manage.py create:sources
+```
 
 ### Running & Development
 And then when you're ready to start developing/testing, run:
@@ -125,8 +128,3 @@ pip rolled back the installs of everything else. Check your pip logs at
 `~/.pip/pip.log`. I'd wager it is `scipy` which ran into a missing
 dependency.*
 
-You can optionally setup the default sources for collecting
-articles by doing (make sure Postgres is running):
-```bash
-(venv) $ python manage.py create:sources
-```
