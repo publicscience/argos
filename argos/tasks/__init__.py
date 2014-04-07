@@ -12,7 +12,7 @@ from argos.util.logger import logger
 from argos.datastore import db
 
 from celery import Celery
-from celery.signals import task_postrun
+from celery.signals import task_postrun, task_prerun
 
 # For sending mail.
 import smtplib
@@ -119,3 +119,8 @@ def close_session(*args, **kwargs):
     # context, this ensures tasks have a fresh session (e.g. session errors
     # won't propagate across tasks)
     db.session.remove()
+
+
+@task_prerun.connect
+def on_task_init(*args, **kwargs):
+    db.dispose()
