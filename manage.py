@@ -2,11 +2,12 @@ from flask.ext.script import Manager, Shell, Server
 from flask.ext.migrate import MigrateCommand
 
 from argos.web import api
-from manage import CreateSourcesCommand, CreateClientCommand, SeedCommand, ProfileCommand, EvaluateCommand
+from manage import CreateSourcesCommand, CreateClientCommand, CreateAdminCommand, SeedCommand, ProfileCommand, EvaluateCommand
 
 manager = Manager(api.create_app())
 manager.add_command('create:sources', CreateSourcesCommand())
 manager.add_command('create:client', CreateClientCommand())
+manager.add_command('create:admin', CreateAdminCommand())
 manager.add_command('profile', ProfileCommand())
 manager.add_command('evaluate', EvaluateCommand())
 manager.add_command('seed', SeedCommand())
