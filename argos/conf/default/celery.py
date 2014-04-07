@@ -24,9 +24,9 @@ CELERY_MAX_CACHED_RESULTS = 1
 
 # Send emails on errors
 CELERY_SEND_TASK_ERROR_EMAILS = True
-ADMINS = (
+ADMINS = [
     ('Francis Tseng', 'ftzeng@gmail.com')
-)
+]
 
 SERVER_EMAIL = 'argos.bot@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'

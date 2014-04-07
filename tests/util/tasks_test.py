@@ -1,11 +1,12 @@
 import unittest
-from tests import RequiresWorkers
+from tests import RequiresDatabase
+
 import math, time
 from celery import chord
 
 from argos.tasks import celery, workers
 
-class TasksTest(RequiresWorkers):
+class TasksTest(RequiresDatabase):
     def test_chord(self):
         result = chord(pow.s(x, 2) for x in range(100))(combine.s())
         expected = sum([math.pow(x, 2) for x in range(100)])

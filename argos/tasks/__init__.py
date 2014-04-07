@@ -6,10 +6,13 @@ Provides access to
 distributed task processing.
 """
 
+from argos import web
 from argos.conf import CELERY
 from argos.util.logger import logger
+from argos.datastore import db
 
 from celery import Celery
+from celery.signals import task_postrun
 
 # For sending mail.
 import smtplib
@@ -18,8 +21,29 @@ from email.mime.text import MIMEText
 
 logger = logger(__name__)
 
-celery = Celery()
-celery.config_from_object(CELERY)
+def create_celery(**config_overrides):
+    """
+    Create an Celery instance with an app,
+    so that an app context exists for Celery tasks.
+    """
+
+    app = web.create_app(__name__, __path__, has_blueprints=False, **config_overrides)
+
+    celery = Celery()
+    celery.config_from_object(CELERY)
+    TaskBase = celery.Task
+
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+celery = create_celery()
 
 def workers():
     """
@@ -87,3 +111,11 @@ def notify(body):
         server.sendmail(from_addr, target[1], msg.as_string())
 
     server.quit()
+
+@task_postrun.connect
+def close_session(*args, **kwargs):
+    # Flask SQLAlchemy will automatically create new sessions for you from 
+    # a scoped session factory, given that we are maintaining the same app
+    # context, this ensures tasks have a fresh session (e.g. session errors
+    # won't propagate across tasks)
+    db.session.remove()

@@ -2,6 +2,7 @@ from argos.tasks import celery
 
 from argos.core.models import Source, Article, Event
 from argos.core.membrane import collector
+from argos.datastore import db
 
 from datetime import datetime, timedelta
 
