@@ -19,7 +19,7 @@ def collect():
     """
     # Get a feed which has not yet been updated
     # and is not currently being updated.
-    feed = Feed.query.filter(Feed.updated_at < datetime.utcnow() - timedelta(hours=1) and not Feed.updating).first()
+    feed = Feed.query.filter(Feed.updated_at < datetime.utcnow() - timedelta(hours=1), ~Feed.updating).first()
 
     # "Claim" this feed,
     # so other workers won't pick it.
@@ -40,7 +40,7 @@ def collect():
         notify('Collecting for feed {0} is complete.'.format(feed.name))
 
 @celery.task
-def cluster_articles(batch_size=20, threshold=0.05):
+def cluster_articles(batch_size=5, threshold=0.05):
     """
     Clusters a batch of orphaned articles
     into events.
@@ -50,7 +50,7 @@ def cluster_articles(batch_size=20, threshold=0.05):
     notify('Clustering articles successful.')
 
 @celery.task
-def cluster_events(batch_size=20, threshold=0.05):
+def cluster_events(batch_size=5, threshold=0.05):
     """
     Clusters a batch of orphaned events
     into stories.
