@@ -156,6 +156,12 @@ search = {
 }
 
 def collection(representation_fields):
+    """
+    A common resource format
+    for collections.
+
+    Includes the results and pagination info.
+    """
     return {
         'results': fields.Nested(representation_fields),
         'pagination': fields.Nested({

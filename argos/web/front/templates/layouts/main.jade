@@ -45,6 +45,9 @@ html(lang="en")
                                     +nav_link('user.watching', 'icon-watch', 'Watching')
                                 li
                                     +nav_link('user.bookmarks', 'icon-bookmark', 'Bookmarks')
+                            li
+                                +nav_link('main.search', 'icon-search', 'Search')
+                            if current_user.is_authenticated()
                                 li
                                     span.icon-settings
                                 | Settings

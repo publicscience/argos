@@ -1,0 +1,25 @@
+extends layouts/main.jade
+
+block content
+    if results|count == 0
+        form.search-form(action="{{ url_for('main.search') }}", method="POST", name="search-form")
+            .bounds
+                label Couldn't find anything for that search...try again?
+                input(type=text, name="query", placeholder="Search", autofocus)
+    form.search-form(action="{{ url_for('main.search') }}", method="POST", name="search-form")
+        .bounds
+            label Search
+            input(type='text', name="query", placeholder="Search", value='{{ query }}', autofocus)
+    article.page.bounds.search-page
+        ul.search-results
+            for result in results
+                - var image = result.image if result.image else '/img/missing.png'
+                - var title = result.title if result.title else result.name
+                li.search-result.clearfix
+                    a(href=result.url)
+                        img(src=image)
+                        .title= title
+                        if result.summary
+                            .result-summary= result.summary|truncate
+                        else
+                            .result-summary We're missing a summary for this concept. Please help us by submitting one.
