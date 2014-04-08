@@ -3,8 +3,9 @@ require(['config'], function() {
 
     require([
             'jquery',
-            'modernizr'
-    ], function($, ø) {
+            'modernizr',
+            'showNotification'
+    ], function($, ø, showNotification) {
         // Do stuff.
         console.log('main.js has loaded.');
         console.log('running jQuery version ' + $().jquery + '.');
@@ -90,37 +91,38 @@ require(['config'], function() {
             });
         });
 
-        function showNotification(msg) {
-            var $notification;
-
-            // Use an existing element if possible.
-            if ( $('.popover-notification').length > 0 ) {
-                $notification = $('.popover-notification');
-                $notification.find('.popover-notification-content').text(msg);
-
-            // Create a new one if needed.
-            } else {
-                $notification = $('<div class="popover-notification"><div class="popover-notification-content">'+msg+'</div></div>');
-                $('body').append($notification);
-                $notification.css({
-                    bottom: -$notification.outerHeight()
-                });
-            }
-
-            $notification
-                .stop(true)
-                .animate({
-                    bottom: 0,
-                    opacity: 1
-                })
-                .delay(2000)
-                .animate({
-                    bottom: -$notification.outerHeight(),
-                    opacity: 0
-                });
-
-        }
     });
 
+});
 
+define('showNotification', ['jquery'], function($) {
+    return function(msg) {
+        var $notification;
+
+        // Use an existing element if possible.
+        if ( $('.popover-notification').length > 0 ) {
+            $notification = $('.popover-notification');
+            $notification.find('.popover-notification-content').text(msg);
+
+        // Create a new one if needed.
+        } else {
+            $notification = $('<div class="popover-notification"><div class="popover-notification-content">'+msg+'</div></div>');
+            $('body').append($notification);
+            $notification.css({
+                bottom: -$notification.outerHeight()
+            });
+        }
+
+        $notification
+            .stop(true)
+            .animate({
+                bottom: 0,
+                opacity: 1
+            })
+            .delay(2000)
+            .animate({
+                bottom: -$notification.outerHeight(),
+                opacity: 0
+            });
+    }
 });

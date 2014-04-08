@@ -1,5 +1,15 @@
 extends layouts/main.jade
 
 block content
-    for source in sources
-        li= source.name
+    .bounds
+        h1 Sources
+        ul.admin-sources
+            for source in sources
+                li.clearfix
+                    .admin-source-title
+                        - var icon = source.icon if source.icon else '/img/source.png'
+                        img(src=icon, data-id='{{ source.id }}').admin-source-icon
+                        span.title= source.name
+                    .admin-source-meta {{ source.feeds|count }} feeds, {{ source.articles.all()|count }} articles
+
+        script(type="text/javascript",src="/js/vendor/bower/requirejs/require.js",data-main="/js/admin")

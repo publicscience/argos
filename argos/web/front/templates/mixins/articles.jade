@@ -5,7 +5,7 @@ mixin articles(title, articles, articles_url=None, max=5)
             - var _articles = articles[:max] if max else articles
             for article in _articles
                 li
-                    .article-icon
+                    .source-icon
                         img(src='/dev/source.png')
                     .article-info
                         .article-title.title

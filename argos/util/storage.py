@@ -45,12 +45,19 @@ def save_from_url(url, filename):
         logger.exception('Error requesting {0} : {1}'.format(url, e))
         return None
 
+    data = BytesIO(res.read())
+    return save_from_file(data, filename)
+
+def save_from_file(file, filename):
+    """
+    Saves file data to S3 and returns
+    its S3 URL.
+    """
     conn = S3Connection(APP['AWS_ACCESS_KEY_ID'], APP['AWS_SECRET_ACCESS_KEY'])
     bucket = conn.get_bucket(APP['S3_BUCKET_NAME'])
     key = Key(bucket)
     key.key = filename
-    data = BytesIO(res.read())
-    key.set_contents_from_file(data)
+    key.set_contents_from_file(file)
 
     # Not sure if this should be called every time.
     key.make_public()
