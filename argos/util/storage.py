@@ -11,6 +11,7 @@ from boto.s3.key import Key
 
 from urllib import request, error, parse
 from io import BytesIO
+import os
 
 from argos.conf import APP
 
@@ -58,6 +59,11 @@ def save_from_file(file, filename):
     key = Key(bucket)
     key.key = filename
     key.set_contents_from_file(file)
+
+    # Manually set Content-Type if necessary.
+    ext = os.path.splitext(filename)[-1]
+    if ext == '.svg':
+        key.set_metadata('Content-Type', 'image/svg+xml')
 
     # Not sure if this should be called every time.
     key.make_public()
