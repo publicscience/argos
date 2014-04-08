@@ -41,7 +41,7 @@ def collect():
     notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url, len(articles)))
 
 @celery.task
-def cluster_articles(batch_size=5, threshold=0.05):
+def cluster_articles(batch_size=5, threshold=0.02):
     """
     Clusters a batch of orphaned articles
     into events.
@@ -51,7 +51,7 @@ def cluster_articles(batch_size=5, threshold=0.05):
     notify('Clustering articles successful.')
 
 @celery.task
-def cluster_events(batch_size=5, threshold=0.05):
+def cluster_events(batch_size=5, threshold=0.02):
     """
     Clusters a batch of orphaned events
     into stories.

@@ -52,15 +52,15 @@ CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULE = {
     'collect-articles': {
         'task': 'argos.tasks.periodic.collect',
-        'schedule': crontab(minute=0, hour='*')
+        'schedule': crontab(minute='*/10')
     },
     'cluster-articles': {
         'task': 'argos.tasks.periodic.cluster_articles',
-        'schedule': crontab(minute=30, hour='*')
+        'schedule': crontab(minute='*/10')
     },
     'cluster-events': {
         'task': 'argos.tasks.periodic.cluster_events',
-        'schedule': crontab(minute=30, hour='*')
+        'schedule': crontab(minute='*/10')
     },
     'test-task': {
         'task': 'argos.tasks.notify',
