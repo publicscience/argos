@@ -31,13 +31,13 @@ def collect():
         feed.updated_at = datetime.utcnow()
 
     except Exception:
-        logger.exception('Exception while collecting for feed {0}'.format(feed.name))
+        logger.exception('Exception while collecting for feed {0}'.format(feed.ext_url))
         raise
 
     finally:
         feed.updating = False
         db.session.commit()
-        notify('Collecting for feed {0} is complete.'.format(feed.name))
+        notify('Collecting for feed {0} is complete.'.format(feed.ext_url))
 
 @celery.task
 def cluster_articles(batch_size=5, threshold=0.05):
