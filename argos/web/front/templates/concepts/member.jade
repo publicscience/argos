@@ -9,7 +9,8 @@ block content
     .bounds
         article.page.clearfix
             .bounds.bounds-collapse-both
-                .page-hero(style='background-image:url("'+concept.image+'")')
+                - var image = concept.image if concept.image else '/img/missing.png'
+                .page-hero(style='background-image:url("'+image+'")')
             .page-body.clearfix.bounds.bounds-collapse-right
                 .page-content
                     section
