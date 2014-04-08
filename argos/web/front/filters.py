@@ -60,7 +60,7 @@ def highlight_mentions(text, mentions):
     sorted_mentions = sorted(mentions, key=lambda x: len(x.name), reverse=True)
     for mention in sorted_mentions:
         text = re.sub(
-                r' {name}(?!</a>)'.format(name=mention.name),
+                r' {name}(?!</a>)'.format(name=re.escape(mention.name)),
                 ' <a href="{url}">{name}</a>'.format(
                     url=url_for('main.concept', slug=mention.slug),
                     name=mention.name),
