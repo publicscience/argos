@@ -25,9 +25,6 @@ def collect(feed):
     """
     Fetch articles from the specified feed,
     and save to db.
-
-    This is a generator which yields a list
-    of new Articles for the feed.
     """
 
     try:
@@ -38,15 +35,13 @@ def collect(feed):
             db.session.add(article)
         db.session.commit()
 
-        yield new_articles
+        return new_articles
 
     except SAXException as e:
         # Error with the feed, make a note.
         logger.info('Error fetching from {0}.'.format(feed.ext_url))
         feed.errors += 1
         db.session.commit()
-
-        yield []
 
 
 def get_articles(feed):

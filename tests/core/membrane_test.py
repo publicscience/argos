@@ -285,7 +285,7 @@ class CollectorTest(RequiresDatabase):
         self.assertEquals(Article.query.count(), 0)
 
         self.mock_articles()
-        articles = [a for a in collector.collect(self.feed)]
+        articles = collector.collect(self.feed)
 
         self.assertEquals(Article.query.count(), 1)
 
@@ -295,8 +295,8 @@ class CollectorTest(RequiresDatabase):
     def test_collect_ignores_existing(self):
         self.mock_articles()
 
-        articles = [a for a in collector.collect(self.feed)]
-        articles = [a for a in collector.collect(self.feed)]
+        articles = collector.collect(self.feed)
+        articles = collector.collect(self.feed)
 
         self.assertEquals(Article.query.count(), 1)
 
@@ -307,7 +307,7 @@ class CollectorTest(RequiresDatabase):
 
         self.mock_articles.side_effect = collector.SAXException('', None)
 
-        articles = [a for a in collector.collect(self.feed)]
+        articles = collector.collect(self.feed)
 
         self.assertEquals(self.feed.errors, 1)
 
