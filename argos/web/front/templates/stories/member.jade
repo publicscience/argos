@@ -8,8 +8,9 @@ extends layouts/main.jade
 block content
     .bounds
         article.page.clearfix
-            .bounds.bounds-collapse-both
-                .page-hero(style='background-image:url("'+story.image+'")')
+            if story.image
+                .bounds.bounds-collapse-both
+                    .page-hero(style='background-image:url("'+story.image+'")')
             .page-body.clearfix.bounds.bounds-collapse-right
                 .page-content
                     section

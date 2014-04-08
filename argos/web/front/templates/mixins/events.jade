@@ -3,8 +3,9 @@
 mixin event_item(event, user, summary_length=0)
     article.item.clearfix
         .item-extra
-            a(href=url_for('main.event', id=event.id))
-                img(src=event.image).item-thumb
+            if event.image
+                a(href=url_for('main.event', id=event.id))
+                    img(src=event.image).item-thumb
             .notations.item-notations
                 .bookmark-flag(style=('' if event in user.bookmarked else 'display:none;'))
                     span.icon-bookmark

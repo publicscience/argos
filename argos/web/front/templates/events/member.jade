@@ -7,8 +7,9 @@ extends layouts/main.jade
 
 block content
     article.page.clearfix
-        .bounds.bounds-collapse-both
-            .page-hero(style='background-image:url("'+event.image+'")')
+        if event.image
+            .bounds.bounds-collapse-both
+                .page-hero(style='background-image:url("'+event.image+'")')
         .page-body.clearfix.bounds.bounds-collapse-right
             .page-notations.notations
                 .bookmark-flag(style=('' if event in current_user.bookmarked else 'display:none;'))
