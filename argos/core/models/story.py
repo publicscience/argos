@@ -86,6 +86,23 @@ class Story(Cluster):
         return self.summary
 
     @staticmethod
+    def recluster(events, threshold=0.7, debug=False):
+        """
+        Reclusters a set of events,
+        resetting their existing story membership.
+        """
+        for event in events:
+            event.stories = []
+        db.session.commit()
+
+        # Prune childless stories.
+        # This can probably be handled by SQLAlchemy through some configuration...
+        for story in Story.query.filter(~Story.members.any()).all():
+            db.session.delete(story)
+        db.session.commit()
+        Story.cluster(events, threshold=threshold, debug=debug)
+
+    @staticmethod
     def cluster(events, threshold=0.7, debug=False):
         """
         Clusters a set of events
@@ -119,6 +136,7 @@ class Story(Cluster):
                 log.debug('No qualifying clusters found, creating a new cluster.')
                 selected_cluster = Story([event])
                 db.session.add(selected_cluster)
+                db.session.commit() # save the cluster the candidate cluster query can consider it.
 
             updated_clusters.append(selected_cluster)
 

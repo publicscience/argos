@@ -4,10 +4,12 @@ from argos.core.models.cluster import Clusterable
 from argos.core import brain
 
 from scipy.spatial.distance import jaccard
+from sqlalchemy import event
+from slugify import slugify
 
 from math import isnan
 from collections import Counter
-from slugify import slugify
+from datetime import datetime
 
 # Ignore the invalid numpy warning,
 # which comes up when jaccard uses
@@ -161,3 +163,7 @@ class Article(Clusterable):
 
         # Normalize back to [0, 1].
         return sim/sum(coefs)
+
+@event.listens_for(Article, 'before_update')
+def receive_before_update(mapper, connection, target):
+    target.updated_at = datetime.utcnow()

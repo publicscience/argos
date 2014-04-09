@@ -12,7 +12,6 @@ class TasksTest(RequiresDatabase):
         expected = sum([math.pow(x, 2) for x in range(100)])
         self.assertEquals(result.get(), expected)
 
-
 @celery.task
 def pow(x, y):
     return math.pow(x, y)

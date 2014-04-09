@@ -121,6 +121,21 @@ class EventTest(RequiresDatabase):
 
         self.assertEqual(Event.query.count(), 1)
 
+    def test_recluster(self):
+        articles = self.prepare_articles()
+
+        Event.cluster(articles, threshold=0.0)
+        self.assertEqual(Event.query.count(), 1)
+
+        original_id = Event.query.first().id
+
+        # The original event should be deleted,
+        # and now we should have two new events.
+        Event.recluster(articles, threshold=1.0)
+        self.assertEqual(Event.query.get(original_id), None)
+        self.assertEqual(Event.query.count(), 2)
+
+
     def test_conceptize(self):
         members = [Article(
             title='Robots',

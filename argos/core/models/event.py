@@ -95,6 +95,23 @@ class Event(Cluster):
         return self.summary
 
     @staticmethod
+    def recluster(articles, threshold=0.7, debug=False):
+        """
+        Reclusters a set of articles,
+        resetting their existing event membership.
+        """
+        for article in articles:
+            article.events = []
+        db.session.commit()
+
+        # Prune childless events.
+        # This can probably be handled by SQLAlchemy through some configuration...
+        for event in Event.query.filter(~Event.members.any()).all():
+            db.session.delete(event)
+        db.session.commit()
+        Event.cluster(articles, threshold=threshold, debug=debug)
+
+    @staticmethod
     def cluster(articles, threshold=0.7, debug=False):
         """
         Clusters a set of articles
@@ -131,6 +148,9 @@ class Event(Cluster):
                 log.debug('No qualifying clusters found, creating a new cluster.')
                 selected_cluster = Event([article])
                 db.session.add(selected_cluster)
+
+                # The new cluster is also an active cluster.
+                active_clusters.append(selected_cluster)
 
             updated_clusters.append(selected_cluster)
 

@@ -70,12 +70,12 @@ def recluster_events(batch_size=5, threshold=0.1):
     you have changed the clustering threshold and
     want existing clusters to reflect those changes.
     """
-    events = Event.query.filter(Event.stories.any()).limit(batch_size).all()
-    Story.cluster(events, threshold=threshold)
+    events = Event.query.filter(Event.stories.any()).order_by(Event.updated_at.desc()).limit(batch_size).all()
+    Story.recluster(events, threshold=threshold)
     notify('Reclustering events successful.')
 
 @celery.task
-def cluster_articles(batch_size=5, threshold=0.1):
+def recluster_articles(batch_size=5, threshold=0.1):
     """
     Recluster articles which already belong to events.
 
@@ -83,6 +83,6 @@ def cluster_articles(batch_size=5, threshold=0.1):
     you have changed the clustering threshold and
     want existing clusters to reflect those changes.
     """
-    articles = Article.query.filter(Article.events.any()).limit(batch_size).all()
-    Event.cluster(articles, threshold=threshold)
+    articles = Article.query.filter(Article.events.any()).order_by(Article.updated_at.desc()).limit(batch_size).all()
+    Event.recluster(articles, threshold=threshold)
     notify('Reclustering articles successful.')
