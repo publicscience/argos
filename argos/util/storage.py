@@ -58,12 +58,13 @@ def save_from_file(file, filename):
     bucket = conn.get_bucket(APP['S3_BUCKET_NAME'])
     key = Key(bucket)
     key.key = filename
-    key.set_contents_from_file(file)
 
     # Manually set Content-Type if necessary.
     ext = os.path.splitext(filename)[-1]
     if ext == '.svg':
         key.content_type = 'image/svg+xml'
+
+    key.set_contents_from_file(file)
 
     # Not sure if this should be called every time.
     key.make_public()
