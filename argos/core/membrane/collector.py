@@ -117,6 +117,12 @@ def get_articles(feed):
         updated = parse(entry.get('updated')) if entry.get('updated') else published
         title = entry.get('title', entry_data.title)
 
+        # Secondary check for an existing Article,
+        # by checking the title and source.
+        existing = Article.query.filter_by(title=title).first()
+        if existing and existing.source == feed.source:
+            continue
+
         # Download and save the top article image.
         image_url = extractor.extract_image(entry_data, filename=hash(url))
 

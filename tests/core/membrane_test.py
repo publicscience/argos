@@ -84,11 +84,11 @@ class FeedTest(RequiresDatabase):
         url = 'sup'
         self.mock_find_feed.return_value = url
 
-        feed.add_sources({'the something times': ['some url']})
+        feed.add_sources({'the something times': ['some_url']})
         self.assertEquals(Source.query.count(), 1)
 
         # Ensure duplicates aren't added.
-        feed.add_sources({'the something times': ['some url']})
+        feed.add_sources({'the something times': ['some_url']})
         self.assertEquals(Source.query.count(), 1)
 
 class ExtractorTest(RequiresDatabase):
@@ -258,7 +258,7 @@ class CollectorTest(RequiresDatabase):
         self.db.session.commit()
 
         article = {
-                'links': [{'href': 'some url'}],
+                'links': [{'href': 'http://some_url.com'}],
                 'title': 'some title',
                 'published': 'Thu, 09 Jan 2014 14:00:00 GMT',
                 'updated': 'Thu, 09 Jan 2014 14:00:00 GMT'
@@ -269,22 +269,33 @@ class CollectorTest(RequiresDatabase):
                )
         self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
 
-    def mock_articles(self):
+    def patch_articles(self):
         self.mock_articles = self.create_patch('argos.core.membrane.collector.get_articles')
         self.mock_articles.return_value = [
             Article(
                 title='Foo',
                 published=datetime.utcnow(),
                 ext_url='foo.com',
-                text='dinosaurs are cool, Clinton'
+                text='dinosaurs are cool, Clinton',
+                source=self.source
             )
         ]
+
+    def patch_extraction(self):
+        extracted_data = MagicMock()
+        extracted_data.cleaned_text = full_text
+        extracted_data.canonical_link = 'a canonical link'
+        self.create_patch('argos.core.membrane.extractor.extract_image', return_value='https://s3.amazon.com/foo/bar/image.jpg')
+
+        # Mock the evaluator score calculation.
+        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, full_text))
 
 
     def test_collect(self):
         self.assertEquals(Article.query.count(), 0)
 
-        self.mock_articles()
+        self.patch_articles()
         articles = collector.collect(self.feed)
 
         self.assertEquals(Article.query.count(), 1)
@@ -292,16 +303,8 @@ class CollectorTest(RequiresDatabase):
         article = Article.query.first()
         self.assertEquals(article.title, 'Foo')
 
-    def test_collect_ignores_existing(self):
-        self.mock_articles()
-
-        articles = collector.collect(self.feed)
-        articles = collector.collect(self.feed)
-
-        self.assertEquals(Article.query.count(), 1)
-
     def test_collect_error(self):
-        self.mock_articles()
+        self.patch_articles()
 
         self.assertEquals(self.feed.errors, 0)
 
@@ -315,18 +318,40 @@ class CollectorTest(RequiresDatabase):
         self.assertRaises(Exception, collector.get_articles, self.source)
 
     def test_articles(self):
-        extracted_data = MagicMock()
-        extracted_data.cleaned_text = full_text
-        extracted_data.canonical_link = 'a canonical link'
+        self.patch_extraction()
 
-        self.create_patch('argos.core.membrane.extractor.extract_image', return_value='https://s3.amazon.com/foo/bar/image.jpg')
-
-        # Mock the evaluator score calculation.
-        self.create_patch('argos.core.membrane.evaluator.score', return_value=100)
-
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', return_value=(extracted_data, full_text))
         articles = collector.get_articles(self.feed)
         self.assertEquals(len(articles), 1)
+
+    def test_articles_ignores_existing(self):
+        self.patch_extraction()
+
+        articles = collector.get_articles(self.feed)
+        articles = collector.get_articles(self.feed)
+
+        self.assertEquals(Article.query.count(), 1)
+
+    def test_collect_ignores_same_source_and_title_if_urls_differ(self):
+        self.patch_extraction()
+
+        articles = collector.get_articles(self.feed)
+
+        # Setup the same article, but with a different link.
+        article = {
+                'links': [{'href': 'http://another_url.com'}],
+                'title': 'some title',
+                'published': 'Thu, 09 Jan 2014 14:00:00 GMT',
+                'updated': 'Thu, 09 Jan 2014 14:00:00 GMT'
+        }
+        data = MagicMock(
+                    entries=[article],
+                    bozo=False
+               )
+        self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
+
+        articles = collector.get_articles(self.feed)
+
+        self.assertEquals(Article.query.count(), 1)
 
     def test_articles_skips_short_articles(self):
         extracted_data = MagicMock()
