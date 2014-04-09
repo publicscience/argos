@@ -1,6 +1,9 @@
 #!/bin/bash
 trap : SIGTERM SIGINT
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ARGOS_ENV=~/env/argos
+
 echo -e "\n\n\n\n\n"
 echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo -e "$(tput setaf 6)Summoning the $(tput setaf 3)Argos$(tput setaf 6) environment with PID $(tput setaf 1)$$$(tput sgr0)"
@@ -17,17 +20,17 @@ REDIS_PID=$!
 rabbitmq-server &
 RABMQ_PID=$!
 
-cd ner
+cd $ARGOS_ENV/ner
 java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.conll.4class.distsim.crf.ser.gz -port 8080 -outputFormat inlineXML &
 NERSV_PID=$!
-cd ..
+cd $DIR
 
-cd jena/fuseki
+cd $ARGOS_ENV/jena/fuseki
 ./fuseki-server --loc=${HOME}/knodb /knowledge &
 KNOSV_PID=$!
-cd ../..
+cd $DIR
 
-source dev-env/bin/activate
+source $ARGOS_ENV/bin/activate
 celery worker --loglevel=DEBUG --app=argos.tasks.celery
 WORKR_PID=$!
 

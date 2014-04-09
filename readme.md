@@ -11,8 +11,16 @@ environments, such as staging or production, please refer to
 [argos.cloud](https://github.com/publicscience/argos.cloud), which is
 designed specifically for that purpose.*
 
+## Setup
 The setup process for Argos is fairly complex, but some scripts vastly simplify it.
 
+*Note on virtualenvs: Many of the following commands (those preceded by `(argos)`) assume you are in your virtual environment. As a reminder, you can activate it like so:*
+```bash
+# by default, the setup script creates a virtualenv at ~/env/argos
+$ source ~/env/argos/bin/activate
+```
+
+### Dependencies
 Argos is built in Python 3.3, so make sure you have `pip3` and `virtualenv-3.3`:
 ```bash
 # OSX
@@ -34,6 +42,7 @@ download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml
 download and setup [Apache Jena](https://jena.apache.org) & [Fuseki](https://jena.apache.org/documentation/serving_data/index.html),
 and generate the documentation.
 
+### Database
 You will also need to setup the databases, which you can do with:
 ```bash
 $ ./run db:create
@@ -44,10 +53,12 @@ testing databases (`argos_dev`, and `argos_test`) respectively. (If you ran `./s
 You can optionally setup the default sources for collecting
 articles by doing (make sure Postgres is running):
 ```bash
-(venv) $ python manage.py create:sources
+(argos) $ python manage.py create:sources
 ```
 
-### Running & Development
+---
+
+## Running & Development
 And then when you're ready to start developing/testing, run:
 ```bash
 $ ./go &
@@ -70,58 +81,105 @@ Then when you're done, kill it with:
 $ kill <pid>
 ```
 
-*Note: The following commands (those with `(venv)`) assume you are in
-your virtual environment. As a reminder, you can activate it like so:*
-```bash
-$ source /path/to/my/venv/bin/activate
-```
 
 You can setup seed data to work with:
 ```bash
-(venv) $ python manage.py seed
+(argos) $ python manage.py seed
 ```
 
 And then run the API server:
 ```bash
-(venv) $ python manage.py server
+(argos) $ python manage.py server
 ```
 
 You can run the frontend ('front') server instead:
 ```bash
-(venv) $ python front.py
+(argos) $ python front.py
 ```
 
+To add a user as an admin:
+```bash
+(argos) $ python manage.py create:admin someone@someplace.com
+```
+
+### Changes to the data model (Migrations)
 If you make changes to the data model, make sure you create a migration:
 ```bash
-(venv) $ python manage.py db migrate
+(argos) $ python manage.py db migrate
 ```
 
 And then run the migration:
 ```bash
-(venv) $ python manage.py db upgrade
+(argos) $ python manage.py db upgrade
 ```
 
-### Tests, Performance, Evaluation
+If you run into errors like:
+```
+sqlalchemy.exc.ProgrammingError: (ProgrammingError) column "<something>" of relation "article" already exists)
+```
+it's likely because your database is already fully-migrated (perhaps you
+created a new one from scratch, based off the latest data model). You
+just need to properly "stamp" the database with the latest revision ID so that
+Alembic (which manages the migrations) knows that its up-to-date:
+```bash
+(argos) $ python manage.py db stamp head
+```
+This marks the database as at the latest (`head`) revision.
+
+---
+
+## Testing, Performance, Evaluation
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
 ```bash
-(venv) $ ./run test
+(argos) $ ./run test
+```
+
+You can also run more specific test modules:
+```bash
+(argos) $ ./run test tests/core
+(argos) $ ./run test tests/core/article_test.py
 ```
 
 You can also profile some of the more intensive parts to identify
 bottlenecks:
 ```bash
-(venv) $ python manage.py profile
+(argos) $ python manage.py profile
 ```
 *Note: don't run this in production as it modifies your database.*
 
 You can also evaluate the quality of some of the algorithms, such as
 clustering:
 ```bash
-(venv) $ python manage.py evaluate
+(argos) $ python manage.py evaluate
 ```
 *Note: don't run this in production as it modifies your database.*
 
+---
+
+## Guide to the project
+Here are some quick notes to help you navigate through the project.
+
+*argos/core*
+The core modules which provide the primary functionality of Argos.
+
+Consists of:
+* *core/brain* – summarization, clustering, entity extraction, providing
+"knowledge" for concepts, etc.
+* *core/digester* – processes data dumps.
+* *core/membrane* – interfaces with the outside world: collects
+articles, gets information about them (such as shared counts), etc.
+
+*argos/web*
+All functionality which opens up Argos' core to the web, divided into
+API and "front" (the end-user frontend) packages.
+
+*argos/tasks*
+For distributed and regular tasks (via Celery).
+
+---
+
+## Notes/Caveats/Miscellany
 *Note: If you are having import errors or the packages seem to be
 missing, fear not ~ it may be because some package failed to install and
 pip rolled back the installs of everything else. Check your pip logs at

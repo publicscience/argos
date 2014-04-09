@@ -78,7 +78,7 @@ then
     echo -e "$(tput setaf 3)Building documentation...$(tput sgr0)"
     echo -e "\n\n\n"
 
-    source dev-env/bin/activate
+    source ~/env/argos/bin/activate
     cd doc
     make clean
     make html

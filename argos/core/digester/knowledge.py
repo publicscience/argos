@@ -74,7 +74,7 @@ def download(force=False):
     """
     Downloads and extracts the desired DBpedia datasets.
 
-    By default, they are extracted to `data/knowledge/`.
+    They are extracted to the app's `DATASETS_PATH` value.
     """
 
     # Get the desired dataset urls.
@@ -82,7 +82,8 @@ def download(force=False):
 
     for dataset_url in dataset_urls:
         # dc = decompressed
-        dc_filepath = os.path.join(DATASETS_PATH, os.path.basename(filepath)[:-4]) # remove '.bz2'
+        dc_filepath = os.path.join(DATASETS_PATH,
+                os.path.basename(dataset_url)[:-4]) # remove '.bz2'
 
         if os.path.exists(dc_filepath) and not force:
             logger.warn('File exists, not re-downloading and extracting. You can force by passing `force=True`.')
@@ -124,7 +125,8 @@ def digest(force=False):
         logger.warn('Existing knowledge database found. Removing...')
         shutil.rmtree(knowledge_path)
 
-    cmd = ['./jena/jena/bin/tdbloader2', '--loc', knowledge_path]
+    # Assuming the Argos env is in its default place.
+    cmd = ['~/env/argos/jena/jena/bin/tdbloader2', '--loc', knowledge_path]
     datasets = [os.path.join(DATASETS_PATH, dataset) for dataset in os.listdir(DATASETS_PATH) if dataset.endswith('.ttl') and any(setname in dataset for setname in DESIRED_DATASETS)]
     logger.info('Using the datasets: {0}'.format(' '.join(datasets)))
 

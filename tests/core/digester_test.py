@@ -206,7 +206,7 @@ class KnowledgeTest(RequiresMocks):
         mock_call = self.create_patch('subprocess.call', return_value=None)
 
         knowledge.digest()
-        mock_call.assert_called_with(['./jena/jena/bin/tdbloader2', '--loc', 'tests/data/knowledge/knodb', 'tests/data/knowledge/images_en.ttl', 'tests/data/knowledge/labels_en.ttl', 'tests/data/knowledge/redirects_en.ttl'])
+        mock_call.assert_called_with(['~/env/argos/jena/jena/bin/tdbloader2', '--loc', 'tests/data/knowledge/knodb', 'tests/data/knowledge/images_en.ttl', 'tests/data/knowledge/labels_en.ttl', 'tests/data/knowledge/redirects_en.ttl'])
 
 
 if __name__ == '__main__':

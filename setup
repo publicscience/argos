@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ARGOS_ENV=~/env/argos
+
 function setup_dependencies {
     echo -e "\n\n\n"
     echo -e "$(tput setaf 3)Installing dependencies...$(tput sgr0)"
@@ -68,8 +70,8 @@ function setup_virtualenv {
     echo -e "\n\n\n"
 
     # Setup the Python 3.3 virtualenv.
-    virtualenv-3.3 dev-env --no-site-packages
-    source dev-env/bin/activate
+    virtualenv-3.3 $ARGOS_ENV --no-site-packages
+    source $ARGOS_ENV/bin/activate
     pip install numpy cython
     pip install -r requirements.txt
 }
@@ -80,7 +82,7 @@ function setup_nltk {
     echo -e "\n\n\n"
 
     # Download NLTK (Python 3) data.
-    source dev-env/bin/activate
+    source $ARGOS_ENV/bin/activate
 
     python -m nltk.downloader wordnet
     python -m nltk.downloader stopwords
@@ -95,10 +97,10 @@ function setup_ner {
     echo -e "$(tput setaf 3)Setting up Stanford NER...$(tput sgr0)"
     echo -e "\n\n\n"
 
-    wget -O ner.zip 'http://nlp.stanford.edu/software/stanford-ner-2013-06-20.zip'
-    unzip -o ner.zip
-    mv 'stanford-ner-2013-06-20' ner
-    rm ner.zip
+    wget -O $ARGOS_ENV/ner.zip 'http://nlp.stanford.edu/software/stanford-ner-2013-06-20.zip'
+    unzip -o $ARGOS_ENV/ner.zip
+    mv 'stanford-ner-2013-06-20' $ARGOS_ENV/ner
+    rm $ARGOS_ENV/ner.zip
 }
 
 function setup_knowledge {
@@ -106,22 +108,22 @@ function setup_knowledge {
     echo -e "$(tput setaf 3)Setting up Apache Jena/Fuseki...$(tput sgr0)"
     echo -e "\n\n\n"
 
-    wget -O jena.tar.gz 'http://mirrors.gigenet.com/apache//jena/binaries/apache-jena-2.11.1.tar.gz'
-    wget -O fuseki.tar.gz 'http://mirrors.gigenet.com/apache//jena/binaries/jena-fuseki-1.0.1-distribution.tar.gz'
+    wget -O $ARGOS_ENV/jena.tar.gz 'http://mirrors.gigenet.com/apache//jena/binaries/apache-jena-2.11.1.tar.gz'
+    wget -O $ARGOS_ENV/fuseki.tar.gz 'http://mirrors.gigenet.com/apache//jena/binaries/jena-fuseki-1.0.1-distribution.tar.gz'
 
     # Extract only the Jena tools we need directly to jena/.
-    mkdir jena
-    tar -xzvf jena.tar.gz
-    mv 'apache-jena-2.11.1' jena/jena
-    rm jena.tar.gz
+    mkdir $ARGOS_ENV/jena
+    tar -xzvf $ARGOS_ENV/jena.tar.gz
+    mv 'apache-jena-2.11.1' $ARGOS_ENV/jena/jena
+    rm $ARGOS_ENV/jena.tar.gz
 
-    tar -xvzf fuseki.tar.gz
-    mv 'jena-fuseki-1.0.1' jena/fuseki
-    rm fuseki.tar.gz
+    tar -xvzf $ARGOS_ENV/fuseki.tar.gz
+    mv 'jena-fuseki-1.0.1' $ARGOS_ENV/jena/fuseki
+    rm $ARGOS_ENV/fuseki.tar.gz
 
     # Make a directory to store the TDB (the triple database, i.e.
     # the knowledge database).
-    mkdir -p data/knowledge
+    mkdir -p $ARGOS_ENV/data/knowledge
 
     # Download and digest the DBpedia dumps.
     python -c "from argos.core.digester import knowledge; knowledge.download(); knowledge.digest()"
