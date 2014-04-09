@@ -63,7 +63,7 @@ def save_from_file(file, filename):
     # Manually set Content-Type if necessary.
     ext = os.path.splitext(filename)[-1]
     if ext == '.svg':
-        key.set_metadata('Content-Type', 'image/svg+xml')
+        key.content_type = 'image/svg+xml'
 
     # Not sure if this should be called every time.
     key.make_public()
