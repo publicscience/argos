@@ -103,7 +103,7 @@ def multisummarize(docs, summary_length=5):
     ideal_length = 20
     summary_sentences = []
     for cluster in ranked_clusters:
-        max_sent = None, 0
+        max_sent = '', 0
         for sent in cluster:
             avg_sim = 0
             for sent_c in cluster:
