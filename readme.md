@@ -146,21 +146,21 @@ bottlenecks:
 ```bash
 (argos) $ python manage.py profile
 ```
-*Note: don't run this in production as it modifies your database.*
+**Note: don't run this in production as it modifies your database.**
 
 You can also evaluate the quality of some of the algorithms, such as
 clustering:
 ```bash
 (argos) $ python manage.py evaluate
 ```
-*Note: don't run this in production as it modifies your database.*
+**Note: don't run this in production as it modifies your database.**
 
 ---
 
 ## Guide to the project
 Here are some quick notes to help you navigate through the project.
 
-*argos/core*
+**argos/core** --
 The core modules which provide the primary functionality of Argos.
 
 Consists of:
@@ -170,19 +170,19 @@ Consists of:
 * *core/membrane* – interfaces with the outside world: collects
 articles, gets information about them (such as shared counts), etc.
 
-*argos/web*
+**argos/web** --
 All functionality which opens up Argos' core to the web, divided into
 API and "front" (the end-user frontend) packages.
 
-*argos/tasks*
+**argos/tasks** --
 For distributed and regular tasks (via Celery).
 
 ---
 
 ## Notes/Caveats/Miscellany
-*Note: If you are having import errors or the packages seem to be
+If you are having import errors or the packages seem to be
 missing, fear not ~ it may be because some package failed to install and
 pip rolled back the installs of everything else. Check your pip logs at
 `~/.pip/pip.log`. I'd wager it is `scipy` which ran into a missing
-dependency.*
+dependency.
 
