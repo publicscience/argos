@@ -15,5 +15,10 @@ manager.add_command('shell', Shell())
 manager.add_command('server', Server(host='0.0.0.0'))
 manager.add_command('db', MigrateCommand)
 
+# Groom (temporary commands for fixes and such)
+
+from manage import FixSVGCommand
+manager.add_command('fixsvg', FixSVGCommand())
+
 if __name__ == '__main__':
     manager.run()

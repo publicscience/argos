@@ -2,7 +2,6 @@ from argos.web.models import User, Role
 from argos.datastore import db
 
 from flask.ext.script import Command, Option
-#from flask.ext.security import UserDatastore
 
 class CreateAdminCommand(Command):
     """
