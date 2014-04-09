@@ -42,7 +42,7 @@ def collect():
         notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url, len(articles)))
 
 @celery.task
-def cluster_articles(batch_size=5, threshold=0.05):
+def cluster_articles(batch_size=5, threshold=0.1):
     """
     Clusters a batch of orphaned articles
     into events.
@@ -52,7 +52,7 @@ def cluster_articles(batch_size=5, threshold=0.05):
     notify('Clustering articles successful.')
 
 @celery.task
-def cluster_events(batch_size=5, threshold=0.05):
+def cluster_events(batch_size=5, threshold=0.1):
     """
     Clusters a batch of orphaned events
     into stories.
@@ -60,3 +60,29 @@ def cluster_events(batch_size=5, threshold=0.05):
     events = Event.query.filter(~Event.stories.any()).limit(batch_size).all()
     Story.cluster(events, threshold=threshold)
     notify('Clustering events successful.')
+
+@celery.task
+def recluster_events(batch_size=5, threshold=0.1):
+    """
+    Recluster events which already belong to stories.
+
+    Set this as a periodic task if, for instance,
+    you have changed the clustering threshold and
+    want existing clusters to reflect those changes.
+    """
+    events = Event.query.filter(Event.stories.any()).limit(batch_size).all()
+    Story.cluster(events, threshold=threshold)
+    notify('Reclustering events successful.')
+
+@celery.task
+def cluster_articles(batch_size=5, threshold=0.1):
+    """
+    Recluster articles which already belong to events.
+
+    Set this as a periodic task if, for instance,
+    you have changed the clustering threshold and
+    want existing clusters to reflect those changes.
+    """
+    articles = Article.query.filter(Article.events.any()).limit(batch_size).all()
+    Event.cluster(articles, threshold=threshold)
+    notify('Reclustering articles successful.')
