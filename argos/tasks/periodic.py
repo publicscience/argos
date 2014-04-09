@@ -21,24 +21,25 @@ def collect():
     # and is not currently being updated.
     feed = Feed.query.filter(Feed.updated_at < datetime.utcnow() - timedelta(hours=1), ~Feed.updating).first()
 
-    # "Claim" this feed,
-    # so other workers won't pick it.
-    feed.updating = True
-    db.session.commit()
-
-    try:
-        articles = collector.collect(feed)
-        feed.updated_at = datetime.utcnow()
-
-    except Exception:
-        logger.exception('Exception while collecting for feed {0}'.format(feed.ext_url))
-        raise
-
-    finally:
-        feed.updating = False
+    if feed:
+        # "Claim" this feed,
+        # so other workers won't pick it.
+        feed.updating = True
         db.session.commit()
 
-    notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url, len(articles)))
+        try:
+            articles = collector.collect(feed)
+            feed.updated_at = datetime.utcnow()
+
+        except Exception:
+            logger.exception('Exception while collecting for feed {0}'.format(feed.ext_url))
+            raise
+
+        finally:
+            feed.updating = False
+            db.session.commit()
+
+        notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url, len(articles)))
 
 @celery.task
 def cluster_articles(batch_size=5, threshold=0.05):
