@@ -10,13 +10,14 @@ PER_PAGE = 20
 
 @bp.route('/')
 def feed():
-    page = request.args.get('page', 1)
+    page = int(request.args.get('page', 1))
 
     if current_user.is_authenticated() and len(current_user.watching) > 0:
         # Get all the events which belong to stories that the user is watching.
         # This is so heinous, and probably very slow – but it works for now.
         # Eventually this will also have highly-promoted stories as well.
         events = models.Event.query.join(models.Event.stories).filter(models.Event.stories.any(models.Story.id.in_([story.id for story in current_user.watching]))).order_by(models.Event.created_at.desc()).all()
+        count = models.Event.query.join(models.Event.stories).filter(models.Event.stories.any(models.Story.id.in_([story.id for story in current_user.watching]))).order_by(models.Event.created_at.desc()).count()
         title = 'Your latest events'
 
     # Default to trending events
@@ -24,8 +25,14 @@ def feed():
         # Filter to only show events which have been clustered
         # (i.e. they belong to at least one story)
         events = models.Event.query.filter(models.Event.stories).order_by(models.Event._score.desc()).paginate(page, per_page=PER_PAGE).items
+        count = models.Event.query.filter(models.Event.stories).order_by(models.Event._score.desc()).count()
         title = 'The latest, most shared events'
-    return render_template('events/collection.jade', events=events, title=title)
+    return render_template('events/collection.jade',
+            events=events,
+            title=title,
+            page=page,
+            total_pages=count/PER_PAGE,
+            route='user.feed')
 
 @bp.route('/watching')
 def watching():

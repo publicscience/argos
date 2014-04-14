@@ -24,3 +24,8 @@ block content
                                 .result-summary= result.summary|truncate
                             else
                                 .result-summary We're missing a summary for this concept. Please help us by submitting one.
+            .pagination
+                if page > 1
+                    a(href=url_for('main.search_results', page=page-1, query=query, types=types)).pagination-prev prev
+                if page < total_pages
+                    a(href=url_for('main.search_results', page=page+1, query=query, types=types)).pagination-next next

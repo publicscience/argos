@@ -9,19 +9,31 @@ PER_PAGE = 20
 
 @bp.route('/latest/')
 def latest():
-    page = request.args.get('page', 1)
+    page = int(request.args.get('page', 1))
     # Filter to only show events which have been clustered
     # (i.e. they belong to at least one story)
     events = models.Event.query.filter(models.Event.stories).paginate(page, per_page=PER_PAGE).items
-    return render_template('events/collection.jade', events=events, title='The latest events')
+    count = models.Event.query.filter(models.Event.stories).count()
+    return render_template('events/collection.jade',
+            events=events,
+            title='The latest events',
+            page=page,
+            total_pages=count/PER_PAGE,
+            route='main.latest')
 
 @bp.route('/trending/')
 def trending():
-    page = request.args.get('page', 1)
+    page = int(request.args.get('page', 1))
     # Filter to only show events which have been clustered
     # (i.e. they belong to at least one story)
     events = models.Event.query.filter(models.Event.stories).order_by(models.Event._score.desc()).paginate(page, per_page=PER_PAGE).items
-    return render_template('events/collection.jade', events=events, title='The latest, most shared events')
+    count = models.Event.query.filter(models.Event.stories).order_by(models.Event._score.desc()).count()
+    return render_template('events/collection.jade',
+            events=events,
+            title='The latest, most shared events',
+            page=page,
+            total_pages=count/PER_PAGE,
+            route='main.trending')
 
 @bp.route('/events/<int:id>')
 def event(id):
@@ -67,13 +79,18 @@ def search():
 
 @bp.route('/search/<string:query>')
 def search_results(query):
-    page = request.args.get('page', 1)
+    page = int(request.args.get('page', 1))
     raw_types = request.args.get('types', 'event,story,concept')
     types = raw_types.split(',')
 
     if query:
         results, count = _search(query, page, PER_PAGE, types=types, url_prefix='main.')
-        return render_template('search/results.jade', results=results, query=query)
+        return render_template('search/results.jade',
+                results=results,
+                query=query,
+                types=raw_types,
+                page=page,
+                total_pages=count/PER_PAGE)
 
     else:
         flash('What are you looking for?')

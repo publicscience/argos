@@ -12,3 +12,8 @@ block content
         else
             for event in events
                 +event_item(event, current_user)
+            .pagination
+                if page > 1
+                    a(href=url_for(route, page=page-1)).pagination-prev prev
+                if page < total_pages
+                    a(href=url_for(route, page=page+1)).pagination-next next
