@@ -10,6 +10,8 @@ from os.path import splitext
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declared_attr
 
+from collections import Counter
+
 concepts_mentions = db.Table('concepts_mentions',
         db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
         db.Column('concept_slug', db.String, db.ForeignKey('concept.slug'))
@@ -99,6 +101,14 @@ class Concept(Model):
                                 cascade='all, delete-orphan')
 
     def __init__(self, name):
+        """
+        Initialize a concept by a name, which can be
+        an alias (it does not have to be the canonical name).
+        This specified name will be saved as an Alias.
+
+        A canonical name will be looked for; if one is found
+        it will be used as the slug for this Concept.
+        """
         self.aliases.append(Alias(name))
 
         # Try to get a canonical URI
@@ -124,11 +134,6 @@ class Concept(Model):
             ext = splitext(k['image'])[-1].lower()
             self.image = storage.save_from_url(k['image'], '{0}{1}'.format(hash(self.slug), ext))
 
-        # If there's a summary,
-        # extract concepts from it.
-        if self.summary:
-            self.conceptize()
-
     @property
     def names(self):
         return [alias.name for alias in self.aliases]
@@ -141,6 +146,9 @@ class Concept(Model):
         with their importance scores
         for this concept.
         """
+        if self.summary and not len(self.concept_associations):
+            self.conceptize()
+
         def with_score(assoc):
             assoc.concept.score = assoc.score
             return assoc.concept
@@ -202,15 +210,48 @@ class Concept(Model):
         """
         Process the concept summary for concepts,
         and add the appropriate mentions.
-
-        For now, this does nothing because the concepts'
-        summaries are parsed for concepts, which then can
-        lead to the creation of new concepts, which means
-        the parsing of those concepts' summaries, ad nauseam...
-
-        Need to come up with a good strategy for dealing with this.
         """
-        pass
+        concepts = []
+        for c_name in brain.concepts(self.summary):
+            # Search for the concept.
+            uri = brain.knowledge.uri_for_name(c_name)
+
+            if uri:
+                slug = uri.split('/')[-1]
+            else:
+                slug = slugify(c_name)
+            c = Concept.query.get(slug)
+
+            # If an concept is found...
+            if c:
+                # Add this name as a new alias, if necessary.
+                alias = Alias.query.filter_by(name=c_name, concept=c).first()
+                if not alias:
+                    alias = Alias(c_name)
+                    c.aliases.append(alias)
+                self.mentions.append(alias)
+
+            # If one doesn't exist, create a new one.
+            if not c:
+                c = Concept(c_name)
+                self.mentions.append(c.aliases[0])
+                db.session.add(c)
+                db.session.commit()
+
+            concepts.append(c)
+
+        # Score the concepts' importance.
+        total_found = len(concepts)
+        counter = Counter(concepts)
+        uniq_concepts = set(concepts)
+
+        assocs = []
+        for concept in uniq_concepts:
+            score = counter[concept]/total_found
+            assoc = ConceptConceptAssociation(concept, score)
+            assocs.append(assoc)
+
+        self.concept_associations = assocs
 
 @event.listens_for(Concept, 'before_update')
 def receive_before_update(mapper, connection, target):

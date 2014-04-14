@@ -75,6 +75,19 @@ class ConceptTest(RequiresDatabase):
             self.assertTrue(c in concept.from_concepts)
             self.assertTrue(concept in c.concepts)
 
+    def test_generates_related_concepts_when_concepts_getter_called(self):
+        c = Concept('Some Concept')
+        c.summary = 'this is a summary Clinton'
+
+        # At first there should not be any concept assocations.
+        self.assertEqual(len(c.concept_associations), 0)
+
+        # But when you call the `concepts` getter,
+        # the concept associations are generated.
+        self.assertEqual(len(c.concepts), 1)
+        self.assertEqual(len(c.concept_associations), 1)
+        self.assertEqual(c.concepts[0].names, ['Clinton'])
+
     # Patches
     def _patch_knowledge_for(self):
         mock_func = self.create_patch('argos.core.brain.knowledge.knowledge_for')
