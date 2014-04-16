@@ -9,7 +9,7 @@ ASSETS_DEBUG = True
 SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos_dev"
 
 KNOWLEDGE_HOST = 'localhost'
-DATASETS_PATH = '~/'
+DATASETS_PATH = '~/env/argos/data/knowledge/'
 
 BIZVIZZ_API_KEY = 'some key'
 

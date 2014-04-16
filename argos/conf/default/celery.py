@@ -11,7 +11,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 # What modules to import on start.
 # Note that in production environments you will want to
 # remove the 'tests' tasks module.
-CELERY_IMPORTS = ('tests.util.tasks_test', 'argos.tasks', 'argos.tasks.periodic', 'argos.core.digester.wikidigester',)
+CELERY_IMPORTS = ('tests.util.tasks_test', 'argos.tasks', 'argos.tasks.periodic',)
 
 # Propagate chord errors when they come up.
 CELERY_CHORD_PROPAGATES = True

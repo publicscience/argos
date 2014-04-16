@@ -65,10 +65,12 @@ DESIRED_DATASETS = [
     'redirects',
     'geo_coordinates',
     'persondata',
-    'disambiguations'
+    'disambiguations',
+    'instance_types',
+    'mappingbased_properties'
 ]
 
-DATASETS_PATH = APP['DATASETS_PATH']
+DATASETS_PATH = os.path.expanduser(APP['DATASETS_PATH'])
 
 def download(force=False):
     """
@@ -115,7 +117,7 @@ def digest(force=False):
     Note: `tdbloader2` only runs properly on Unix systems.
     """
 
-    knowledge_path = os.path.join(os.path.expanduser(DATASETS_PATH), 'knodb')
+    knowledge_path = os.path.join(DATASETS_PATH, 'knodb')
     logger.info('Digesting the datasets to {0}...'.format(knowledge_path))
 
     if os.path.exists(knowledge_path):
@@ -126,7 +128,8 @@ def digest(force=False):
         shutil.rmtree(knowledge_path)
 
     # Assuming the Argos env is in its default place.
-    cmd = ['~/env/argos/jena/jena/bin/tdbloader2', '--loc', knowledge_path]
+    loader_path = os.path.expanduser('~/env/argos/jena/jena/bin/tdbloader2')
+    cmd = [loader_path, '--loc', knowledge_path]
     datasets = [os.path.join(DATASETS_PATH, dataset) for dataset in os.listdir(DATASETS_PATH) if dataset.endswith('.ttl') and any(setname in dataset for setname in DESIRED_DATASETS)]
     logger.info('Using the datasets: {0}'.format(' '.join(datasets)))
 

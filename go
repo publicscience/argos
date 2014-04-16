@@ -26,7 +26,7 @@ NERSV_PID=$!
 cd $DIR
 
 cd $ARGOS_ENV/jena/fuseki
-./fuseki-server --loc=${HOME}/knodb /knowledge &
+./fuseki-server --loc=$ARGOS_ENV/data/knowledge/knodb /knowledge &
 KNOSV_PID=$!
 cd $DIR
 
