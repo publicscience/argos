@@ -291,7 +291,7 @@ def aliases_for_name(name):
         >>> aliases_for_name("United States Secretary of State")
         ['http://dbpedia.org/resource/US_Secretary_Of_State',
          'http://dbpedia.org/resource/Secretary_of_State_of_the_United_States',
-          'http://dbpedia.org/resource/US_Secretary_of_State', ...]
+         'http://dbpedia.org/resource/US_Secretary_of_State', ...]
     """
 
     uri = uri_for_name(name)
@@ -307,6 +307,31 @@ def aliases_for_uri(uri):
     results = _prepare_results(data)
     return [d['alias_uri'] for d in results]
 
+def types_for_uri(uri):
+    """
+    Returns a list of types for a given entity URI.
+
+    Example::
+
+        >>> types_for_uri('http://dbpedia.org/resource/Google')
+        ['http://www.w3.org/2002/07/owl#Thing',
+         'http://dbpedia.org/ontology/Agent',
+         'http://dbpedia.org/ontology/Organisation',
+         'http://schema.org/Organization',
+         'http://dbpedia.org/ontology/Company']
+    """
+    uri = _quote(uri)
+    query = 'SELECT ?type WHERE {{ <{0}> rdf:type ?type }}'.format(uri)
+    data = _query(query)
+    results = _prepare_results(data)
+    return [d['type'] for d in results]
+
+def types_for_name(name):
+    """
+    Returns a list of types for a given entity name.
+    """
+    uri = uri_for_name(name)
+    return types_for_uri(uri)
 
 def knowledge_for(uri=None, name=None, fallback=False):
     """

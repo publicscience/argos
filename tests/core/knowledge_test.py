@@ -21,6 +21,27 @@ class KnowledgeTest(RequiresMocks):
         uri = knowledge.uri_for_name('United States Secretary of State')
         self.assertEqual(uri, 'http://dbpedia.org/resource/United_States_Secretary_of_State')
 
+    def test_types_for_uri(self):
+        self.mock_resp.read.return_value = b'''
+            {
+              "head": {
+                "vars": [ "type" ]
+              } ,
+              "results": {
+                "bindings": [
+                  {
+                    "type": { "type": "uri" , "value": "http://schema.org/Organization" }
+                  } ,
+                  {
+                    "type": { "type": "uri" , "value": "http://dbpedia.org/ontology/Company" }
+                  }
+                ]
+              }
+            }
+        '''
+        types = knowledge.types_for_uri('http://dbpedia.org/resource/Google')
+        self.assertEqual(types, ['http://schema.org/Organization', 'http://dbpedia.org/ontology/Company'])
+
     def test_image_for_uri(self):
         self.mock_resp.read.return_value = b'{\n  "head": {\n    "vars": [ "image_url" ]\n  } ,\n  "results": {\n    "bindings": [\n      {\n        "image_url": { "type": "uri" , "value": "http://upload.wikimedia.org/wikipedia/commons/7/7e/StarTrek_Logo_2007.JPG" }\n      }\n    ]\n  }\n}\n'
         image_url = knowledge.image_for_uri('http://dbpedia.org/resource/Star_Trek')
