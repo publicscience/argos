@@ -59,7 +59,7 @@ class ArticleTest(RequiresDatabase):
 
         # Mock things so we extract one concept with the same URI
         # as the one we just created.
-        self.create_patch('argos.core.brain.knowledge.uri_for_name', return_value=uri)
+        self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
         self.create_patch('argos.core.brain.concepts', return_value=['An concept'])
 
         # Create the article, which calls conceptize.
@@ -80,7 +80,7 @@ class ArticleTest(RequiresDatabase):
 
         # Mock things so we extract one concept with the same URI
         # as the one we just created.
-        self.create_patch('argos.core.brain.knowledge.uri_for_name', return_value=uri)
+        self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
         self.create_patch('argos.core.brain.concepts', return_value=[concept.aliases[0].name])
 
         # Create the article, which calls conceptize.
@@ -97,7 +97,7 @@ class ArticleTest(RequiresDatabase):
         uri = concept.uri
 
         # Mock things so two concepts are returned, but since they share the same uri, they point to the same concept.
-        self.create_patch('argos.core.brain.knowledge.uri_for_name', return_value=uri)
+        self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
         self.create_patch('argos.core.brain.concepts', return_value=['Concept alias one', 'Concept alias two'])
 
         # Create the article, which calls conceptize.
@@ -123,7 +123,7 @@ class ArticleTest(RequiresDatabase):
                 return 'uri_a'
             else:
                 return 'uri_b'
-        mock_func = self.create_patch('argos.core.brain.knowledge.uri_for_name')
+        mock_func = self.create_patch('argos.core.knowledge.uri_for_name')
         mock_func.side_effect = mock_uri_for_name
 
         # One concept appears 3 times, the other only once.

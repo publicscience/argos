@@ -30,8 +30,8 @@ def patch_knowledge():
     # tests don't require the Fuseki server
     # or a network connection to Wikipedia.
     patcher = Patcher([
-        'argos.core.brain.knowledge.knowledge_for',
-        'argos.core.brain.knowledge.uri_for_name'
+        'argos.core.knowledge.knowledge_for',
+        'argos.core.knowledge.uri_for_name'
     ])
     return patcher
 
@@ -70,8 +70,8 @@ class Patcher():
     Example::
 
         p = Patcher([
-            'argos.core.brain.knowledge.knowledge_for',
-            'argos.core.brain.knowledge.uri_for_name'
+            'argos.core.knowledge.knowledge_for',
+            'argos.core.knowledge.uri_for_name'
         ])
 
     This will look for the methods `faux_knowledge_for` and

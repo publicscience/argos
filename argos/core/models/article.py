@@ -2,6 +2,7 @@ from argos.datastore import db
 from argos.core.models.concept import Concept, Alias, BaseConceptAssociation
 from argos.core.models.cluster import Clusterable
 from argos.core import brain
+from argos.core import knowledge
 
 from scipy.spatial.distance import jaccard
 from sqlalchemy import event
@@ -82,7 +83,7 @@ class Article(Clusterable):
         concepts = []
         for c_name in brain.concepts(self.text):
             # Search for the concept.
-            uri = brain.knowledge.uri_for_name(c_name)
+            uri = knowledge.uri_for_name(c_name)
 
             if uri:
                 slug = uri.split('/')[-1]

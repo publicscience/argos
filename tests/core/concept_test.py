@@ -90,7 +90,7 @@ class ConceptTest(RequiresDatabase):
 
     # Patches
     def _patch_knowledge_for(self):
-        mock_func = self.create_patch('argos.core.brain.knowledge.knowledge_for')
+        mock_func = self.create_patch('argos.core.knowledge.knowledge_for')
 
         def faux_knowledge_for(name=None, uri=None, fallback=None):
             if uri:
@@ -110,4 +110,4 @@ class ConceptTest(RequiresDatabase):
         mock_func.side_effect = faux_knowledge_for
 
     def _patch_uri_for_name(self, return_value):
-        self.create_patch('argos.core.brain.knowledge.uri_for_name', return_value=return_value)
+        self.create_patch('argos.core.knowledge.uri_for_name', return_value=return_value)

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from tests import RequiresMocks
 
 import argos.core.brain as brain
-from argos.core.brain import knowledge
+from argos.core import knowledge
 
 class BrainTest(unittest.TestCase):
     def test_tokenize(self):

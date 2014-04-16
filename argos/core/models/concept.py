@@ -1,7 +1,7 @@
 from argos.datastore import db, Model
 
 from argos.core import brain
-from argos.core.brain import knowledge
+from argos.core import knowledge
 from argos.util import storage
 
 from slugify import slugify
@@ -214,7 +214,7 @@ class Concept(Model):
         concepts = []
         for c_name in brain.concepts(self.summary):
             # Search for the concept.
-            uri = brain.knowledge.uri_for_name(c_name)
+            uri = knowledge.uri_for_name(c_name)
 
             if uri:
                 slug = uri.split('/')[-1]
