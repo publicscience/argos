@@ -11,6 +11,8 @@ SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos
 KNOWLEDGE_HOST = 'localhost'
 DATASETS_PATH = '~/'
 
+BIZVIZZ_API_KEY = 'some key'
+
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
 S3_BUCKET_NAME = 'argos_development_storage'
