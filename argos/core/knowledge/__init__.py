@@ -70,6 +70,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbp: <http://dbpedia.org/property/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -107,8 +108,7 @@ def uri_for_name(name):
         }}
     '''
     query = _build_query(base_query, name)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     if results:
         return results[0].get('uri')
     return None
@@ -120,8 +120,7 @@ def name_for_uri(uri):
     """
     uri = _quote(uri)
     query = 'SELECT ?name WHERE {{ <{0}> rdfs:label ?name }}'.format(uri)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     if results:
         return results[0].get('name')
     return None
@@ -165,8 +164,7 @@ def image_for_uri(uri, fallback=False):
     """
     uri = _quote(uri)
     query = 'SELECT ?image_url WHERE {{ <{0}> foaf:depiction ?image_url }}'.format(uri)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     if results:
         return results[0].get('image_url')
     elif fallback:
@@ -203,8 +201,7 @@ def coordinates_for_uri(uri):
     """
     uri = _quote(uri)
     query = 'SELECT ?lat ?long WHERE {{ <{0}> geo:lat ?lat; geo:long ?long }}'.format(uri)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     if results:
         return results[0]
     return None
@@ -264,8 +261,7 @@ def summary_for_uri(uri, short=False, fallback=False):
     uri = _quote(uri)
     predicate = 'rdfs:comment' if short else 'dbo:abstract'
     query = 'SELECT ?summary WHERE {{ <{0}> {1} ?summary }}'.format(uri, predicate)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     if results:
         return results[0].get('summary')
     elif fallback:
@@ -303,8 +299,7 @@ def aliases_for_uri(uri):
     """
     uri = _quote(uri)
     query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'.format(uri)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     return [d['alias_uri'] for d in results]
 
 def types_for_uri(uri):
@@ -322,8 +317,7 @@ def types_for_uri(uri):
     """
     uri = _quote(uri)
     query = 'SELECT ?type WHERE {{ <{0}> rdf:type ?type }}'.format(uri)
-    data = _query(query)
-    results = _prepare_results(data)
+    results = _get_results(query)
     return [d['type'] for d in results]
 
 def types_for_name(name):
@@ -423,6 +417,14 @@ def _prepare_results(data):
         results.append({k: v['value'] for k, v in binding.items()})
     return results
 
+def _get_results(query):
+    """
+    Convenience method for making a query
+    and getting formatted results.
+    """
+    data = _query(query)
+    return _prepare_results(data)
+
 def _build_query(base_query, *args):
     """
     Formats a query with arguments, sanitizing
@@ -461,3 +463,5 @@ def _quote(text):
             text = text.replace(mapping[0], mapping[1])
     return text
 
+
+from argos.core.knowledge import profiles

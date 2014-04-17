@@ -206,6 +206,14 @@ class Concept(Model):
     def related_concepts(self):
         return self.to_concepts + self.from_concepts
 
+    @property
+    def profile(self):
+        """
+        Returns a data profile specifically
+        for this concept's type.
+        """
+        return knowledge.profiles.get_profile(self.uri)
+
     def conceptize(self):
         """
         Process the concept summary for concepts,

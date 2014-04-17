@@ -11,7 +11,11 @@ SQLALCHEMY_DATABASE_URI = "postgresql://argos_user:password@localhost:5432/argos
 KNOWLEDGE_HOST = 'localhost'
 DATASETS_PATH = '~/env/argos/data/knowledge/'
 
+# http://bizvizz.com/api/request
 BIZVIZZ_API_KEY = 'some key'
+
+# https://www.opensecrets.org/api/admin/index.php?function=signup
+OPENSECRETS_API_KEY = 'some key'
 
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')

@@ -67,7 +67,8 @@ DESIRED_DATASETS = [
     'persondata',
     'disambiguations',
     'instance_types',
-    'mappingbased_properties'
+    'mappingbased_properties',
+    'raw_infobox_properties'
 ]
 
 DATASETS_PATH = os.path.expanduser(APP['DATASETS_PATH'])
