@@ -212,7 +212,9 @@ class Concept(Model):
         Returns a data profile specifically
         for this concept's type.
         """
-        return knowledge.profiles.get_profile(self.uri)
+        if not hasattr(self, '_profile') or not self._profile:
+            self._profile = knowledge.profiles.get_profile(self.uri)
+        return self._profile
 
     def conceptize(self):
         """

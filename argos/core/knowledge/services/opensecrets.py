@@ -30,12 +30,12 @@ def organizations(name):
 
         [{
             'name': 'Google Inc',
-            'year': '2014',
             'contributions': {
                 'democrat': '747341',
                 'lobbying': '15800000',
                 'republican': '483817',
-                'total': '1461482'
+                'total': '1461482',
+                'year': '2014'
             }
         }]
     """
@@ -52,12 +52,12 @@ def organizations(name):
         raw = _request('orgSummary', id=orgid)['organization']['@attributes']
         results.append({
             #'name': raw['orgname'],
-            'year': raw['cycle'],
             'contributions': {
                 'total': raw['total'],
                 'lobbying': raw['lobbying'],
                 'democrat': raw['dems'],
-                'republican': raw['repubs']
+                'republican': raw['repubs'],
+                'year': raw['cycle']
             }
         })
 

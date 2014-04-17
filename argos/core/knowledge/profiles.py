@@ -6,7 +6,7 @@ Constructs a specific "data profile" for
 a resource (concept) based on its ontological type.
 """
 
-from argos.core.knowledge import _quote, _get_results, types_for_uri, name_for_uri, services
+from argos.core.knowledge import _quote, _get_results, types_for_uri, name_for_uri, image_for_uri, services
 
 def get_profile(uri):
     types = types_for_uri(uri)
@@ -25,14 +25,13 @@ def get_company_profile(uri):
     Example return value::
 
         {'assets': 'US$ 93.80 billion',
-         'contributions': [{
-            'contributions': {
+         'contributions': {
                 'democrat': '747341',
                 'lobbying': '15800000',
                 'republican': '483817',
-                'total': '1461482'
-            },
-           'year': '2014'}],
+                'total': '1461482',
+                'year': '2014'
+         },
          'employees': '53861',
          'income': 'US$ 10.74 billion',
          'name': 'Google',
@@ -77,33 +76,56 @@ def get_company_profile(uri):
     # Get the names for each subsidiary.
     subsidiaries = {}
     for subsidiary in [result['subsidiaries'] for result in results]:
-        subsidiaries[subsidiary] = name_for_uri(subsidiary)
+        # This should be combined into a single query.
+        subsidiaries[subsidiary] = {'name': name_for_uri(subsidiary), 'image': image_for_uri(subsidiary)}
 
-    profile = results[0]
-    profile['subsidiaries'] = subsidiaries
+    profile = None
+    if results:
+        profile = results[0]
+        profile['subsidiaries'] = subsidiaries
 
-    contributions = services.opensecrets.organizations(profile['name'])
-    profile['contributions'] = contributions
+        # For now just using the first result,
+        # but it is possible that multiple organizations are returned.
+        os_data = services.opensecrets.organizations(profile['name'])
+        profile['contributions'] = os_data[0]['contributions']
 
     return profile
 
 def get_place_profile(uri):
+    """
+    Example return value::
+
+        {'areaKm': '603628',
+         'areaSqMi': '233090',
+         'capital': 'http://dbpedia.org/resource/Kiev',
+         'latitude': '49.0',
+         'leaders': {'http://dbpedia.org/resource/Mykola_Azarov': 'Mykola Azarov',
+          'http://dbpedia.org/resource/Viktor_Yanukovych': 'Viktor Yanukovych',
+          'http://dbpedia.org/resource/Volodymyr_Rybak': 'Volodymyr Rybak'},
+         'longitude': '32.0',
+         'population': '44854065',
+         'populationDensityKm': '77',
+         'populationDensitySqMi': '199',
+         'populationYear': '2012'}
+    """
     uri = _quote(uri)
 
     query = '''
         SELECT *
         WHERE {{
-            <{uri}> dbp:capital ?capital;
-                    dbp:areaKm ?areaKm;
-                    dbp:areaSqMi ?areaSqMi;
-                    dbp:imageFlag ?flag;
-                    dbp:populationEstimate ?population;
-                    dbp:populationEstimateYear ?populationYear;
-                    dbp:populationDensityKm ?populationDensityKm;
-                    dbp:populationDensitySqMi ?populationDensitySqMi;
-                    dbo:leaderName ?leaders;
-                    geo:lat ?latitude;
+            <{uri}> geo:lat ?latitude;
                     geo:long ?longitude .
+            OPTIONAL {{ <{uri}> dbp:capital ?capital . }}
+            OPTIONAL {{ <{uri}> dbp:leaderName ?leaders . }}
+            OPTIONAL {{
+                <{uri}> dbp:areaKm ?areaKm;
+                        dbp:areaSqMi ?areaSqMi . }}
+            OPTIONAL {{
+                <{uri}> dbp:populationEstimate ?population;
+                        dbp:populationEstimateYear ?populationYear . }}
+            OPTIONAL {{
+                <{uri}> dbp:populationDensityKm ?populationDensityKm;
+                        dbp:populationDensitySqMi ?populationDensitySqMi . }}
         }}
     '''.format(uri=uri)
 
@@ -114,7 +136,9 @@ def get_place_profile(uri):
     for leader in [result['leaders'] for result in results]:
         leaders[leader] = name_for_uri(leader)
 
-    profile = results[0]
-    profile['leaders'] = leaders
+    profile = None
+    if results:
+        profile = results[0]
+        profile['leaders'] = leaders
 
     return profile

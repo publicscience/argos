@@ -50,6 +50,12 @@ def format_date(date):
     return babel.format_date(date, format)
 
 @bp.app_template_filter()
+def format_currency(value, currency='USD'):
+    if type(value) == str:
+        value = int(value)
+    return babel.format_currency(value, currency)
+
+@bp.app_template_filter()
 def highlight_mentions(text, mentions):
     """
     A template filter for highlighting
