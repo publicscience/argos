@@ -16,7 +16,7 @@ def get_profile(uri):
         profile['type'] = 'company'
         return profile
     elif 'http://dbpedia.org/ontology/Place' in types:
-        profile = get_place_profile(uri)
+        profile = get_place_profile(uri, types)
         profile['type'] = 'place'
         return profile
 
@@ -91,7 +91,7 @@ def get_company_profile(uri):
 
     return profile
 
-def get_place_profile(uri):
+def get_place_profile(uri, types):
     """
     Example return value::
 
@@ -140,5 +140,15 @@ def get_place_profile(uri):
     if results:
         profile = results[0]
         profile['leaders'] = leaders
+
+        distance = 1000
+        if 'http://dbpedia.org/ontology/Country' in types:
+            distance = 4000
+        elif 'http://dbpedia.org/ontology/Region' in types:
+            distance = 2000
+        # etc
+
+        profile['photos'] = services.instagram.photos_at_location(profile['latitude'], profile['longitude'], distance=distance)
+
 
     return profile

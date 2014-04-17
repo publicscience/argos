@@ -17,6 +17,9 @@ BIZVIZZ_API_KEY = 'some key'
 # https://www.opensecrets.org/api/admin/index.php?function=signup
 OPENSECRETS_API_KEY = 'some key'
 
+# http://instagram.com/developer/clients/manage/
+INSTAGRAM_CLIENT_ID = 'some client id'
+
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
 S3_BUCKET_NAME = 'argos_development_storage'

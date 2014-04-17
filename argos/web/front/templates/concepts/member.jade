@@ -51,6 +51,12 @@ block content
                                 //- https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels
                                 img(src="https://maps.googleapis.com/maps/api/staticmap?center={{ concept.profile['latitude'] }},{{ concept.profile['longitude'] }}&zoom=5&size=600x400&sensor=false&scale=2")
 
+                            h6 The pulse of {{ concept.name }}
+                            ul.profile-photos.clearfix
+                                for photo in concept.profile['photos']
+                                    li
+                                        img(src=photo)
+
                     +articles('Articles mentioning '+concept.name, concept.articles, articles_url=url_for('main.concept_articles', slug=concept.slug))
 
                     .heading.page-heading
