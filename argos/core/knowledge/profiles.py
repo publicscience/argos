@@ -133,7 +133,7 @@ def get_place_profile(uri, types):
 
     # Get the names for each leader.
     leaders = {}
-    for leader in [result['leaders'] for result in results]:
+    for leader in [result['leaders'] for result in results if result.get('leaders', None)]:
         leaders[leader] = name_for_uri(leader)
 
     profile = None
