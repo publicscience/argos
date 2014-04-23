@@ -92,6 +92,48 @@ class KnowledgeTest(RequiresMocks):
         name = knowledge.name_for_uri('http://dbpedia.org/resource/United_States_Secretary_of_State')
         self.assertEqual(name, 'United States Secretary of State')
 
+    def test_pagelinks_for_uri(self):
+        self.mock_resp.read.return_value = b'''
+            {
+                "head": {
+                    "vars": [ "from" ]
+                } ,
+                "results": {
+                    "bindings": [
+                        {
+                            "from": { "type": "uri" , "value": "http://dbpedia.org/resource/Taiping_Rebellion" }
+                        } ,
+                        {
+                            "from": { "type": "uri" , "value": "http://dbpedia.org/resource/Taiping_Heavenly_Kingdom" }
+                        }
+                    ]
+                }
+            }
+        '''
+        pagelinks = knowledge.pagelinks_for_uri('http://dbpedia.org/resource/Zeng_Guofan')
+        self.assertEqual(len(pagelinks), 2)
+
+    def test_commonness_for_uri(self):
+        self.mock_resp.read.return_value = b'''
+            {
+                "head": {
+                    "vars": [ "from" ]
+                } ,
+                "results": {
+                    "bindings": [
+                        {
+                            "from": { "type": "uri" , "value": "http://dbpedia.org/resource/Taiping_Rebellion" }
+                        } ,
+                        {
+                            "from": { "type": "uri" , "value": "http://dbpedia.org/resource/Taiping_Heavenly_Kingdom" }
+                        }
+                    ]
+                }
+            }
+        '''
+        commonness = knowledge.commonness_for_uri('http://dbpedia.org/resource/Zeng_Guofan')
+        self.assertEqual(commonness, 2)
+
 
 class KnowledgeProfilesTest(RequiresMocks):
     def test_company_profile(self):

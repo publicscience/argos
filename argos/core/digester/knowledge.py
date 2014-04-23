@@ -68,7 +68,8 @@ DESIRED_DATASETS = [
     'disambiguations',
     'instance_types',
     'mappingbased_properties',
-    'raw_infobox_properties'
+    'raw_infobox_properties',
+    'page_links'
 ]
 
 DATASETS_PATH = os.path.expanduser(APP['DATASETS_PATH'])

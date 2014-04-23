@@ -94,6 +94,9 @@ def uri_for_name(name):
     but are in fact different, may still turn up as an alias (i.e. a redirect) for an entity.
     For example, an alias for 'John Kerry' is 'Peggy Kerry', who is his sister. She should
     be her own entity, but in the dataset, there is a Wikipedia redirect from her to him.
+
+    warning::
+        requires the `labels` dbpedia dataset.
     """
 
     # Note: double braces are parsed down to single braces when using `str.format()`.
@@ -117,6 +120,9 @@ def name_for_uri(uri):
     """
     Returns a name for a given uri.
     If none is found, None is returned.
+
+    warning::
+        requires the `labels` dbpedia dataset.
     """
     uri = _quote(uri)
     query = 'SELECT ?name WHERE {{ <{0}> rdfs:label ?name }}'.format(uri)
@@ -143,6 +149,9 @@ def image_for_name(name, fallback=False, no_uri=False):
 
         >>> image_for_name("Star Trek")
         'http://upload.wikimedia.org/wikipedia/commons/7/7e/StarTrek_Logo_2007.JPG'
+
+    warning::
+        requires the `images` dbpedia dataset.
     """
 
     uri = None
@@ -161,6 +170,9 @@ def image_for_uri(uri, fallback=False):
 
     If `fallback=True`, will fallback to Wikipedia
     for an image.
+
+    warning::
+        requires the `images` dbpedia dataset.
     """
     uri = _quote(uri)
     query = 'SELECT ?image_url WHERE {{ <{0}> foaf:depiction ?image_url }}'.format(uri)
@@ -190,6 +202,9 @@ def coordinates_for_name(name):
 
         >>> coordinates_for_name("Beijing")
         {'lat': '39.90638888888889', 'long': '116.37972222222223'}
+
+    warning::
+        requires the `geo_coordinates` dbpedia dataset.
     """
     uri = uri_for_name(name)
     return coordinates_for_uri(uri)
@@ -198,6 +213,9 @@ def coordinates_for_uri(uri):
     """
     Returns a set of coordinates for a given entity URI.
     If none is found, None is returned.
+
+    warning::
+        requires the `geo_coordinates` dbpedia dataset.
     """
     uri = _quote(uri)
     query = 'SELECT ?lat ?long WHERE {{ <{0}> geo:lat ?lat; geo:long ?long }}'.format(uri)
@@ -229,6 +247,10 @@ def summary_for_name(name, short=False, fallback=False, no_uri=False):
 
         >>> summary_for_name("Beijing", short=True)
         "Beijing, sometimes romanized as Peking, is the capital of the People's Republic of China and one of the most populous cities in the world. The population as of 2012 was 20,693,000. The metropolis, located in northern China, is governed as a direct-controlled municipality under the national government, with 14 urban and suburban districts and two rural counties. Beijing Municipality is surrounded by Hebei Province with the exception of neighboring Tianjin Municipality to the southeast."
+
+    warning::
+        requires the `long_abstracts` dbpedia dataset.
+        requires the `short_abstracts` dbpedia dataset.
     """
     # If `no_uri=True`, override user setting for
     # `fallback` and set to True.
@@ -257,6 +279,10 @@ def summary_for_uri(uri, short=False, fallback=False):
 
     Optionally specify `short=True` to get a
     shorter summary.
+
+    warning::
+        requires the `long_abstracts` dbpedia dataset.
+        requires the `short_abstracts` dbpedia dataset.
     """
     uri = _quote(uri)
     predicate = 'rdfs:comment' if short else 'dbo:abstract'
@@ -288,6 +314,9 @@ def aliases_for_name(name):
         ['http://dbpedia.org/resource/US_Secretary_Of_State',
          'http://dbpedia.org/resource/Secretary_of_State_of_the_United_States',
          'http://dbpedia.org/resource/US_Secretary_of_State', ...]
+
+    warning::
+        requires the `redirects` dbpedia dataset.
     """
 
     uri = uri_for_name(name)
@@ -296,6 +325,9 @@ def aliases_for_name(name):
 def aliases_for_uri(uri):
     """
     Returns a list of alias URIs for a given entity URI.
+
+    warning::
+        requires the `redirects` dbpedia dataset.
     """
     uri = _quote(uri)
     query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'.format(uri)
@@ -314,6 +346,9 @@ def types_for_uri(uri):
          'http://dbpedia.org/ontology/Organisation',
          'http://schema.org/Organization',
          'http://dbpedia.org/ontology/Company']
+
+    warning::
+        requires the `instance_types` dbpedia dataset.
     """
     uri = _quote(uri)
     query = 'SELECT ?type WHERE {{ <{0}> rdf:type ?type }}'.format(uri)
@@ -323,9 +358,54 @@ def types_for_uri(uri):
 def types_for_name(name):
     """
     Returns a list of types for a given entity name.
+
+    warning::
+        requires the `instance_types` dbpedia dataset.
     """
     uri = uri_for_name(name)
     return types_for_uri(uri)
+
+def pagelinks_for_uri(uri):
+    """
+    Gets the number of pagelinks *to* a URI.
+
+    warning::
+        requires the `page_links` dbpedia dataset.
+    """
+    uri = _quote(uri)
+    query = 'SELECT ?from WHERE {{ ?from dbo:wikiPageWikiLink <{0}> }}'.format(uri)
+    results = _get_results(query)
+    return [d['from'] for d in results]
+
+def pagelinks_for_name(name):
+    """
+    Gets the number of pagelinks *to* a given entity name.
+
+    warning::
+        requires the `page_links` dbpedia dataset.
+    """
+    uri = uri_for_name(name)
+    return pagelinks_for_uri(uri)
+
+def commonness_for_uri(uri):
+    """
+    Calculates a commonness score for a URI.
+
+    warning::
+        requires the `page_links` dbpedia dataset.
+    """
+    pagelinks = pagelinks_for_uri(uri)
+    return len(pagelinks)
+
+def commonness_for_name(name):
+    """
+    Calculates a commonness score for a given entity name.
+
+    warning::
+        requires the `page_links` dbpedia dataset.
+    """
+    pagelinks = pagelinks_for_name(name)
+    return len(pagelinks)
 
 def knowledge_for(uri=None, name=None, fallback=False):
     """

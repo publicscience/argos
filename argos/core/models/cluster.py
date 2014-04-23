@@ -184,7 +184,7 @@ class Cluster(Clusterable):
         raw_scores = {}
         for assoc_group in grouped_assocs:
             concept = assoc_group[0].concept
-            raw_scores[concept] = sum(assoc.score for assoc in assoc_group)
+            raw_scores[concept] = sum(assoc.score for assoc in assoc_group) - concept.commonness
         total = sum(raw_scores.values())
 
         # Calculate the final scores and create the associations.

@@ -21,6 +21,7 @@ class APITest(RequiresAPI):
                 'updated_at': concept.updated_at.isoformat(),
                 'summary': concept.summary,
                 'image': concept.image,
+                'commonness': '0.0',
                 'stories': [{
                     'relatedness': '0.5',
                     'id': story.id,

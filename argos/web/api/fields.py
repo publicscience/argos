@@ -83,6 +83,7 @@ concept = {
     'url': fields.Url('concept'),
     'summary': fields.String,
     'image': fields.String,
+    'commonness': fields.Float,
     'updated_at': DateTimeField,
     'stories': fields.Nested({
         'id': fields.Integer,

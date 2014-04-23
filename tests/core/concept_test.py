@@ -29,6 +29,13 @@ class ConceptTest(RequiresDatabase):
         c = Concept('Argos')
         self.assertEqual(c.slug, 'argos_argos')
 
+    def test_sets_commonness(self):
+        self._patch_knowledge_for()
+        self._patch_uri_for_name(self.uri)
+
+        c = Concept('Argos')
+        self.assertEqual(c.commonness, 0.0)
+
     def test_fallback_slug_if_no_uri(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(None)

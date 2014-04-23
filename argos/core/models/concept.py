@@ -91,6 +91,7 @@ class Concept(Model):
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow)
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
     aliases     = db.relationship('Alias', backref='concept', lazy='joined')
+    commonness  = db.Column(db.Float, default=0.0)
 
     # Mapping concepts to concepts,
     # and tracking mentions of other concepts in this concept's summary.
@@ -117,6 +118,7 @@ class Concept(Model):
         if self.uri:
             self.slug = self.uri.split('/')[-1]
             k = knowledge.knowledge_for(uri=self.uri, fallback=True)
+            self.commonness = knowledge.commonness_for_uri(self.uri)
 
         # If no URI was found,
         # generate our own slug.
@@ -125,6 +127,9 @@ class Concept(Model):
         else:
             self.slug = slugify(name)
             k = knowledge.knowledge_for(name=name)
+            # Commonness is set to default of 0.0,
+            # which makes sense because if there's no URI for it
+            # it probably is not common at all.
 
         self.summary = k['summary']
         self.name = k['name']
@@ -257,7 +262,7 @@ class Concept(Model):
 
         assocs = []
         for concept in uniq_concepts:
-            score = counter[concept]/total_found
+            score = (counter[concept] - concept.commonness)/total_found
             assoc = ConceptConceptAssociation(concept, score)
             assocs.append(assoc)
 
