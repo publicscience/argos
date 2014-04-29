@@ -141,14 +141,14 @@ def get_place_profile(uri, types):
         profile = results[0]
         profile['leaders'] = leaders
 
-        distance = 1000
+        distance = 20
         if 'http://dbpedia.org/ontology/Country' in types:
-            distance = 4000
+            distance = 32
         elif 'http://dbpedia.org/ontology/Region' in types:
-            distance = 2000
+            distance = 26
         # etc
 
-        profile['photos'] = services.instagram.photos_at_location(profile['latitude'], profile['longitude'], distance=distance)
+        profile['photos'] = services.flickr.photos_at_location(profile['latitude'], profile['longitude'], distance=distance)
 
 
     return profile
