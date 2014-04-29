@@ -140,18 +140,6 @@ class KnowledgeProfilesTest(RequiresMocks):
         self.mock_types = self.create_patch('argos.core.knowledge.types_for_uri')
         self.mock_types.return_value = ['http://dbpedia.org/ontology/Company']
 
-        self.mock_opensecrets = self.create_patch('argos.core.knowledge.services.opensecrets.organizations')
-        self.mock_opensecrets.return_value = [{
-            'name': 'Google Inc',
-            'year': '2014',
-            'contributions': {
-                'democrat': '747341',
-                'lobbying': '15800000',
-                'republican': '483817',
-                'total': '1461482'
-            }
-        }]
-
         profile = knowledge.profiles.get_profile('http://dbpedia.org/resource/Google')
 
         self.assertEqual(profile['type'], 'company')

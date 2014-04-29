@@ -23,6 +23,9 @@ INSTAGRAM_CLIENT_ID = 'some client id'
 # https://www.flickr.com/services/apps/create/
 FLICKR_CLIENT_ID = 'some client id'
 
+# http://sunlightfoundation.com/api/
+SUNLIGHT_API_KEY = 'some api key'
+
 AWS_ACCESS_KEY_ID = env.get('ARGOS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.get('ARGOS_AWS_SECRET_ACCESS_KEY')
 S3_BUCKET_NAME = 'argos_development_storage'

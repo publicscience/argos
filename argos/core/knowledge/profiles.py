@@ -20,6 +20,7 @@ def get_profile(uri):
         profile['type'] = 'place'
         return profile
 
+
 def get_company_profile(uri):
     """
     Example return value::
@@ -86,8 +87,8 @@ def get_company_profile(uri):
 
         # For now just using the first result,
         # but it is possible that multiple organizations are returned.
-        os_data = services.opensecrets.organizations(profile['name'])
-        profile['contributions'] = os_data[0]['contributions']
+        profile['contributions'] = services.influenceexplorer.recipients_for_organization(profile['name'])[0]
+        profile['party_contributions'] = services.influenceexplorer.parties_for_organization(profile['name'])[0]
 
     return profile
 
