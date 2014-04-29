@@ -10,10 +10,12 @@ also for tuning/evaluation.
 from argos.datastore import db
 from argos.core.models import Source, Feed, Article, Author, Concept, Event, Story
 from argos.core.membrane import evaluator, extractor
+from argos.web.models.oauth import Client
 
 import json
 import random
 import dateutil.parser
+from werkzeug.security import gen_salt
 
 # For creating a test user.
 from flask_security.registerable import register_user
@@ -91,13 +93,13 @@ def main():
     print('Found {0} concepts.'.format(num_concepts))
 
     print('Clustering articles into events...')
-    Event.cluster(articles, threshold=0.04)
+    Event.cluster(articles, threshold=0.5)
     num_events = Event.query.count()
     print('Created {0} event clusters.'.format(num_events))
 
     print('Clustering events into stories...')
     events = Event.query.all()
-    Story.cluster(events, threshold=0.04)
+    Story.cluster(events, threshold=0.5)
     num_stories = Story.query.count()
     print('Created {0} story clusters.'.format(num_stories))
 

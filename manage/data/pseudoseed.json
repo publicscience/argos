@@ -2,7 +2,7 @@
     "sources": [
         {
             "name": "The New York Times",
-            "icon": "icon",
+            "icon": "https://argos-production-s3bucket-1oi0ajc7nesld.s3.amazonaws.com/2014-04-09-03-51-19-671254.png",
             "feeds": [{
                 "ext_url": "http://www.nytimes.com/services/xml/rss/nyt/World.xml",
                 "articles": [
@@ -35,7 +35,7 @@
         },
         {
             "name": "The Guardian",
-            "icon": "icon",
+            "icon": "https://argos-production-s3bucket-1oi0ajc7nesld.s3.amazonaws.com/2014-04-09-03-52-40-843615.png",
             "feeds": [{
                 "ext_url": "http://feeds.theguardian.com/theguardian/world/rss",
                 "articles": [
@@ -72,7 +72,7 @@
         },
         {
             "name": "Reuters",
-            "icon": "icon",
+            "icon": "https://argos-production-s3bucket-1oi0ajc7nesld.s3.amazonaws.com/2014-04-09-03-51-07-840732.png",
             "feeds": [{
                 "ext_url": "http://feeds.reuters.com/Reuters/PoliticsNews",
                 "articles": [
