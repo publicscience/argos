@@ -19,6 +19,8 @@ def get_profile(uri):
         profile = get_place_profile(uri, types)
         profile['type'] = 'place'
         return profile
+    else:
+        return {}
 
 
 def get_company_profile(uri):
@@ -26,12 +28,22 @@ def get_company_profile(uri):
     Example return value::
 
         {'assets': 'US$ 93.80 billion',
-         'contributions': {
-                'democrat': '747341',
-                'lobbying': '15800000',
-                'republican': '483817',
-                'total': '1461482',
-                'year': '2014'
+         'contributions': [{
+           'direct_amount': '0',
+           'direct_count': '0',
+           'employee_amount': '1602978.00',
+           'employee_count': '2274',
+           'id': '4148b26f6f1c437cb50ea9ca4699417a',
+           'name': 'Barack Obama (D)',
+           'party': 'D',
+           'state': '',
+           'total_amount': '1602978.00',
+           'total_count': '2274'
+         }],
+         'party_contributions': {
+            'Democrats': ['5157', '6166411.11'],
+            'Other': ['831', '2022397.43'],
+            'Republicans': ['1114', '1998822.25']
          },
          'employees': '53861',
          'income': 'US$ 10.74 billion',

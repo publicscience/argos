@@ -85,6 +85,7 @@ concept = {
     'image': fields.String,
     'commonness': fields.Float,
     'updated_at': DateTimeField,
+    'profile': fields.Raw,
     'stories': fields.Nested({
         'id': fields.Integer,
         'url': fields.Url('story'),
