@@ -34,7 +34,9 @@ block content
                                     ,
                         .meta-time= event.updated_at|natural_datetime
                 section.page-summary
-                    p= event.summary|highlight_mentions(event.mentions)|sanitize_html
+                    ul
+                        for sentence in event.summary_sentences
+                            li= sentence|highlight_mentions(event.mentions)|sanitize_html
                     .page-meta.meta This summary was automatically generated from the articles below.
 
                 +articles('In Greater Depth', event.articles, articles_url=url_for('main.event_articles', id=event.id))

@@ -4,6 +4,7 @@ from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
 from argos.core.brain.summarize import multisummarize
+from argos.core.brain import sentences
 
 import itertools
 
@@ -74,6 +75,14 @@ class Story(Cluster):
         Gets images from its members.
         """
         return [member.image for member in self.members if member.image is not None]
+
+    @property
+    def summary_sentences(self):
+        """
+        Breaks up a summary back into its
+        original sentences (as a list).
+        """
+        return sentences(self.summary)
 
     def summarize(self):
         """

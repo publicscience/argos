@@ -2,7 +2,7 @@ from argos.datastore import db
 from argos.core.models.cluster import Cluster
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core.brain.cluster import cluster
-from argos.core.brain import summarize
+from argos.core.brain import summarize, sentences
 
 from argos.util.logger import logger
 
@@ -50,6 +50,14 @@ class Event(Cluster):
         Gets images from its members.
         """
         return [member.image for member in self.members if member.image is not None]
+
+    @property
+    def summary_sentences(self):
+        """
+        Breaks up a summary back into its
+        original sentences (as a list).
+        """
+        return sentences(self.summary)
 
     @property
     def score(self):

@@ -21,7 +21,9 @@ block content
                             .meta-tags foo
                             .meta-time Last updated {{ story.updated_at|natural_datetime }}
                     section.page-summary
-                        p= story.summary|highlight_mentions(story.mentions)|sanitize_html
+                        ul
+                            for sentence in story.summary_sentences
+                                li= sentence|highlight_mentions(story.mentions)|sanitize_html
                         .page-meta.meta This summary was automatically generated from the articles below.
 
                     //- TO DO: right now this just grabs from the first event,

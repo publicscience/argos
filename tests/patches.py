@@ -31,7 +31,9 @@ def patch_knowledge():
     # or a network connection to Wikipedia.
     patcher = Patcher([
         'argos.core.knowledge.knowledge_for',
-        'argos.core.knowledge.uri_for_name'
+        'argos.core.knowledge.uri_for_name',
+        'argos.core.knowledge.commonness_for_name',
+        'argos.core.knowledge.commonness_for_uri'
     ])
     return patcher
 
@@ -126,6 +128,12 @@ def faux_knowledge_for(name=None, uri=None, fallback=None):
 
 def faux_uri_for_name(name):
     return "http://fauxpedia.org/resource/{0}".format(name)
+
+def faux_commonness_for_name(name):
+    return 100
+
+def faux_commonness_for_uri(name):
+    return 100
 
 def faux_concepts(docs):
     return ['Nautilus', 'Picard']
