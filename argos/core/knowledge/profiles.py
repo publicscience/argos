@@ -49,15 +49,12 @@ def get_company_profile(uri):
          'income': 'US$ 10.74 billion',
          'name': 'Google',
          'revenue': 'US$ 50.18 billion',
-         'subsidiaries': {
-            'http://dbpedia.org/resource/AdMob': 'AdMob',
-            'http://dbpedia.org/resource/DoubleClick': 'DoubleClick',
-            'http://dbpedia.org/resource/Motorola_Mobility': 'Motorola Mobility',
-            'http://dbpedia.org/resource/On2_Technologies': 'On2 Technologies',
-            'http://dbpedia.org/resource/Picnik': 'Picnik',
-            'http://dbpedia.org/resource/YouTube': 'YouTube',
-            'http://dbpedia.org/resource/Zagat': 'Zagat'
-         },
+         'subsidiaries': [{
+            'http://dbpedia.org/resource/YouTube': {
+                'image': 'http://upload.wikimedia.org/wikipedia/commons/e/e8/Logo_Youtube.svg',
+                'name': 'YouTube'
+            }
+         }],
          'symbol': 'GOOG'}
      """
 
@@ -119,7 +116,9 @@ def get_place_profile(uri, types):
          'population': '44854065',
          'populationDensityKm': '77',
          'populationDensitySqMi': '199',
-         'populationYear': '2012'}
+         'populationYear': '2012',
+         'photos': ['http://foo.com/photo.jpg']
+         }
     """
     uri = _quote(uri)
 
