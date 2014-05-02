@@ -3,6 +3,8 @@ from tests.helpers import save
 
 from tests import RequiresAPI
 
+from datetime import datetime
+
 class APITest(RequiresAPI):
     def test_404(self):
         r = self.client.get('/does_not_exist')
@@ -206,6 +208,69 @@ class APITest(RequiresAPI):
         event_ids = [event.id for event in events]
         r = self.client.get('/trending')
         results = self.json(r).get('results')
+        self.assertEqual([event['id'] for event in results], event_ids)
+
+    def test_GET_trending_filter_date_from(self):
+        expected_events = []
+        for i in range(4):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-04-21', '%Y-%m-%d')
+            expected_events.append(event)
+        for i in range(2):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-03-21', '%Y-%m-%d')
+        save()
+
+        expected_events = sorted(expected_events,
+                        key=lambda x: x.score,
+                        reverse=True)
+        event_ids = [event.id for event in expected_events]
+        r = self.client.get('/trending?from=2014-04-01')
+        results = self.json(r).get('results')
+        self.assertEqual(len(results), 4)
+        self.assertEqual([event['id'] for event in results], event_ids)
+
+    def test_GET_trending_filter_date_to(self):
+        expected_events = []
+        for i in range(4):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-04-21', '%Y-%m-%d')
+        for i in range(2):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-03-21', '%Y-%m-%d')
+            expected_events.append(event)
+        save()
+
+        expected_events = sorted(expected_events,
+                        key=lambda x: x.score,
+                        reverse=True)
+        event_ids = [event.id for event in expected_events]
+        r = self.client.get('/trending?to=2014-04-01')
+        results = self.json(r).get('results')
+        self.assertEqual(len(results), 2)
+        self.assertEqual([event['id'] for event in results], event_ids)
+
+    def test_GET_trending_filter_date_range(self):
+        expected_events = []
+        for i in range(4):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-04-21', '%Y-%m-%d')
+            expected_events.append(event)
+        for i in range(2):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-04-24', '%Y-%m-%d')
+        for i in range(2):
+            event = fac.event()
+            event.created_at = datetime.strptime('2014-03-21', '%Y-%m-%d')
+        save()
+
+        expected_events = sorted(expected_events,
+                        key=lambda x: x.score,
+                        reverse=True)
+        event_ids = [event.id for event in expected_events]
+        r = self.client.get('/trending?from=2014-04-01&to=2014-04-22')
+        results = self.json(r).get('results')
+        self.assertEqual(len(results), 4)
         self.assertEqual([event['id'] for event in results], event_ids)
 
     def test_collection_pagination(self):
