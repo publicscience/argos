@@ -52,9 +52,16 @@ they are not valid IRIs, and as such, they are invalid Fuseki SPARQL.
 I've read elsewhere that if you percent escape them (i.e. make them %22),
 they should work. But they don't.
 So for now they are just being removed.
+
+warning::
+    if `fallback=True`, then if a uri is not found for a name,
+    DBpedia live will be queried. This is ok for now, but if usage
+    becomes particularly heavy, some other arrangement should be used
+    (e.g. hosting our own DBpedia live database).
 """
 
 from urllib import request, error
+from urllib.parse import urlencode
 import json
 
 from argos.conf import APP
@@ -76,7 +83,7 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 """
 
-def uri_for_name(name):
+def uri_for_name(name, fallback=False):
     """
     Returns the canonical URI for a given entity name.
     This will also match common mispellings or alternate spellings.*
@@ -106,7 +113,7 @@ def uri_for_name(name):
             {{ ?alias_uri rdfs:label "{0}"@en; dbo:wikiPageRedirects ?uri . }}
             UNION
             {{ ?uri rdfs:label "{0}"@en
-                NOT EXISTS {{  ?uri dbo:wikiPageRedirects ?nil }}
+                FILTER NOT EXISTS {{  ?uri dbo:wikiPageRedirects ?nil }}
             }}
         }}
     '''
@@ -114,6 +121,10 @@ def uri_for_name(name):
     results = _get_results(query)
     if results:
         return results[0].get('uri')
+    elif fallback:
+        results = _get_live_results(query)
+        if results:
+            return results[-1].get('uri')
     return None
 
 def name_for_uri(uri):
@@ -131,12 +142,12 @@ def name_for_uri(uri):
         return results[0].get('name')
     return None
 
-def image_for_name(name, fallback=False, no_uri=False):
+def image_for_name(name, fallback=False):
     """
     Returns an image URL for a given entity name.
     If none is found, None is returned.
 
-    If `fallback=True`, will fallback to Wikipedia
+    If `fallback=True`, will fallback to DBpedia live
     for an image.
 
     If you know there is no URI for the specified name,
@@ -154,22 +165,13 @@ def image_for_name(name, fallback=False, no_uri=False):
         requires the `images` dbpedia dataset.
     """
 
-    uri = None
-    image = None
-    if not no_uri:
-        uri = uri_for_name(name)
-        image = image_for_uri(uri) if uri else None
-    if (uri is None or image is None) and fallback:
-        image = wiki_image_for_name(name)
-    return image
+    uri = uri_for_name(name, fallback=fallback)
+    return image_for_uri(uri, fallback=fallback)
 
 def image_for_uri(uri, fallback=False):
     """
     Returns an image URL for a given entity URI.
     If none is found, None is returned.
-
-    If `fallback=True`, will fallback to Wikipedia
-    for an image.
 
     warning::
         requires the `images` dbpedia dataset.
@@ -180,20 +182,12 @@ def image_for_uri(uri, fallback=False):
     if results:
         return results[0].get('image_url')
     elif fallback:
-        name = name_for_uri(uri)
-        return wiki_image_for_name(name)
+        results = _get_live_results(query)
+        if results:
+            return results[-1].get('image_url')
     return None
 
-def wiki_image_for_name(name):
-    """
-    Queries Wikipedia for an image for an entity name.
-    """
-    # Eventually this will get from a locally processed
-    # Wikipedia clone database.
-    # For now, return None.
-    return None
-
-def coordinates_for_name(name):
+def coordinates_for_name(name, fallback=False):
     """
     Returns a set of coordinates for a given entity name.
     If none is found, None is returned.
@@ -206,10 +200,10 @@ def coordinates_for_name(name):
     warning::
         requires the `geo_coordinates` dbpedia dataset.
     """
-    uri = uri_for_name(name)
-    return coordinates_for_uri(uri)
+    uri = uri_for_name(name, fallback=fallback)
+    return coordinates_for_uri(uri, fallback=fallback)
 
-def coordinates_for_uri(uri):
+def coordinates_for_uri(uri, fallback=False):
     """
     Returns a set of coordinates for a given entity URI.
     If none is found, None is returned.
@@ -222,26 +216,19 @@ def coordinates_for_uri(uri):
     results = _get_results(query)
     if results:
         return results[0]
+    elif fallback:
+        results = _get_live_results(query)
+        if results:
+            return results[-1]
     return None
 
-def summary_for_name(name, short=False, fallback=False, no_uri=False):
+def summary_for_name(name, short=False, fallback=False):
     """
     Returns a summary for a given entity name.
     If none is found, None is returned.
 
     Optionally specify `short=True` to get a
     shorter summary.
-
-    If `fallback=True`, will fallback to Wikipedia
-    for a summary.
-    Note that this is temporary, and may not necessarily
-    return a summary for the correct entity.
-
-    If you know there is no URI for the specified name,
-    i.e. from having separately called `uri_for_name`,
-    you can specify `no_uri=True`, and querying for the
-    URI will be skipped. Note that this overrides the user
-    value for `fallback` and sets it to `True`.
 
     Example::
 
@@ -252,30 +239,13 @@ def summary_for_name(name, short=False, fallback=False, no_uri=False):
         requires the `long_abstracts` dbpedia dataset.
         requires the `short_abstracts` dbpedia dataset.
     """
-    # If `no_uri=True`, override user setting for
-    # `fallback` and set to True.
-    fallback = True if no_uri else fallback
-
-    uri = None
-    summary = None
-    if not no_uri:
-        uri = uri_for_name(name)
-
-        # Override fallback here,
-        # so we can just reuse the name from here.
-        summary = summary_for_uri(uri, short=short, fallback=False) if uri else None
-
-    if (uri is None or summary is None) and fallback:
-        summary = wiki_summary_for_name(name, short=short)
-    return summary
+    uri = uri_for_name(name, fallback=fallback)
+    return summary_for_uri(uri, short=short, fallback=fallback)
 
 def summary_for_uri(uri, short=False, fallback=False):
     """
     Returns a summary for a given entity URI.
     If none is found, None is returned.
-
-    If `fallback=True`, will fallback to Wikipedia
-    for a summary.
 
     Optionally specify `short=True` to get a
     shorter summary.
@@ -291,20 +261,12 @@ def summary_for_uri(uri, short=False, fallback=False):
     if results:
         return results[0].get('summary')
     elif fallback:
-        name = name_for_uri(uri)
-        return wiki_summary_for_name(name, short=short)
+        results = _get_live_results(query)
+        if results:
+            return results[-1].get('summary')
     return None
 
-def wiki_summary_for_name(name, short=False):
-    """
-    Queries Wikipedia for a summary for an entity name.
-    """
-    # Eventually this will get from a locally processed
-    # Wikipedia clone database.
-    # For now, return None.
-    return None
-
-def aliases_for_name(name):
+def aliases_for_name(name, fallback=False):
     """
     Returns a list of alias URIs for a given entity name.
 
@@ -319,10 +281,10 @@ def aliases_for_name(name):
         requires the `redirects` dbpedia dataset.
     """
 
-    uri = uri_for_name(name)
-    return aliases_for_uri(uri)
+    uri = uri_for_name(name, fallback=fallback)
+    return aliases_for_uri(uri, fallback=fallback)
 
-def aliases_for_uri(uri):
+def aliases_for_uri(uri, fallback=False):
     """
     Returns a list of alias URIs for a given entity URI.
 
@@ -332,9 +294,13 @@ def aliases_for_uri(uri):
     uri = _quote(uri)
     query = 'SELECT ?alias_uri WHERE {{ ?alias_uri dbo:wikiPageRedirects <{0}> }}'.format(uri)
     results = _get_results(query)
-    return [d['alias_uri'] for d in results]
+    if results:
+        return [d['alias_uri'] for d in results]
+    elif fallback:
+        return [d['alias_uri'] for d in _get_live_results(query)]
+    return None
 
-def types_for_uri(uri):
+def types_for_uri(uri, fallback=False):
     """
     Returns a list of types for a given entity URI.
 
@@ -353,19 +319,23 @@ def types_for_uri(uri):
     uri = _quote(uri)
     query = 'SELECT ?type WHERE {{ <{0}> rdf:type ?type }}'.format(uri)
     results = _get_results(query)
-    return [d['type'] for d in results]
+    if results:
+        return [d['type'] for d in results]
+    elif fallback:
+        return [d['type'] for d in _get_live_results(query)]
+    return []
 
-def types_for_name(name):
+def types_for_name(name, fallback=False):
     """
     Returns a list of types for a given entity name.
 
     warning::
         requires the `instance_types` dbpedia dataset.
     """
-    uri = uri_for_name(name)
-    return types_for_uri(uri)
+    uri = uri_for_name(name, fallback=fallback)
+    return types_for_uri(uri, fallback=fallback)
 
-def pagelinks_for_uri(uri):
+def pagelinks_for_uri(uri, fallback=False):
     """
     Gets the number of pagelinks *to* a URI.
 
@@ -375,39 +345,43 @@ def pagelinks_for_uri(uri):
     uri = _quote(uri)
     query = 'SELECT ?from WHERE {{ ?from dbo:wikiPageWikiLink <{0}> }}'.format(uri)
     results = _get_results(query)
-    return [d['from'] for d in results]
+    if results:
+        return [d['from'] for d in results]
+    elif fallback:
+        return [d['from'] for d in _get_live_results(query)]
+    return []
 
-def pagelinks_for_name(name):
+def pagelinks_for_name(name, fallback=False):
     """
     Gets the number of pagelinks *to* a given entity name.
 
     warning::
         requires the `page_links` dbpedia dataset.
     """
-    uri = uri_for_name(name)
-    return pagelinks_for_uri(uri)
+    uri = uri_for_name(name, fallback=fallback)
+    return pagelinks_for_uri(uri, fallback=fallback)
 
-def commonness_for_uri(uri):
+def commonness_for_uri(uri, fallback=False):
     """
     Calculates a commonness score for a URI.
 
     warning::
         requires the `page_links` dbpedia dataset.
     """
-    pagelinks = pagelinks_for_uri(uri)
+    pagelinks = pagelinks_for_uri(uri, fallback=fallback)
     return len(pagelinks)
 
-def commonness_for_name(name):
+def commonness_for_name(name, fallback=False):
     """
     Calculates a commonness score for a given entity name.
 
     warning::
         requires the `page_links` dbpedia dataset.
     """
-    pagelinks = pagelinks_for_name(name)
+    pagelinks = pagelinks_for_name(name, fallback=fallback)
     return len(pagelinks)
 
-def knowledge_for(uri=None, name=None, fallback=False):
+def knowledge_for(uri, fallback=False):
     """
     A convenience method for getting necessary information
     for a given name or uri.
@@ -424,15 +398,10 @@ def knowledge_for(uri=None, name=None, fallback=False):
     """
 
     results = {}
-    if uri:
-        uri = _quote(uri)
-        results['summary'] = summary_for_uri(uri, short=False, fallback=fallback)
-        results['image'] = image_for_uri(uri, fallback=fallback)
-        results['name'] = name_for_uri(uri)
-    elif name:
-        results['summary'] = summary_for_name(name, short=False, no_uri=True)
-        results['image'] = image_for_name(name, no_uri=True)
-        results['name'] = name
+    uri = _quote(uri)
+    results['summary'] = summary_for_uri(uri, short=False, fallback=fallback)
+    results['image'] = image_for_uri(uri, fallback=fallback)
+    results['name'] = name_for_uri(uri)
     return results
 
 
@@ -542,6 +511,44 @@ def _quote(text):
         for mapping in mappings:
             text = text.replace(mapping[0], mapping[1])
     return text
+
+def _get_live_results(query):
+    """
+    Convenience method for making a query
+    and getting formatted results from the
+    DBpedia live endpoint.
+    """
+    data = _query_live(query)
+    return _prepare_results(data)
+
+def _query_live(query):
+    """
+    Query the DBpedia live endpoint. We should be respectful of
+    using this endpoint too much; if we find that is the case,
+    we should setup our own synchronized DBpedia live endpoint.
+    """
+    data = {'query': '{0} {1}'.format(PREFIXES, query).replace('\n', ' ')}
+    endpoint = 'http://dbpedia-live.openlinksw.com/sparql'
+    url = '{endpoint}?{query}'.format(
+            endpoint=endpoint,
+            query=urlencode(data)
+          )
+    req = request.Request(url,
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/sparql-query'
+            })
+    try:
+        res = request.urlopen(req)
+    except error.HTTPError as e:
+        logger.exception('Error with with query: {0}\n\nError: {1}'.format(query, e.read()))
+        raise e
+    if res.status != 200:
+        raise Exception('Response error, status was not 200')
+    else:
+        content = res.read()
+        return json.loads(content.decode('utf-8'))
+    return None
 
 
 from argos.core.knowledge import profiles

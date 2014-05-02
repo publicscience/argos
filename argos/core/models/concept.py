@@ -120,24 +120,24 @@ class Concept(Model):
             k = knowledge.knowledge_for(uri=self.uri, fallback=True)
             self.commonness = knowledge.commonness_for_uri(self.uri)
 
+            self.summary = k['summary']
+            self.name = k['name']
+
+            # Download the image.
+            if k['image'] is not None:
+                ext = splitext(k['image'])[-1].lower()
+                self.image = storage.save_from_url(k['image'], '{0}{1}'.format(hash(self.slug), ext))
+
         # If no URI was found,
         # generate our own slug.
         # Note: A problem here is that it assumes that
-        # this particular name is the canonical one.
+        # this particular name is the canonical one,
+        # and that we don't collect any information for it.
         else:
             self.slug = slugify(name)
-            k = knowledge.knowledge_for(name=name)
             # Commonness is set to default of 0.0,
             # which makes sense because if there's no URI for it
             # it probably is not common at all.
-
-        self.summary = k['summary']
-        self.name = k['name']
-
-        # Download the image.
-        if k['image'] is not None:
-            ext = splitext(k['image'])[-1].lower()
-            self.image = storage.save_from_url(k['image'], '{0}{1}'.format(hash(self.slug), ext))
 
     @property
     def names(self):

@@ -36,13 +36,6 @@ class ConceptTest(RequiresDatabase):
         c = Concept('Argos')
         self.assertEqual(c.commonness, 0.0)
 
-    def test_fallback_slug_if_no_uri(self):
-        self._patch_knowledge_for()
-        self._patch_uri_for_name(None)
-
-        c = Concept('Argos')
-        self.assertEqual(c.slug, 'argos')
-
     def test_sets_properties_from_knowledge(self):
         self._patch_knowledge_for()
         self._patch_uri_for_name(self.uri)
@@ -59,17 +52,6 @@ class ConceptTest(RequiresDatabase):
         self._patch_uri_for_name(self.uri)
         c = Concept('Argos')
         self.assertEqual(c.image, 'https://s3.amazon.com/fakeimage.jpg')
-
-
-    def test_sets_properties_from_knowledge_no_uri(self):
-        self._patch_knowledge_for()
-        self._patch_uri_for_name(None)
-
-        name = 'Argos'
-        c = Concept(name)
-
-        self.assertEqual(c.summary, 'this is a fake.summary for name {0}'.format(name))
-        self.assertEqual(c.name, name)
 
     def test_related_concepts(self):
         related_concepts = fac.concept(num=2)
@@ -99,20 +81,12 @@ class ConceptTest(RequiresDatabase):
     def _patch_knowledge_for(self):
         mock_func = self.create_patch('argos.core.knowledge.knowledge_for')
 
-        def faux_knowledge_for(name=None, uri=None, fallback=None):
-            if uri:
-                return {
-                    'summary': 'this is a fake.summary for uri {0}'.format(uri),
-                    'image': 'http://www.argos.la/image.jpg',
-                    'name': 'Canonical name'
-                }
-            if name:
-                return {
-                    'summary': 'this is a fake.summary for name {0}'.format(name),
-                    'image': 'http://www.argos.la/image.jpg',
-                    'name': name
-                }
-            return None
+        def faux_knowledge_for(uri, fallback=False):
+            return {
+                'summary': 'this is a fake.summary for uri {0}'.format(uri),
+                'image': 'http://www.argos.la/image.jpg',
+                'name': 'Canonical name'
+            }
 
         mock_func.side_effect = faux_knowledge_for
 
