@@ -129,6 +129,19 @@ function setup_knowledge {
     python -c "from argos.core.digester import knowledge; knowledge.download(); knowledge.digest()"
 }
 
+function setup_spotlight {
+    echo -e "\n\n\n"
+    echo -e "$(tput setaf 3)Setting up DBpedia Spotlight...$(tput sgr0)"
+    echo -e "\n\n\n"
+
+    mkdir -p $ARGOS_ENV/data/spotlight
+    wget -O $ARGOS_ENV/data/spotlight/en_2+2.tar.gz http://spotlight.sztaki.hu/downloads/en_2+2.tar.gz
+    tar -xvf $ARGOS_ENV/data/spotlight/en_2+2.tar.gz
+    mv 'en_2+2' $ARGOS_ENV/data/spotlight
+    rm $ARGOS_ENV/data/spotlight/en_2+2.tar.gz
+
+    wget -O $ARGOS_ENV/data/spotlight/dbpedia-spotlight-0.7.jar http://spotlight.sztaki.hu/downloads/dbpedia-spotlight-0.7.jar
+}
 
 
 echo -e "\n\n\n\n\n"
@@ -142,6 +155,7 @@ setup_virtualenv
 setup_ner
 setup_knowledge
 setup_nltk
+setup_spotlight
 
 # Create databases.
 ./run db:create

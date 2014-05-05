@@ -12,10 +12,10 @@ class BrainTest(unittest.TestCase):
         expected = ['hey', 'buddy', 'hey', 'say', 'say']
         self.assertEqual(tokens,expected)
 
-    def test_concept_recognition(self):
+    def test_concept_recognition_stanford(self):
         with open('tests/data/sample.txt', 'r') as f:
             sample = f.read()
-        results = brain.concepts(sample)
+        results = brain.concepts(sample, strategy='stanford')
 
         expected = [
             'Second Red Scare',
@@ -38,6 +38,17 @@ class BrainTest(unittest.TestCase):
             'American',
             'Berkeley',
             'Enrico Fermi Award',
+        ]
+
+        self.assertEqual(set(results), set(expected))
+
+    def test_concept_recognition_spotlight(self):
+        results = brain.concepts('Brazilian state-run giant oil company Petrobras signed a three-year technology and research cooperation agreement with oil service provider Halliburton.', strategy='spotlight')
+
+        expected = [
+            'Brazilian',
+            'Petrobras',
+            'Halliburton'
         ]
 
         self.assertEqual(set(results), set(expected))
