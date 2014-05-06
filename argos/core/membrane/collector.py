@@ -29,13 +29,12 @@ def collect(feed):
 
     try:
         logger.info('Fetching from {0}...'.format(feed.ext_url))
-        new_articles = get_articles(feed)
 
-        for article in new_articles:
+        def commit_article(article):
             db.session.add(article)
-        db.session.commit()
 
-        return new_articles
+        get_articles(feed, commit_article)
+        db.session.commit()
 
     except SAXException as e:
         # Error with the feed, make a note.
@@ -44,7 +43,7 @@ def collect(feed):
         db.session.commit()
 
 
-def get_articles(feed):
+def get_articles(feed, fn):
     """
     Parse the specified feed,
     gathering the latest new articles.
@@ -64,9 +63,7 @@ def get_articles(feed):
 
     Args:
         | feed (Feed)    -- the feed to fetch from.
-
-    Returns:
-        | list -- list of latest new Articles.
+        | fn (Callable)  -- function to use an article
     """
     # Fetch the feed data.
     data = feedparser.parse(feed.ext_url)
@@ -78,8 +75,6 @@ def get_articles(feed):
         if not isinstance(data.bozo_exception, feedparser.CharacterEncodingOverride) and not isinstance(data.bozo_exception, feedparser.NonXMLContentType):
             raise data.bozo_exception
 
-    # Build the entry dicts.
-    articles = []
     for entry in data.entries:
 
         # URL for this entry.
@@ -126,7 +121,7 @@ def get_articles(feed):
         # Download and save the top article image.
         image_url = extractor.extract_image(entry_data, filename=hash(url))
 
-        articles.append(Article(
+        fn(Article(
             ext_url=url,
             source=feed.source,
             feed=feed,
@@ -140,7 +135,3 @@ def get_articles(feed):
             image=image_url,
             score=evaluator.score(url)
         ))
-
-    return articles
-
-

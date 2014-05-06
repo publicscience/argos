@@ -28,7 +28,7 @@ def collect():
         db.session.commit()
 
         try:
-            articles = collector.collect(feed)
+            collector.collect(feed)
             feed.updated_at = datetime.utcnow()
 
         except Exception:
@@ -39,7 +39,7 @@ def collect():
             feed.updating = False
             db.session.commit()
 
-        notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url, len(articles)))
+        notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url))
 
 @celery.task
 def cluster_articles(batch_size=5, threshold=0.1):
