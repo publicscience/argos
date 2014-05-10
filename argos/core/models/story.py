@@ -11,18 +11,18 @@ import itertools
 from argos.util.logger import logger
 
 stories_events = db.Table('stories_events',
-        db.Column('story_id', db.Integer, db.ForeignKey('story.id'), primary_key=True),
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True)
+        db.Column('story_id', db.Integer, db.ForeignKey('story.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True),
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
 )
 
 stories_mentions = db.Table('stories_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
-        db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
+        db.Column('story_id', db.Integer, db.ForeignKey('story.id', ondelete='CASCADE', onupdate='CASCADE'))
 )
 
 class StoryConceptAssociation(BaseConceptAssociation):
     __backref__     = 'story_associations'
-    story_id        = db.Column(db.Integer, db.ForeignKey('story.id'), primary_key=True)
+    story_id        = db.Column(db.Integer, db.ForeignKey('story.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
 
 class Story(Cluster):
     __tablename__   = 'story'

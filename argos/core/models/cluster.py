@@ -40,7 +40,7 @@ class Clusterable(Model):
 
         return db.relationship(args['association_model'],
                 backref=db.backref(args['backref_name']),
-                cascade='all, delete-orphan',
+                cascade='all, delete, delete-orphan',
                 order_by=args['association_model'].score.desc())
 
     @property
@@ -97,6 +97,12 @@ class Cluster(Clusterable):
     title       = db.Column(db.Unicode)
     summary     = db.Column(db.UnicodeText)
     image       = db.Column(db.String())
+
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return self.title
 
     @declared_attr
     def members(cls):

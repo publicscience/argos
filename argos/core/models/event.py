@@ -11,18 +11,18 @@ from math import log
 from sqlalchemy import event, inspect
 
 events_articles = db.Table('events_articles',
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id'), primary_key=True)
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True),
+        db.Column('article_id', db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
 )
 
 events_mentions = db.Table('events_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'))
 )
 
 class EventConceptAssociation(BaseConceptAssociation):
     __backref__     = 'event_associations'
-    event_id        = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
+    event_id        = db.Column(db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
 
 class Event(Cluster):
     __tablename__   = 'event'

@@ -19,18 +19,18 @@ import numpy
 numpy.seterr(invalid='ignore')
 
 articles_authors = db.Table('authors',
-        db.Column('author_id', db.Integer, db.ForeignKey('author.id')),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
+        db.Column('author_id', db.Integer, db.ForeignKey('author.id', ondelete='CASCADE', onupdate='CASCADE')),
+        db.Column('article_id', db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'))
 )
 
 articles_mentions = db.Table('articles_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id'))
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
+        db.Column('article_id', db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'))
 )
 
 class ArticleConceptAssociation(BaseConceptAssociation):
     __backref__ = 'article_associations'
-    article_id  = db.Column(db.Integer, db.ForeignKey('article.id'), primary_key=True)
+    article_id  = db.Column(db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
 
 class Article(Clusterable):
     """
@@ -50,6 +50,12 @@ class Article(Clusterable):
     authors     = db.relationship('Author',
                     secondary=articles_authors,
                     backref=db.backref('articles', lazy='dynamic'))
+
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return self.title
 
     def __init__(self, **kwargs):
         for key in kwargs:

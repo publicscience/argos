@@ -45,6 +45,7 @@ Flask-Assets==0.9
 pyjade==2.2.0
 Flask-Babel==0.9
 humanize==0.5
+colorama==0.3.1
 
 # Use latest feedparser.
 # Although feedparser says it supports Py3.3,

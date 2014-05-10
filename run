@@ -5,6 +5,7 @@
 DB_USER=argos_user
 DEV_DB=argos_dev
 TEST_DB=argos_test
+EVAL_DB=argos_eval
 DEFAULT_PW=password
 
 
@@ -16,7 +17,7 @@ function db_drop {
         # On Ubuntu, need to run these commands as the postgres user.
         PREFIX='sudo -u postgres'
     fi
-    for DB_NAME in $DEV_DB $TEST_DB
+    for DB_NAME in $DEV_DB $TEST_DB $EVAL_DB
     do
         if [[ `$PREFIX psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'"` == 1 ]]
         then
@@ -46,7 +47,7 @@ function db_create {
     fi
 
     # Create databases if they don't exist.
-    for DB_NAME in $DEV_DB $TEST_DB
+    for DB_NAME in $DEV_DB $TEST_DB $EVAL_DB
     do
         if [[ `$PREFIX psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'"` != 1 ]]
         then

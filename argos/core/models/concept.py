@@ -13,8 +13,8 @@ from sqlalchemy.ext.declarative import declared_attr
 from collections import Counter
 
 concepts_mentions = db.Table('concepts_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id')),
-        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug'))
+        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
+        db.Column('concept_slug', db.String, db.ForeignKey('concept.slug', ondelete='CASCADE', onupdate='CASCADE'))
 )
 
 class BaseConceptAssociation(Model):
@@ -51,12 +51,12 @@ class BaseConceptAssociation(Model):
 
     @declared_attr
     def concept_slug(cls):
-        return db.Column(db.String, db.ForeignKey('concept.slug'), primary_key=True)
+        return db.Column(db.String, db.ForeignKey('concept.slug', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
 
 
 class ConceptConceptAssociation(BaseConceptAssociation):
-    from_concept_slug   = db.Column(db.String, db.ForeignKey('concept.slug'), primary_key=True)
-    concept_slug        = db.Column(db.String, db.ForeignKey('concept.slug'), primary_key=True)
+    from_concept_slug   = db.Column(db.String, db.ForeignKey('concept.slug', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
+    concept_slug        = db.Column(db.String, db.ForeignKey('concept.slug', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
     concept             = db.relationship('Concept', backref=db.backref('from_concept_associations'), foreign_keys=[concept_slug])
 
 
@@ -66,7 +66,7 @@ class Alias(Model):
     """
     id          = db.Column(db.Integer, primary_key=True)
     name        = db.Column(db.UnicodeText)
-    slug        = db.Column(db.String, db.ForeignKey('concept.slug'))
+    slug        = db.Column(db.String, db.ForeignKey('concept.slug', ondelete='CASCADE', onupdate='CASCADE'))
 
     def __init__(self, name):
         self.name = name

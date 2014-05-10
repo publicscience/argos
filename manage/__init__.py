@@ -5,4 +5,3 @@ from manage.evaluate import *
 from manage.profile import *
 from manage.admin import *
 from manage.groom import *
-from manage.pseudoseed import *
