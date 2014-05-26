@@ -3,7 +3,7 @@ Search
 
 **Search events, stories, and entities**::
 
-    GET /search
+    GET /search/<query>
 
 Parameters
 
