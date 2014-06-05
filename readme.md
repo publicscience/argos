@@ -157,6 +157,12 @@ clustering:
 
 ---
 
+## Deployment
+
+See [argos.cloud](https://github.com/publicscience/argos.cloud).
+
+---
+
 ## Guide to the project
 Here are some quick notes to help you navigate through the project.
 
