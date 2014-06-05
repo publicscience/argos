@@ -131,10 +131,10 @@ SECURITY_UNAUTHORIZED_VIEW = 'security.login'
 # Template Paths
 # ==============
 
-SECURITY_FORGOT_PASSWORD_TEMPLATE = 'security/forgot_password.jade'
+SECURITY_FORGOT_PASSWORD_TEMPLATE = 'security/forgot_password.html'
 SECURITY_LOGIN_USER_TEMPLATE = 'security/login_user.jade'
-SECURITY_REGISTER_USER_TEMPLATE = 'security/register_user.jade'
-SECURITY_RESET_PASSWORD_TEMPLATE = 'security/reset_password.jade'
+SECURITY_REGISTER_USER_TEMPLATE = 'security/register_user.html'
+SECURITY_RESET_PASSWORD_TEMPLATE = 'security/reset_password.html'
 SECURITY_CHANGE_PASSWORD_TEMPLATE = 'security/change_password.html'
 SECURITY_SEND_CONFIRMATION_TEMPLATE = 'security/send_confirmation.html'
 SECURITY_SEND_LOGIN_TEMPLATE = 'security/send_login.html'
