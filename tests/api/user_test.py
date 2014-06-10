@@ -14,6 +14,37 @@ class UserAPITest(RequiresAPI):
                 'password': '123456'
         }
 
+    def token(self):
+        # Get a token for authenticated API requests.
+        r = self.client.post('/test_auth', data={'id': 1})
+        return self.json(r)['token']
+
+    def auth_get(self, endpoint):
+        token = self.token()
+        return self.client.get(
+                endpoint,
+                headers={'Authorization': 'Bearer {0}'.format(token)})
+
+    def auth_delete(self, endpoint):
+        token = self.token()
+        return self.client.delete(
+                endpoint,
+                headers={'Authorization': 'Bearer {0}'.format(token)})
+
+    def auth_patch(self, endpoint, data):
+        token = self.token()
+        return self.client.patch(
+                endpoint,
+                headers={'Authorization': 'Bearer {0}'.format(token)},
+                data=data)
+
+    def auth_post(self, endpoint, data):
+        token = self.token()
+        return self.client.post(
+                endpoint,
+                headers={'Authorization': 'Bearer {0}'.format(token)},
+                data=data)
+
     def test_get_current_user_not_authenticated(self):
         r = self.client.get('/user')
         self.assertEqual(r.status_code, 401)
@@ -22,8 +53,7 @@ class UserAPITest(RequiresAPI):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
-        self.client.post('/test_login', data={'id': 1})
-        r = self.client.get('/user')
+        r = self.auth_get('/user')
         self.assertEqual(r.status_code, 200)
 
     def test_patch_current_user_not_authenticated(self):
@@ -34,8 +64,7 @@ class UserAPITest(RequiresAPI):
         user = User(active=True, **self.userdata)
         self.db.session.add(user)
         self.db.session.commit()
-        self.client.post('/test_login', data={'id': 1})
-        r = self.client.patch('/user', data={'something':'foo'})
+        r = self.auth_patch('/user', data={'something':'foo'})
         self.assertEqual(r.status_code, 204)
 
     def test_get_single_user(self):
@@ -73,9 +102,7 @@ class UserAPITest(RequiresAPI):
         user.watching.append(story)
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-
-        r = self.client.get('/user/watching')
+        r = self.auth_get('/user/watching')
 
         expected_members = []
         expected_concepts = [{
@@ -113,8 +140,7 @@ class UserAPITest(RequiresAPI):
         story = fac.story()
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-        r = self.client.post('/user/watching', data={'story_id':story.id})
+        r = self.auth_post('/user/watching', data={'story_id':story.id})
         self.assertEqual(r.status_code, 201)
         self.assertEqual(story.watchers, [user])
         self.assertEqual(user.watching, [story])
@@ -125,8 +151,7 @@ class UserAPITest(RequiresAPI):
         story = fac.story()
         user.watching.append(story)
         save()
-        self.client.post('/test_login', data={'id': 1})
-        r = self.client.delete('/user/watching/{0}'.format(story.id))
+        r = self.auth_delete('/user/watching/{0}'.format(story.id))
         self.assertEqual(r.status_code, 204)
         self.assertEqual(story.watchers, [])
         self.assertEqual(user.watching, [])
@@ -151,12 +176,10 @@ class UserAPITest(RequiresAPI):
         not_watched_story = fac.story()
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-
-        r = self.client.get('/user/watching/{0}'.format(watched_story.id))
+        r = self.auth_get('/user/watching/{0}'.format(watched_story.id))
         self.assertEqual(r.status_code, 204)
 
-        r = self.client.get('/user/watching/{0}'.format(not_watched_story.id))
+        r = self.auth_get('/user/watching/{0}'.format(not_watched_story.id))
         self.assertEqual(r.status_code, 404)
 
     def test_get_current_user_bookmarked(self):
@@ -170,9 +193,7 @@ class UserAPITest(RequiresAPI):
         user.bookmarked.append(event)
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-
-        r = self.client.get('/user/bookmarked')
+        r = self.auth_get('/user/bookmarked')
 
         expected_members = []
         expected_concepts = [{
@@ -212,8 +233,7 @@ class UserAPITest(RequiresAPI):
         event = fac.event()
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-        r = self.client.post('/user/bookmarked', data={'event_id':event.id})
+        r = self.auth_post('/user/bookmarked', data={'event_id':event.id})
         self.assertEqual(r.status_code, 201)
         self.assertEqual(user.bookmarked, [event])
 
@@ -223,8 +243,7 @@ class UserAPITest(RequiresAPI):
         event = fac.event()
         user.bookmarked.append(event)
         save()
-        self.client.post('/test_login', data={'id': 1})
-        r = self.client.delete('/user/bookmarked/{0}'.format(event.id))
+        r = self.auth_delete('/user/bookmarked/{0}'.format(event.id))
         self.assertEqual(r.status_code, 204)
         self.assertEqual(user.bookmarked, [])
 
@@ -248,12 +267,10 @@ class UserAPITest(RequiresAPI):
         not_bookmarked_event = fac.event()
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-
-        r = self.client.get('/user/bookmarked/{0}'.format(bookmarked_event.id))
+        r = self.auth_get('/user/bookmarked/{0}'.format(bookmarked_event.id))
         self.assertEqual(r.status_code, 204)
 
-        r = self.client.get('/user/bookmarked/{0}'.format(not_bookmarked_event.id))
+        r = self.auth_get('/user/bookmarked/{0}'.format(not_bookmarked_event.id))
         self.assertEqual(r.status_code, 404)
 
     def test_get_current_user_feed(self):
@@ -265,9 +282,7 @@ class UserAPITest(RequiresAPI):
         user.watching.append(story)
         save()
 
-        self.client.post('/test_login', data={'id': 1})
-
-        r = self.client.get('/user/feed')
+        r = self.auth_get('/user/feed')
         expected_event_ids = [event.id for event in story.events]
         not_expected_event_ids = [event.id for event in not_watched_story.events]
         result_event_ids = [event['id'] for event in self.json(r)]

@@ -53,7 +53,7 @@ class OAuthTest(RequiresAPI):
             r = self.client.get(token_url)
         else:
             r = self.client.get('{0}&client_secret={1}'.format(token_url, client_secret))
-        if r.status_code == 400:
+        if r.status_code in [400, 401]:
             return None
         return self.json(r)
 
@@ -108,7 +108,7 @@ class OAuthPasswordGrantTypeTest(OAuthTest):
         })
         data = self.json(r)
 
-        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.status_code, 401)
         self.assertEqual(data['error'], 'unauthorized_client')
 
     def test_with_confidential_client_invalid_password(self):
@@ -202,7 +202,7 @@ class OAuthAuthCodeGrantTypeTest(OAuthTest):
 
         code = r.headers['Location'].replace('{0}?code='.format(self.default_redirect_uri), '')
 
-        tokens = self.get_tokens(code, client_id)
+        tokens = self.get_tokens(code, client_id, client_secret)
 
         self.assertGreater(len(tokens['access_token']), 0)
         self.assertGreater(len(tokens['refresh_token']), 0)

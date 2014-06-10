@@ -21,6 +21,7 @@ if __name__ == '__main__':
     # For debugging...
     #@app.before_request
     #def log_request():
+        #print(request.url)
         #print(request.headers)
 
     manager = Manager(app)
