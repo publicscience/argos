@@ -52,6 +52,15 @@ Example response
 
 -----
 
+.. warning::
+   For the following authenticated routes, you must have the `Authorization` header set.
+
+   For example:
+
+   Authorization: Bearer Akh198jCU1jk0NanlxXa410fa2f83g
+
+-----
+
 **Get the currently authenticated user**::
 
     GET /user

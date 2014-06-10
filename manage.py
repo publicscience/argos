@@ -6,6 +6,8 @@ from flask.ext.migrate import MigrateCommand
 from argos.web import api
 from manage import CreateSourcesCommand, CreateClientCommand, CreateAdminCommand, SeedCommand, ProfileCommand, EvaluateCommand, ReclusterCommand
 
+from flask import request
+
 if __name__ == '__main__':
     # Get the command to determine the app config.
     if sys.argv[1] == 'evaluate':
@@ -15,6 +17,11 @@ if __name__ == '__main__':
         app = api.create_app(**config)
     else:
         app = api.create_app()
+
+    # For debugging...
+    #@app.before_request
+    #def log_request():
+        #print(request.headers)
 
     manager = Manager(app)
     manager.add_command('create:sources', CreateSourcesCommand())
