@@ -22,7 +22,7 @@ def _request(method, **kwargs):
     resp = request.urlopen(url).read().decode('utf-8')
     return json.loads(resp)['response']
 
-def organizations(name):
+def organizations(profile):
     """
     Gets organizations and information about them.
 
@@ -40,6 +40,7 @@ def organizations(name):
         }]
     """
 
+    name = profile['name']
     raw_orgs = _request('getOrgs', org=name)['organization']
     if type(raw_orgs) is list:
         orgs = [org['@attributes']['orgid'] for org in raw_orgs]
@@ -61,5 +62,5 @@ def organizations(name):
             }
         })
 
-    return results
+    return {'organizations': results}
 

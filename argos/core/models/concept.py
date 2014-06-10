@@ -101,6 +101,8 @@ class Concept(Model):
                                 backref=db.backref('from_concept'),
                                 cascade='all, delete-orphan')
 
+    _sources = ['Wikipedia', 'DBpedia']
+
     def __init__(self, name):
         """
         Initialize a concept by a name, which can be
@@ -142,6 +144,14 @@ class Concept(Model):
     @property
     def names(self):
         return [alias.name for alias in self.aliases]
+
+    @property
+    def sources(self):
+        """
+        Returns the data sources
+        used for this concept.
+        """
+        return self._sources
 
     @property
     def concepts(self):
@@ -219,6 +229,7 @@ class Concept(Model):
         """
         if not hasattr(self, '_profile') or not self._profile:
             self._profile = knowledge.profiles.get_profile(self.uri)
+            self._sources += self._profile.get('sources', [])
         return self._profile
 
     def conceptize(self):

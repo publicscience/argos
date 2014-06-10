@@ -25,66 +25,78 @@ def _request(method, **kwargs):
     resp = request.urlopen(url).read().decode('utf-8')
     return json.loads(resp)
 
-def recipients_for_organization(name):
+def recipients_for_organization(profile):
     """
     Gets top recipients for an organization.
     """
 
+    name = profile['name']
     results = []
     raw_orgs = _request('entities', search=name)
     for org_id in [org['id'] for org in raw_orgs]:
         results.append(_request('aggregates/org/{id}/recipients'.format(id=org_id)))
-    return results
 
-def parties_for_organization(name):
+    # For now just using the first result,
+    # but it is possible that multiple organizations are returned.
+    return {'contributions': results[0]}
+
+def parties_for_organization(profile):
     """
     Gets party contributions for an organization.
     """
 
+    name = profile['name']
     results = []
     raw_orgs = _request('entities', search=name)
     for org_id in [org['id'] for org in raw_orgs]:
         results.append(_request('aggregates/org/{id}/recipients/party_breakdown'.format(id=org_id)))
-    return results
 
-def recipients_for_individual(name):
+    # For now just using the first result,
+    # but it is possible that multiple organizations are returned.
+    return {'party_contributions': results[0]}
+
+def recipients_for_individual(profile):
     """
     Gets top recipients for an individual.
     """
 
+    name = profile['name']
     results = []
     raw_indivs = _request('entities', search=name)
     for indiv_id in [indiv['id'] for indiv in raw_indivs]:
         results.append(_request('aggregates/indiv/{id}/recipient_pols'.format(id=indiv_id)))
     return results
 
-def parties_for_individual(name):
+def parties_for_individual(profile):
     """
     Gets party contributions for an individual.
     """
 
+    name = profile['name']
     results = []
     raw_indivs = _request('entities', search=name)
     for indiv_id in [indiv['id'] for indiv in raw_indivs]:
         results.append(_request('aggregates/indiv/{id}/recipients/party_breakdown'.format(id=indiv_id)))
     return results
 
-def organizations_for_individual(name):
+def organizations_for_individual(profile):
     """
     Gets organization contributions for an individual.
     """
 
+    name = profile['name']
     results = []
     raw_indivs = _request('entities', search=name)
     for indiv_id in [indiv['id'] for indiv in raw_indivs]:
         results.append(_request('aggregates/indiv/{id}/recipient_orgs'.format(id=indiv_id)))
     return results
 
-def contributors_for_politician(name):
+def contributors_for_politician(profile):
     """
     Gets top contributors for a politician.
     """
 
+    name = profile['name']
     results = []
     raw_pols = _request('entities', search=name)
     for pol_id in [pol['id'] for pol in raw_pols]:

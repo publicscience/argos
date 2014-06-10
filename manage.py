@@ -19,10 +19,10 @@ if __name__ == '__main__':
         app = api.create_app()
 
     # For debugging...
-    #@app.before_request
-    #def log_request():
-        #print(request.url)
-        #print(request.headers)
+    @app.before_request
+    def log_request():
+        print(request.url)
+        print(request.headers)
 
     manager = Manager(app)
     manager.add_command('create:sources', CreateSourcesCommand())

@@ -21,7 +21,16 @@ def _request(**kwargs):
     resp = request.urlopen(url).read().decode('utf-8')
     return json.loads(resp)
 
-def photos_at_location(lat, lng, distance=20):
+def photos_at_location(profile):
+    lat, lng = profile['latitude'], profile['longitude']
+
+    distance = 20
+    if 'http://dbpedia.org/ontology/Country' in profile['types']:
+        distance = 32
+    elif 'http://dbpedia.org/ontology/Region' in profile['types']:
+        distance = 26
+    # etc
+
     if distance > 32:
         raise Exception('Distance cannot be greater than 32.')
 
@@ -45,5 +54,5 @@ def photos_at_location(lat, lng, distance=20):
                 id=photo['id'],
                 secret=photo['secret']
              ))
-    return urls
+    return {'photos': urls}
 

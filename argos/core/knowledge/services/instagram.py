@@ -21,7 +21,16 @@ def _request(**kwargs):
     resp = request.urlopen(url).read().decode('utf-8')
     return json.loads(resp)['data']
 
-def photos_at_location(lat, lng, distance=2000):
+def photos_at_location(profile):
+    lat, lng = profile['latitude'], profile['longitude']
+
+    distance = 2000
+    if 'http://dbpedia.org/ontology/Country' in profile['types']:
+        distance = 3200
+    elif 'http://dbpedia.org/ontology/Region' in profile['types']:
+        distance = 2600
+    # etc
+
     data = _request(lat=lat, lng=lng, distance=distance)
-    return [item['images']['standard_resolution']['url'] for item in data]
+    return {'photos': [item['images']['standard_resolution']['url'] for item in data]}
 

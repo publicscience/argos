@@ -13,7 +13,8 @@ Example response
         "name": "John Kerry",
         "names": ["John Kerry", "J. Kerry", "Secretary Kerry"],
         "slug": "john-kerry",
-        "summary": "John Kerry is the current US Secretary of State..."
+        "summary": "John Kerry is the current US Secretary of State...",
+        "sources": ["Wikipedia", "DBpedia"],
         "image": "https://s3.amazonaws.com/argos/12948741.jpg",
         "commonness": "11847.0",
         "url": "/entities/john-kerry",
@@ -51,7 +52,8 @@ Place
             "populationDensityKm": "77",
             "populationDensitySqMi": "199",
             "populationYear": "2012",
-            "photos": ["http://foo.com/photo1.jpg", "http://foo.com/photo2.jpg"]
+            "photos": ["http://foo.com/photo1.jpg", "http://foo.com/photo2.jpg"],
+            "sources": ["Flickr"]
         }
         ...
     }
@@ -92,7 +94,8 @@ Company
                     "name": "YouTube"
                 }
             }],
-            "symbol": "GOOG"
+            "symbol": "GOOG",
+            "sources": ["Influence Explorer"]
         }
         ...
     }

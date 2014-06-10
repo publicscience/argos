@@ -55,7 +55,9 @@ def get_company_profile(uri):
                 'name': 'YouTube'
             }
          }],
-         'symbol': 'GOOG'}
+         'symbol': 'GOOG',
+         'sources': ['Influence Explorer']
+         }
      """
 
     # MISSING
@@ -94,10 +96,12 @@ def get_company_profile(uri):
         profile = results[0]
         profile['subsidiaries'] = subsidiaries
 
-        # For now just using the first result,
-        # but it is possible that multiple organizations are returned.
-        profile['contributions'] = services.influenceexplorer.recipients_for_organization(profile['name'])[0]
-        profile['party_contributions'] = services.influenceexplorer.parties_for_organization(profile['name'])[0]
+        services.process(profile, {
+            'influence_explorer': [
+                'recipients_for_organization',
+                'parties_for_organization'
+            ]
+        })
 
     return profile
 
@@ -117,7 +121,8 @@ def get_place_profile(uri, types):
          'populationDensityKm': '77',
          'populationDensitySqMi': '199',
          'populationYear': '2012',
-         'photos': ['http://foo.com/photo.jpg']
+         'photos': ['http://foo.com/photo.jpg'],
+         'sources': ['Flickr']
          }
     """
     uri = _quote(uri)
@@ -152,15 +157,12 @@ def get_place_profile(uri, types):
     if results:
         profile = results[0]
         profile['leaders'] = leaders
+        profile['types'] = types
 
-        distance = 20
-        if 'http://dbpedia.org/ontology/Country' in types:
-            distance = 32
-        elif 'http://dbpedia.org/ontology/Region' in types:
-            distance = 26
-        # etc
-
-        profile['photos'] = services.flickr.photos_at_location(profile['latitude'], profile['longitude'], distance=distance)
-
+        services.process(profile, {
+            'flickr': [
+                'photos_at_location'
+            ]
+        })
 
     return profile

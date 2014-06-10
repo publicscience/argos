@@ -22,6 +22,7 @@ class APITest(RequiresAPI):
                 'url': '/concepts/{0}'.format(concept.slug),
                 'updated_at': concept.updated_at.isoformat(),
                 'summary': concept.summary,
+                'sources': concept.sources,
                 'profile': {},
                 'image': concept.image,
                 'commonness': '100.0',
