@@ -135,8 +135,10 @@ def save_token(token, request, *args, **kwargs):
     for t in tokens:
         db.session.delete(t)
 
-    expires_in = token.pop('expires_in')
-    expires = datetime.utcnow() + timedelta(seconds=expires_in)
+    # For now using non-expiring tokens.
+    #expires_in = token.pop('expires_in')
+    #expires = datetime.utcnow() + timedelta(seconds=expires_in)
+    expires = datetime.max
 
     token = Token(
         access_token=token['access_token'],
