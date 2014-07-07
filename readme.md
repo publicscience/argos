@@ -181,15 +181,12 @@ articles or events are.
 * The threshold for which the similarity metric indicates that two
 articles or events are sufficiently similar to be grouped together.
 
-To prepare the evaluation, you must first run a few commands:
+To prepare the evaluation, you must first run:
 ```bash
-# Generate the seed data.
-(argos) $ python manage.py evaluate generate
-
-# Populate the database with the seed data.
+# Generate the seed data and populate the database.
 # NOTE: This will overwrite your database, so don't run it in
 production!
-(argos) $ python manage.py evaluate seed
+(argos) $ python manage.py evaluate prepare
 ```
 
 Then you can run the evaluations:
@@ -199,9 +196,22 @@ Then you can run the evaluations:
 ```
 **Note: don't run this in production as it modifies your database.**
 
-An HTML report will be output to `manage/reports/` with some details.
+An HTML report will be output to `manage/evaluate/reports/` with some details.
 You can look at the cluster members and determine for yourself if they
 look right.
+
+The clustering evaluation system already tries a spread of thresholds to
+try and find an optimal one. It does not, however, have different
+similarity strategies. New ones can be patched in by defining methods in
+either `manage/evaluate/strategies/event.py` or
+`manage/evaluate/strategies/story.py`. The methods must have `similarity`
+in their name to be registered as an alternative similarity strategy.
+
+The only requirement is that the method's parameters are `(self, obj)`,
+where obj is the object being compared to, and that it returns a float
+value from `0.0` to `1.0`, where `0.0` is completely dissimilar and
+`1.0` means identical.
+
 
 ---
 
