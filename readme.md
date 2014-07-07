@@ -183,8 +183,7 @@ articles or events are sufficiently similar to be grouped together.
 To prepare the evaluation, you must first run:
 ```bash
 # Generate the seed data and populate the database.
-# NOTE: This will overwrite your database, so don't run it in
-production!
+# NOTE: This will overwrite your database, so don't run it in production!
 (argos) $ python manage.py evaluate prepare
 ```
 
