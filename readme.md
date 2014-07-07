@@ -128,7 +128,7 @@ This marks the database as at the latest (`head`) revision.
 
 ---
 
-## Testing, Performance, Evaluation
+## Testing & Performance
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
 ```bash
@@ -148,12 +148,60 @@ bottlenecks:
 ```
 **Note: don't run this in production as it modifies your database.**
 
+---
+
+## Evaluation
 You can also evaluate the quality of some of the algorithms, such as
-clustering:
+clustering.
+
+The project comes with a set of data to use for evaluation, located in
+`manage/data/evaluation/`. It is a very small dataset which only
+captures a small domain of the news taht is out there, so at some point
+I'd like to have a larger and broader one available.
+
+The evaluation commands run either the event or story clustering on this
+set of data and then compare the algorithmic results to hand-curated
+clusters of the same data.
+
+The selected clustering (event or story) is run multiple times,
+iterating over similarity thresholds ranging from an optionally-set
+minimum threshold (set with `-min <float>`, default `0.0`) to an
+optionally-set maximum threshold (set with `-max <float>`, default `1.0`),
+using steps of an optionally-set side (set with `-s <float>`, default `0.05`).
+
+A score for each threshold is calculated based on the difference between the
+expected, hand-curated clusters and the algorithmic results.
+
+Note that the clustering algorithm used is a hierarchical agglomerative
+one, so the main thing under examination in these evaluations is two
+fold:
+
+* The quality of the similarity metric, which measures how similar two
+articles or events are.
+* The threshold for which the similarity metric indicates that two
+articles or events are sufficiently similar to be grouped together.
+
+To prepare the evaluation, you must first run a few commands:
 ```bash
-(argos) $ python manage.py evaluate
+# Generate the seed data.
+(argos) $ python manage.py evaluate generate
+
+# Populate the database with the seed data.
+# NOTE: This will overwrite your database, so don't run it in
+production!
+(argos) $ python manage.py evaluate seed
+```
+
+Then you can run the evaluations:
+```bash
+(argos) $ python manage.py evaluate event
+(argos) $ python manage.py evaluate story
 ```
 **Note: don't run this in production as it modifies your database.**
+
+An HTML report will be output to `manage/reports/` with some details.
+You can look at the cluster members and determine for yourself if they
+look right.
 
 ---
 

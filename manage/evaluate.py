@@ -12,11 +12,13 @@ from argos.core.membrane import evaluator, extractor
 from argos.web.models.oauth import Client
 from argos.util.progress import progress_bar
 
+import os
 import json
 import random
 import numpy
 import cProfile, pstats
 import dateutil.parser
+from datetime import datetime
 from unittest.mock import patch
 from werkzeug.security import gen_salt
 from colorama import Fore
@@ -27,6 +29,10 @@ from flask import current_app
 
 from flask.ext.script import Command, Option
 
+import jinja2 # For generating HTML reports.
+this_dir = os.path.dirname(os.path.realpath(__file__))
+templateLoader = jinja2.FileSystemLoader(searchpath=this_dir+'/templates/')
+templateEnv = jinja2.Environment(loader=templateLoader)
 
 class EvaluateCommand(Command):
     option_list = (
@@ -56,11 +62,14 @@ def seed():
     """
     seed = json.load(open('manage/data/evaluation/seed.json'))
 
+    patches = patch_external()
+
     print('Resetting the database...')
     db.drop_all()
     db.create_all()
 
     print('Seeding the articles...')
+    print('This make take awhile...')
     articles = []
     for source_name, source_data in seed['sources'].items():
         source = Source(name=source_name, icon=source_data['icon'])
@@ -107,12 +116,18 @@ def seed():
     print('Found {0} concepts.'.format(num_concepts))
     print('==============================================\n\n')
 
+    stop_patches(patches)
+
+    print('Done seeding.')
+
 
 def generate():
     """
     This generates or updates evaluation seed data based on the
     data in the `seed_source.json` file.
     """
+    print('Generating seed data...')
+
     # Load the existing data, to check against.
     try: 
         seed_existing = json.load(open('manage/data/evaluation/seed.json', 'r'))
@@ -175,6 +190,7 @@ def generate():
                     })
 
     json.dump(seed, open('manage/data/evaluation/seed.json', 'w'), sort_keys=True, indent=4, separators=(',', ': '))
+    print('Done generating seed data.')
 
 
 def evaluate_events(step, min_threshold, max_threshold):
@@ -216,6 +232,7 @@ def evaluate_events(step, min_threshold, max_threshold):
     # Run the clustering at the varying thresholds
     # and collect the scores.
     all_scores = {}
+    results = {}
     for threshold in numpy.linspace(min_threshold, max_threshold, (max_threshold-min_threshold)/step):
         print('\nClustering with threshold {0}{1}{2}'.format(Fore.YELLOW, threshold, Fore.RESET))
         p.runcall(Event.cluster, articles, threshold=threshold, debug=False)
@@ -227,9 +244,12 @@ def evaluate_events(step, min_threshold, max_threshold):
         # This could use refining!
         events = Event.query.all()
         scores = []
+        results[threshold] = []
         for event in events:
             # So we can inspect the cluster compositions.
-            print(set(event.members))
+            members = set(event.members)
+            print(members)
+            results[threshold].append(members)
 
             # The lower the diff, the better.
             diffs = [len(set(event.members).symmetric_difference(set(expected))) for expected in expected_events.values()]
@@ -261,7 +281,22 @@ def evaluate_events(step, min_threshold, max_threshold):
     # Disable patches.
     stop_patches(patches)
 
-    ## Cleanup
+    # Build report.
+    template = templateEnv.get_template('cluster_report.jinja')
+    now = datetime.now()
+    html = template.render({
+        'name': 'Evaluate event clustering',
+        'date': now,
+        'results': results,
+        'scores': all_scores,
+        'best_threshold': best_threshold,
+        'best_score': all_scores[best_threshold],
+        'expected': expected_events
+    })
+    with open(this_dir+'/reports/event_clustering_' + now.isoformat() + '.html', 'w') as report:
+        report.write(html)
+
+    # Cleanup
     print('\nCleaning up...')
     clean()
 
@@ -391,6 +426,13 @@ def clean():
     Story.query.delete()
     Event.query.delete()
 
+def patch_external():
+    patches = [
+            patch('argos.util.storage.save_from_url', autospec=True, return_value='fakeimage.jpg')
+    ]
+    for p in patches:
+        p.start()
+    return patches
 
 def start_patches():
     patches = [

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report</title>
+    <style>
+        html, body {
+            font-family: "Helvetica", "Arial", "sans-serif";
+            background: #fafafa;
+            color: #111;
+        }
+
+        .muted { color: #ddd; }
+        .best { color: #1bafae; }
+        .result {
+            border-top: 2px solid #fc0d1b;
+            padding: 2em 0;
+        }
+        .expected {
+            border: 2px solid #fc0d1b;
+            padding: 2em;
+        }
+        .cluster {
+            background: #eaeaea;
+            padding: 2em;
+            margin: 1em 0;
+            font-size: 0.75em;
+
+            -webkit-column-count: 2;
+            -moz-column-count: 2;
+            column-count: 2;
+        }
+
+        table, th, td {
+            border: 1px solid #eee;
+            border-collapse: collapse;
+            padding: 0.5em;
+        }
+        th {
+            background: #eaeaea;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>{{ name }}</h1>
+    <em class="muted">Run on {{ date }}</em>
+
+    <h4 class="best">Best score: {{ best_score }} (out of 1.0) with a threshold of {{ best_threshold }}</h4>
+
+    <p>Expecting {{ expected|length }} clusters (<a href="#expected">view composition</a>).</p>
+
+    <h2>At a glance</h2>
+    <table>
+        <tr>
+            <th>Threshold</th>
+            <th>Score</th>
+            <th>Num. Clusters</th>
+        </tr>
+        {% for threshold, clusters in results.items() %}
+            <tr>
+                <td>{{ threshold }}</td>
+                <td>{{ scores[threshold] }}</td>
+                <td>{{ clusters|length }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% for threshold, clusters in results.items() %}
+        <section class="result">
+            <h2>Threshold: {{ threshold }}</h2>
+            <h4>Score: {{ scores[threshold] }}</h4>
+            <h6>Clusters (got {{ clusters|length }}, <a href="#expected">expecting {{ expected|length }}</a>.)</h6>
+
+            <div class="clusters">
+                {% for cluster in clusters %}
+                    <div class="cluster">
+                        {% for event in cluster %}
+                            <p>{{ event }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+        </section>
+    {% endfor %}
+
+    <a name="expected"></a>
+    <section class="expected">
+        <h2>Expected cluster composition</h2>
+        {% for id, cluster in expected.items() %}
+            <div class="cluster">
+                {% for event in cluster %}
+                    <p>{{ event }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </section>
+
+</body>
+</html>
