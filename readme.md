@@ -151,12 +151,12 @@ bottlenecks:
 ---
 
 ## Evaluation
-You can also evaluate the quality of some of the algorithms, such as
-clustering.
+You can also evaluate the quality of some of the algorithms (currently
+only the article=>event and event=>story clustering).
 
 The project comes with a set of data to use for evaluation, located in
-`manage/data/evaluation/`. It is a very small dataset which only
-captures a small domain of the news taht is out there, so at some point
+`manage/data/evaluation/`. It is a *very* small dataset which only
+captures a small domain of the news that is out there, so at some point
 I'd like to have a larger and broader one available.
 
 The evaluation commands run either the event or story clustering on this
@@ -173,8 +173,7 @@ A score for each threshold is calculated based on the difference between the
 expected, hand-curated clusters and the algorithmic results.
 
 Note that the clustering algorithm used is a hierarchical agglomerative
-one, so the main thing under examination in these evaluations is two
-fold:
+one, so the main things under examination in these evaluations are:
 
 * The quality of the similarity metric, which measures how similar two
 articles or events are.
