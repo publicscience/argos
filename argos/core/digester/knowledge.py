@@ -129,8 +129,7 @@ def digest(force=False):
         logger.warn('Existing knowledge database found. Removing...')
         shutil.rmtree(knowledge_path)
 
-    # Assuming the Argos env is in its default place.
-    loader_path = os.path.expanduser('~/env/argos/jena/jena/bin/tdbloader2')
+    loader_path = os.path.expanduser(os.path.join(APP['JENA_PATH'], 'bin/tdbloader2'))
     cmd = [loader_path, '--loc', knowledge_path]
     datasets = [os.path.join(DATASETS_PATH, dataset) for dataset in os.listdir(DATASETS_PATH) if dataset.endswith('.ttl') and any(setname in dataset for setname in DESIRED_DATASETS)]
     logger.info('Using the datasets: {0}'.format(' '.join(datasets)))
