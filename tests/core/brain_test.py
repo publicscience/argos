@@ -5,7 +5,7 @@ from tests import RequiresMocks
 
 import argos.core.brain as brain
 
-class BrainTest(unittest.TestCase):
+class BrainTest(RequiresMocks):
     def test_tokenize(self):
         data = "hey there buddy, hey Says, say"
         tokens = brain.tokenize(data)
@@ -43,6 +43,49 @@ class BrainTest(unittest.TestCase):
         self.assertEqual(set(results), set(expected))
 
     def test_concept_recognition_spotlight(self):
+        data = b'''{
+          "@text": "Brazilian state-run giant oil company Petrobras signed a three-year technology and research cooperation agreement with oil service provider Halliburton.",
+          "@confidence": "0.0",
+          "@support": "0",
+          "@types": "",
+          "@sparql": "",
+          "@policy": "whitelist",
+          "Resources":   [
+                {
+              "@URI": "http://dbpedia.org/resource/Brazil",
+              "@support": "74040",
+              "@types": "Schema:Place,DBpedia:Place,DBpedia:PopulatedPlace,Schema:Country,DBpedia:Country",
+              "@surfaceForm": "Brazilian",
+              "@offset": "0",
+              "@similarityScore": "0.9999203720889515",
+              "@percentageOfSecondRank": "7.564391175472872E-5"
+            },
+                {
+              "@URI": "http://dbpedia.org/resource/Petrobras",
+              "@support": "387",
+              "@types": "DBpedia:Agent,Schema:Organization,DBpedia:Organisation,DBpedia:Company",
+              "@surfaceForm": "Petrobras",
+              "@offset": "38",
+              "@similarityScore": "1.0",
+              "@percentageOfSecondRank": "0.0"
+            },
+                {
+              "@URI": "http://dbpedia.org/resource/Halliburton",
+              "@support": "458",
+              "@types": "DBpedia:Agent,Schema:Organization,DBpedia:Organisation,DBpedia:Company",
+              "@surfaceForm": "Halliburton",
+              "@offset": "140",
+              "@similarityScore": "1.0",
+              "@percentageOfSecondRank": "0.0"
+            }
+          ]
+        }'''
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.read.return_value = data
+        self.create_patch('urllib.request.urlopen', return_value=mock_response)
+
         results = brain.concepts('Brazilian state-run giant oil company Petrobras signed a three-year technology and research cooperation agreement with oil service provider Halliburton.', strategy='spotlight')
 
         expected = [

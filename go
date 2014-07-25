@@ -2,7 +2,7 @@
 trap : SIGTERM SIGINT
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ARGOS_ENV=~/env/argos
+ARGOS_ENV=~/env/argos.core
 
 echo -e "\n\n\n\n\n"
 echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

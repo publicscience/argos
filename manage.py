@@ -3,8 +3,8 @@ import sys
 from flask.ext.script import Manager, Shell, Server
 from flask.ext.migrate import MigrateCommand
 
-from argos.web import api
-from manage import CreateSourcesCommand, CreateClientCommand, CreateAdminCommand, SeedCommand, ProfileCommand, EvaluateCommand, ReclusterCommand
+from argos import create_app
+from manage import CreateSourcesCommand, SeedCommand, ProfileCommand, EvaluateCommand, ReclusterCommand
 
 from flask import request
 
@@ -14,9 +14,9 @@ if __name__ == '__main__':
         config = {
                 'SQLALCHEMY_DATABASE_URI': 'postgresql://argos_user:password@localhost:5432/argos_eval'
         }
-        app = api.create_app(**config)
+        app = create_app(**config)
     else:
-        app = api.create_app()
+        app = create_app()
 
     # For debugging...
     @app.before_request
@@ -26,8 +26,6 @@ if __name__ == '__main__':
 
     manager = Manager(app)
     manager.add_command('create:sources', CreateSourcesCommand())
-    manager.add_command('create:client', CreateClientCommand())
-    manager.add_command('create:admin', CreateAdminCommand())
     manager.add_command('profile', ProfileCommand())
     manager.add_command('evaluate', EvaluateCommand())
     manager.add_command('seed', SeedCommand())

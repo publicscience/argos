@@ -5,25 +5,17 @@ import subprocess
 from unittest.mock import patch
 from json import loads
 
-from argos import web
-from argos.web import api, front
 from argos.datastore import db
 from argos.tasks import workers
+from argos import create_app
 
 from tests.patches import patch_knowledge, patch_concepts, patch_aws
-from tests import helpers
 
 test_config = {
         'SQLALCHEMY_DATABASE_URI': 'postgresql://argos_user:password@localhost:5432/argos_test'
 }
 
-bare_app = web.create_app(**test_config)
-api_app = api.create_app(**test_config)
-front_app = front.create_app(**test_config)
-
-for app in [api_app, front_app]:
-    app.register_blueprint(helpers.blueprint)
-
+bare_app = create_app(**test_config)
 
 class RequiresMocks(unittest.TestCase):
     def create_patch(self, name, **kwargs):
@@ -110,11 +102,3 @@ class RequiresDatabase(RequiresMocks):
         Load response data into json.
         """
         return loads(resp.data.decode('utf-8'))
-
-class RequiresAPI(RequiresDatabase):
-    def  _setup_app(self):
-        self.app = api_app
-
-class RequiresFront(RequiresDatabase):
-    def  _setup_app(self):
-        self.app = front_app

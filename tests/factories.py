@@ -12,34 +12,9 @@ It's assumed that when factories are used, you aren't testing the lower-level fu
 from tests.helpers import save
 from tests.patches import requires_patches
 from argos.core.models import Concept, Article, Event, Story, Source, Feed
-from argos.web.models import User
 from argos.datastore import db
 
 from copy import copy
-
-def user(num=1):
-    args = {
-            'name': 'Hubble Bubble {0}',
-            'email': 'hubbubs{0}@mail.com',
-            'image': 'https://hubb.ub/pic{0}.png',
-            'active': True,
-            'password': '123456'
-    }
-    u_s = []
-    for i in range(num):
-        # Copy the args and fill in
-        # the numbers.
-        a = copy(args)
-        for k, v in a.items():
-            if isinstance(a[k], str):
-                a[k] = v.format(i)
-        u_s.append(User(**a))
-
-    save(u_s)
-
-    if len(u_s) is 1:
-        return u_s[0]
-    return u_s
 
 
 @requires_patches

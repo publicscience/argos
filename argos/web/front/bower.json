@@ -1,9 +1,0 @@
-{
-  "name": "Argos",
-  "version": "0.0.1",
-  "dependencies": {
-    "requirejs": "latest",
-    "modernizr": "latest",
-    "jquery-filedrop": "~0.1.0"
-  }
-}

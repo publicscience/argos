@@ -6,7 +6,7 @@ Provides access to
 distributed task processing.
 """
 
-from argos import web
+from argos import create_app
 from argos.conf import CELERY
 from argos.util.logger import logger
 from argos.datastore import db
@@ -41,7 +41,7 @@ def create_celery(app):
     celery.Task = ContextTask
     return celery
 
-app = web.create_app(__name__, __path__, has_blueprints=False)
+app = create_app(__name__, __path__)
 celery = create_celery(app)
 
 def workers():

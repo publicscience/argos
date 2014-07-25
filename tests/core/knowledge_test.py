@@ -137,7 +137,7 @@ class KnowledgeTest(RequiresMocks):
 
 class KnowledgeProfilesTest(RequiresMocks):
     def test_company_profile(self):
-        self.mock_types = self.create_patch('argos.core.knowledge.types_for_uri')
+        self.mock_types = self.create_patch('argos.core.knowledge.profiles.types_for_uri')
         self.mock_types.return_value = ['http://dbpedia.org/ontology/Company']
 
         profile = knowledge.profiles.get_profile('http://dbpedia.org/resource/Google')
@@ -145,8 +145,11 @@ class KnowledgeProfilesTest(RequiresMocks):
         self.assertEqual(profile['type'], 'company')
 
     def test_place_profile(self):
-        self.mock_types = self.create_patch('argos.core.knowledge.types_for_uri')
+        self.mock_types = self.create_patch('argos.core.knowledge.profiles.types_for_uri')
         self.mock_types.return_value = ['http://dbpedia.org/ontology/Place']
+
+        self.mock_place_profile = self.create_patch('argos.core.knowledge.profiles.get_place_profile')
+        self.mock_place_profile.return_value = {}
 
         profile = knowledge.profiles.get_profile('http://dbpedia.org/resource/Syria')
 
