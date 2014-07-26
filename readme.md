@@ -56,6 +56,34 @@ articles by doing (make sure Postgres is running):
 (argos) $ python manage.py create:sources
 ```
 
+### Training the Vectorizer
+Finally, you will need to train the vectorizer pipeline for the brain,
+which is implemented in `argos.core.brain.vectorize`. You can train this
+pipeline with a JSON file of training data structured like so:
+```
+[
+    {
+        'title': 'Some title',
+        'text': 'Some text'
+    }, {
+        'title': 'Another article',
+        'text': 'Foo bar'
+    },
+    ...
+]
+```
+
+And then the training is accomplished like so:
+```bash
+(argos) $ python manage.py train /path/to/training/data.json
+```
+
+This will serialize (pickle) the trained pipeline to the `PIPELINE_PATH`
+specified in the config. This pipeline is used specifically to vectorize
+*news articles* so that should probably be what your training data is
+composed of. You can collect this data using
+[argos.corpora](https://github.com/publicscience/argos.corpora).
+
 ---
 
 ## Running & Development
