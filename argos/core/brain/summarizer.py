@@ -1,5 +1,5 @@
 """
-Summarize
+Summarizer
 ==============
 
 Summarizes documents.

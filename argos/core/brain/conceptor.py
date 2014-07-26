@@ -1,5 +1,5 @@
 """
-Conceptize
+Conceptor
 ==============
 
 Concept extraction from text.

@@ -58,7 +58,7 @@ articles by doing (make sure Postgres is running):
 
 ### Training the Vectorizer
 Finally, you will need to train the vectorizer pipeline for the brain,
-which is implemented in `argos.core.brain.vectorize`. You can train this
+which is implemented in `argos.core.brain.vectorizer`. You can train this
 pipeline with a JSON file of training data structured like so:
 ```
 [

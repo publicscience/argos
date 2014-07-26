@@ -1,5 +1,5 @@
 """
-Vectorize
+Vectorizer
 ==============
 
 Handles vectorizing of documents.

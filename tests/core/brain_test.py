@@ -104,9 +104,5 @@ class BrainTest(RequiresMocks):
         data = '[h%e@l&l~o* (t/h>e,r.e:'
         self.assertEqual(brain.depunctuate(data), ' h e l l o   t h e r e ')
 
-    def test_sanitize(self):
-        data = '<html><h1 class="foo">hello there</h1></html>'
-        self.assertEqual(brain.sanitize(data), 'hello there')
-
 if __name__ == '__main__':
 	unittest.main()
