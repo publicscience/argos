@@ -308,7 +308,7 @@ class CollectorTest(RequiresDatabase):
 
         self.assertEquals(self.feed.errors, 0)
 
-        self.mock_articles.side_effect = collector.SAXException('', None)
+        self.mock_articles.side_effect = [collector.SAXException('', None)]
 
         articles = collector.collect(self.feed)
 
@@ -350,7 +350,7 @@ class CollectorTest(RequiresDatabase):
                     entries=[article],
                     bozo=False
                )
-        self.mock_parse = self.create_patch('feedparser.parse', return_value=data)
+        self.mock_parse.return_value = data
 
         collector.get_articles(self.feed, lambda a: articles.append(a))
 
@@ -366,14 +366,14 @@ class CollectorTest(RequiresDatabase):
 
     def test_articles_skips_404_articles(self):
         from urllib import error
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None))
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=[error.HTTPError(url=None, code=404, msg=None, hdrs=None, fp=None)])
         articles = []
         collector.get_articles(self.feed, lambda a: articles.append(a))
         self.assertEquals(len(articles), 0)
 
     def test_articles_skips_unreachable_articles(self):
         from urllib import error
-        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=error.URLError('unreachable'))
+        self.create_patch('argos.core.membrane.extractor.extract_entry_data', side_effect=[error.URLError('unreachable')])
         articles = []
         collector.get_articles(self.feed, lambda a: articles.append(a))
         self.assertEquals(len(articles), 0)
