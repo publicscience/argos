@@ -8,7 +8,7 @@ import argos.core.brain as brain
 class BrainTest(RequiresMocks):
     def test_tokenize(self):
         data = "hey there buddy, hey Says, say"
-        tokens = brain.tokenize(data)
+        tokens = brain.vectorize.tokenize(data)
         expected = ['hey', 'buddy', 'hey', 'say', 'say']
         self.assertEqual(tokens,expected)
 

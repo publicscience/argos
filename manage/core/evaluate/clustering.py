@@ -16,8 +16,8 @@ from datetime import datetime
 from contextlib import contextmanager
 from colorama import Fore
 
-from manage.evaluate.patch import start_patches, stop_patches
-from manage.evaluate.report import build_report
+from manage.core.evaluate.patch import start_patches, stop_patches
+from manage.core.evaluate.report import build_report
 
 def evaluate_events(step, min_threshold, max_threshold):
     """
@@ -27,7 +27,7 @@ def evaluate_events(step, min_threshold, max_threshold):
     # Load the annotated data.
     print('Assembling expected article clusters...')
     expected_events = {}
-    seed = json.load(open('manage/data/evaluation/seed.json'))
+    seed = json.load(open('manage/core/data/evaluation/seed.json'))
     for source_name, source_data in seed['sources'].items():
         for feed_url, raw_articles in source_data['feeds'].items():
             for article_data in raw_articles:
@@ -56,7 +56,7 @@ def evaluate_stories(step, min_threshold, max_threshold):
     print('Assembling expected article clusters ("perfect" events)...')
     expected_events = {}
     expected_stories = {}
-    seed = json.load(open('manage/data/evaluation/seed.json'))
+    seed = json.load(open('manage/core/data/evaluation/seed.json'))
     for source_name, source_data in seed['sources'].items():
         for feed_url, raw_articles in source_data['feeds'].items():
             for article_data in raw_articles:

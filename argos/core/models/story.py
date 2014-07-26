@@ -4,7 +4,7 @@ from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
 from argos.core.brain.cluster import cluster
 from argos.core.brain.summarize import multisummarize
-from argos.core.brain import sentences
+from argos.core.brain.vectorize import sentences
 
 import itertools
 

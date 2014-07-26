@@ -12,6 +12,9 @@ KNOWLEDGE_HOST = 'localhost'
 DATASETS_PATH = '~/env/argos/data/knowledge/'
 JENA_PATH = '~/env/argos/jena/jena'
 
+# Where to store/retrieve the pickled vectorizing pipeline.
+PIPELINE_PATH = '~/env/argos/data/'
+
 # http://bizvizz.com/api/request
 BIZVIZZ_API_KEY = 'some key'
 

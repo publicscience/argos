@@ -2,7 +2,7 @@ from tests import RequiresDatabase
 
 from argos.core.models import Source
 
-import manage
+import manage.core
 
 from datetime import datetime
 
@@ -19,5 +19,5 @@ class ManageTest(RequiresDatabase):
 
         mock_find_feed.side_effect = faux_url
 
-        manage.create_sources()
+        manage.core.create_sources()
         self.assertTrue(Source.query.count() > 1)

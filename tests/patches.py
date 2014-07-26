@@ -54,7 +54,7 @@ def patch_summarization():
 
 def patch_vectorize():
     patcher = Patcher([
-        'argos.core.brain.vectorize'
+        'argos.core.brain.vectorize.vectorize'
     ])
     return patcher
 
@@ -144,7 +144,7 @@ def faux_summarize(title, text):
 def faux_multisummarize(docs):
     return ['this', 'is', 'a', 'fake', 'summary']
 
-from argos.core.brain import vectorize
+from argos.core.brain.vectorize import vectorize
 cached_vector = vectorize('foo bar')
 def faux_vectorize(docs):
     return cached_vector

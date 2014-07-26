@@ -57,12 +57,7 @@ class EventTest(RequiresDatabase):
         c = Event(members)
         avg_sim = self.event.similarity(c)
 
-        # Currently, the similarity calculation between clusters
-        # does not yield 1.0 if they are identical clusters,
-        # because we calculate the average similarity of the articles
-        # between the clusters, rather than the overlap of the two clusters.
-        #self.assertEqual(avg_sim, 1.0)
-        self.assertAlmostEqual(avg_sim, 0.83999999999999)
+        self.assertEqual(avg_sim, 1.0)
 
     def test_similarity_with_cluster_different(self):
         self.prepare_event()
@@ -108,6 +103,12 @@ class EventTest(RequiresDatabase):
                 text='superstars are awesome, Clinton',
                 created_at=datetime.utcnow()
         )
+
+        # Forcing it to evaluate the article as not similar;
+        # the actual vectorizing model changes depending on the training data fed into it
+        # so we can't rely on the "real" similarity to be consistent.
+        self.create_patch('argos.core.models.Article.similarity', return_value=0.0)
+
         Event.cluster([article])
         self.assertEqual(self.event.members.count(), 2)
 

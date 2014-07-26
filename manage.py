@@ -4,7 +4,7 @@ from flask.ext.script import Manager, Shell, Server
 from flask.ext.migrate import MigrateCommand
 
 from argos.web import api
-from manage import CreateSourcesCommand, CreateClientCommand, CreateAdminCommand, SeedCommand, ProfileCommand, EvaluateCommand, ReclusterCommand
+from manage import web, core
 
 from flask import request
 
@@ -25,15 +25,16 @@ if __name__ == '__main__':
         print(request.headers)
 
     manager = Manager(app)
-    manager.add_command('create:sources', CreateSourcesCommand())
-    manager.add_command('create:client', CreateClientCommand())
-    manager.add_command('create:admin', CreateAdminCommand())
-    manager.add_command('profile', ProfileCommand())
-    manager.add_command('evaluate', EvaluateCommand())
-    manager.add_command('seed', SeedCommand())
+    manager.add_command('create:client', web.CreateClientCommand())
+    manager.add_command('create:admin', web.CreateAdminCommand())
+    manager.add_command('create:sources', core.CreateSourcesCommand())
+    manager.add_command('profile', core.ProfileCommand())
+    manager.add_command('evaluate', core.EvaluateCommand())
+    manager.add_command('seed', core.SeedCommand())
+    manager.add_command('recluster', core.ReclusterCommand())
+    manager.add_command('train', core.TrainVectorizerCommand())
+    manager.add_command('db', MigrateCommand)
     manager.add_command('shell', Shell())
     manager.add_command('server', Server(host='0.0.0.0'))
-    manager.add_command('db', MigrateCommand)
-    manager.add_command('recluster', ReclusterCommand())
 
     manager.run()

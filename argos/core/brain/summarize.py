@@ -5,7 +5,7 @@ Summarize
 Summarizes documents.
 """
 
-from argos.core.brain import tokenize, sentences, stopwords, vectorize
+from argos.core.brain.vectorize import tokenize, sentences, stopwords, vectorize
 
 from re import sub
 from math import fabs
@@ -74,7 +74,9 @@ def multisummarize(docs, summary_length=5):
         # Keep track of the maximum scoring cluster
         # (above some minimum similarity)
         # and the avg sim score.
-        min_sim = 0.01
+        # The higher the min_sim,
+        # the harder it is to join a cluster.
+        min_sim = 0.2
         max_cluster = None, min_sim
         for cluster in clusters:
             avg_sim = 0

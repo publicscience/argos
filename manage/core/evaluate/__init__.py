@@ -8,8 +8,8 @@ for this purpose.
 
 from flask.ext.script import Command, Option
 
-from manage.evaluate.prepare import generate, seed
-from manage.evaluate.clustering import evaluate_events, evaluate_stories
+from manage.core.evaluate.prepare import generate, seed
+from manage.core.evaluate.clustering import evaluate_events, evaluate_stories
 
 class EvaluateCommand(Command):
     option_list = (

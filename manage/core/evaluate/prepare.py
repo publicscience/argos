@@ -12,7 +12,7 @@ import random
 import dateutil.parser
 import json
 
-from manage.evaluate.patch import patch_external, stop_patches
+from manage.core.evaluate.patch import patch_external, stop_patches
 
 def seed():
     """
@@ -23,7 +23,7 @@ def seed():
         print('Nevermind then!')
         return
 
-    seed = json.load(open('manage/data/evaluation/seed.json'))
+    seed = json.load(open('manage/core/data/evaluation/seed.json'))
 
     patches = patch_external()
 
@@ -93,12 +93,12 @@ def generate():
 
     # Load the existing data, to check against.
     try: 
-        seed_existing = json.load(open('manage/data/evaluation/seed.json', 'r'))
+        seed_existing = json.load(open('manage/core/data/evaluation/seed.json', 'r'))
     except FileNotFoundError:
         seed_existing = {}
 
     # Copy the url file as a starting template.
-    seed = json.load(open('manage/data/evaluation/seed_source.json', 'r'))
+    seed = json.load(open('manage/core/data/evaluation/seed_source.json', 'r'))
 
     # Some authors to use, since the author extraction doesn't seem to work.
     available_authors = ['Peter Baker', 'Mark Landler', 'Alan Cowell', 'Marina Woo', 'Jessica Smith', 'Hilary Baum']
@@ -152,7 +152,7 @@ def generate():
                         "score":score
                     })
 
-    json.dump(seed, open('manage/data/evaluation/seed.json', 'w'), sort_keys=True, indent=4, separators=(',', ': '))
+    json.dump(seed, open('manage/core/data/evaluation/seed.json', 'w'), sort_keys=True, indent=4, separators=(',', ': '))
     print('Done generating seed data.')
 
 

@@ -40,7 +40,7 @@ class SeedCommand(Command):
         seed()
 
 def seed(debug=False):
-    seeds = open('manage/data/seed.json', 'r')
+    seeds = open('manage/core/data/seed.json', 'r')
 
     sample_images = [
         'https://upload.wikimedia.org/wikipedia/commons/d/d5/Michael_Rogers_-_Herbiers_2004.jpg',
@@ -107,7 +107,7 @@ def seed(debug=False):
 
     # Collect all appropriate files.
     all_files = []
-    for dir, subdir, files in os.walk('manage/data/organized_articles'):
+    for dir, subdir, files in os.walk('manage/core/data/organized_articles'):
         for file in files:
             filepath = os.path.join(dir, file)
             name, ext = os.path.splitext(filepath)
@@ -180,6 +180,6 @@ def seed(debug=False):
 
 
 def create_sources():
-    sources = open('manage/data/seed_sources.json', 'r')
+    sources = open('manage/core/data/seed_sources.json', 'r')
     raw_sources = json.load(sources)
     feed.add_sources(raw_sources)

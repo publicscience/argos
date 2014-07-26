@@ -4,11 +4,9 @@ from argos.core.models.cluster import Clusterable
 from argos.core import brain
 from argos.core import knowledge
 
-from scipy.spatial.distance import jaccard
 from sqlalchemy import event
 from slugify import slugify
 
-from math import isnan
 from collections import Counter
 from datetime import datetime
 
@@ -76,8 +74,8 @@ class Article(Clusterable):
             (bag of words vector, concepts vector)
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
-            bow_vec = brain.vectorize(self.text)
-            ent_vec = brain.vectorize(' '.join([c.slug for c in self.concepts]))
+            bow_vec = brain.vectorize.vectorize(self.text)
+            ent_vec = brain.vectorize.vectorize_concepts(' '.join([c.slug for c in self.concepts]))
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
@@ -127,49 +125,6 @@ class Article(Clusterable):
             assocs.append(assoc)
 
         self.concept_associations = assocs
-
-    def similarity(self, article):
-        """
-        Calculate the similarity between this article
-        and another article.
-        """
-        # Compare the text vectors,
-        # and the concept vectors.
-        v = self.vectorize()
-        v_ = article.vectorize()
-
-        # Linearly combine the similarity values,
-        # weighing them according to these coefficicepts.
-        # [text vector, concept vector, publication date]
-        coefs = [2, 1, 2]
-        sim = 0
-        for i, vec in enumerate(v):
-            dist = jaccard(v_[i], v[i])
-
-            # Two empty vectors returns a jaccard distance of NaN.
-            # Set it to be 1, i.e. consider them completely different
-            # (or, put more clearly, they have nothing in common)
-            # FYI if jaccard runs on empty vectors, it will throw a warning.
-            if isnan(dist):
-                dist = 1
-            s = 1 - dist
-            sim += (coefs[i] * s)
-
-        # Also take publication dates into account.
-        ideal_time = 259200 # 3 days, in seconds
-        t, t_ = self.created_at, article.created_at
-
-        # Subtract the more recent time from the earlier time.
-        time_diff = t - t_ if t > t_ else t_ - t
-        time_diff = time_diff.total_seconds()
-
-        # Score is normalized [0, 1], where 1 is within the ideal time,
-        # and approaches 0 the longer the difference is from the ideal time.
-        time_score = 1 if time_diff < ideal_time else ideal_time/time_diff
-        sim += (coefs[2] * time_score)
-
-        # Normalize back to [0, 1].
-        return sim/sum(coefs)
 
 @event.listens_for(Article, 'before_update')
 def receive_before_update(mapper, connection, target):

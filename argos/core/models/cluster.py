@@ -2,11 +2,12 @@ from argos.datastore import db, Model
 from argos.core.brain.summarize import summarize, multisummarize
 
 from sqlalchemy.ext.declarative import declared_attr
+
 from scipy.spatial.distance import jaccard
+from math import isnan
 
 from datetime import datetime
 from itertools import chain, groupby
-
 
 class Clusterable(Model):
     """
@@ -80,8 +81,58 @@ class Clusterable(Model):
     def vectorize(self):
         raise NotImplementedError
 
-    def similarity(self):
-        raise NotImplementedError
+    def similarity(self, obj):
+        """
+        Calculate the similarity between this
+        clusterable and another clusterable.
+
+        As the `similarity` method on the Clusterable class,
+        this method is intended for comparing similarity across *peers*,
+        that is, other instances of the same class.
+
+        The idea here is that two identical instances should have
+        a similarity of 1.0.
+
+        Assumes that a clusterable's vectors are composed of
+        a text (bag of words) vector and a concepts vector.
+        The construction of these vectors should be implemented in
+        the `vectorize` method.
+        """
+        v = self.vectorize()
+        v_ = obj.vectorize()
+
+        # Linearly combine the similarity values,
+        # weighing them according to these coefficients.
+        # [text vector, concept vector, publication date]
+        coefs = [2, 1, 2]
+        sim = 0
+        for i, vec in enumerate(v):
+            dist = jaccard(v_[i], v[i])
+
+            # Two empty vectors returns a jaccard distance of NaN.
+            # Set it to be 1, i.e. consider them completely different
+            # (or, put more clearly, they have nothing in common)
+            # FYI if jaccard runs on empty vectors, it will throw a warning.
+            if isnan(dist):
+                dist = 1
+            s = 1 - dist
+            sim += (coefs[i] * s)
+
+        # Also take publication dates into account.
+        ideal_time = 259200 # 3 days, in seconds
+        t, t_ = self.created_at, obj.created_at
+
+        # Subtract the more recent time from the earlier time.
+        time_diff = t - t_ if t > t_ else t_ - t
+        time_diff = time_diff.total_seconds()
+
+        # Score is normalized [0, 1], where 1 is within the ideal time,
+        # and approaches 0 the longer the difference is from the ideal time.
+        time_score = 1 if time_diff < ideal_time else ideal_time/time_diff
+        sim += (coefs[2] * time_score)
+
+        # Normalize back to [0, 1].
+        return sim/sum(coefs)
 
 
 class Cluster(Clusterable):
@@ -206,11 +257,11 @@ class Cluster(Clusterable):
         Update the cluster's attributes,
         optionally saving (saves by default).
         """
+        self.updated_at = datetime.utcnow()
+        self.created_at = datetime.utcnow()
         self.titleize()
         self.summarize()
         self.conceptize()
-        self.updated_at = datetime.utcnow()
-        self.created_at = datetime.utcnow()
 
     def add(self, member):
         """
@@ -220,14 +271,24 @@ class Cluster(Clusterable):
 
     def similarity(self, obj):
         """
-        Calculate the similarity of an object with this cluster,
-        or the similarity between another cluster and this cluster.
-        If it is an object, that object must have a `similarity` method implemented.
-        """
-        sims = [obj.similarity(member) for member in self.members]
+        Because a Cluster is both a Clusterable and can have members,
+        this similarity method will use the *peer* similarity method
+        as defined in the Clusterable class if `obj` is an instance of the same class.
+        In this case, the similarity should be 1.0 if the clusters are identical in composition;
+        that is, they each have the same set of members. The members do not need to all be identical.
 
-        # Calculate average similarity.
-        return sum(sims)/len(sims)
+        Otherwise, it will treat obj as a potential member (i.e. a child)
+        and handle similarity accordingly. In this case, `obj` must have a `similarity`
+        method implemented. In this case, the similarity should be 1.0 if the candidate member (`obj`)
+        is identical to *each* member of the Cluster (that is, all members are also identical to each other).
+        """
+        if self.__class__ == obj.__class__:
+            return super().similarity(obj)
+        else:
+            sims = [obj.similarity(member) for member in self.members]
+
+            # Calculate average similarity.
+            return sum(sims)/len(sims)
 
     def timespan(self, start, end=None):
         """

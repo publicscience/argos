@@ -1,8 +1,9 @@
 from argos.datastore import db
 from argos.core.models.cluster import Cluster
 from argos.core.models.concept import BaseConceptAssociation
+from argos.core import brain
+from argos.core.brain import summarize
 from argos.core.brain.cluster import cluster
-from argos.core.brain import summarize, sentences
 
 from argos.util.logger import logger
 
@@ -57,7 +58,7 @@ class Event(Cluster):
         Breaks up a summary back into its
         original sentences (as a list).
         """
-        return sentences(self.summary)
+        return brain.vectorize.sentences(self.summary)
 
     @property
     def score(self):
@@ -90,6 +91,35 @@ class Event(Cluster):
         sign = 1 if score > 0 else -1 if score < 0 else 0
         seconds = epoch_seconds - 1134028003
         return round(order + sign * seconds / 45000, 7)
+
+    def vectorize(self):
+        """
+        Returns a tuple of vectors representing this event.
+
+        Events are represented by:
+            (bag of words vector, concepts vector)
+        """
+        if not hasattr(self, 'vectors') or self.vectors is None:
+            text, concepts = self._assemble_from_articles()
+            bow_vec = brain.vectorize.vectorize(text)
+            ent_vec = brain.vectorize.vectorize_concepts(concepts)
+            self.vectors = [bow_vec, ent_vec]
+        return self.vectors
+
+    def _assemble_from_articles(self):
+        """
+        Builds a 'super article' out of this
+        event's articles, which is used to build
+        the vector representation of the event.
+        """
+        texts = []
+        concepts = []
+        for a in self.articles:
+            texts.append(' '.join([a.title, a.text]))
+            concepts.append(' '.join([c.slug for c in a.concepts]))
+        super_text = ' '.join(texts)
+        super_concepts = ' '.join(concepts)
+        return super_text, super_concepts
 
     def summarize(self):
         """

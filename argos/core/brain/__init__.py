@@ -6,103 +6,19 @@ Provides text processing
 and "intelligence" faculties.
 """
 
-# Python 2.7 support.
-import sys
-if sys.version_info <= (3,0):
-    # Point to Py2.7 NLTK data.
-    import nltk, os
-    nltk.data.path = [os.path.abspath('mapreduce/nltk_data/')]
-
-# Python 2.7 support.
-try:
-    from html.parser import HTMLParser
-except ImportError:
-    from HTMLParser import HTMLParser
-
-from sklearn.feature_extraction.text import HashingVectorizer, TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.corpus import stopwords
-
-import ner
-import string
 import json
+import string
 from collections import Counter
 from urllib import request, error
 from urllib.parse import urlencode
+from html.parser import HTMLParser
+
+import ner
 
 from argos.conf import APP
 
 from argos.util.logger import logger
 logger = logger(__name__)
-
-def tokenize(doc, **kwargs):
-    """
-    Tokenizes a document, using a lemmatizer.
-
-    Args:
-        | doc (str)                 -- the text document to process.
-
-    Returns:
-        | list                      -- the list of tokens.
-    """
-
-    tokens = []
-    lemmr = kwargs.get('lemmr', WordNetLemmatizer())
-    stops = set(list(string.punctuation) + stopwords.words('english'))
-
-    # Tokenize
-    for sentence in sent_tokenize(doc):
-        for token in word_tokenize(sentence):
-
-            # Ignore punctuation and stopwords
-            if token in stops:
-                continue
-
-            # Lemmatize
-            lemma = lemmr.lemmatize(token.lower())
-            tokens.append(lemma)
-    return tokens
-
-
-def sentences(doc):
-    """
-    Extracts sentences from a document.
-    """
-    return sent_tokenize(doc)
-
-
-class Tokenizer():
-    """
-    Custom tokenizer for vectorization.
-    Uses Lemmatization.
-    """
-    def __init__(self):
-        self.lemmr = WordNetLemmatizer()
-    def __call__(self, doc):
-        return tokenize(doc, lemmr=self.lemmr)
-
-
-def vectorize(docs):
-    """
-    Vectorizes a list of documents.
-
-    Args:
-        | docs (list)       -- the documents to vectorize.
-        | docs (str)        -- a single document to vectorize.
-
-    Returns:
-        | scipy sparse matrix (CSR/Compressed Sparse Row format)
-    """
-    h = HashingVectorizer(input='content', stop_words='english', norm=None, tokenizer=Tokenizer())
-
-    if type(docs) is str:
-        # Extract and return the vector for the single document.
-        return h.transform([docs]).toarray()[0]
-    else:
-        return h.transform(docs)
-
 
 def concepts(docs, strategy='stanford'):
     """
@@ -116,7 +32,7 @@ def concepts(docs, strategy='stanford'):
     Args:
         | docs (list)       -- the documents to process.
         | doc (str)         -- the document to process.
-        | strategy (str)    -- the strategy to use, default is `stanford`. can be `stanford`, `nltk`, or `spotlight`.
+        | strategy (str)    -- the strategy to use, default is `stanford`. can be `stanford` or `spotlight`.
 
     Returns:
         | list              -- list of all entity mentions
@@ -224,22 +140,8 @@ def concepts(docs, strategy='stanford'):
                 entities = json.loads(content.decode('utf-8'))['Resources']
                 return [entity['@surfaceForm'] for entity in entities]
 
-    elif strategy == 'nltk':
-        names = []
-        from nltk.tag import pos_tag
-        from nltk.chunk import batch_ne_chunk
-        for doc in docs:
-            sentences = sent_tokenize(doc)
-            tokenized_sentences = [word_tokenize(sent) for sent in sentences]
-            tagged = [pos_tag(sent) for sent in tokenized_sentences]
-            chunked = batch_ne_chunk(tagged, binary=True) # binary=False will tag entities as ORGANIZATION, etc.
-
-            for tree in chunked:
-                names.extend(_extract_entities(tree))
-        entities = [strip(name) for name in names]
-
     else:
-        raise Exception('Unknown strategy specified. Please use either `stanford`, `nltk`, or `spotlight`.')
+        raise Exception('Unknown strategy specified. Please use either `stanford` or `spotlight`.')
 
     return entities
 
@@ -300,14 +202,3 @@ class Sanitizer(HTMLParser):
         self.fed.append(d)
     def get_data(self):
         return ''.join(self.fed)
-
-
-def _extract_entities(tree):
-    entities = []
-    if hasattr(tree, 'node') and tree.node:
-        if tree.node == 'NE':
-            entities.append(' '.join([child[0] for child in tree]))
-        else:
-            for child in tree:
-                entities.extend(_extract_entities(child))
-    return entities

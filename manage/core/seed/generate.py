@@ -10,7 +10,7 @@ def generate(num=50):
     articles = json.load(dump)
 
     # Load seed sources.
-    srcs = json.load(open('manage/data/seed_sources.json', 'r'))
+    srcs = json.load(open('manage/core/data/seed_sources.json', 'r'))
     srcs_urls = [src[1] for src in srcs]
 
     # Filter down to articles from the specified sources.
@@ -20,5 +20,5 @@ def generate(num=50):
     a = filtered[:num]
 
     # Dump the results to another json.
-    new_dump = open('manage/data/seed.json', 'w')
+    new_dump = open('manage/core/data/seed.json', 'w')
     json.dump(a, new_dump)

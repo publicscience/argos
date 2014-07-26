@@ -14,7 +14,7 @@ class CreateSourcesCommand(Command):
     def run(self):
         create_sources()
 
-def create_sources(filepath='manage/data/sources.json'):
+def create_sources(filepath='manage/core/data/sources.json'):
     """
     Load feeds from a JSON file.
     It should consist of an array of arrays like so::
