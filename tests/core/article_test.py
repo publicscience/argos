@@ -60,7 +60,7 @@ class ArticleTest(RequiresDatabase):
         # Mock things so we extract one concept with the same URI
         # as the one we just created.
         self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
-        self.create_patch('argos.core.brain.concepts', return_value=['An concept'])
+        self.create_patch('argos.core.brain.conceptor.concepts', return_value=['An concept'])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)
@@ -81,7 +81,7 @@ class ArticleTest(RequiresDatabase):
         # Mock things so we extract one concept with the same URI
         # as the one we just created.
         self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
-        self.create_patch('argos.core.brain.concepts', return_value=[concept.aliases[0].name])
+        self.create_patch('argos.core.brain.conceptor.concepts', return_value=[concept.aliases[0].name])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)
@@ -98,7 +98,7 @@ class ArticleTest(RequiresDatabase):
 
         # Mock things so two concepts are returned, but since they share the same uri, they point to the same concept.
         self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
-        self.create_patch('argos.core.brain.concepts', return_value=['Concept alias one', 'Concept alias two'])
+        self.create_patch('argos.core.brain.conceptor.concepts', return_value=['Concept alias one', 'Concept alias two'])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)
@@ -127,7 +127,7 @@ class ArticleTest(RequiresDatabase):
         mock_func.side_effect = mock_uri_for_name
 
         # One concept appears 3 times, the other only once.
-        self.create_patch('argos.core.brain.concepts', return_value=['some concept', 'another concept', 'some concept', 'some concept'])
+        self.create_patch('argos.core.brain.conceptor.concepts', return_value=['some concept', 'another concept', 'some concept', 'some concept'])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)

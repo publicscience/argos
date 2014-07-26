@@ -7,7 +7,6 @@ for articles.
 """
 
 from argos.core.models import Author
-from argos.core.brain import concepts
 from argos.util import storage
 
 from http.client import IncompleteRead
@@ -60,13 +59,6 @@ def extract_tags(entry, known_tags=None):
         tags += [tag['term'] for tag in entry['tags']]
 
     return list(set(tags))
-
-    # DISABLING FOR NOW. Easier to run through all entries and add
-    # these concepts later.
-    # Otherwise, try to extract some.
-    #else:
-        #sample = entry['fulltext']
-        #return concepts(sample)
 
 def extract_image(entry_data, filename):
     """

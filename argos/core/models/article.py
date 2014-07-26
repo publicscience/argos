@@ -74,8 +74,8 @@ class Article(Clusterable):
             (bag of words vector, concepts vector)
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
-            bow_vec = brain.vectorize.vectorize(self.text)
-            ent_vec = brain.vectorize.vectorize_concepts(' '.join([c.slug for c in self.concepts]))
+            bow_vec = brain.vectorizer.vectorize(self.text)
+            ent_vec = brain.conceptor.vectorize(' '.join([c.slug for c in self.concepts]))
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
@@ -85,7 +85,7 @@ class Article(Clusterable):
         and add the appropriate mentions.
         """
         concepts = []
-        for c_name in brain.concepts(self.text):
+        for c_name in brain.conceptor.concepts(self.text):
             # Search for the concept.
             uri = knowledge.uri_for_name(c_name)
 

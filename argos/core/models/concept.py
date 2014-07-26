@@ -238,7 +238,7 @@ class Concept(Model):
         and add the appropriate mentions.
         """
         concepts = []
-        for c_name in brain.concepts(self.summary):
+        for c_name in brain.conceptor.concepts(self.summary):
             # Search for the concept.
             uri = knowledge.uri_for_name(c_name)
 

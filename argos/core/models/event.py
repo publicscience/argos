@@ -2,7 +2,7 @@ from argos.datastore import db
 from argos.core.models.cluster import Cluster
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core import brain
-from argos.core.brain import summarize
+from argos.core.brain import summarizer
 from argos.core.brain.cluster import cluster
 
 from argos.util.logger import logger
@@ -58,7 +58,7 @@ class Event(Cluster):
         Breaks up a summary back into its
         original sentences (as a list).
         """
-        return brain.vectorize.sentences(self.summary)
+        return brain.sentences(self.summary)
 
     @property
     def score(self):
@@ -101,8 +101,8 @@ class Event(Cluster):
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
             text, concepts = self._assemble_from_articles()
-            bow_vec = brain.vectorize.vectorize(text)
-            ent_vec = brain.vectorize.vectorize_concepts(concepts)
+            bow_vec = brain.vectorizer.vectorize(text)
+            ent_vec = brain.conceptor.vectorize(concepts)
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
@@ -127,9 +127,9 @@ class Event(Cluster):
         """
         if self.members.count() == 1:
             member = self.members[0]
-            self.summary = ' '.join(summarize.summarize(member.title, member.text))
+            self.summary = ' '.join(summarizer.summarize(member.title, member.text))
         else:
-            self.summary = ' '.join(summarize.multisummarize([m.text for m in self.members]))
+            self.summary = ' '.join(summarizer.multisummarize([m.text for m in self.members]))
         return self.summary
 
     @staticmethod

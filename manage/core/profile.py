@@ -10,8 +10,8 @@ import cProfile, pstats
 
 from argos.datastore import db
 
-from argos.core.brain import vectorize
-from argos.core.brain.summarize import summarize, multisummarize
+from argos.core.brain import vectorizer
+from argos.core.brain.summarizer import summarize, multisummarize
 from argos.core.models import Article, Event
 
 from flask.ext.script import Command
@@ -26,18 +26,18 @@ class ProfileCommand(Command):
         profile()
 
 def profile_vectorize():
-    print('argos.core.brain.vectorize')
+    print('argos.core.brain.vectorizer.vectorize')
     doc = open('tests/data/multidoc/1.txt', 'r').read()
-    profile_cmd('v(d)', None, {'v': vectorize, 'd': doc})
+    profile_cmd('v(d)', None, {'v': vectorizer.vectorize, 'd': doc})
 
 def profile_summarize():
-    print('argos.core.brain.summarize.summarize')
+    print('argos.core.brain.summarizer.summarize')
     doc = open('tests/data/multidoc/1.txt', 'r').read()
     title = 'This is a title'
     profile_cmd('s(t, d)', None, {'s': summarize, 't': title, 'd': doc})
 
 def profile_multisummarize():
-    print('argos.core.brain.summarize.multisummarize')
+    print('argos.core.brain.summarizer.multisummarize')
     docs = [open('tests/data/multidoc/{0}.txt'.format(i), 'r').read() for i in range(1,4)]
     profile_cmd('s(d)', None, {'s': multisummarize, 'd': docs})
 

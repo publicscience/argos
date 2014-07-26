@@ -182,10 +182,10 @@ class EventTest(RequiresDatabase):
         # Check to see that we can break up the summary
         # back into its original sentences.
 
-        from argos.core.brain import summarize
+        from argos.core.brain import summarizer
         title = 'Syria Misses New Deadline as It Works to Purge Arms'
         text = 'Syria missed a revised deadline on Sunday for completing the export or destruction of chemicals in its weapons arsenal, but the government of the war-ravaged country may be only days away from finishing the job, according to international experts overseeing the process. The Syrian government had agreed to complete the export or destruction of about 1,200 tons of chemical agents by April 27 after missing a February deadline, but by Sunday, it had shipped out or destroyed 92.5 percent of the arsenal, said Sigrid Kaag, the coordinator of the joint mission by the United Nations and the watchdog agency the Organization for the Prohibition of Chemical Weapons.'
-        expected_sents = summarize.summarize(title, text)
+        expected_sents = summarizer.summarize(title, text)
         article = Article(
                         title=title,
                         text=text,

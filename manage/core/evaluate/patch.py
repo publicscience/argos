@@ -21,8 +21,8 @@ def patch_external():
 
 def start_patches():
     patches = [
-            patch('argos.core.brain.summarize.summarize', autospec=True, return_value=['foo']),
-            patch('argos.core.brain.summarize.multisummarize', autospec=True, return_value=['foo'])
+            patch('argos.core.brain.summarizer.summarize', autospec=True, return_value=['foo']),
+            patch('argos.core.brain.summarizer.multisummarize', autospec=True, return_value=['foo'])
     ]
     for p in patches:
         p.start()

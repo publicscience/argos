@@ -5,7 +5,8 @@ Summarize
 Summarizes documents.
 """
 
-from argos.core.brain.vectorize import tokenize, sentences, stopwords, vectorize
+from argos.core.brain import sentences
+from argos.core.brain.vectorizer import tokenize, stopwords, vectorize
 
 from re import sub
 from math import fabs

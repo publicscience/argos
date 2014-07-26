@@ -8,7 +8,7 @@ Handles vectorizing of documents.
 import os, pickle
 import string
 
-from sklearn.feature_extraction.text import HashingVectorizer, TfidfTransformer, CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import TruncatedSVD
 from sklearn.preprocessing import Normalizer
@@ -52,7 +52,6 @@ def train(docs):
     since they don't convey much information.
     """
     pipeline = Pipeline([
-        #('vectorizer', HashingVectorizer(input='content', stop_words='english', norm=None, lowercase=True, tokenizer=Tokenizer())),
         ('vectorizer', CountVectorizer(input='content', stop_words='english', lowercase=True, tokenizer=Tokenizer(), min_df=0.015, max_df=0.9)),
         ('tfidf', TfidfTransformer(norm=None, use_idf=True, smooth_idf=True)),
         ('feature_reducer', TruncatedSVD(n_components=100)),
@@ -96,14 +95,6 @@ def tokenize(doc, **kwargs):
             tokens.append(lemma)
     return tokens
 
-
-def sentences(doc):
-    """
-    Extracts sentences from a document.
-    """
-    return sent_tokenize(doc)
-
-
 def vectorize(docs):
     """
     Vectorizes a list of documents using
@@ -125,16 +116,3 @@ def vectorize(docs):
     else:
         return PIPELINE.transform(docs)
 
-def vectorize_concepts(concepts):
-    """
-    This vectorizes a list or a string of concepts;
-    the regular `vectorize` method is meant to vectorize text documents;
-    it is trained for that kind of data and thus is inappropriate for concepts.
-    So instead we just use a simple hashing vectorizer.
-    """
-    h = HashingVectorizer(input='content', stop_words='english', norm=None, tokenizer=Tokenizer())
-    if type(concepts) is str:
-        # Extract and return the vector for the single document.
-        return h.transform([concepts]).toarray()[0]
-    else:
-        return h.transform(concepts)

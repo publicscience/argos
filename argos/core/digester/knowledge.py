@@ -114,7 +114,7 @@ def digest(force=False):
     using Apache Jena's `tdbloader2`.
 
     This digested data can then be interfaced via
-    Apache Jena's Fuseki server (see `argos.core.brain.knowledge`).
+    Apache Jena's Fuseki server (see `argos.core.knowledge`).
 
     Note: `tdbloader2` only runs properly on Unix systems.
     """

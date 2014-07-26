@@ -8,14 +8,14 @@ import argos.core.brain as brain
 class BrainTest(RequiresMocks):
     def test_tokenize(self):
         data = "hey there buddy, hey Says, say"
-        tokens = brain.vectorize.tokenize(data)
+        tokens = brain.vectorizer.tokenize(data)
         expected = ['hey', 'buddy', 'hey', 'say', 'say']
         self.assertEqual(tokens,expected)
 
     def test_concept_recognition_stanford(self):
         with open('tests/data/sample.txt', 'r') as f:
             sample = f.read()
-        results = brain.concepts(sample, strategy='stanford')
+        results = brain.conceptor.concepts(sample, strategy='stanford')
 
         expected = [
             'Second Red Scare',
@@ -86,7 +86,7 @@ class BrainTest(RequiresMocks):
         mock_response.read.return_value = data
         self.create_patch('urllib.request.urlopen', return_value=mock_response)
 
-        results = brain.concepts('Brazilian state-run giant oil company Petrobras signed a three-year technology and research cooperation agreement with oil service provider Halliburton.', strategy='spotlight')
+        results = brain.conceptor.concepts('Brazilian state-run giant oil company Petrobras signed a three-year technology and research cooperation agreement with oil service provider Halliburton.', strategy='spotlight')
 
         expected = [
             'Brazilian',

@@ -1,5 +1,5 @@
 from argos.datastore import db, Model
-from argos.core.brain.summarize import summarize, multisummarize
+from argos.core.brain.summarizer import summarize, multisummarize
 
 from sqlalchemy.ext.declarative import declared_attr
 

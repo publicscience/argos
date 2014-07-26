@@ -22,4 +22,4 @@ def train(filepath):
     training_data = json.load(training_file)
 
     docs = ['{0} {1}'.format(d['title'], d['text']) for d in training_data]
-    brain.vectorize.train(docs)
+    brain.vectorizer.train(docs)
