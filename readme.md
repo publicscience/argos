@@ -14,7 +14,7 @@ designed specifically for that purpose.*
 *Note: Argos requires some training data, which can be collected using
 the [argos.corpora](https://github.com/publicscience/argos.corpora) project.
 This project also can collect testing/evaluation data for assessing the
-quality of Argos' clustering.
+quality of Argos' clustering.*
 
 ## Setup
 The setup process for Argos is fairly complex, but some scripts vastly simplify it.
