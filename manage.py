@@ -25,14 +25,22 @@ if __name__ == '__main__':
         print(request.headers)
 
     manager = Manager(app)
+
+    # Web
     manager.add_command('create:client', web.CreateClientCommand())
     manager.add_command('create:admin', web.CreateAdminCommand())
+
+    # Core
     manager.add_command('create:sources', core.CreateSourcesCommand())
-    manager.add_command('profile', core.ProfileCommand())
-    manager.add_command('evaluate', core.EvaluateCommand())
     manager.add_command('seed', core.SeedCommand())
     manager.add_command('recluster', core.ReclusterCommand())
     manager.add_command('train', core.TrainVectorizerCommand())
+    
+    # Evaluation
+    manager.add_command('profile', core.ProfileCommand())
+    manager.add_command('evaluate', core.EvaluateCommand())
+
+    # Misc
     manager.add_command('db', MigrateCommand)
     manager.add_command('shell', Shell())
     manager.add_command('server', Server(host='0.0.0.0'))

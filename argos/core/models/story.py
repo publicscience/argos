@@ -1,4 +1,4 @@
-from argos.datastore import db
+from argos.datastore import db, join_table
 from argos.core.models import Concept, Event
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
@@ -10,15 +10,8 @@ import itertools
 
 from argos.util.logger import logger
 
-stories_events = db.Table('stories_events',
-        db.Column('story_id', db.Integer, db.ForeignKey('story.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True),
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-)
-
-stories_mentions = db.Table('stories_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
-        db.Column('story_id', db.Integer, db.ForeignKey('story.id', ondelete='CASCADE', onupdate='CASCADE'))
-)
+stories_events = join_table('stories_events', 'story', 'event')
+stories_mentions = join_table('stories_mentions', 'story', 'alias')
 
 class StoryConceptAssociation(BaseConceptAssociation):
     __backref__     = 'story_associations'
@@ -109,6 +102,8 @@ class Story(Cluster):
         for story in Story.query.filter(~Story.members.any()).all():
             db.session.delete(story)
         db.session.commit()
+
+        # Re-do the clustering.
         Story.cluster(events, threshold=threshold, debug=debug)
 
     @staticmethod
@@ -135,7 +130,7 @@ class Story(Cluster):
 
         for event in events:
             # Find stories which have some matching concepts with this event.
-            candidate_clusters = Story.query.filter(Concept.slug.in_([concept.slug for concept in event.concepts])).all()
+            candidate_clusters = Story.query.filter(Concept.slug.in_(event.concept_slugs)).all()
 
             # Cluster this event.
             selected_cluster = cluster(event, candidate_clusters, threshold=threshold, logger=log)

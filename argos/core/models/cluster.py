@@ -62,6 +62,10 @@ class Clusterable(Model):
             return assoc.concept
         return list(map(with_score, self.concept_associations))
 
+    @property
+    def concept_slugs(self):
+        return [c.slug for c in self.concepts]
+
     @declared_attr
     def mentions(cls):
         """

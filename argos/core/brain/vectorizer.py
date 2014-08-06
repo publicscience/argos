@@ -63,6 +63,7 @@ def train(docs):
 
     PIPELINE = pipeline
 
+    logger.info('Serializing pipeline to {0}'.format(PIPELINE_PATH))
     pipeline_file = open(PIPELINE_PATH, 'wb')
     pickle.dump(pipeline, pipeline_file)
     logger.info('Training complete.')

@@ -1,4 +1,4 @@
-from argos.datastore import db
+from argos.datastore import db, join_table
 from argos.core.models.cluster import Cluster
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core import brain
@@ -11,15 +11,8 @@ from datetime import datetime
 from math import log
 from sqlalchemy import event, inspect
 
-events_articles = db.Table('events_articles',
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-)
-
-events_mentions = db.Table('events_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id', ondelete='CASCADE', onupdate='CASCADE'))
-)
+events_articles = join_table('events_articles', 'event', 'article')
+events_mentions = join_table('events_mentions', 'event', 'alias')
 
 class EventConceptAssociation(BaseConceptAssociation):
     __backref__     = 'event_associations'
@@ -100,13 +93,13 @@ class Event(Cluster):
             (bag of words vector, concepts vector)
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
-            text, concepts = self._assemble_from_articles()
+            text, concepts = self._article_aggregate()
             bow_vec = brain.vectorizer.vectorize(text)
             ent_vec = brain.conceptor.vectorize(concepts)
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
-    def _assemble_from_articles(self):
+    def _article_aggregate(self):
         """
         Builds a 'super article' out of this
         event's articles, which is used to build
@@ -116,7 +109,7 @@ class Event(Cluster):
         concepts = []
         for a in self.articles:
             texts.append(' '.join([a.title, a.text]))
-            concepts.append(' '.join([c.slug for c in a.concepts]))
+            concepts.append(' '.join(a.concept_slugs))
         super_text = ' '.join(texts)
         super_concepts = ' '.join(concepts)
         return super_text, super_concepts
@@ -147,6 +140,8 @@ class Event(Cluster):
         for event in Event.query.filter(~Event.members.any()).all():
             db.session.delete(event)
         db.session.commit()
+
+        # Re-do the clustering.
         Event.cluster(articles, threshold=threshold, debug=debug)
 
     @staticmethod
@@ -172,10 +167,10 @@ class Event(Cluster):
         for article in articles:
             # Select candidate clusters,
             # i.e. active clusters which share at least one concept with this article.
-            a_cons = [concept.slug for concept in article.concepts]
+            a_cons = article.concept_slugs
             candidate_clusters = []
             for c in active_clusters:
-                c_cons = [concept.slug for concept in c.concepts]
+                c_cons = c.concept_slugs
                 if set(c_cons).intersection(a_cons):
                     candidate_clusters.append(c)
 

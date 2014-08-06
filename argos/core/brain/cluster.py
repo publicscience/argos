@@ -5,6 +5,10 @@ Cluster
 Clusters text documents.
 """
 
+from collections import namedtuple
+
+Score = namedtuple('Score', ['cluster', 'avg_sim'])
+
 def cluster(obj, clusters, threshold=0.7, logger=None):
     """
     A generic clustering function.
@@ -35,35 +39,37 @@ def cluster(obj, clusters, threshold=0.7, logger=None):
 
     # Keep tracking of qualifying clusters
     # and their avg sim with this obj.
-    # [(cluster, avg_sim),...]
-    qualifying_clusters = []
-    selected_cluster = None
+    qual_scores = []
+
+    # The selected cluster
+    # to return.
+    sel_clus = None
 
     # Compare the obj with the candidate clusters.
-    for cluster in clusters:
-        avg_sim = cluster.similarity(obj)
+    for clus in clusters:
+        avg_sim = clus.similarity(obj)
         if logger: logger.debug('Average similarity was {0}.'.format(avg_sim))
         if avg_sim > threshold:
-            qualifying_clusters.append((cluster, avg_sim))
+            qual_scores.append( Score(clus, avg_sim) )
 
-    num_qualified = len(qualifying_clusters)
-    if logger: logger.debug('Found {0} qualifying clusters.'.format(num_qualified))
+    num_qual = len(qual_scores)
+    if logger: logger.debug('Found {0} qualifying clusters.'.format(num_qual))
 
-    if num_qualified == 1:
+    if num_qual == 1:
         # Grab the only cluster and add the obj.
         if logger: logger.debug('Only one qualifying cluster, adding {0} to it.'.format(name))
-        selected_cluster = qualifying_clusters[0][0]
+        sel_clus = qual_scores[0].cluster
 
-    elif num_qualified > 1:
+    elif num_qual > 1:
         # Get the most similar cluster and add the obj.
         if logger: logger.debug('Multiple qualifying clusters found, adding {0} to the most similar one.'.format(name))
-        max_cluster = (None, 0)
-        for cluster in qualifying_clusters:
-            if cluster[1] > max_cluster[1]:
-                max_cluster = cluster
-        selected_cluster = max_cluster[0]
+        max_score = Score(None, 0)
+        for score in qual_scores:
+            if score.avg_sim > max_score.avg_sim:
+                max_score = score
+        sel_clus = max_score.cluster
 
-    if selected_cluster:
-        selected_cluster.add(obj)
+    if sel_clus:
+        sel_clus.add(obj)
 
-    return selected_cluster
+    return sel_clus

@@ -1,4 +1,4 @@
-from argos.datastore import db
+from argos.datastore import db, join_table
 from argos.core.models.concept import Concept, Alias, BaseConceptAssociation
 from argos.core.models.cluster import Clusterable
 from argos.core import brain
@@ -16,15 +16,8 @@ from datetime import datetime
 import numpy
 numpy.seterr(invalid='ignore')
 
-articles_authors = db.Table('authors',
-        db.Column('author_id', db.Integer, db.ForeignKey('author.id', ondelete='CASCADE', onupdate='CASCADE')),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'))
-)
-
-articles_mentions = db.Table('articles_mentions',
-        db.Column('alias_id', db.Integer, db.ForeignKey('alias.id', ondelete='CASCADE', onupdate='CASCADE')),
-        db.Column('article_id', db.Integer, db.ForeignKey('article.id', ondelete='CASCADE', onupdate='CASCADE'))
-)
+articles_authors = join_table('articles_authors', 'article', 'author')
+articles_mentions = join_table('articles_mentions', 'article', 'alias')
 
 class ArticleConceptAssociation(BaseConceptAssociation):
     __backref__ = 'article_associations'
