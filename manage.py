@@ -10,7 +10,7 @@ from flask import request
 
 if __name__ == '__main__':
     # Get the command to determine the app config.
-    if sys.argv[1] == 'evaluate':
+    if 'evaluate' in sys.argv[1]:
         config = {
                 'SQLALCHEMY_DATABASE_URI': 'postgresql://argos_user:password@localhost:5432/argos_eval'
         }
@@ -38,7 +38,8 @@ if __name__ == '__main__':
     
     # Evaluation
     manager.add_command('profile', core.ProfileCommand())
-    manager.add_command('evaluate', core.EvaluateCommand())
+    manager.add_command('evaluate:event', core.EvaluateEventCommand())
+    manager.add_command('evaluate:story', core.EvaluateStoryCommand())
 
     # Misc
     manager.add_command('db', MigrateCommand)

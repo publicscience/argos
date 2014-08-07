@@ -95,7 +95,9 @@ class Article(Clusterable):
                 if not alias:
                     alias = Alias(c_name)
                     c.aliases.append(alias)
-                self.mentions.append(alias)
+                # Avoid duplicate aliases.
+                if alias not in self.mentions:
+                    self.mentions.append(alias)
 
             # If one doesn't exist, create a new one.
             if not c:

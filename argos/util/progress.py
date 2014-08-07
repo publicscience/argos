@@ -13,3 +13,6 @@ def progress_bar(percent):
         sys.stdout.write('=')
         sys.stdout.flush()
     sys.stdout.write('\b' * (width+10))
+
+    if percent == 100:
+        print('\n')

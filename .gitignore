@@ -13,3 +13,4 @@ config.py
 .webassets-cache
 bower/
 index.css
+reports/

@@ -1,251 +1,399 @@
 """
-Clustering
-==========
-Evaluate article=>event
-and event=>story clustering.
+Clustering evaluation
+=====================
+
 """
 
 from argos.datastore import db
 from argos.core.models import Article, Event, Story
+from argos.core.models.cluster import Clusterable
 from argos.util.progress import progress_bar
 
-import json
+from manage.core.evaluate.patch import start_patches, stop_patches, patch_external
+from manage.core.evaluate.report import build_report
+
 import numpy
+from sklearn import metrics
+from dateutil.parser import parse
+
+import os
+import json
+import webbrowser
 import inspect, importlib
 from datetime import datetime
 from contextlib import contextmanager
-from colorama import Fore
+from collections import namedtuple
 
-from manage.core.evaluate.patch import start_patches, stop_patches
-from manage.core.evaluate.report import build_report
-
-def evaluate_events(step, min_threshold, max_threshold):
-    """
-    Evaluate the event clustering algorithm.
-    """
-
-    # Load the annotated data.
-    print('Assembling expected article clusters...')
-    expected_events = {}
-    seed = json.load(open('manage/core/data/evaluation/seed.json'))
-    for source_name, source_data in seed['sources'].items():
-        for feed_url, raw_articles in source_data['feeds'].items():
-            for article_data in raw_articles:
-                article = Article.query.filter_by(ext_url=article_data['ext_url']).first()
-                event_id = article_data['event']
-
-                # Create the list for this event,
-                # if it doesn't already exist.
-                if not expected_events.get(event_id, False):
-                    expected_events[event_id] = []
-
-                # Keep track of which articles are
-                # supposed to be clustered together.
-                expected_events[event_id].append(article)
-    print('\nExpecting {0}{1}{2} events.'.format(Fore.RED, len(expected_events), Fore.RESET))
-
-    e = Evaluator(Event, Article, expected_events, step, min_threshold, max_threshold)
-    e.evaluate()
-
-def evaluate_stories(step, min_threshold, max_threshold):
-    """
-    Evaluate the story clustering algorithm.
-    """
-
-    # Load the annotated data and create "perfect" article clusters.
-    print('Assembling expected article clusters ("perfect" events)...')
-    expected_events = {}
-    expected_stories = {}
-    seed = json.load(open('manage/core/data/evaluation/seed.json'))
-    for source_name, source_data in seed['sources'].items():
-        for feed_url, raw_articles in source_data['feeds'].items():
-            for article_data in raw_articles:
-                article = Article.query.filter_by(ext_url=article_data['ext_url']).first()
-                event_id = article_data['event']
-
-                # Create the list for this event,
-                # if it doesn't already exist.
-                if not expected_events.get(event_id, False):
-                    expected_events[event_id] = []
-
-                # Keep track of which articles are
-                # supposed to be clustered together.
-                expected_events[event_id].append(article)
-
-    total_events = len(expected_events)
-    completed_events = 0
-    for story_name, events in seed['stories'].items():
-
-        # Create the list for this story,
-        # if it doesn't already exist.
-        if not expected_stories.get(story_name, False):
-            expected_stories[story_name] = []
-
-        progress_bar(completed_events/total_events * 100)
-
-        for event_id, event_title in events.items():
-            # Create an event out of the annotated members.
-            event = Event(expected_events[int(event_id)])
-
-            # Manually set the titles for easier referencing.
-            event.title = '[{0}{1}{2}] {3}'.format(Fore.BLUE, story_name.upper(), Fore.RESET, event_title)
-
-            db.session.add(event)
-
-            # Progress bar, for sanity.
-            completed_events += 1
-            progress_bar(completed_events/total_events * 100)
-
-            # Keep track of which story this event is
-            # supposed to belong to.
-            expected_stories[story_name].append(event)
-    db.session.commit()
-    print('\nExpecting {0}{1}{2} stories.'.format(Fore.RED, len(expected_stories), Fore.RESET))
-
-    e = Evaluator(Story, Event, expected_stories, step, min_threshold, max_threshold)
-    e.evaluate()
 
 class Evaluator():
-    def __init__(self, cluster_cls, clusterable_cls, expected_clusters, step, min_threshold, max_threshold):
-        self.cluster_cls = cluster_cls
-        self.cluster_name = cluster_cls.__name__
-        self.clusterable_cls = clusterable_cls
-        self.clusterable_name = clusterable_cls.__name__
-        self.expected_clusters = expected_clusters
-        self.step = step
-        self.min_threshold = min_threshold
-        self.max_threshold = max_threshold
+    Label = namedtuple('Label', ['clusterable', 'label'])
+    Result = namedtuple('Result', ['composition', 'score'])
 
-    def evaluate(self):
-        clean()
+    def __init__(self, datapath):
+        self.datapath = os.path.expanduser(datapath)
+        self.clusterables, self.labels_true, self.expected_clusters = self._load_data()
+
+        self.default_search_grid = {
+            # Similarity thresholds
+            'threshold': [val for val in numpy.linspace(
+                    0.0,
+                    1.0,
+                    10.0
+                )],
+
+            # Similarity strategies (funcs)
+            'strategy': self.strategies()
+        }
+
+    def evaluate(self, params_grid=None):
+        """
+        Run the evaluation over the grid search parameters.
+        """
+        print('Running clustering...')
+
+        self._reset()
+        if params_grid is None: params_grid = self.default_search_grid
+
+        # For the progress bar.
+        total_combos = 1
+        completed_combos = 0
+        for vals in params_grid.values():
+            total_combos *= len(vals)
+        progress_bar(completed_combos/total_combos * 100)
 
         # Patch things that are time-consuming,
         # but which aren't being evaluated here.
         # In particular, summarization is *REALLY* slow,
         # and not being looked at here, so it's patched out.
         patches = start_patches()
+        patches_external = patch_external()
 
-        # Load in all alternative strategies,
-        # which are methods with 'similarity' in
-        # their name.
-        strategies_module = importlib.import_module('manage.evaluate.strategies.' + self.cluster_name.lower())
-        strategies = [f for f in inspect.getmembers(strategies_module, inspect.isfunction) if 'similarity' in f[0]]
-        print('Using {0} different similarity strategies.'.format(len(strategies) + 1)) # +1 including default strategy.
+        scores = {}
+        clusters = {}
 
-        clusterables = self.clusterable_cls.query.all()
+        for strat_func in params_grid['strategy']:
+            strat_name = strat_func.__name__
+            _scores = {}
+            _clusters = {}
 
-        # Run the clustering at the varying thresholds
-        # and collect the scores, cluster compositions,
-        # and best threshold/scores for each strategy.
-        all_scores = {}
-        all_results = {}
-        best_thresholds = {}
+            for thresh in params_grid['threshold']:
+                # Run the clustering.
+                _scores[thresh], _clusters[thresh] = self._cluster(strat_func, thresh)
 
-        # Run with the default (currently implemented) similarity function.
-        print('Running with default strategy...')
-        all_scores['default'], all_results['default'] = self._cluster_across_thresholds(clusterables)
-        best_thresholds['default'] = max(all_scores['default'], key=all_scores['default'].get)
+                self._reset()
 
-        # Run the defined threshold spread with each alternate strategy.
-        for (strategy_name, strategy_func) in strategies:
-            print('Running with strategy: {0}'.format(strategy_name))
-            with patch_similarity(self.clusterable_cls, strategy_func):
-                all_scores[strategy_name], all_results[strategy_name] = self._cluster_across_thresholds(clusterables)
-                best_thresholds[strategy_name] = max(all_scores[strategy_name], key=all_scores[strategy_name].get)
+                completed_combos += 1
+                progress_bar(completed_combos/total_combos * 100)
 
+            # Calculate the average score for this composition.
+            _scores['AVERAGE'] = sum([_scores[thresh] for thresh in _scores])/len(_scores)
 
-        # Get the best score.
-        best = { 'score': 0 }
-        for strategy, threshold in best_thresholds.items():
-            score = all_scores[strategy][threshold]
-            if score > best['score']:
-                best['score'] = score
-                best['strategy'] = strategy
-                best['threshold'] = threshold
-        print('{0}The strategy {1}, with threshold {2}, had the best score of {3}.{4}'.format(Fore.GREEN, best['strategy'], best['threshold'], best['score'], Fore.RESET))
+            # Record the results.
+            scores[strat_name] = _scores
+            clusters[strat_name] = _clusters
 
-        # Disable patches.
+        # Stop patches.
         stop_patches(patches)
+        stop_patches(patches_external)
 
-        # Build report.
+        # Calculate bests.
+        best_result = self.Result(None, 0)
+        worst_result = self.Result(None, 1)
+        all_scores = []
+        for composition, score in self._get_scores(scores):
+            all_scores.append(score)
+            if score > best_result.score:
+                best_result = self.Result(composition, score)
+            if score < worst_result.score:
+                worst_result = self.Result(composition, score)
+        average_score = sum(all_scores)/len(all_scores)
+
+        # Generate a report.
+        report_path = self._generate_report(scores, clusters, best_result, worst_result, average_score)
+        print('Report created at {0}.'.format(report_path))
+
+        # Open the report in the browser.
+        webbrowser.open('file://{0}'.format(report_path), new=2)
+
+    def _cluster(self, similarity_func, threshold):
+        """
+        Run the clustering for a particular
+        similarity function and threshold.
+
+        Returns the score and lists representing
+        the resulting clusters.
+        """
+        with patch_similarity(self.clusterable_cls, similarity_func):
+            # Run the clustering.
+            self.cluster_cls.cluster(
+                self.clusterables,
+                threshold=threshold,
+                debug=False)
+
+            # Get the resulting labels.
+            clusters = self.cluster_cls.query.all()
+            labels = []
+            for clus in clusters:
+                labels += [self.Label(c, clus.id) for c in clus.members]
+
+            # Sort the labels to match the self.labels_true sort order,
+            # which is the the self.clusterables sort order.
+            sort_map = {l.clusterable.id: l for l in labels}
+            sorted_labels = [sort_map[c.id] for c in self.clusterables]
+            labels_pred = [l.label for l in sorted_labels]
+
+        # Score results and get cluster memberships.
+        score = self._score(labels_pred)
+        clusters = [c.members.all() for c in clusters]
+        return score, clusters
+
+    def _generate_report(self, scores, clusters, best, worst, average):
+        """
+        Generate an HTML report of the evaluation results.
+        """
         now = datetime.now()
-        build_report('cluster_report', self.cluster_name.lower() + '_clustering_' + now.isoformat(), {
-            'name': 'Evaluate {0} clustering'.format(self.cluster_name),
+        subject = self.cluster_cls.__name__
+        strategy_sources = {s.__name__: ''.join(inspect.getsourcelines(s)[0]) for s in self.strategies()}
+
+        return build_report('cluster_report', subject.lower() + '_clustering_' + now.isoformat(), {
+            'name': '{0} clustering evaluation'.format(subject),
             'date': now,
-            'all_results': all_results,
-            'all_scores': all_scores,
             'best': best,
-            'expected': self.expected_clusters
+            'worst': worst,
+            'average': average,
+            'all_clusters': clusters,
+            'all_scores': scores,
+            'expected': self.expected_clusters,
+            'clusterables': self.clusterables,
+            'datapath': self.datapath,
+            'sources': strategy_sources
         })
 
-        # Cleanup
-        print('\nCleaning up...')
-        clean()
+    def _get_scores(self, results, composition='', ignore_keys=['AVERAGE']):
+        """
+        Yields the score values (assumed to be the only
+        float dict value) out of a nested dict of scores.
+        """
+        for key, val in results.items():
+            key_ = str(key)
 
-        print('Done.')
+            if key in ignore_keys:
+                continue
+
+            if type(val) is dict:
+                next_composition = key_ if not composition else composition + ' | ' + key_
+                for c, v in self._get_scores(val, next_composition):
+                    yield c, v
+
+            elif type(val) in [float, numpy.float64]:
+                yield composition + ' | ' + key_, val
+
+            else:
+                raise Exception('Unexpected type. Expecting a dict or a float.')
+
+    def _reset(self):
+        """
+        Reset created clusters.
+        """
+        raise NotImplementedError
+
+    def _purge(self):
+        """
+        Resets the evaluation database.
+        """
+        print('Resetting the database...')
+        db.session.close()
+        db.drop_all()
+        db.create_all()
+
+    def _load_data(self):
+        """
+        This loads the test data,
+        which is pre-labeled,
+        and return the data to be clustered
+        as well as their expected (true) labels.
+
+        This assumes that the test data is in JSON format,
+        structured roughly like so::
+
+            [ // Clusters
+
+                { // A Cluster
+
+                    // members for the cluster and other data
+
+                }
+            ]
+        """
+        patches = patch_external()
+        self._purge()
+
+        print('Loading testing data at {0}...'.format(self.datapath))
+        data = json.load(open(self.datapath))
+
+        labels_true = []
+        expected_clusters = []
+
+        # For the progress bar.
+        total = len(data)
+        completed = 0
+        progress_bar(completed/total * 100)
+
+        for idx, cluster in enumerate(data):
+
+            members = self._process_cluster(cluster)
+
+            expected_clusters.append(members)
+            labels_true += [idx for i in range(len(members))]
+
+            completed += 1
+            progress_bar(completed/total * 100)
+
+        # What the evaluator will be clustering.
+        clusterables = [a for mems in expected_clusters for a in mems]
+
+        db.session.commit()
+
+        stop_patches(patches)
+
+        print('Loaded {0} clusterables (of class {1}). Expecting {2} clusters.'.format(
+            len(clusterables),
+            self.clusterable_cls.__name__,
+            len(expected_clusters)))
+        return clusterables, labels_true, expected_clusters
+
+
+    def _process_cluster(self, cluster):
+        """
+        This is called from within `_load_data`
+        to process an individual cluster from
+        the raw test data.
+
+        This needs to return:
+            * (list) the members of that cluster
+        """
+        raise NotImplementedError
+
+    def strategies(self):
+        """
+        Load in all alternative strategies,
+        which are methods with 'similarity' in
+        their name.
+        """
+        strategies_module = importlib.import_module('manage.core.evaluate.strategies.' + self.cluster_cls.__name__.lower())
+        strategies = [f[1] for f in inspect.getmembers(strategies_module, inspect.isfunction) if 'similarity' in f[0]]
+
+        # Add the default strategy.
+        strategies.append(Clusterable.similarity)
+
+        print('Using {0} different similarity strategies.'.format(len(strategies)))
+        return strategies
+
+    def _score(self, labels_pred):
+        """
+        Score the clustering results.
+
+        These labels to NOT need to be congruent,
+        these scoring functions only consider the cluster composition.
+
+        That is::
+
+            self.labels_true = [0,0,0,1,1,1]
+            labels_pred = [5,5,5,2,2,2]
+            self._score(labels_pred)
+            >>> 1.0
+
+        Even though the labels aren't exactly the same,
+        all that matters is that the items which belong together
+        have been clustered together.
+        """
+        #return metrics.adjusted_rand_score(self.labels_true, labels_pred)
+        #return metrics.v_measure_score(self.labels_true, labels_pred)
+        return metrics.adjusted_mutual_info_score(self.labels_true, labels_pred)
 
 
 
-    def _cluster_across_thresholds(self, clusterables):
-        all_scores, all_clusters = {}, {}
-        for threshold in numpy.linspace(self.min_threshold, self.max_threshold, (self.max_threshold-self.min_threshold)/self.step):
-            print('\nClustering with threshold {0}{1}{2}'.format(Fore.YELLOW, threshold, Fore.RESET))
-
-            self.cluster_cls.cluster(clusterables, threshold=threshold, debug=False)
-
-            num_clusters = self.cluster_cls.query.count()
-            print('Created {0}{1}{2} {3}s:'.format(Fore.YELLOW, num_clusters, Fore.RESET, self.cluster_name))
-            print('{0}---{1}'.format(Fore.RED, Fore.RESET))
-
-            # Evaluate the algorithmic quality.
-            # This could use refining!
-            created_clusters = self.cluster_cls.query.all()
-            scores = []
-            clusters = []
-            for cluster in created_clusters:
-                # So we can inspect the cluster compositions.
-                members = set(cluster.members)
-                clusters.append(members)
-                print(members)
-
-                score = score_cluster(cluster, self.expected_clusters)
-                scores.append(score)
-
-            print('{0}---{1}'.format(Fore.RED, Fore.RESET))
-
-            # Tweak the score so that the closer it is to 1, the better.
-            final_score = 1/(sum(scores) + 1)
-            print('Final score was {0}{1}{2}\n'.format(Fore.GREEN, final_score, Fore.RESET))
-
-            # Save the score and cluster compositions.
-            all_scores[threshold], all_clusters[threshold] = final_score, clusters
-
-            # Reset clusters.
-            self.cluster_cls.query.delete()
-
-        return all_scores, all_clusters
 
 
 
 
-def score_cluster(cluster, expected_clusters):
-    """
-    Gives a score for a cluster depending on
-    how different it is from the expected clusters.
+class EventEvaluator(Evaluator):
+    cluster_cls = Event
+    clusterable_cls = Article
 
-    It just tries to find the smallest difference,
-    i.e. it looks for the cluster which overlaps with it
-    the most and returns how many members differ between the two.
-    """
-    # The lower the diff, the better.
-    diffs = [len(set(cluster.members).symmetric_difference(set(expected))) for expected in expected_clusters.values()]
+    def _process_cluster(self, cluster):
+        """
+        Expected format of an Event is::
+            {
+                'title': 'an event title',
+                'articles': [{
+                    // article representation
+                    // ...
+                    // MongoDB exported datetimes:
+                    'created_at': { '$date': '2014-08-05T19:44:26.069-0400' }
+                }]
+            }
+        """
+        event_articles = cluster['articles']
+        members = []
+        for a_data in event_articles:
+            # Handle MongoDB JSON dates.
+            for key in ['created_at', 'updated_at']:
+                a_data[key] = parse(a_data[key]['$date'])
 
-    # Get the minimum difference.
-    return min(diffs)
+            article = Article(**a_data)
+            db.session.add(article)
 
-def clean():
-    Story.query.delete()
-    Event.query.delete()
+            members.append(article)
+        return members
+
+    def _reset(self):
+        Event.query.delete()
+        db.session.commit()
+
+
+class StoryEvaluator(Evaluator):
+    cluster_cls = Story
+    clusterable_cls = Event
+
+    def _process_cluster(self, cluster):
+        """
+        Expected format of a Story is::
+
+            {
+                'title': 'an story title',
+                'events': [{
+                    // event representation,
+                    // see `EventEvaluator#_load_data`
+                }]
+            }
+        """
+        story_events = cluster['events']
+        members = []
+        for e_data in story_events:
+            articles = []
+            for a_data in e_data['articles']:
+                # Handle MongoDB JSON dates.
+                for key in ['created_at', 'updated_at']:
+                    a_data[key] = parse(a_data[key]['$date'])
+                article = Article(**a_data)
+                articles.append(article)
+            event = Event(articles)
+            event.title = e_data['title']
+            db.session.add(event)
+
+            members.append(event)
+        return members
+
+    def _reset(self):
+        Story.query.delete()
+        db.session.commit()
+
+
+
+
+
+
 
 @contextmanager
 def patch_similarity(cls, new_func):
@@ -257,3 +405,4 @@ def patch_similarity(cls, new_func):
     cls.similarity = new_func
     yield
     cls.similarity = tmp
+

@@ -8,5 +8,7 @@ templateEnv = jinja2.Environment(loader=templateLoader)
 def build_report(template_name, filename, data):
     template = templateEnv.get_template(template_name +'.jinja')
     html = template.render(data)
-    with open(this_dir+'/reports/' + filename + '.html', 'w') as report:
+    report_path = this_dir+'/reports/' + filename + '.html'
+    with open(report_path, 'w') as report:
         report.write(html)
+    return report_path

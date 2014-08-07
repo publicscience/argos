@@ -39,6 +39,28 @@ class EventTest(RequiresDatabase):
         self.db.session.add(self.event)
         self.db.session.commit()
 
+    def test_event_deletion_removes_from_articles_events(self):
+        articles = self.prepare_articles()
+        for article in articles:
+            self.db.session.add(article)
+
+        # Make an event.
+        self.event = Event(articles)
+        self.db.session.add(self.event)
+        self.db.session.commit()
+
+        # The articles should reference their events.
+        for article in articles:
+            self.assertEqual(article.events, [self.event])
+
+        # Destroy events.
+        Event.query.delete()
+        self.db.session.commit()
+
+        # The articles should no longer have references to the events.
+        for article in articles:
+            self.assertEqual(article.events, [])
+
     def test_similarity_with_object_different(self):
         self.prepare_event()
         avg_sim = self.event.similarity(self.article)

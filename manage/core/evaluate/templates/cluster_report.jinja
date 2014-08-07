@@ -6,28 +6,129 @@
         html, body {
             font-family: "Helvetica", "Arial", "sans-serif";
             background: #fafafa;
-            color: #111;
+            color: #222;
+            margin: 0
         }
 
-        .muted { color: #ddd; }
-        .best { color: #1bafae; }
+        a, a:visited {
+            color: #09F;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        header {
+            background: #222;
+            color: #fff;
+            padding: 1em;
+            font-size: 0.75em
+        }
+        .meta {
+            float: right;
+        }
+        .meta .muted {
+            color: #666;
+            margin-left: 1em;
+        }
+        .result--header .meta,
+        .strategy--header .meta {
+            margin-top: 0.4em;
+        }
+
+        h1, h2 {
+            display: inline;
+            margin-right: 0.2em;
+        }
+
+        .stats, .overview, .results {
+            padding: 2em;
+        }
+
+        .stats {
+            background: #222222;
+            text-align: center;
+        }
+        .stat {
+            text-align: center;
+            color: rgba(0,0,0,0.3);
+            border-radius: 0.4em;
+            padding: 2em 1em;
+            margin: 0 0.5em 2em 0.5em;
+            max-width: 100%;
+            display: inline-block;
+        }
+        .best { background: #61DD9C; }
+        .average { background: #8552C5; }
+        .worst { background: #CE4E4E; }
+        .stat--score {
+            font-size: 2em;
+            padding: 1em;
+            color: #fff;
+        }
+
+        .overview--results {
+            text-align: center;
+        }
+        .overview--result {
+            display: inline-block;
+            margin: 0.5em;
+        }
+
+        .strategy--header {
+            border-bottom: 2px solid #0099FF;
+            margin-top: 4em;
+            background: #222;
+            color: #fff;
+            padding: 2em 1em;
+        }
+        .strategy-source {
+            display: none;
+            padding: 2em;
+            background: #222;
+            color: #fff;
+        }
+
         .result {
-            border-top: 2px solid #fc0d1b;
-            padding: 2em 0;
+            padding: 1em 0 0 0;
+        }
+        .result--header {
+            background: #ECECEC;
+            color: #404040;
+            padding: 1em;
+            cursor: pointer;
         }
         .expected {
-            border: 2px solid #fc0d1b;
             padding: 2em;
+            background: #222;
+            color: #fff;
+        }
+        .clusters {
+            text-align: center;
+            -webkit-column-count: 3;
+            -moz-column-count: 3;
+            column-count: 3;
+            display: none;
+            padding: 1em 0;
         }
         .cluster {
             background: #eaeaea;
             padding: 2em;
             margin: 1em 0;
             font-size: 0.75em;
+            display: block;
+            text-align: left;
+            color: #222;
 
-            -webkit-column-count: 2;
-            -moz-column-count: 2;
-            column-count: 2;
+            break-inside: avoid-column;
+            page-break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+        }
+        .cluster:first-child {
+            margin-top: 0;
+        }
+        .cluster p:before {
+            content: '>';
+            color: #00ADFF;
+            margin-right: 0.5em;
         }
 
         table, th, td {
@@ -42,62 +143,120 @@
 </head>
 <body>
 
-    <h1>{{ name }}</h1>
-    <em class="muted">Run on {{ date }}</em>
+    <header>
+        {{ name }}
+        <div class="meta">
+            <span class="muted">Run on</span> {{ date }}
+            <span class="muted">Using data at</span> {{ datapath }}
+        </div>
+    </header>
 
-    <h4 class="best">Best score: {{ best.score }} (out of 1.0) for {{ best.strategy }} strategy with a threshold of {{ best.threshold }}</h4>
+    <section class="stats">
+        <div class="stat best">
+            Best score
+            <h4 class="stat--score">{{ best.score }}</h4>
+            {{ best.composition }}
+        </div>
+        <div class="stat average">
+            Average score
+            <h4 class="stat--score">{{ average }}</h4>
+            Across all compositions
+        </div>
+        <div class="stat worst">
+            Worst score
+            <h4 class="stat--score">{{ worst.score }}</h4>
+            {{ worst.composition }}
+        </div>
+    </section>
 
-    <p>Expecting {{ expected|length }} clusters (<a href="#expected">view composition</a>).</p>
+    <section class="overview" id="overview">
+        <h1>Overview</h1>
+        <p>Clustered {{ clusterables|length }} clusterables.</p>
+        <p>Expecting {{ expected|length }} clusters (<a href="#expected">view composition</a>).</p>
 
-    {% for strategy, results in all_results.items() %}
-        <h2>{{ strategy }} : At a glance</h2>
-        <table>
-            <tr>
-                <th>Threshold</th>
-                <th>Score</th>
-                <th>Num. Clusters</th>
-            </tr>
-            {% for threshold, clusters in results.items() %}
-                <tr>
-                    <td>{{ threshold }}</td>
-                    <td>{{ all_scores[strategy][threshold] }}</td>
-                    <td>{{ clusters|length }}</td>
-                </tr>
+        <div class="overview--results">
+            {% for strategy, results in all_clusters|dictsort %}
+                <div class="overview--result">
+                    <h2><a href="#{{ strategy }}">{{ strategy }}</a></h2>
+                    <table>
+                        <tr>
+                            <th>Threshold</th>
+                            <th>Score</th>
+                            <th>Num. Clusters</th>
+                        </tr>
+                        {% for threshold, clusters in results|dictsort %}
+                            <tr>
+                                <td><a href="#{{ strategy }}-{{ threshold }}">{{ threshold }}</a></td>
+                                <td>{{ all_scores[strategy][threshold] }}</td>
+                                <td>{{ clusters|length }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
             {% endfor %}
-        </table>
-    {% endfor %}
+        </div>
+    </section>
 
-    {% for strategy, results in all_results.items() %}
-        <h1>{{ strategy }}</h1>
-        {% for threshold, clusters in results.items() %}
-            <section class="result">
-                <h2>Threshold: {{ threshold }}</h2>
-                <h4>Score: {{ all_scores[strategy][threshold] }}</h4>
-                <h6>Clusters (got {{ clusters|length }}, <a href="#expected">expecting {{ expected|length }}</a>.)</h6>
-
-                <div class="clusters">
-                    {% for cluster in clusters %}
-                        <div class="cluster">
-                            {% for member in cluster %}
-                                <p>{{ member }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-            </section>
-        {% endfor %}
-    {% endfor %}
-
-    <a name="expected"></a>
-    <section class="expected">
-        <h2>Expected cluster composition</h2>
-        {% for id, cluster in expected.items() %}
-            <div class="cluster">
-                {% for member in cluster %}
-                    <p>{{ member }}</p>
-                {% endfor %}
+    <section class="results">
+        {% for strategy, results in all_clusters|dictsort %}
+            <div class="strategy--header">
+                <h1 id="{{ strategy }}">{{ strategy }}</h1>
+                <a href="#overview">to top</a>
+                <div class="meta">
+                    <a onclick="toggle_visibility('{{ strategy }}-source');">view source</a>
+                </div>
             </div>
+            <div class="strategy-source" id="{{ strategy }}-source">
+                <pre>{{ sources[strategy] }}</pre>
+            </div>
+
+            {% for threshold, clusters in results|dictsort %}
+                <section class="result" id="{{ strategy }}-{{ threshold }}">
+                    <div class="result--header" onclick="toggle_visibility('{{ strategy }}-{{ threshold }}-clusters');">
+                        <h2>Threshold: {{ threshold }}</h2>
+                        <a href="#overview">to top</a>
+                        <div class="meta">
+                            <span class="muted">Score:</span> {{ all_scores[strategy][threshold] }}
+                            <span class="muted">Clusters:</span> {{ clusters|length }}/<a href="#expected">{{ expected|length }}</a>
+                        </div>
+                    </div>
+
+                    <div class="clusters" id="{{ strategy }}-{{ threshold }}-clusters">
+                        {% for cluster in clusters %}
+                            <div class="cluster">
+                                {% for member in cluster %}
+                                    <p>{{ member }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                </section>
+            {% endfor %}
         {% endfor %}
     </section>
+
+    <section class="expected" id="expected">
+        <h2>Expected cluster composition</h2>
+        <div class="clusters" style="display:block;">
+            {% for cluster in expected %}
+                <div class="cluster">
+                    {% for member in cluster %}
+                        <p>{{ member }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <script type="text/javascript">
+        function toggle_visibility(id) {
+            var el = document.getElementById(id);
+            if (el.style.display == 'block') {
+                el.style.display = 'none';
+            } else {
+                el.style.display = 'block';
+            }
+        }
+    </script>
 
 </body>
 </html>

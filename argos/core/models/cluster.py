@@ -186,9 +186,7 @@ class Cluster(Clusterable):
 
     def __init__(self, members):
         """
-        Initialize a cluster with some members and a tag.
-
-        Tags are used to keep track of "levels" or "kinds" of clusters.
+        Initialize a cluster with some members.
         """
         self.members = members
         self.update()
