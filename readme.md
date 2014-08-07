@@ -16,6 +16,21 @@ the [argos.corpora](https://github.com/publicscience/argos.corpora) project.
 This project also can collect testing/evaluation data for assessing the
 quality of Argos' clustering.*
 
+* [Setup](#setup)
+    * [Dependencies](#dependencies)
+    * [Database](#database)
+    * [Training](#training-the-vectorizer)
+* [Running & Development](#running--development)
+    * [Migrations](#changes-to-the-data-model-migrations)
+* [Testing](#testing)
+* [Performance](#performance)
+* [Evaluation](#evaluation)
+* [Deployment](#deployment)
+* [Guide to the project](#guide-to-the-project)
+* [Notes](#notescaveatsmiscellany)
+
+---
+
 ## Setup
 The setup process for Argos is fairly complex, but some scripts vastly simplify it.
 
@@ -161,7 +176,7 @@ This marks the database as at the latest (`head`) revision.
 
 ---
 
-## Testing & Performance
+## Testing
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
 ```bash
@@ -173,6 +188,10 @@ You can also run more specific test modules:
 (argos) $ ./run test tests/core
 (argos) $ ./run test tests/core/article_test.py
 ```
+
+---
+
+## Performance
 
 You can also profile some of the more intensive parts to identify
 bottlenecks:
@@ -187,23 +206,16 @@ bottlenecks:
 You can also evaluate the quality of some of the algorithms (currently
 only the article=>event and event=>story clustering).
 
-The project comes with a set of data to use for evaluation, located in
-`manage/data/evaluation/`. It is a *very* small dataset which only
-captures a small domain of the news that is out there, so at some point
-I'd like to have a larger and broader one available.
+The project comes with a few datasets to use for evaluation, located in
+`manage/core/evaluate/data/`. They are not particularly large,
+but you can generate more evaluation datasets using
+[argos.corpora](https://github.com/publicscience/argos.corpora)'s
+`sampler` functionality (which will generate "pre-labeled" event
+clusters by parsing WikiNews dumps).
 
-The evaluation commands run either the event or story clustering on this
-set of data and then compare the algorithmic results to hand-curated
-clusters of the same data.
-
-The selected clustering (event or story) is run multiple times,
-iterating over similarity thresholds ranging from an optionally-set
-minimum threshold (set with `-min <float>`, default `0.0`) to an
-optionally-set maximum threshold (set with `-max <float>`, default `1.0`),
-using steps of an optionally-set side (set with `-s <float>`, default `0.05`).
-
-A score for each threshold is calculated based on the difference between the
-expected, hand-curated clusters and the algorithmic results.
+The evaluation commands perform a grid search across different
+similarity thresholds and strategies (see below for more details),
+scoring the results against the pre-labeled clusters.
 
 Note that the clustering algorithm used is a hierarchical agglomerative
 one, so the main things under examination in these evaluations are:
@@ -213,29 +225,30 @@ articles or events are.
 * The threshold for which the similarity metric indicates that two
 articles or events are sufficiently similar to be grouped together.
 
-To prepare the evaluation, you must first run:
+To run the evaluations:
 ```bash
-# Generate the seed data and populate the database.
-# NOTE: This will overwrite your database, so don't run it in production!
-(argos) $ python manage.py evaluate prepare
+(argos) $ python manage.py evaluate:event
+(argos) $ python manage.py evaluate:story
+```
+**Note: don't run this in production as it modifies your database.** 
+
+These will run evaluations on the provided datasets. To pass in a
+different dataset:
+```bash
+(argos) $ python manage.py evaluate:event -d /path/to/my/dataset.json
 ```
 
-Then you can run the evaluations:
-```bash
-(argos) $ python manage.py evaluate event
-(argos) $ python manage.py evaluate story
-```
-**Note: don't run this in production as it modifies your database.**
+The dataset is expected to be in JSON format and adhere to a certain
+structure, which is what the `argos.corpora` sampler outputs.
 
-An HTML report will be output to `manage/evaluate/reports/` with some details.
+An HTML report will be output to `manage/core/evaluate/reports/` with some details.
 You can look at the cluster members and determine for yourself if they
 look right.
 
-The clustering evaluation system already tries a spread of thresholds to
-try and find an optimal one. It does not, however, have different
-similarity strategies. New ones can be patched in by defining methods in
-either `manage/evaluate/strategies/event.py` or
-`manage/evaluate/strategies/story.py`. The methods must have `similarity`
+
+New similarity strategies can be patched in by defining methods in
+either `manage/core/evaluate/strategies/event.py` or
+`manage/core/evaluate/strategies/story.py`. The methods must have `similarity`
 in their name to be registered as an alternative similarity strategy.
 
 The only requirement is that the method's parameters are `(self, obj)`,
