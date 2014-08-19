@@ -23,6 +23,12 @@ import inspect, importlib
 from datetime import datetime
 from contextlib import contextmanager
 from collections import namedtuple
+from itertools import permutations
+
+def make_sim(sim_func, weights):
+    def func(self, obj):
+        return sim_func(self, obj, weights=weights)
+    return func
 
 
 class Evaluator():
@@ -33,16 +39,20 @@ class Evaluator():
         self.datapath = os.path.expanduser(datapath)
         self.clusterables, self.labels_true, self.expected_clusters = self._load_data()
 
+        weights = [val for val in numpy.linspace(0.0, 1.0, 10.0)]
+
         self.default_search_grid = {
             # Similarity thresholds
             'threshold': [val for val in numpy.linspace(
                     0.0,
                     1.0,
-                    10.0
+                    20.0
                 )],
 
             # Similarity strategies (funcs)
-            'strategy': self.strategies()
+            'strategy': self.strategies(),
+
+            'weights': list(permutations(weights))
         }
 
     def evaluate(self, params_grid=None):
@@ -77,16 +87,23 @@ class Evaluator():
             _clusters = {}
 
             for thresh in params_grid['threshold']:
-                # Run the clustering.
-                _scores[thresh], _clusters[thresh] = self._cluster(strat_func, thresh)
+                _scores[thresh] = {}
+                _clusters[thresh] = {}
 
-                self._reset()
+                for weights in params_grid['weights']:
+                    # Run the clustering.
+                    _scores[thresh][weights], _clusters[thresh][weights] = self._cluster(strat_func, thresh, weights)
 
-                completed_combos += 1
-                progress_bar(completed_combos/total_combos * 100)
+                    self._reset()
 
-            # Calculate the average score for this composition.
-            _scores['AVERAGE'] = sum([_scores[thresh] for thresh in _scores])/len(_scores)
+                    completed_combos += 1
+                    progress_bar(completed_combos/total_combos * 100)
+
+                # Calculate the average score for this threshold.
+                _scores[thresh]['AVERAGE'] = sum([_scores[thresh][weights] for weights in _scores[thresh]])/len(_scores[thresh])
+
+            # Calculate the average score for this strategy.
+            _scores['AVERAGE'] = sum([_scores[thresh]['AVERAGE'] for thresh in _scores])/len(_scores)
 
             # Record the results.
             scores[strat_name] = _scores
@@ -115,7 +132,7 @@ class Evaluator():
         # Open the report in the browser.
         webbrowser.open('file://{0}'.format(report_path), new=2)
 
-    def _cluster(self, similarity_func, threshold):
+    def _cluster(self, similarity_func, threshold, weights):
         """
         Run the clustering for a particular
         similarity function and threshold.
@@ -123,12 +140,15 @@ class Evaluator():
         Returns the score and lists representing
         the resulting clusters.
         """
-        with patch_similarity(self.clusterable_cls, similarity_func):
+
+        sim_func = make_sim(similarity_func, weights)
+        with patch_similarity(self.clusterable_cls, sim_func):
             # Run the clustering.
             self.cluster_cls.cluster(
                 self.clusterables,
                 threshold=threshold,
-                debug=False)
+                debug=False,
+                log=False)
 
             # Get the resulting labels.
             clusters = self.cluster_cls.query.all()

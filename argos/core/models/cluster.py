@@ -85,7 +85,7 @@ class Clusterable(Model):
     def vectorize(self):
         raise NotImplementedError
 
-    def similarity(self, obj):
+    def similarity(self, obj, weights=[2,1,2]):
         """
         Calculate the similarity between this
         clusterable and another clusterable.
@@ -108,7 +108,6 @@ class Clusterable(Model):
         # Linearly combine the similarity values,
         # weighing them according to these coefficients.
         # [text vector, concept vector, publication date]
-        coefs = [2, 1, 2]
         sim = 0
         for i, vec in enumerate(v):
             dist = jaccard(v_[i], v[i])
@@ -120,7 +119,7 @@ class Clusterable(Model):
             if isnan(dist):
                 dist = 1
             s = 1 - dist
-            sim += (coefs[i] * s)
+            sim += (weights[i] * s)
 
         # Also take publication dates into account.
         ideal_time = 259200 # 3 days, in seconds
@@ -133,10 +132,10 @@ class Clusterable(Model):
         # Score is normalized [0, 1], where 1 is within the ideal time,
         # and approaches 0 the longer the difference is from the ideal time.
         time_score = 1 if time_diff < ideal_time else ideal_time/time_diff
-        sim += (coefs[2] * time_score)
+        sim += (weights[2] * time_score)
 
         # Normalize back to [0, 1].
-        return sim/sum(coefs)
+        return sim/sum(weights)
 
 
 class Cluster(Clusterable):

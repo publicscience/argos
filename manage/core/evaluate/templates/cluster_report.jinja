@@ -29,12 +29,15 @@
             color: #666;
             margin-left: 1em;
         }
-        .result--header .meta,
         .strategy--header .meta {
             margin-top: 0.4em;
         }
+        .result--header .meta,
+        .clusterable--header .meta {
+            margin-top: 0.1em;
+        }
 
-        h1, h2 {
+        h1, h2, h3 {
             display: inline;
             margin-right: 0.2em;
         }
@@ -96,18 +99,22 @@
             padding: 1em;
             cursor: pointer;
         }
-        .expected {
+        .expected,
+        .clusterables {
             padding: 2em;
             background: #222;
             color: #fff;
         }
-        .clusters {
-            text-align: center;
+        .clusters,
+        .clusterable--concepts {
             -webkit-column-count: 3;
             -moz-column-count: 3;
             column-count: 3;
             display: none;
             padding: 1em 0;
+        }
+        .clusters {
+            text-align: center;
         }
         .cluster {
             background: #eaeaea;
@@ -129,6 +136,33 @@
             content: '>';
             color: #00ADFF;
             margin-right: 0.5em;
+        }
+        .cluster a {
+            color: #222;
+        }
+        .clusterables {
+            border-top: 2px solid #09F;
+        }
+        .clusterable--header {
+            padding: 0.6em 0.5em 0.5em 0.6em;
+            color: #fff;
+            background: #09F;
+            margin-top: 1em;
+            margin-bottom: 0;
+        }
+        .clusterable--header .meta a {
+            color: #fff;
+        }
+        .clusterable--body {
+            background: #eaeaea;
+            color: #222;
+            font-size: 0.8em;
+        }
+        .clusterable--concepts,
+        .clusterable--text {
+            padding: 2em;
+            display: none;
+            margin: 0;
         }
 
         table, th, td {
@@ -213,7 +247,7 @@
             {% for threshold, clusters in results|dictsort %}
                 <section class="result" id="{{ strategy }}-{{ threshold }}">
                     <div class="result--header" onclick="toggle_visibility('{{ strategy }}-{{ threshold }}-clusters');">
-                        <h2>Threshold: {{ threshold }}</h2>
+                        <h3>Threshold: {{ threshold }}</h3>
                         <a href="#overview">to top</a>
                         <div class="meta">
                             <span class="muted">Score:</span> {{ all_scores[strategy][threshold] }}
@@ -225,7 +259,7 @@
                         {% for cluster in clusters %}
                             <div class="cluster">
                                 {% for member in cluster %}
-                                    <p>{{ member }}</p>
+                                    <p><a href="#{{ member.id }}">{{ member }}</a></p>
                                 {% endfor %}
                             </div>
                         {% endfor %}
@@ -240,11 +274,36 @@
             {% for cluster in expected %}
                 <div class="cluster">
                     {% for member in cluster %}
-                        <p>{{ member }}</p>
+                        <p><a href="#{{ member.id }}">{{ member }}</a></p>
                     {% endfor %}
                 </div>
             {% endfor %}
         </div>
+    </section>
+
+    <section class="clusterables">
+        <h2>Clusterable details</h2>
+        {% for clusterable in clusterables %}
+            <div class="clusterable">
+                <div class="clusterable--header" id="{{ clusterable.id }}">
+                    <h3>{{ clusterable.title }}</h3>
+                    <div class="meta">
+                        <a onclick="toggle_visibility('{{ clusterable.id }}-concepts');">view concepts</a>
+                        <a onclick="toggle_visibility('{{ clusterable.id }}-text');">view text</a>
+                    </div>
+                </div>
+                <div class="clusterable--body">
+                    <ul class="clusterable--concepts" id="{{ clusterable.id }}-concepts">
+                        {% for slug in clusterable.concept_slugs|sort %}
+                            <li>{{ slug }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="clusterable--text" id="{{ clusterable.id }}-text">
+                        {{ clusterable.text }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     </section>
 
     <script type="text/javascript">

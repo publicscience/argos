@@ -13,9 +13,14 @@ from argos.conf import APP
 
 log_path = path.join(path.dirname(__file__), 'logs/log.log')
 
-def logger(name):
+def logger(name, null=False):
     # Create the logger.
     logger = logging.getLogger(name)
+
+    if null:
+        nh = logging.NullHandler()
+        logger.addHandler(nh)
+        return logger
 
     # Configure the logger.
     logger.setLevel(logging.INFO)

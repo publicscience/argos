@@ -6,10 +6,19 @@ from argos.core.brain import summarizer
 from argos.core.brain.cluster import cluster
 
 from argos.util.logger import logger
+from argos.conf import APP
 
 from datetime import datetime
 from math import log
 from sqlalchemy import event, inspect
+
+
+logr = logger('EVENT_CLUSTERING')
+
+if APP['DEBUG']:
+    logr.setLevel('DEBUG')
+else:
+    logr.setLevel('ERROR')
 
 events_articles = join_table('events_articles', 'event', 'article')
 events_mentions = join_table('events_mentions', 'event', 'alias')
@@ -94,25 +103,32 @@ class Event(Cluster):
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
             text, concepts = self._article_aggregate()
-            bow_vec = brain.vectorizer.vectorize(text)
-            ent_vec = brain.conceptor.vectorize(concepts)
+            bow_vec = brain.vectorizer.vectorize(self.text)
+            ent_vec = brain.conceptor.vectorize(self.member_concept_slugs)
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
-    def _article_aggregate(self):
+    @property
+    def member_concept_slugs(self):
         """
-        Builds a 'super article' out of this
-        event's articles, which is used to build
-        the vector representation of the event.
+        The aggregate of all this event's
+        articles' concepts
         """
-        texts = []
-        concepts = []
-        for a in self.articles:
-            texts.append(' '.join([a.title, a.text]))
-            concepts.append(' '.join(a.concept_slugs))
-        super_text = ' '.join(texts)
-        super_concepts = ' '.join(concepts)
-        return super_text, super_concepts
+        if not hasattr(self, '_mem_slugs') or self._mem_slugs is None:
+            concepts = [' '.join(a.concept_slugs) for a in self.articles]
+            self._mem_slugs = ' '.join(concepts)
+        return self._mem_slugs
+
+    @property
+    def text(self):
+        """
+        The aggregate of all of this event's
+        articles' texts.
+        """
+        if not hasattr(self, '_text') or self._text is None:
+            texts = [' '.join([a.title, a.text]) for a in self.articles]
+            self._text = ' '.join(texts)
+        return self._text
 
     def summarize(self):
         """
@@ -145,7 +161,7 @@ class Event(Cluster):
         Event.cluster(articles, threshold=threshold, debug=debug)
 
     @staticmethod
-    def cluster(articles, threshold=0.7, debug=False):
+    def cluster(articles, threshold=0.7):
         """
         Clusters a set of articles
         into existing events (or creates new ones).
@@ -154,12 +170,6 @@ class Event(Cluster):
             | articles (list)       -- the Articles to cluster
             | threshold (float)     -- the similarity threshold for qualifying a cluster
         """
-        log = logger('EVENT_CLUSTERING')
-        if debug:
-            log.setLevel('DEBUG')
-        else:
-            log.setLevel('ERROR')
-
         updated_clusters = []
         active_clusters = Event.query.filter_by(active=True).all()
         now = datetime.utcnow()
@@ -174,11 +184,11 @@ class Event(Cluster):
                 if set(c_cons).intersection(a_cons):
                     candidate_clusters.append(c)
 
-            selected_cluster = cluster(article, candidate_clusters, threshold=threshold, logger=log)
+            selected_cluster = cluster(article, candidate_clusters, threshold=threshold, logger=logr)
 
             # If no selected cluster was found, then create a new one.
             if not selected_cluster:
-                log.debug('No qualifying clusters found, creating a new cluster.')
+                logr.debug('No qualifying clusters found, creating a new cluster.')
                 selected_cluster = Event([article])
                 db.session.add(selected_cluster)
 
@@ -208,6 +218,11 @@ def receive_before_update(mapper, connection, target):
         target._score = target.calculate_score()
 
         target.updated_at = datetime.utcnow()
+
+        # Reset calculated values.
+        target.vectors = None
+        target._text = None
+        target._mem_slugs = None
 
 @event.listens_for(Event, 'before_insert')
 def receive_before_insert(mapper, connection, target):
