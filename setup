@@ -70,7 +70,7 @@ function setup_virtualenv {
     echo -e "\n\n\n"
 
     # Setup the Python 3.3 virtualenv.
-    virtualenv -p /usr/bin/python3 $ARGOS_ENV --no-site-packages
+    virtualenv -p `which python3` $ARGOS_ENV --no-site-packages
     source $ARGOS_ENV/bin/activate
     pip install numpy cython
     pip install -r requirements.txt
