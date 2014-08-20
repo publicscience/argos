@@ -58,7 +58,7 @@ function setup_dependencies {
         sudo apt-get install bzr -y
 
         # PostgreSQL
-        sudo apt-get install postgresql postgresql-server-dev-9.1 -y
+        sudo apt-get install postgresql postgresql-server-dev-9.3 -y
 
         sudo pip3 install virtualenv
     fi
@@ -70,7 +70,7 @@ function setup_virtualenv {
     echo -e "\n\n\n"
 
     # Setup the Python 3.3 virtualenv.
-    virtualenv-3.3 $ARGOS_ENV --no-site-packages
+    virtualenv -p /usr/bin/python3 $ARGOS_ENV --no-site-packages
     source $ARGOS_ENV/bin/activate
     pip install numpy cython
     pip install -r requirements.txt
@@ -108,8 +108,8 @@ function setup_knowledge {
     echo -e "$(tput setaf 3)Setting up Apache Jena/Fuseki...$(tput sgr0)"
     echo -e "\n\n\n"
 
-    JENA_VERSION=2.11.2
-    FUSEKI_VERSION=1.0.2
+    JENA_VERSION=2.12.0
+    FUSEKI_VERSION=1.1.0
 
     wget -O $ARGOS_ENV/jena.tar.gz "http://mirrors.gigenet.com/apache//jena/binaries/apache-jena-$JENA_VERSION"
     wget -O $ARGOS_ENV/fuseki.tar.gz "http://mirrors.gigenet.com/apache//jena/binaries/jena-fuseki-$FUSEKI_VERSION-distribution.tar.gz"
