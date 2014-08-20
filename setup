@@ -25,6 +25,7 @@ function setup_dependencies {
 
         # gcc, for building scipy
         brew install gcc
+        brew install gfortran
 
         # PostgreSQL
         brew install postgres
