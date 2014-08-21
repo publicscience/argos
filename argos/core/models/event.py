@@ -12,7 +12,6 @@ from datetime import datetime
 from math import log
 from sqlalchemy import event, inspect
 
-
 logr = logger('EVENT_CLUSTERING')
 
 if APP['DEBUG']:
@@ -102,7 +101,6 @@ class Event(Cluster):
             (bag of words vector, concepts vector)
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
-            text, concepts = self._article_aggregate()
             bow_vec = brain.vectorizer.vectorize(self.text)
             ent_vec = brain.conceptor.vectorize(self.member_concept_slugs)
             self.vectors = [bow_vec, ent_vec]
@@ -142,7 +140,7 @@ class Event(Cluster):
         return self.summary
 
     @staticmethod
-    def recluster(articles, threshold=0.7, debug=False):
+    def recluster(articles, threshold=0.7):
         """
         Reclusters a set of articles,
         resetting their existing event membership.
@@ -158,7 +156,7 @@ class Event(Cluster):
         db.session.commit()
 
         # Re-do the clustering.
-        Event.cluster(articles, threshold=threshold, debug=debug)
+        Event.cluster(articles, threshold=threshold)
 
     @staticmethod
     def cluster(articles, threshold=0.7):

@@ -9,6 +9,14 @@ from argos.core.brain.summarizer import multisummarize
 import itertools
 
 from argos.util.logger import logger
+from argos.conf import APP
+
+logr = logger('STORY_CLUSTERING')
+
+if APP['DEBUG']:
+    logr.setLevel('DEBUG')
+else:
+    logr.setLevel('ERROR')
 
 stories_events = join_table('stories_events', 'story', 'event')
 stories_mentions = join_table('stories_mentions', 'story', 'alias')
@@ -88,7 +96,7 @@ class Story(Cluster):
         return self.summary
 
     @staticmethod
-    def recluster(events, threshold=0.7, debug=False):
+    def recluster(events, threshold=0.7):
         """
         Reclusters a set of events,
         resetting their existing story membership.
@@ -104,10 +112,10 @@ class Story(Cluster):
         db.session.commit()
 
         # Re-do the clustering.
-        Story.cluster(events, threshold=threshold, debug=debug)
+        Story.cluster(events, threshold=threshold)
 
     @staticmethod
-    def cluster(events, threshold=0.7, debug=False):
+    def cluster(events, threshold=0.7):
         """
         Clusters a set of events
         into existing stories (or creates new ones).
@@ -115,17 +123,10 @@ class Story(Cluster):
         Args:
             | events (list)         -- the Events to cluster
             | threshold (float)     -- the similarity threshold for qualifying a cluster
-            | debug (bool)          -- will log clustering info if True
 
         Returns:
             | clusters (list)       -- the list of updated clusters
         """
-        log = logger('STORY_CLUSTERING')
-        if debug:
-            log.setLevel('DEBUG')
-        else:
-            log.setLevel('ERROR')
-
         updated_clusters = []
 
         for event in events:
@@ -133,11 +134,11 @@ class Story(Cluster):
             candidate_clusters = Story.query.filter(Concept.slug.in_(event.concept_slugs)).all()
 
             # Cluster this event.
-            selected_cluster = cluster(event, candidate_clusters, threshold=threshold, logger=log)
+            selected_cluster = cluster(event, candidate_clusters, threshold=threshold, logger=logr)
 
             # If no selected cluster was found, then create a new one.
             if not selected_cluster:
-                log.debug('No qualifying clusters found, creating a new cluster.')
+                logr.debug('No qualifying clusters found, creating a new cluster.')
                 selected_cluster = Story([event])
                 db.session.add(selected_cluster)
                 db.session.commit() # save the cluster the candidate cluster query can consider it.
