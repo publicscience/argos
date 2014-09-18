@@ -35,27 +35,28 @@ quality of Argos' clustering.*
 The setup process for Argos is fairly complex, but some scripts vastly simplify it.
 
 *Note on virtualenvs: Many of the following commands (those preceded by `(argos)`) assume you are in your virtual environment. As a reminder, you can activate it like so:*
-```bash
-# by default, the setup script creates a virtualenv at ~/env/argos
-$ source ~/env/argos/bin/activate
-```
+
+    # by default, the setup script creates a virtualenv at ~/env/argos
+    $ source ~/env/argos/bin/activate
+
+### Configuration
+Override default configuration values in `argos/conf/app.py` and `argos/conf/celery.py`.
 
 ### Dependencies
 Argos is built in Python 3.3, so make sure you have `pip3` and `virtualenv-3.3`:
-```bash
-# OSX
-$ brew install python3 # (also installs pip3)
-$ pip3 install virtualenv
 
-# Ubuntu
-$ sudo apt-get install python3.3 python3-pip -y
-$ sudo pip3 install virtualenv
-```
+    # OSX
+    $ brew install python3 # (also installs pip3)
+    $ pip3 install virtualenv
+
+    # Ubuntu
+    $ sudo apt-get install python3.3 python3-pip -y
+    $ sudo pip3 install virtualenv
 
 Then, the easiest way to set things up is to just run the `setup` script:
-```bash
-$ ./setup
-```
+
+    $ ./setup
+
 This will install any necessary system dependencies, setup the
 virtualenv, setup NLTK with the necessary data, install Postgres and setup its databases,
 download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download), 
@@ -64,39 +65,36 @@ and generate the documentation.
 
 ### Database
 You will also need to setup the databases, which you can do with:
-```bash
-$ ./run db:create
-```
+
+    $ ./run db:create
+
 This creates a Postgres user, `argos_user`, and sets up development and
 testing databases (`argos_dev`, and `argos_test`) respectively. (If you ran `./setup` already, this step should not be necessary.)
 
 You can optionally setup the default sources for collecting
 articles by doing (make sure Postgres is running):
-```bash
-(argos) $ python manage.py create:sources
-```
+
+    (argos) $ python manage.py create:sources
 
 ### Training the Vectorizer
 Finally, you will need to train the vectorizer pipeline for the brain,
 which is implemented in `argos.core.brain.vectorizer`. You can train this
 pipeline with a JSON file of training data structured like so:
-```
-[
-    {
-        'title': 'Some title',
-        'text': 'Some text'
-    }, {
-        'title': 'Another article',
-        'text': 'Foo bar'
-    },
-    ...
-]
-```
+
+    [
+        {
+            'title': 'Some title',
+            'text': 'Some text'
+        }, {
+            'title': 'Another article',
+            'text': 'Foo bar'
+        },
+        ...
+    ]
 
 And then the training is accomplished like so:
-```bash
-(argos) $ python manage.py train /path/to/training/data.json
-```
+
+    (argos) $ python manage.py train /path/to/training/data.json
 
 This will serialize (pickle) the trained pipeline to the `PIPELINE_PATH`
 specified in the config. This pipeline is used specifically to vectorize
@@ -108,12 +106,13 @@ composed of. You can collect this data using
 
 ## Running & Development
 And then when you're ready to start developing/testing, run:
-```bash
-$ ./go &
-```
+
+    $ ./go &
+
 This command will startup the Argos environment as a background process.
 It will tell you its `pid`, keep note of that so you can kill it later.
 The environment runs:
+
 * Redis (6379)
 * Stanford NER (8080)
 * RabbitMQ (5672)
@@ -125,53 +124,45 @@ fail, but it is because they are already running as services. Don't
 worry about it.*
 
 Then when you're done, kill it with:
-```bash
-$ kill <pid>
-```
 
+    $ kill <pid>
 
 You can setup seed data to work with:
-```bash
-(argos) $ python manage.py seed
-```
+
+    (argos) $ python manage.py seed
 
 And then run the API server:
-```bash
-(argos) $ python manage.py server
-```
+
+    (argos) $ python manage.py server
 
 You can run the frontend ('front') server instead:
-```bash
-(argos) $ python front.py
-```
+
+    (argos) $ python front.py
 
 To add a user as an admin:
-```bash
-(argos) $ python manage.py create:admin someone@someplace.com
-```
+
+    (argos) $ python manage.py create:admin someone@someplace.com
 
 ### Changes to the data model (Migrations)
 If you make changes to the data model, make sure you create a migration:
-```bash
-(argos) $ python manage.py db migrate
-```
+
+    (argos) $ python manage.py db migrate
 
 And then run the migration:
-```bash
-(argos) $ python manage.py db upgrade
-```
+
+    (argos) $ python manage.py db upgrade
 
 If you run into errors like:
-```
-sqlalchemy.exc.ProgrammingError: (ProgrammingError) column "<something>" of relation "article" already exists)
-```
+
+    sqlalchemy.exc.ProgrammingError: (ProgrammingError) column "<something>" of relation "article" already exists)
+
 it's likely because your database is already fully-migrated (perhaps you
 created a new one from scratch, based off the latest data model). You
 just need to properly "stamp" the database with the latest revision ID so that
 Alembic (which manages the migrations) knows that its up-to-date:
-```bash
-(argos) $ python manage.py db stamp head
-```
+
+    (argos) $ python manage.py db stamp head
+
 This marks the database as at the latest (`head`) revision.
 
 ---
@@ -179,15 +170,13 @@ This marks the database as at the latest (`head`) revision.
 ## Testing
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
-```bash
-(argos) $ ./run test
-```
+
+    (argos) $ ./run test
 
 You can also run more specific test modules:
-```bash
-(argos) $ ./run test tests/core
-(argos) $ ./run test tests/core/article_test.py
-```
+
+    (argos) $ ./run test tests/core
+    (argos) $ ./run test tests/core/article_test.py
 
 ---
 
@@ -195,9 +184,9 @@ You can also run more specific test modules:
 
 You can also profile some of the more intensive parts to identify
 bottlenecks:
-```bash
-(argos) $ python manage.py profile
-```
+
+    (argos) $ python manage.py profile
+
 **Note: don't run this in production as it modifies your database.**
 
 ---
@@ -226,17 +215,16 @@ articles or events are.
 articles or events are sufficiently similar to be grouped together.
 
 To run the evaluations:
-```bash
-(argos) $ python manage.py evaluate:event
-(argos) $ python manage.py evaluate:story
-```
+
+    (argos) $ python manage.py evaluate:event
+    (argos) $ python manage.py evaluate:story
+
 **Note: don't run this in production as it modifies your database.** 
 
 These will run evaluations on the provided datasets. To pass in a
 different dataset:
-```bash
-(argos) $ python manage.py evaluate:event -d /path/to/my/dataset.json
-```
+
+    (argos) $ python manage.py evaluate:event -d /path/to/my/dataset.json
 
 The dataset is expected to be in JSON format and adhere to a certain
 structure, which is what the `argos.corpora` sampler outputs.
