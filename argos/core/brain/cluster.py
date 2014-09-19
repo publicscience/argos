@@ -4,72 +4,62 @@ Cluster
 
 Clusters text documents.
 """
+from sys import platform
 
-from collections import namedtuple
+from scipy import clip
+from scipy.spatial.distance import pdist, squareform
+from scipy.cluster.hierarchy import linkage, fcluster
 
-Score = namedtuple('Score', ['cluster', 'avg_sim'])
+import numpy as np
+from sklearn.metrics.pairwise import pairwise_distances
 
-def cluster(obj, clusters, threshold=0.7, logger=None):
+def cluster(vecs, objs, metric='cosine', linkage_method='average', threshold=0.2):
     """
-    A generic clustering function.
-
-    It relies on the :class:`Clusterable` object's similarity function to assign
-    the object to a cluster, if a qualifying one is found.
-
-    .. note::
-        This function *does not* create a new cluster if a qualifying one isn't found.
-
-        Nor does it save the cluster changes – it is expected that the database session is committed outside of the function.
-
-    Args:
-        | obj (Clusterable)     -- the object to be clustered
-        | cluster (list)        -- the list of Clusters to compare to
-        | threshold (float)     -- the minimum similarity threshold for a qualifying cluster
-        | logger (logger)       -- will log to this logger if one is provided (default: None)
-
-    Returns:
-        | the qualifying cluster if found, else None.
-
-    It's meant to be called from :class:`Cluster` subclass's own `cluster` methods.
+    Hierarchical Agglomerative Clustering.
     """
 
-    # For logging purposes.
-    name = obj.__class__.__name__
-    logger.debug('Using {0} candidate clusters.'.format(len(clusters)))
+    if platform != 'darwin':
+        # This breaks on OSX 10.9.4, py3.3+, with large arrays:
+        # https://stackoverflow.com/questions/11662960/ioerror-errno-22-invalid-argument-when-reading-writing-large-bytestring
+        # https://github.com/numpy/numpy/issues/3858
 
-    # Keep tracking of qualifying clusters
-    # and their avg sim with this obj.
-    qual_scores = []
+        # This returns the distance matrix in squareform,
+        # we use squareform() to convert it to condensed form, which is what linkage() accepts.
+        # n_jobs=-2 to use all cores except 1.
+        #distance_matrix = pairwise_distances(vecs, metric=metric, n_jobs=-1)
+        #distance_matrix = squareform(distance_matrix, checks=False)
 
-    # The selected cluster
-    # to return.
-    sel_clus = None
+        # Just using pdist for now because it seems way faster.
+        # Possible that the multicore gains aren't seen until you have many cores going.
+        # Also, pdist stores an array in memory that can be very huge, which is why
+        # memory constrains the core usage.
+        distance_matrix = pdist(vecs, metric=metric)
 
-    # Compare the obj with the candidate clusters.
-    for clus in clusters:
-        avg_sim = clus.similarity(obj)
-        if logger: logger.debug('Average similarity was {0}.'.format(avg_sim))
-        if avg_sim > threshold:
-            qual_scores.append( Score(clus, avg_sim) )
+    else:
+        distance_matrix = pdist(vecs, metric=metric)
 
-    num_qual = len(qual_scores)
-    if logger: logger.debug('Found {0} qualifying clusters.'.format(num_qual))
+    linkage_matrix = linkage(distance_matrix, method=linkage_method, metric=metric)
 
-    if num_qual == 1:
-        # Grab the only cluster and add the obj.
-        if logger: logger.debug('Only one qualifying cluster, adding {0} to it.'.format(name))
-        sel_clus = qual_scores[0].cluster
+    # Floating point errors with the cosine metric occasionally lead to negative values.
+    # Round them to 0.
+    linkage_matrix = clip(linkage_matrix, 0, np.amax(linkage_matrix))
 
-    elif num_qual > 1:
-        # Get the most similar cluster and add the obj.
-        if logger: logger.debug('Multiple qualifying clusters found, adding {0} to the most similar one.'.format(name))
-        max_score = Score(None, 0)
-        for score in qual_scores:
-            if score.avg_sim > max_score.avg_sim:
-                max_score = score
-        sel_clus = max_score.cluster
+    labels = fcluster(linkage_matrix, threshold, criterion='distance')
 
-    if sel_clus:
-        sel_clus.add(obj)
+    return labels_to_lists(objs, labels)
 
-    return sel_clus
+
+def labels_to_lists(objs, labels):
+    """
+    Convert a list of objects
+    to be a list of lists arranged
+    according to a list of labels.
+    """
+    tmp = {}
+
+    for i, label in enumerate(labels):
+        if label not in tmp:
+            tmp[label] = []
+        tmp[label].append(objs[i])
+
+    return [v for v in tmp.values()]

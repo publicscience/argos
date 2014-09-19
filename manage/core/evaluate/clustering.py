@@ -4,6 +4,11 @@ Clustering evaluation
 
 """
 
+# Override the debug setting
+# or it'll log a bunch of stuff.
+from argos.conf import APP
+APP['DEBUG'] = False
+
 from argos.datastore import db
 from argos.core.models import Article, Event, Story
 from argos.core.models.cluster import Clusterable
@@ -39,7 +44,7 @@ class Evaluator():
         self.datapath = os.path.expanduser(datapath)
         self.clusterables, self.labels_true, self.expected_clusters = self._load_data()
 
-        weights = [val for val in numpy.linspace(0.0, 1.0, 10.0)]
+        weights = [val for val in numpy.linspace(0.0, 1.0, 4.0)]
 
         self.default_search_grid = {
             # Similarity thresholds
@@ -69,6 +74,7 @@ class Evaluator():
         completed_combos = 0
         for vals in params_grid.values():
             total_combos *= len(vals)
+        print('Trying {0} combinations of parameters'.format(total_combos))
         progress_bar(completed_combos/total_combos * 100)
 
         # Patch things that are time-consuming,
@@ -146,9 +152,7 @@ class Evaluator():
             # Run the clustering.
             self.cluster_cls.cluster(
                 self.clusterables,
-                threshold=threshold,
-                debug=False,
-                log=False)
+                threshold=threshold)
 
             # Get the resulting labels.
             clusters = self.cluster_cls.query.all()

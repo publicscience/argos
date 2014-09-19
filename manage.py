@@ -3,8 +3,8 @@ import sys
 from flask.ext.script import Manager, Shell, Server
 from flask.ext.migrate import MigrateCommand
 
+from manage import core, web
 from argos.web import api
-from manage import web, core
 
 from flask import request
 

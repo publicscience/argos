@@ -13,8 +13,8 @@ import ner
 from sklearn.feature_extraction.text import HashingVectorizer
 
 from argos.conf import APP
-from argos.core.brain import strip
-from argos.core.brain.vectorizer import Tokenizer
+from . import strip
+from .vectorizer import Tokenizer
 
 from argos.util.logger import logger
 logger = logger(__name__)
@@ -140,7 +140,7 @@ def vectorize(concepts):
     it is trained for that kind of data and thus is inappropriate for concepts.
     So instead we just use a simple hashing vectorizer.
     """
-    h = HashingVectorizer(input='content', stop_words='english', norm=None, tokenizer=Tokenizer())
+    h = HashingVectorizer(input='content', stop_words='english', norm='l1', tokenizer=Tokenizer())
     if type(concepts) is str:
         # Extract and return the vector for the single document.
         return h.transform([concepts]).toarray()[0]
