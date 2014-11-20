@@ -5,19 +5,11 @@ from argos.core import brain
 from argos.core.brain import summarizer
 from argos.core.brain.cluster import cluster
 
-from argos.util.logger import logger
-from argos.conf import APP
-
+from itertools import chain
 from datetime import datetime
 from math import log
 from sqlalchemy import event, inspect
-
-logr = logger('EVENT_CLUSTERING')
-
-if APP['DEBUG']:
-    logr.setLevel('DEBUG')
-else:
-    logr.setLevel('ERROR')
+from difflib import SequenceMatcher
 
 events_articles = join_table('events_articles', 'event', 'article')
 events_mentions = join_table('events_mentions', 'event', 'alias')
@@ -92,6 +84,13 @@ class Event(Cluster):
         sign = 1 if score > 0 else -1 if score < 0 else 0
         seconds = epoch_seconds - 1134028003
         return round(order + sign * seconds / 45000, 7)
+
+    def update_score(self):
+        # Calculate the raw score.
+        self.raw_score = sum([member.score for member in self.members])
+
+        # Cache a score.
+        self._score = self.calculate_score()
 
     def vectorize(self):
         """
@@ -168,34 +167,24 @@ class Event(Cluster):
             | articles (list)       -- the Articles to cluster
             | threshold (float)     -- the similarity threshold for qualifying a cluster
         """
-        updated_clusters = []
-        active_clusters = Event.query.filter_by(active=True).all()
         now = datetime.utcnow()
+        active = Event.query.filter_by(active=True).all()
 
-        for article in articles:
-            # Select candidate clusters,
-            # i.e. active clusters which share at least one concept with this article.
-            a_cons = article.concept_slugs
-            candidate_clusters = []
-            for c in active_clusters:
-                c_cons = c.concept_slugs
-                if set(c_cons).intersection(a_cons):
-                    candidate_clusters.append(c)
+        existing_clusters = [event.members for event in active]
+        existing_articles = list(chain.from_iterable(existing_clusters))
 
-            selected_cluster = cluster(article, candidate_clusters, threshold=threshold, logger=logr)
+        articles = articles + existing_articles
+        vectors = [a.vectors for a in articles]
+        clusters = cluster(vectors, articles)
 
-            # If no selected cluster was found, then create a new one.
-            if not selected_cluster:
-                logr.debug('No qualifying clusters found, creating a new cluster.')
-                selected_cluster = Event([article])
-                db.session.add(selected_cluster)
+        # Convert to sorted lists of ids for comparison.
+        existing_clusters_ = [sorted([a.id for a in cluster.members]) for cluster in existing_clusters]
+        clusters_ = [sorted([a.id for a in cluster.members]) for cluster in clusters_]
 
-                # The new cluster is also an active cluster.
-                active_clusters.append(selected_cluster)
+        #for cluster in clusters_:
+            #for excluster in existing_clusters_:
 
-            updated_clusters.append(selected_cluster)
-
-        for clus in active_clusters:
+        for clus in active:
             # Mark expired clusters inactive.
             if (now - clus.updated_at).days > 3:
                 clus.active = False
@@ -209,12 +198,7 @@ class Event(Cluster):
 def receive_before_update(mapper, connection, target):
     # Only make these changes if the articles have changed.
     if inspect(target).attrs.members.history.has_changes():
-        # Calculate the raw score.
-        target.raw_score = sum([member.score for member in target.members])
-
-        # Cache a score.
-        target._score = target.calculate_score()
-
+        target.update_score()
         target.updated_at = datetime.utcnow()
 
         # Reset calculated values.
@@ -224,11 +208,6 @@ def receive_before_update(mapper, connection, target):
 
 @event.listens_for(Event, 'before_insert')
 def receive_before_insert(mapper, connection, target):
-    # Calculate the raw score.
-    target.raw_score = sum([member.score for member in target.members])
-
-    # Cache a score.
-    target._score = target.calculate_score()
-
+    target.udpate_score()
     target.updated_at = datetime.utcnow()
 
