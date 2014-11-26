@@ -41,7 +41,7 @@ def patch_concepts():
     # Patch these methods so
     # tests don't require the Stanford NER server.
     patcher = Patcher([
-        'argos.core.brain.conceptor.concepts'
+        'galaxy.concept.concepts'
     ])
     return patcher
 
@@ -54,7 +54,7 @@ def patch_summarization():
 
 def patch_vectorize():
     patcher = Patcher([
-        'argos.core.brain.vectorizer.vectorize'
+        'galaxy.vector.vectorize'
     ])
     return patcher
 
@@ -144,7 +144,7 @@ def faux_summarize(title, text):
 def faux_multisummarize(docs):
     return ['this', 'is', 'a', 'fake', 'summary']
 
-from argos.core.brain.vectorizer import vectorize
+from galaxy import vectorize
 cached_vector = vectorize('foo bar')
 def faux_vectorize(docs):
     return cached_vector

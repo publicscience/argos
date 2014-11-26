@@ -27,7 +27,7 @@ class APITest(RequiresAPI):
                 'image': concept.image,
                 'commonness': '100.0',
                 'stories': [{
-                    'relatedness': '0.5',
+                    'relatedness': str(1.0/len(story.concepts)),
                     'id': story.id,
                     'url': '/stories/{0}'.format(story.id)}]
         }
@@ -46,7 +46,7 @@ class APITest(RequiresAPI):
         expected_concepts = [{
             'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
-            'score': '0.5'
+            'score': str(1.0/len(event.concepts))
         } for concept in event.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in event.mentions]
         for member in event.members:
@@ -88,7 +88,7 @@ class APITest(RequiresAPI):
         expected_concepts = [{
             'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
-            'score': '0.5'
+            'score': str(1.0/len(story.concepts))
         } for concept in story.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in story.mentions]
         for member in story.events:

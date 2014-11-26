@@ -1,15 +1,16 @@
 from argos.datastore import db, join_table
 from argos.core.models.cluster import Cluster
 from argos.core.models.concept import BaseConceptAssociation
-from argos.core import brain
 from argos.core.brain import summarizer
-from argos.core.brain.cluster import cluster
 
 from itertools import chain
 from datetime import datetime
 from math import log
 from sqlalchemy import event, inspect
 from difflib import SequenceMatcher
+from nltk.tokenize import sent_tokenize
+
+import galaxy as gx
 
 events_articles = join_table('events_articles', 'event', 'article')
 events_mentions = join_table('events_mentions', 'event', 'alias')
@@ -51,7 +52,7 @@ class Event(Cluster):
         Breaks up a summary back into its
         original sentences (as a list).
         """
-        return brain.sentences(self.summary)
+        return sent_tokenize(self.summary)
 
     @property
     def score(self):
@@ -100,8 +101,8 @@ class Event(Cluster):
             (bag of words vector, concepts vector)
         """
         if not hasattr(self, 'vectors') or self.vectors is None:
-            bow_vec = brain.vectorizer.vectorize(self.text)
-            ent_vec = brain.conceptor.vectorize(self.member_concept_slugs)
+            bow_vec = gx.vectorize(self.text)
+            ent_vec = gx.concept_vectorize(self.member_concept_slugs)
             self.vectors = [bow_vec, ent_vec]
         return self.vectors
 
@@ -138,62 +139,6 @@ class Event(Cluster):
             self.summary = ' '.join(summarizer.multisummarize([m.text for m in self.members]))
         return self.summary
 
-    @staticmethod
-    def recluster(articles, threshold=0.7):
-        """
-        Reclusters a set of articles,
-        resetting their existing event membership.
-        """
-        for article in articles:
-            article.events = []
-        db.session.commit()
-
-        # Prune childless events.
-        # This can probably be handled by SQLAlchemy through some configuration...
-        for event in Event.query.filter(~Event.members.any()).all():
-            db.session.delete(event)
-        db.session.commit()
-
-        # Re-do the clustering.
-        Event.cluster(articles, threshold=threshold)
-
-    @staticmethod
-    def cluster(articles, threshold=0.7):
-        """
-        Clusters a set of articles
-        into existing events (or creates new ones).
-
-        Args:
-            | articles (list)       -- the Articles to cluster
-            | threshold (float)     -- the similarity threshold for qualifying a cluster
-        """
-        now = datetime.utcnow()
-        active = Event.query.filter_by(active=True).all()
-
-        existing_clusters = [event.members for event in active]
-        existing_articles = list(chain.from_iterable(existing_clusters))
-
-        articles = articles + existing_articles
-        vectors = [a.vectors for a in articles]
-        clusters = cluster(vectors, articles)
-
-        # Convert to sorted lists of ids for comparison.
-        existing_clusters_ = [sorted([a.id for a in cluster.members]) for cluster in existing_clusters]
-        clusters_ = [sorted([a.id for a in cluster.members]) for cluster in clusters_]
-
-        #for cluster in clusters_:
-            #for excluster in existing_clusters_:
-
-        for clus in active:
-            # Mark expired clusters inactive.
-            if (now - clus.updated_at).days > 3:
-                clus.active = False
-            else:
-                clus.update()
-
-        db.session.commit()
-        return updated_clusters
-
 @event.listens_for(Event, 'before_update')
 def receive_before_update(mapper, connection, target):
     # Only make these changes if the articles have changed.
@@ -208,6 +153,6 @@ def receive_before_update(mapper, connection, target):
 
 @event.listens_for(Event, 'before_insert')
 def receive_before_insert(mapper, connection, target):
-    target.udpate_score()
+    target.update_score()
     target.updated_at = datetime.utcnow()
 

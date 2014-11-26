@@ -108,7 +108,7 @@ class UserAPITest(RequiresAPI):
         expected_concepts = [{
             'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
-            'score': '0.5'
+            'score': str(1.0/len(story.concepts))
         } for concept in story.concepts]
         expected_watchers = [{'url': '/users/{0}'.format(user.id), 'id': user.id}]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in story.mentions]
@@ -190,6 +190,7 @@ class UserAPITest(RequiresAPI):
         self.db.session.add(user)
 
         event = fac.event()
+
         user.bookmarked.append(event)
         save()
 
@@ -199,7 +200,7 @@ class UserAPITest(RequiresAPI):
         expected_concepts = [{
             'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
-            'score': '0.5'
+            'score': str(1.0/len(event.concepts))
         } for concept in event.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in event.mentions]
         for member in event.members:
@@ -223,6 +224,10 @@ class UserAPITest(RequiresAPI):
                 'mentions': expected_mentions,
                 'stories': []
         }
+
+        print(self.json(r))
+        print('\n\n\n')
+        print([expected])
 
         self.assertEqual(self.json(r), [expected])
 

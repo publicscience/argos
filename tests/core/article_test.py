@@ -1,42 +1,9 @@
 from tests import RequiresDatabase
 import tests.factories as fac
-from datetime import datetime, timedelta
 
 from argos.core.models import Article, Concept
 
 class ArticleTest(RequiresDatabase):
-    def test_identical_similarity(self):
-        # Identical
-        a = fac.article()
-        b = fac.article()
-        sim = a.similarity(b)
-        self.assertEqual(sim, 1.0)
-
-    def test_time_bias(self):
-        # Identical
-        a = fac.article()
-        b = fac.article()
-        sim = a.similarity(b)
-
-        # Set time difference
-        b.created_at = datetime.utcnow() - timedelta(days=10)
-        sim_ = a.similarity(b)
-
-        self.assertTrue(sim > sim_)
-
-    def test_small_time_bias(self):
-        # Identical
-        a = fac.article()
-        b = fac.article()
-        sim = a.similarity(b)
-
-        # Set time difference to be small,
-        # small enough that it doesn't affect the score.
-        b.created_at = datetime.utcnow() - timedelta(days=1)
-        sim_ = a.similarity(b)
-
-        self.assertEqual(sim, sim_)
-
     def test_conceptize_creates_new_concepts_if_no_existing_concept_is_found(self):
         self.assertEqual(Concept.query.count(), 0)
 
@@ -60,7 +27,7 @@ class ArticleTest(RequiresDatabase):
         # Mock things so we extract one concept with the same URI
         # as the one we just created.
         self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
-        self.create_patch('argos.core.brain.conceptor.concepts', return_value=['An concept'])
+        self.create_patch('galaxy.concepts', return_value=['An concept'])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)
@@ -81,7 +48,7 @@ class ArticleTest(RequiresDatabase):
         # Mock things so we extract one concept with the same URI
         # as the one we just created.
         self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
-        self.create_patch('argos.core.brain.conceptor.concepts', return_value=[concept.aliases[0].name])
+        self.create_patch('galaxy.concepts', return_value=[concept.aliases[0].name])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)
@@ -98,7 +65,7 @@ class ArticleTest(RequiresDatabase):
 
         # Mock things so two concepts are returned, but since they share the same uri, they point to the same concept.
         self.create_patch('argos.core.knowledge.uri_for_name', return_value=uri)
-        self.create_patch('argos.core.brain.conceptor.concepts', return_value=['Concept alias one', 'Concept alias two'])
+        self.create_patch('galaxy.concepts', return_value=['Concept alias one', 'Concept alias two'])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)
@@ -127,7 +94,7 @@ class ArticleTest(RequiresDatabase):
         mock_func.side_effect = mock_uri_for_name
 
         # One concept appears 3 times, the other only once.
-        self.create_patch('argos.core.brain.conceptor.concepts', return_value=['some concept', 'another concept', 'some concept', 'some concept'])
+        self.create_patch('galaxy.concepts', return_value=['some concept', 'another concept', 'some concept', 'some concept'])
 
         # Create the article, which calls conceptize.
         article = Article(title='A title', text='Some text', score=100)

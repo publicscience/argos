@@ -38,4 +38,4 @@ def strip(text):
     punctuation = string.punctuation + '“”‘’–"'
     return text.strip(punctuation)
 
-from . import conceptor, cluster, summarizer, vectorizer
+from . import cluster, summarizer

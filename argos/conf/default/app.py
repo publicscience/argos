@@ -12,9 +12,6 @@ KNOWLEDGE_HOST = 'localhost'
 DATASETS_PATH = '~/env/argos/data/knowledge/'
 JENA_PATH = '~/env/argos/jena/jena'
 
-# Where to store/retrieve the pickled vectorizing pipeline.
-PIPELINE_PATH = '~/env/argos/data/'
-
 # http://bizvizz.com/api/request
 BIZVIZZ_API_KEY = 'some key'
 
@@ -127,7 +124,7 @@ SECURITY_POST_REGISTER_VIEW = None
 SECURITY_POST_CONFIRM_VIEW = None
 SECURITY_POST_CHANGE_VIEW = None
 
-# Note: If the following is None, defaults to HTTP 403 
+# Note: If the following is None, defaults to HTTP 403
 #       response
 SECURITY_UNAUTHORIZED_VIEW = 'security.login'
 
@@ -147,7 +144,7 @@ SECURITY_SEND_LOGIN_TEMPLATE = 'security/send_login.html'
 # Feature Flags
 # ==============
 
-# Note: Flag to create an endpoint for confirming email addresses upon 
+# Note: Flag to create an endpoint for confirming email addresses upon
 #       new account creation (SECURITY_CONFIRM_URL)
 SECURITY_CONFIRMABLE = False
 

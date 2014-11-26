@@ -2,11 +2,10 @@ from argos.datastore import db, join_table
 from argos.core.models import Concept, Event
 from argos.core.models.concept import BaseConceptAssociation
 from argos.core.models.cluster import Cluster
-from argos.core.brain import sentences
-from argos.core.brain.cluster import cluster
 from argos.core.brain.summarizer import multisummarize
 
 import itertools
+from nltk.tokenize import sent_tokenize
 
 from argos.util.logger import logger
 from argos.conf import APP
@@ -83,7 +82,7 @@ class Story(Cluster):
         Breaks up a summary back into its
         original sentences (as a list).
         """
-        return sentences(self.summary)
+        return sent_tokenize(self.summary)
 
     def summarize(self):
         """
@@ -94,56 +93,3 @@ class Story(Cluster):
         else:
             self.summary = ' '.join(multisummarize([m.summary for m in self.members]))
         return self.summary
-
-    @staticmethod
-    def recluster(events, threshold=0.7):
-        """
-        Reclusters a set of events,
-        resetting their existing story membership.
-        """
-        for event in events:
-            event.stories = []
-        db.session.commit()
-
-        # Prune childless stories.
-        # This can probably be handled by SQLAlchemy through some configuration...
-        for story in Story.query.filter(~Story.members.any()).all():
-            db.session.delete(story)
-        db.session.commit()
-
-        # Re-do the clustering.
-        Story.cluster(events, threshold=threshold)
-
-    @staticmethod
-    def cluster(events, threshold=0.7):
-        """
-        Clusters a set of events
-        into existing stories (or creates new ones).
-
-        Args:
-            | events (list)         -- the Events to cluster
-            | threshold (float)     -- the similarity threshold for qualifying a cluster
-
-        Returns:
-            | clusters (list)       -- the list of updated clusters
-        """
-        updated_clusters = []
-
-        for event in events:
-            # Find stories which have some matching concepts with this event.
-            candidate_clusters = Story.query.filter(Concept.slug.in_(event.concept_slugs)).all()
-
-            # Cluster this event.
-            selected_cluster = cluster(event, candidate_clusters, threshold=threshold, logger=logr)
-
-            # If no selected cluster was found, then create a new one.
-            if not selected_cluster:
-                logr.debug('No qualifying clusters found, creating a new cluster.')
-                selected_cluster = Story([event])
-                db.session.add(selected_cluster)
-                db.session.commit() # save the cluster the candidate cluster query can consider it.
-
-            updated_clusters.append(selected_cluster)
-
-        db.session.commit()
-        return updated_clusters

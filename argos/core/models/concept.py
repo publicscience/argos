@@ -1,9 +1,9 @@
 from argos.datastore import db, Model
 
-from argos.core import brain
 from argos.core import knowledge
 from argos.util import storage
 
+import galaxy as gx
 from slugify import slugify
 from datetime import datetime
 from os.path import splitext
@@ -238,7 +238,7 @@ class Concept(Model):
         and add the appropriate mentions.
         """
         concepts = []
-        for c_name in brain.conceptor.concepts(self.summary):
+        for c_name in gx.concepts(self.summary):
             # Search for the concept.
             uri = knowledge.uri_for_name(c_name)
 

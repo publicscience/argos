@@ -154,10 +154,14 @@ class Cluster(Clusterable):
         Looks for the cluster member that is most similar to the others,
         and then uses the title of that member.
         """
+        # TO DO
+        # the title gets set at the end of the clustering process by getting the most representative
+        # node of a cluster.
         max_member = (None, 0)
         max_member_w_image = (None, 0)
         for member in self.members:
-            avg_sim = self.similarity(member)
+            #avg_sim = self.similarity(member)
+            avg_sim = 0.5
             if avg_sim >= max_member[1]:
                 max_member = (member, avg_sim)
             if avg_sim >= max_member_w_image[1] and member.image is not None:

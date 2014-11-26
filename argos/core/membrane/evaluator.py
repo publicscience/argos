@@ -6,10 +6,9 @@ Collects ranking info about articles,
 such as number of shares, likes, tweets, etc.
 """
 
-from time import sleep
-
-from urllib import request, error, parse
 import json
+from urllib import request, error, parse
+from time import sleep
 
 import xmltodict
 

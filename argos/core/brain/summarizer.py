@@ -5,13 +5,13 @@ Summarizer
 Summarizes documents.
 """
 
-from . import sentences
-from .vectorizer import tokenize, stopwords, vectorize
-
 from re import sub
 from math import fabs
 from collections import Counter
+
 from scipy.spatial.distance import cosine
+from nltk.tokenize import sent_tokenize
+from galaxy.vector import tokenize, stopwords, vectorize
 
 IDEAL_WORDS = 20
 
@@ -27,14 +27,14 @@ def summarize(title, text, summary_length=5):
     Returns:
         | summary (list)    -- list of sentences selected for the summary.
 
-    Currently uses a modified version of `PyTeaser <https://github.com/xiaoxu193/PyTeaser>`_, which is based off of `TextTeaser <https://github.com/MojoJolo/textteaser>`_.
+    Currently uses a modified version of `PyTeaser <https://github.com/xiaoxu193/PyTeaser>`, which is based off of `TextTeaser <https://github.com/MojoJolo/textteaser>`.
     """
     summary = []
     keys = keywords(text)
     title_tokens = tokenize(title)
 
     # Score sentences and use the top selections.
-    ranks = score(sentences(text), title_tokens, keys).most_common(summary_length)
+    ranks = score(sent_tokenize(text), title_tokens, keys).most_common(summary_length)
     for rank in ranks:
         summary.append(rank[0])
 
@@ -65,7 +65,7 @@ def multisummarize(docs, summary_length=5):
     # Also collect position information about each sentence.
     sents = []
     for doc in docs:
-        sents += [(sent, vectorize(sent), pos + 1) for pos, sent in enumerate(sentences(doc))]
+        sents += [(sent, vectorize(sent), pos + 1) for pos, sent in enumerate(sent_tokenize(doc))]
     clusters = []
 
     # Cluster the sentences.
@@ -87,7 +87,7 @@ def multisummarize(docs, summary_length=5):
             if avg_sim >= max_cluster[1]:
                 max_cluster = cluster, avg_sim
 
-        # If a cluster was found, 
+        # If a cluster was found,
         # add the sentence to it
         if max_cluster[0]:
             max_cluster[0].append(sent)
