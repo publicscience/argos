@@ -9,8 +9,8 @@ from urllib.parse import urlencode
 from urllib import request
 import json
 
-from argos.conf import APP
-CLIENT_ID = APP['INSTAGRAM_CLIENT_ID']
+from argos.conf import API
+CLIENT_ID = API['INSTAGRAM_CLIENT_ID']
 
 def _request(**kwargs):
     url = 'https://api.instagram.com/v1/media/search?client_id={client_id}&{params}'.format(

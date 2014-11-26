@@ -9,8 +9,8 @@ from urllib.parse import urlencode
 from urllib import request
 import json
 
-from argos.conf import APP
-KEY = APP['OPENSECRETS_API_KEY']
+from argos.conf import API
+KEY = API['OPENSECRETS_API_KEY']
 
 def _request(method, **kwargs):
     url = 'http://api.opensecrets.org/?output=json&method={method}&apikey={key}&{params}'.format(

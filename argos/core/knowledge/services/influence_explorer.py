@@ -12,8 +12,8 @@ from urllib.parse import urlencode
 from urllib import request
 import json
 
-from argos.conf import APP
-KEY = APP['SUNLIGHT_API_KEY']
+from argos.conf import API
+KEY = API['SUNLIGHT_API_KEY']
 
 def _request(method, **kwargs):
     url = 'http://transparencydata.com/api/1.0/{method}.json?apikey={key}&{params}'.format(

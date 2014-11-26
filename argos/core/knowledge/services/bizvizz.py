@@ -6,5 +6,5 @@ http://bizvizz.com/api/documentation
 """
 
 
-from argos.conf import APP
-KEY = APP['BIZVIZZ_API_KEY']
+from argos.conf import API
+KEY = API['BIZVIZZ_API_KEY']

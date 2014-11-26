@@ -9,8 +9,8 @@ from urllib.parse import urlencode
 from urllib import request
 import json
 
-from argos.conf import APP
-CLIENT_ID = APP['FLICKR_CLIENT_ID']
+from argos.conf import API
+CLIENT_ID = API['FLICKR_CLIENT_ID']
 
 def _request(**kwargs):
     url = 'https://api.flickr.com/services/rest/?api_key={api_key}&format=json&nojsoncallback=1&{params}'.format(
