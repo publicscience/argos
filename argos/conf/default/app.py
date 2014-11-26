@@ -31,3 +31,14 @@ CLUSTERING = {
     'threshold': 50.0,
     'weights': [1., 90., 30.]
 }
+
+from galaxy import conf as galaxy_conf
+galaxy_conf.PIPELINE_PATH = '~/env/argos/'
+galaxy_conf.STANFORD = {
+    'host':  'localhost',
+    'port': 8080
+}
+galaxy_conf.SPOTLIGHT = {
+    'host': 'localhost',
+    'port': 2222
+}

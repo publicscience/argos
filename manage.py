@@ -35,11 +35,9 @@ if __name__ == '__main__':
     manager.add_command('seed', core.SeedCommand())
     manager.add_command('recluster', core.ReclusterCommand())
     manager.add_command('train', core.TrainVectorizerCommand())
-    
+
     # Evaluation
     manager.add_command('profile', core.ProfileCommand())
-    manager.add_command('evaluate:event', core.EvaluateEventCommand())
-    manager.add_command('evaluate:story', core.EvaluateStoryCommand())
 
     # Misc
     manager.add_command('db', MigrateCommand)

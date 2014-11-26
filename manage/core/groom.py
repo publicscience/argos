@@ -11,21 +11,33 @@ rather than rely on these commands. But they
 are temporary fixes.
 """
 
-from argos.core.models import Article, Event, Story
+import os
+import shutil
+from flask.ext.script import Command
 
-from flask.ext.script import Command, Option
+from argos.core.brain import cluster
+from argos.core.models import Article
+from argos.conf import APP
 
 class ReclusterCommand(Command):
-    option_list = (
-        Option(dest='threshold', type=float),
-    )
-    def run(self, threshold):
-        print('Reclustering articles...')
-        articles = Article.query.all()
-        Event.recluster(articles, threshold=threshold)
-        print('Reclustering articles successful.')
+    """
+    This will reconstruct the ENTIRE hierarchy.
+    You'd really only want to do this if you changed the clustering
+    parameters and want to reconstruct the hierarchy with the new params.
 
-        print('Reclustering events...')
-        events = Event.query.all()
-        Story.recluster(events, threshold=threshold)
-        print('Reclustering events successful.')
+    Depending on how many articles you have, this may take a TON of time.
+    """
+    def run(self):
+        path = APP['CLUSTERING']['hierarchy_path']
+
+        if os.path.exists(path):
+            print('Backing up existing hierarchy...')
+            shutil.move(path, path + '.bk')
+
+        # Reload the hierarchy.
+        cluster.load_hierarchy()
+
+        print('Reconstructing the hierarchy...')
+        articles = Article.query.all()
+        cluster.cluster(articles)
+        print('Reconstruction done!')

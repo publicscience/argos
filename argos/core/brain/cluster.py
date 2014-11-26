@@ -21,13 +21,16 @@ from argos.datastore import db
 from argos.core.models import Event, Article
 conf = APP['CLUSTERING']
 
-PATH = conf['hierarchy_path']
-if os.path.exists(PATH):
-    h = Hierarchy.load(PATH)
-else:
-    h = Hierarchy(metric=conf['metric'],
-                  lower_limit_scale=conf['lower_limit_scale'],
-                  upper_limit_scale=conf['upper_limit_scale'])
+def load_hierarchy():
+    global h
+    PATH = conf['hierarchy_path']
+    if os.path.exists(PATH):
+        h = Hierarchy.load(PATH)
+    else:
+        h = Hierarchy(metric=conf['metric'],
+                      lower_limit_scale=conf['lower_limit_scale'],
+                      upper_limit_scale=conf['upper_limit_scale'])
+load_hierarchy()
 
 def cluster(new_articles):
     # Build the article vectors.

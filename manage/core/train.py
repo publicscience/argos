@@ -3,7 +3,7 @@ import json
 from flask.ext.script import Command, Option
 
 from argos.core import brain
-
+from galaxy import concept, vector
 
 class TrainVectorizerCommand(Command):
     """
@@ -11,15 +11,18 @@ class TrainVectorizerCommand(Command):
     based on training data.
     """
     option_list = (
-        Option(dest='filepath', type=str),
+        Option(dest='datapath', type=str),
+        Option(dest='pipetype', type=str),
     )
-    def run(self, filepath):
-        train(filepath)
+    def run(self, datapath, pipetype):
+        print('Loading training data from {0}...'.format(datapath))
+        with open(datapath, 'r') as f:
+            training_data = json.load(f)
+            docs = ['{0} {1}'.format(d['title'], d['text']) for d in training_data]
 
-def train(filepath):
-    print('Loading training data from {0}...'.format(filepath))
-    training_file = open(filepath, 'r')
-    training_data = json.load(training_file)
+        # These train to the PIPELINE_PATH specified in argos.conf.app
+        if pipetype == 'bow':
+            vector.train(docs)
 
-    docs = ['{0} {1}'.format(d['title'], d['text']) for d in training_data]
-    brain.vectorizer.train(docs)
+        if pipetype in ['stanford', 'spotlight', 'keyword']:
+            concept.train(docs, pipetype=pipetype)
