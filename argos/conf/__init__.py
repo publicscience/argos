@@ -32,6 +32,8 @@ Configuration files should be of the format:
 NAMES = [
   'celery',
   'app',
+  'security',
+  'api'
 ]
 
 for n in NAMES:
