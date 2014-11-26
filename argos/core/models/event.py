@@ -7,7 +7,6 @@ from itertools import chain
 from datetime import datetime
 from math import log
 from sqlalchemy import event, inspect
-from difflib import SequenceMatcher
 from nltk.tokenize import sent_tokenize
 
 import galaxy as gx
@@ -27,6 +26,13 @@ class Event(Cluster):
     active          = db.Column(db.Boolean, default=True)
     raw_score       = db.Column(db.Float, default=0.0)
     _score          = db.Column(db.Float, default=0.0)
+
+    @classmethod
+    def all_active(cls):
+        """
+        Returns all active events.
+        """
+        return cls.query.filter_by(active=True).all()
 
     @property
     def articles(self):
@@ -93,19 +99,6 @@ class Event(Cluster):
         # Cache a score.
         self._score = self.calculate_score()
 
-    def vectorize(self):
-        """
-        Returns a tuple of vectors representing this event.
-
-        Events are represented by:
-            (bag of words vector, concepts vector)
-        """
-        if not hasattr(self, 'vectors') or self.vectors is None:
-            bow_vec = gx.vectorize(self.text)
-            ent_vec = gx.concept_vectorize(self.member_concept_slugs)
-            self.vectors = [bow_vec, ent_vec]
-        return self.vectors
-
     @property
     def member_concept_slugs(self):
         """
@@ -147,7 +140,6 @@ def receive_before_update(mapper, connection, target):
         target.updated_at = datetime.utcnow()
 
         # Reset calculated values.
-        target.vectors = None
         target._text = None
         target._mem_slugs = None
 

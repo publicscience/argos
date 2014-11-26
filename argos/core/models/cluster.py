@@ -79,10 +79,6 @@ class Clusterable(Model):
                 secondary=args['secondary'],
                 backref=db.backref(args['backref_name']))
 
-    def vectorize(self):
-        raise NotImplementedError
-
-
 class Cluster(Clusterable):
     """
     A cluster.

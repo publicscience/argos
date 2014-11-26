@@ -11,12 +11,6 @@ from slugify import slugify
 from collections import Counter
 from datetime import datetime
 
-# Ignore the invalid numpy warning,
-# which comes up when jaccard uses
-# empty vectors.
-import numpy
-numpy.seterr(invalid='ignore')
-
 articles_authors = join_table('articles_authors', 'article', 'author')
 articles_mentions = join_table('articles_mentions', 'article', 'alias')
 
@@ -55,23 +49,9 @@ class Article(Clusterable):
 
         if self.text is not None:
             self.conceptize()
-            self.vectorize()
 
         if self.score is None:
             self.score = 0.0
-
-    def vectorize(self):
-        """
-        Returns a tuple of vectors representing this article.
-
-        Articles are represented by:
-            (bag of words vector, concepts vector)
-        """
-        if not hasattr(self, 'vectors') or self.vectors is None:
-            bow_vec = gx.vectorize(self.text)
-            ent_vec = gx.concept_vectorize(' '.join([c.slug for c in self.concepts]))
-            self.vectors = [bow_vec, ent_vec]
-        return self.vectors
 
     def conceptize(self):
         """
