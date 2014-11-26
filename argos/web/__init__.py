@@ -1,4 +1,4 @@
-from argos.conf import APP
+from argos.conf import APP, SECURITY
 from argos.datastore import db
 
 from flask import Flask
@@ -12,6 +12,7 @@ import importlib
 def create_app(package_name=__name__, package_path=__path__, has_blueprints=True, **config_overrides):
     app = Flask(package_name, static_url_path='')
     app.config.update(APP)
+    app.config.update(SECURITY)
 
     # Apply overrides.
     app.config.update(config_overrides)
