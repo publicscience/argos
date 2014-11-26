@@ -274,7 +274,7 @@ class CollectorTest(RequiresDatabase):
         self.mock_articles.return_value = [
             Article(
                 title='Foo',
-                published=datetime.utcnow(),
+                created_at=datetime.utcnow(),
                 ext_url='foo.com',
                 text='dinosaurs are cool, Clinton',
                 source=self.source
@@ -319,8 +319,8 @@ class CollectorTest(RequiresDatabase):
 
     def test_articles(self):
         self.patch_extraction()
-        
-        articles = [] 
+
+        articles = []
         collector.get_articles(self.feed, lambda a: articles.append(a))
         self.assertEquals(len(articles), 1)
 
