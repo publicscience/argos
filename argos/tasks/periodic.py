@@ -1,5 +1,6 @@
 from argos.tasks import celery, notify
 
+from argos.core.brain import cluster
 from argos.core.models import Feed, Article, Event, Story
 from argos.core.membrane import collector
 from argos.datastore import db
@@ -42,47 +43,11 @@ def collect():
         notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url))
 
 @celery.task
-def cluster_articles(batch_size=5, threshold=0.1):
+def cluster_articles():
     """
     Clusters a batch of orphaned articles
-    into events.
+    from the past few days into events.
     """
-    articles = Article.query.filter(~Article.events.any()).limit(batch_size).all()
-    Event.cluster(articles, threshold=threshold)
+    articles = Article.query.filter(~Article.events.any(), Article.created_at < datetime.utcnow() - timedelta(days=2)).all()
+    cluster.cluster(articles)
     notify('Clustering articles successful.')
-
-@celery.task
-def cluster_events(batch_size=5, threshold=0.1):
-    """
-    Clusters a batch of orphaned events
-    into stories.
-    """
-    events = Event.query.filter(~Event.stories.any()).limit(batch_size).all()
-    Story.cluster(events, threshold=threshold)
-    notify('Clustering events successful.')
-
-@celery.task
-def recluster_events(batch_size=5, threshold=0.1):
-    """
-    Recluster events which already belong to stories.
-
-    Set this as a periodic task if, for instance,
-    you have changed the clustering threshold and
-    want existing clusters to reflect those changes.
-    """
-    events = Event.query.filter(Event.stories.any()).order_by(Event.updated_at.desc()).limit(batch_size).all()
-    Story.recluster(events, threshold=threshold)
-    notify('Reclustering events successful.')
-
-@celery.task
-def recluster_articles(batch_size=5, threshold=0.1):
-    """
-    Recluster articles which already belong to events.
-
-    Set this as a periodic task if, for instance,
-    you have changed the clustering threshold and
-    want existing clusters to reflect those changes.
-    """
-    articles = Article.query.filter(Article.events.any()).order_by(Article.updated_at.desc()).limit(batch_size).all()
-    Event.recluster(articles, threshold=threshold)
-    notify('Reclustering articles successful.')

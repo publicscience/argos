@@ -58,10 +58,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'argos.tasks.periodic.cluster_articles',
         'schedule': crontab(minute='*/10')
     },
-    'cluster-events': {
-        'task': 'argos.tasks.periodic.cluster_events',
-        'schedule': crontab(minute='*/10')
-    },
     'test-task': {
         'task': 'argos.tasks.notify',
         'schedule': crontab(minute=30, hour='*'),
@@ -77,6 +73,5 @@ CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (Queue('default'), Broadcast('broadcast_tasks'), )
 CELERY_ROUTES = {
         'argos.tasks.periodic.collect': {'queue': 'broadcast_tasks'},
-        'argos.tasks.periodic.cluster_articles': {'queue': 'broadcast_tasks'},
-        'argos.tasks.periodic.cluster_events': {'queue': 'broadcast_tasks'}
+        'argos.tasks.periodic.cluster_articles': {'queue': 'broadcast_tasks'}
 }
