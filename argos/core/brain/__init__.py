@@ -7,13 +7,6 @@ and "intelligence" faculties.
 """
 
 import string
-from nltk.tokenize import sent_tokenize
-
-def sentences(doc):
-    """
-    Extracts sentences from a document.
-    """
-    return sent_tokenize(doc)
 
 def trim(text):
     """
@@ -37,5 +30,3 @@ def strip(text):
     """
     punctuation = string.punctuation + '“”‘’–"'
     return text.strip(punctuation)
-
-from . import cluster, summarizer

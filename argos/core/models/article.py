@@ -5,11 +5,14 @@ from argos.core import knowledge
 
 import galaxy as gx
 
+import pytz
 from sqlalchemy import event
 from slugify import slugify
 
 from collections import Counter
 from datetime import datetime
+
+epoch = datetime.utcfromtimestamp(0).replace(tzinfo=pytz.UTC)
 
 articles_authors = join_table('articles_authors', 'article', 'author')
 articles_mentions = join_table('articles_mentions', 'article', 'alias')
@@ -33,6 +36,7 @@ class Article(Clusterable):
     score       = db.Column(db.Float, default=0.0)
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
     feed_id     = db.Column(db.Integer, db.ForeignKey('feed.id'))
+    node_id     = db.Column(db.Integer, unique=True, index=True)
     authors     = db.relationship('Author',
                     secondary=articles_authors,
                     backref=db.backref('articles', lazy='dynamic'))
@@ -101,6 +105,19 @@ class Article(Clusterable):
             assocs.append(assoc)
 
         self.concept_associations = assocs
+
+    @property
+    def published(self):
+        """Convert datetime to seconds"""
+        # If not timezone is set, assume UTC.
+        # super annoying and it's probably not a good guess but it's
+        # all we got for now.
+        # In production, we will be setting article publish times as utc when
+        # we fetch them, so it should be less of a problem there.
+        if self.created_at.tzinfo is None:
+            created_at = self.created_at.replace(tzinfo=pytz.UTC)
+        delta = created_at - epoch
+        return delta.total_seconds()
 
 @event.listens_for(Article, 'before_update')
 def receive_before_update(mapper, connection, target):
