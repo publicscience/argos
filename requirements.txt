@@ -65,8 +65,7 @@ git+git://github.com/ftzeng/python-goose.git
 # https://github.com/boto/boto/pull/1698
 git+git://github.com/ftzeng/boto.git@py3kport
 
-# Install unofficial mwlib Python 3 port.
-git+git://github.com/ftzeng/mwlib_simple.git@simple
 
-# Install unofficial pyner Python 3 port.
-git+git://github.com/ftzeng/pyner
+# Install galaxy (argos cluster).
+git+git://github.com/BowdoinOrient/topia.termextract.git
+git+ssh://git@github.com/ftzeng/galaxy.git

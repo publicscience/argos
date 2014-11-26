@@ -13,10 +13,6 @@ function setup_dependencies {
         brew install rabbitmq
         brew install wget
 
-        # Required by mwlib.
-        brew install libevent
-        brew install re2c
-
         # Redis
         brew install redis
 
@@ -29,6 +25,10 @@ function setup_dependencies {
 
         # PostgreSQL
         brew install postgres
+
+        # For galaxy
+        brew tap homebrew/science
+        brew install hdf5
 
     # Otherwise, assume Linux...
     else
@@ -45,10 +45,6 @@ function setup_dependencies {
         # Java for the NER server
         sudo apt-get install openjdk-7-jre -y
 
-        # Required by mwlib.
-        sudo apt-get install libevent-dev -y
-        sudo apt-get install re2c -y
-
         # Required by lxml.
         sudo apt-get install libxml2-dev libxslt1-dev python-dev lib32z1-dev -y
 
@@ -60,6 +56,9 @@ function setup_dependencies {
 
         # PostgreSQL
         sudo apt-get install postgresql postgresql-server-dev-9.3 -y
+
+        # For galaxy
+        sudo apt-get install libhdf5-dev
 
         sudo pip3 install virtualenv
     fi
@@ -73,7 +72,7 @@ function setup_virtualenv {
     # Setup the Python 3.3 virtualenv.
     virtualenv -p `which python3` $ARGOS_ENV --no-site-packages
     source $ARGOS_ENV/bin/activate
-    pip install numpy cython
+    pip install numpy cython numexpr
     pip install -r requirements.txt
 }
 
