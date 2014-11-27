@@ -68,7 +68,7 @@ if [ -z $1 ]
 then
     echo -e "$(tput setaf 3)Tell me what to do...$(tput sgr0)"
 
-elif [ $1 == 'test' ]
+elif [ $1 == 'tests' ]
 then
     shift # to pass the rest of the args
     nosetests $@ --logging-clear-handlers
