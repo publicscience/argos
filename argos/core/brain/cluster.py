@@ -1,11 +1,3 @@
-"""
-- add leaf node uuids to articles (article.node)
-    - index articles by the node id
-- incorporate new articles
-- when clustering, should get clusters of uuids
-- for each uuid,
-"""
-
 import os
 from difflib import SequenceMatcher
 from datetime import datetime
