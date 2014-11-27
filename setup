@@ -108,8 +108,8 @@ function setup_knowledge {
     echo -e "$(tput setaf 3)Setting up Apache Jena/Fuseki...$(tput sgr0)"
     echo -e "\n\n\n"
 
-    JENA_VERSION=2.12.0
-    FUSEKI_VERSION=1.1.0
+    JENA_VERSION=2.12.1
+    FUSEKI_VERSION=1.1.1
 
     wget -O $ARGOS_ENV/jena.tar.gz "http://mirrors.gigenet.com/apache//jena/binaries/apache-jena-$JENA_VERSION"
     wget -O $ARGOS_ENV/fuseki.tar.gz "http://mirrors.gigenet.com/apache//jena/binaries/jena-fuseki-$FUSEKI_VERSION-distribution.tar.gz"
