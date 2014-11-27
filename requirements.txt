@@ -69,3 +69,6 @@ git+git://github.com/ftzeng/boto.git@py3kport
 # Install galaxy (argos cluster).
 git+git://github.com/BowdoinOrient/topia.termextract.git
 git+ssh://git@github.com/ftzeng/galaxy.git
+
+# Doc theme
+git+git://github.com/ftzeng/futora.sphinx.git
