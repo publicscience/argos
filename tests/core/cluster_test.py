@@ -63,13 +63,13 @@ class ClusterTest(RequiresDatabase):
 
         # Since there are no events yet, we expect at least one to be created.
         articles = self.prepare_articles()
-        cluster.cluster(articles)
+        cluster.cluster(articles, min_articles=1)
 
         self.assertTrue(Event.query.count() > 0)
 
     def test_cluster_freezes_events(self):
         articles = self.prepare_articles(type='different')
-        cluster.cluster(articles)
+        cluster.cluster(articles, min_articles=1)
 
         self.assertEqual(Event.query.count(), 2)
 
@@ -92,7 +92,7 @@ class ClusterTest(RequiresDatabase):
 
     def test_cluster_updates_events(self):
         articles = self.prepare_articles(type='different')
-        cluster.cluster(articles)
+        cluster.cluster(articles, min_articles=1)
 
         self.assertEqual(Event.query.count(), 2)
         for event in Event.query.all():
@@ -100,7 +100,7 @@ class ClusterTest(RequiresDatabase):
 
         # These two articles should be identical to the first one.
         new_articles = self.prepare_articles(type='duplicate')
-        cluster.cluster(new_articles)
+        cluster.cluster(new_articles, min_articles=1)
 
         # The number of events should not have changed.
         self.assertEqual(Event.query.count(), 2)
@@ -111,3 +111,34 @@ class ClusterTest(RequiresDatabase):
                 self.assertEqual(event.members.count(), 1)
             else:
                 self.assertEqual(event.members.count(), 3)
+
+    def test_cluster_minimum_articles(self):
+        # Create articles and slice such that we expect one cluster of 2 articles and one of 1 article.
+        articles = self.prepare_articles(type='different') + self.prepare_articles(type='different')
+        articles = articles[:3]
+
+        # Require a minimum of two articles to create an event.
+        cluster.cluster(articles, min_articles=2)
+
+        # So we should only have one event.
+        self.assertEqual(Event.query.count(), 1)
+        self.assertEqual(Event.query.first().members.all(), [articles[0], articles[2]])
+
+    def test_cluster_minimum_articles_deletes(self):
+        articles = self.prepare_articles(type='different') + self.prepare_articles(type='different')
+        cluster.cluster(articles, min_articles=2)
+
+        # We should have two events first.
+        self.assertEqual(Event.query.count(), 2)
+
+        # Get one duplicate event.
+        new_articles = self.prepare_articles(type='different')
+        new_articles = new_articles[:1]
+
+        # Cluster the new duplicate event and raise the min.
+        # One cluster should have 3 now and one should have two.
+        cluster.cluster(new_articles, min_articles=3)
+
+        # One event should have been deleted.
+        self.assertEqual(Event.query.count(), 1)
+        self.assertEqual(Event.query.first().members.all(), [articles[0], articles[2], new_articles[0]])

@@ -24,7 +24,14 @@ def load_hierarchy():
                       upper_limit_scale=conf['upper_limit_scale'])
 load_hierarchy()
 
-def cluster(new_articles):
+def cluster(new_articles, min_articles=2):
+    """
+    Clusters a list of Articles into Events.
+
+    The `min_articles` param specifies the minimum amount of member articles required
+    to create or preserve an event. If an existing event comes to have less than this
+    minimum, it is deleted.
+    """
     # Build the article vectors.
     vecs = build_vectors(new_articles, conf['weights'])
 
@@ -38,6 +45,9 @@ def cluster(new_articles):
 
     # Get the (event) clusters.
     clusters = h.clusters(distance_threshold=conf['threshold'], with_labels=False)
+
+    # Filter out events that do not meet the minimum articles requirement.
+    clusters = [clus for clus in clusters if len(clus) >= min_articles]
 
     process_events(clusters)
 
