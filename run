@@ -71,7 +71,7 @@ then
 elif [ $1 == 'test' ]
 then
     shift # to pass the rest of the args
-    nosetests $@
+    nosetests $@ --logging-clear-handlers
 
 elif [ $1 == 'doc' ]
 then

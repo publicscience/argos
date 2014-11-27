@@ -13,6 +13,9 @@ from argos.tasks import workers
 from tests.patches import patch_knowledge, patch_concepts, patch_aws
 from tests import helpers
 
+import numpy as np
+np.seterr(invalid='ignore')
+
 test_config = {
         'SQLALCHEMY_DATABASE_URI': 'postgresql://argos_user:password@localhost:5432/argos_test'
 }
