@@ -40,7 +40,7 @@ def collect():
             feed.updating = False
             db.session.commit()
 
-        notify('Collecting for feed {0} is complete. Collected {1} new articles.'.format(feed.ext_url))
+        notify('Collecting for feed {0} is complete.'.format(feed.ext_url))
 
 @celery.task
 def cluster_articles():
