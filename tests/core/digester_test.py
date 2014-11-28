@@ -56,7 +56,9 @@ class KnowledgeTest(RequiresMocks):
 
         knowledge.digest()
         from argos.conf import APP
-        mock_call.assert_called_with([os.path.expanduser(os.path.join(APP['JENA_PATH'], 'bin/tdbloader2')), '--loc', 'tests/data/knowledge/knodb', 'tests/data/knowledge/images_en.ttl', 'tests/data/knowledge/labels_en.ttl', 'tests/data/knowledge/redirects_en.ttl'])
+        loader_path = os.path.expanduser(os.path.join(APP['JENA_PATH'], 'bin/tdbloader2'))
+        called_args = mock_call.call_args[0][0]
+        self.assertEqual(set(called_args), {loader_path, '--loc', 'tests/data/knowledge/knodb', 'tests/data/knowledge/images_en.ttl', 'tests/data/knowledge/labels_en.ttl', 'tests/data/knowledge/redirects_en.ttl'})
 
 
 if __name__ == '__main__':
