@@ -5,6 +5,10 @@ Concepts
 
     GET /concepts/:slug
 
+Example request::
+
+    curl -H "Accept: application/json" http://localhost:5000/concepts/John_Kerry
+
 Example response
 
 .. code-block:: json

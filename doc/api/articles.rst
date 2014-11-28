@@ -5,6 +5,10 @@ Articles
 
     GET /articles/:id
 
+Example request::
+
+    curl -H "Accept: application/json" http://localhost:5000/articles/1
+
 Example response
 
 .. code-block:: json

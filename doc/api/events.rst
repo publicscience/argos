@@ -13,6 +13,10 @@ Parameters
 | page          | int    | The page of events to fetch.     |
 +---------------+--------+----------------------------------+
 
+Example request::
+
+    curl -H "Accept: application/json" http://localhost:5000/events
+
 Example response
 
 .. code-block:: json
@@ -60,6 +64,10 @@ Example response
 **Get a single event**::
 
     GET /events/:id
+
+Example request::
+
+    curl -H "Accept: application/json" http://localhost:5000/events/1
 
 Example response
 
