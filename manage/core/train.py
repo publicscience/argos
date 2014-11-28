@@ -11,8 +11,8 @@ class TrainVectorizerCommand(Command):
     based on training data.
     """
     option_list = (
-        Option(dest='datapath', type=str),
         Option(dest='pipetype', type=str),
+        Option(dest='datapath', type=str),
     )
     def run(self, datapath, pipetype):
         print('Loading training data from {0}...'.format(datapath))

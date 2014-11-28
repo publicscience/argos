@@ -9,7 +9,8 @@ Argos
 environment for developing Argos. For deploying Argos to other
 environments, such as staging or production, please refer to
 [argos.cloud](https://github.com/publicscience/argos.cloud), which is
-designed specifically for that purpose.*
+designed specifically for that purpose. __[note: there have been several changes to argos
+as of late and argos.cloud is not yet updated]__*
 
 *Note: Argos requires some training data, which can be collected using
 the [argos.corpora](https://github.com/publicscience/argos.corpora) project.
@@ -40,7 +41,16 @@ The setup process for Argos is fairly complex, but some scripts vastly simplify 
     $ source ~/env/argos/bin/activate
 
 ### Configuration
-Override default configuration values in `argos/conf/app.py` and `argos/conf/celery.py`.
+Override default configuration values (defaults are found in `argos/conf/default/`) by
+creating a corresponding config in `argos/conf/`. For example, if you want to set your
+own API authentication credentials, do so by creating `argos/conf/api.py`, which will
+override `argos/conf/default/api.py`.
+
+Some important settings here are
+
+- API authentication credentials for any external services (in `argos/conf/api.py`)
+- AWS (S3) access keys (in `argos/conf/app.py`)
+- error email authentication info for both the app (in `argos/conf/app.py`) and celery (in `argos/conf/celery.py`)
 
 ### Dependencies
 Argos is built in Python 3.3, so make sure you have `pip3` and `virtualenv-3.3`:
@@ -59,8 +69,9 @@ Then, the easiest way to set things up is to just run the `setup` script:
 
 This will install any necessary system dependencies, setup the
 virtualenv, setup NLTK with the necessary data, install Postgres and setup its databases,
-download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download), 
+download and setup [Stanford NER](http://nlp.stanford.edu/software/CRF-NER.shtml#Download),
 download and setup [Apache Jena](https://jena.apache.org) & [Fuseki](https://jena.apache.org/documentation/serving_data/index.html),
+with data from [DBpedia](http://dbpedia.org/About), download and setup [DBpedia Spotlight](https://github.com/dbpedia-spotlight/dbpedia-spotlight/wiki)
 and generate the documentation.
 
 ### Database
@@ -76,10 +87,9 @@ articles by doing (make sure Postgres is running):
 
     (argos) $ python manage.py create:sources
 
-### Training the Vectorizer
-Finally, you will need to train the vectorizer pipeline for the brain,
-which is implemented in `argos.core.brain.vectorizer`. You can train this
-pipeline with a JSON file of training data structured like so:
+### Training the vectorizers
+Finally, you will need to train the vectorizer pipelines used in clustering.
+You can train this pipeline with a JSON file of training data structured like so:
 
     [
         {
@@ -92,19 +102,29 @@ pipeline with a JSON file of training data structured like so:
         ...
     ]
 
-And then the training is accomplished like so:
+You need to train a bag-of-words vectorizing pipeline and one for concepts/entities as well.
 
-    (argos) $ python manage.py train /path/to/training/data.json
+The training is accomplished like so:
+
+    (argos) $ python manage.py train <pipeline type> /path/to/training/data.json
+
+For example:
+
+    (argos) $ python manage.py train bow /path/to/training/data.json
+    (argos) $ python manage.py train stanford /path/to/training/data.json
 
 This will serialize (pickle) the trained pipeline to the `PIPELINE_PATH`
-specified in the config. This pipeline is used specifically to vectorize
-*news articles* so that should probably be what your training data is
-composed of. You can collect this data using
+specified in the config, generating filenames based on the pipeline type.
+This pipeline is used specifically to vectorize *news articles* so that should probably
+be what your training data is composed of. You can collect this data using
 [argos.corpora](https://github.com/publicscience/argos.corpora).
 
 ---
 
 ## Running & Development
+
+### Starting the environment
+
 And then when you're ready to start developing/testing, run:
 
     $ ./go &
@@ -115,9 +135,10 @@ The environment runs:
 
 * Redis (6379)
 * Stanford NER (8080)
+* DBpedia spotlight (2222)
 * RabbitMQ (5672)
 * Apache Jena Fuseki (3030)
-* A Celery worker
+* Celery workers
 
 *Note: If you're running this on Ubuntu, some of these processes may
 fail, but it is because they are already running as services. Don't
@@ -127,18 +148,31 @@ Then when you're done, kill it with:
 
     $ kill <pid>
 
+### Seeding development data
 You can setup seed data to work with:
 
     (argos) $ python manage.py seed
 
+### Running the API server
 And then run the API server:
 
     (argos) $ python manage.py server
 
+### Running the front end server
 You can run the frontend ('front') server instead:
 
     (argos) $ python front.py
 
+### Running the periodic celery tasks
+To run the periodic celery tasks, which includes collecting of new articles from feeds and
+clustering them into events, we use `celery beat`:
+
+    # First create this dir and chown it to whatever user is running celery beat
+    (argos) $ sudo mkdir -p /var/lib/celery
+
+    (argos) $ celery beat --app=argos.tasks.celery --schedule=/var/lib/celery/beat.db --pidfile=
+
+### Adding admin users
 To add a user as an admin:
 
     (argos) $ python manage.py create:admin someone@someplace.com
@@ -171,12 +205,12 @@ This marks the database as at the latest (`head`) revision.
 When you get everything setup it's worth running the tests to ensure
 that things have installed correctly:
 
-    (argos) $ ./run test
+    (argos) $ ./run tests
 
 You can also run more specific test modules:
 
-    (argos) $ ./run test tests/core
-    (argos) $ ./run test tests/core/article_test.py
+    (argos) $ ./run tests tests/core
+    (argos) $ ./run tests tests/core/article_test.py
 
 ---
 
@@ -219,7 +253,7 @@ To run the evaluations:
     (argos) $ python manage.py evaluate:event
     (argos) $ python manage.py evaluate:story
 
-**Note: don't run this in production as it modifies your database.** 
+**Note: don't run this in production as it modifies your database.**
 
 These will run evaluations on the provided datasets. To pass in a
 different dataset:
@@ -251,27 +285,8 @@ value from `0.0` to `1.0`, where `0.0` is completely dissimilar and
 
 See [argos.cloud](https://github.com/publicscience/argos.cloud).
 
----
-
-## Guide to the project
-Here are some quick notes to help you navigate through the project.
-
-**argos/core** --
-The core modules which provide the primary functionality of Argos.
-
-Consists of:
-* *core/brain* – summarization, clustering, entity extraction, providing
-"knowledge" for concepts, etc.
-* *core/digester* – processes data dumps.
-* *core/membrane* – interfaces with the outside world: collects
-articles, gets information about them (such as shared counts), etc.
-
-**argos/web** --
-All functionality which opens up Argos' core to the web, divided into
-API and "front" (the end-user frontend) packages.
-
-**argos/tasks** --
-For distributed and regular tasks (via Celery).
+**Note: argos has gone through some changes and argos.cloud has not yet been
+updated accordingly.**
 
 ---
 
