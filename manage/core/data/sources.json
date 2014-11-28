@@ -23,9 +23,6 @@
         "http://feeds.theguardian.com/theguardian/us/rss",
         "http://feeds.theguardian.com/theguardian/world/rss"
     ],
-    "The Independent": [
-        "http://www.independent.co.uk/news/world/rss"
-    ],
     "The Washington Post": [
         "http://feeds.washingtonpost.com/rss/politics",
         "http://feeds.washingtonpost.com/rss/world",
@@ -42,21 +39,5 @@
         "http://feeds.reuters.com/Reuters/PoliticsNews",
         "http://feeds.reuters.com/Reuters/worldNews",
         "http://feeds.reuters.com/Reuters/domesticNews"
-    ],
-    "Al Jazeera": [
-        "http://www.aljazeera.com/Services/Rss/?PostingId=2007731105943979989",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=2007721151816881407",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=200772115196613309",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=2007722144444234906",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=2007721155716791636",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=2007721152443657412",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=20121120141543822755",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=200861163157760548",
-        "http://www.aljazeera.com/Services/Rss/?PostingId=201082875028851478"
-    ],
-    "NPR": [
-        "http://www.npr.org/rss/rss.php?id=1012",
-        "http://www.npr.org/rss/rss.php?id=1003",
-        "http://www.npr.org/rss/rss.php?id=1004"
     ]
 }
