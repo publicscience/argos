@@ -1,6 +1,6 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={'autoflush': False})
 Model = db.Model
 
 def join_table(name, a, b):

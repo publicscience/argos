@@ -2,7 +2,7 @@ Cython==0.20.2
 Flask==0.10.1
 Flask-RESTful==0.2.12
 Flask-OAuthlib==0.5.0
-Flask-SQLAlchemy==1.0
+Flask-SQLAlchemy==2.0
 Flask-Script==2.0.5
 Flask-Security==1.7.2
 Flask-Migrate==1.2.0
@@ -10,7 +10,7 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 PyYAML==3.10
 Pygments==1.6
-SQLAlchemy==0.9.7
+SQLAlchemy==0.9.8
 Sphinx==1.2.2
 Werkzeug==0.9.6
 amqp==1.4.5

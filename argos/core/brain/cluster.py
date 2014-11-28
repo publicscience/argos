@@ -51,7 +51,7 @@ def cluster(new_articles, min_articles=2):
 
     process_events(clusters)
 
-    h.save(PATH)
+    h.save(os.path.expanduser(conf['hierarchy_path']))
 
 def process_events(clusters):
     """

@@ -6,28 +6,25 @@ Create some seed data.
 """
 
 from argos.datastore import db
-from argos.core.models import Concept, Article, Event, Story, Source
+from argos.core.brain import cluster
+from argos.core.models import Concept, Article, Event, Story, Source, Feed
 from argos.core.membrane import feed
 from argos.util.progress import progress_bar
 from argos.web.models.oauth import Client
-from werkzeug.security import gen_salt
+
+from flask.ext.script import Command
 
 # For creating a test user.
 from flask_security.registerable import register_user
 from flask import current_app
-
-from flask.ext.script import Command
+from werkzeug.security import gen_salt
 
 import json
 import os
 import random
 from datetime import datetime
 from dateutil.parser import parse
-
-# Boto outputs a lot of deprecation warnings (because it is
-# still in the process of being ported to Py3).
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+from unittest.mock import patch
 
 class SeedCommand(Command):
     """
@@ -40,6 +37,10 @@ class SeedCommand(Command):
         seed()
 
 def seed(debug=False):
+    # Patch out saving images to S3.
+    patcher = patch('argos.util.storage.save_from_url', autospec=True, return_value='https://i.imgur.com/Zf9mXlj.jpg')
+    patcher.start()
+
     seeds = open('manage/core/data/seed.json', 'r')
 
     sample_images = [
@@ -67,6 +68,7 @@ def seed(debug=False):
     ]
 
     print('Resetting the database...')
+    db.reflect()
     db.drop_all()
     db.create_all()
 
@@ -80,28 +82,29 @@ def seed(debug=False):
     entries = json.load(seeds)
     print('Seeding {0} articles...'.format(len(entries)))
     articles = []
-    #for entry in entries:
-        #if debug:
-            #print(json.dumps(entry, sort_keys=True, indent=4))
+    for entry in entries:
+        if debug:
+            print(json.dumps(entry, sort_keys=True, indent=4))
 
-        #source = Source.query.filter_by(ext_url=entry['source']).first()
+        feed = Feed.query.filter_by(ext_url=entry['source']).first()
 
-        #a = Article(
-                #ext_url=entry['url'],
-                #source=source,
-                #html=entry['html'],
-                #text=entry['text'],
-                #tags=entry['tags'],
-                #title=entry['title'],
-                #created_at = parse(entry['published']),
-                #updated_at = parse(entry['updated']),
-                #image=random.choice(sample_images), # fake image
-                #score=random.random() * 100         # fake score
-        #)
-        #articles.append(a)
-        #db.session.add(a)
+        a = Article(
+                ext_url=entry['url'],
+                feed=feed,
+                source=feed.source,
+                html=entry['html'],
+                text=entry['text'],
+                tags=entry['tags'],
+                title=entry['title'],
+                created_at = parse(entry['published']),
+                updated_at = parse(entry['updated']),
+                image=random.choice(sample_images), # fake image
+                score=random.random() * 100         # fake score
+        )
+        articles.append(a)
+        db.session.add(a)
 
-        #progress_bar(len(articles) / len(entries) * 100)
+        progress_bar(len(articles) / len(entries) * 100)
 
     print('Creating additional articles...')
 
@@ -138,15 +141,16 @@ def seed(debug=False):
     print('Found {0} concepts.'.format(num_concepts))
 
     print('Clustering articles into events...')
-    Event.cluster(articles, threshold=0.04)
+    cluster.cluster(articles)
     num_events = Event.query.count()
     print('Created {0} event clusters.'.format(num_events))
 
     print('Clustering events into stories...')
-    events = Event.query.all()
-    Story.cluster(events, threshold=0.04)
+    # TO DO
     num_stories = Story.query.count()
     print('Created {0} story clusters.'.format(num_stories))
+
+    patcher.stop()
 
     print('\n\n==============================================')
     print('From {0} sources, seeded {1} articles, found {2} concepts, created {3} events and {4} stories.'.format(num_sources, num_articles, num_concepts, num_events, num_stories))
