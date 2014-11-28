@@ -35,6 +35,7 @@ if __name__ == '__main__':
     manager.add_command('seed', core.SeedCommand())
     manager.add_command('recluster', core.ReclusterCommand())
     manager.add_command('train', core.TrainVectorizerCommand())
+    manager.add_command('stats', core.GutcheckCommand())
 
     # Evaluation
     manager.add_command('profile', core.ProfileCommand())
