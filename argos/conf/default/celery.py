@@ -73,5 +73,5 @@ CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (Queue('default'), Broadcast('broadcast_tasks'), )
 CELERY_ROUTES = {
         'argos.tasks.periodic.collect': {'queue': 'broadcast_tasks'},
-        'argos.tasks.periodic.cluster_articles': {'queue': 'broadcast_tasks'}
+        'argos.tasks.periodic.cluster_articles': {'queue': 'default'}
 }

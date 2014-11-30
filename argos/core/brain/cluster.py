@@ -24,7 +24,7 @@ def load_hierarchy():
                       upper_limit_scale=conf['upper_limit_scale'])
 load_hierarchy()
 
-def cluster(new_articles, min_articles=2):
+def cluster(new_articles, min_articles=3):
     """
     Clusters a list of Articles into Events.
 

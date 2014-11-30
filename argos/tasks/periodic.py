@@ -48,7 +48,8 @@ def cluster_articles():
     Clusters a batch of orphaned articles
     from the past few days into events.
     """
-    articles = Article.query.filter(~Article.events.any(), Article.created_at < datetime.utcnow() - timedelta(days=2)).all()
+    #articles = Article.query.filter(~Article.events.any(), Article.created_at < datetime.utcnow() - timedelta(days=2)).all()
+    articles = Article.query.filter(~Article.events.any(), Article.node_id != None).all()
     if articles:
         cluster.cluster(articles)
         notify('Clustering articles successful.')

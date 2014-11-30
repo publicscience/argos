@@ -15,6 +15,7 @@ import os
 import shutil
 from flask.ext.script import Command
 
+from argos.datastore import db
 from argos.core.brain import cluster
 from argos.core.models import Article
 from argos.conf import APP
@@ -29,6 +30,7 @@ class ReclusterCommand(Command):
     """
     def run(self):
         path = APP['CLUSTERING']['hierarchy_path']
+        path = os.path.expanduser(path)
 
         if os.path.exists(path):
             print('Backing up existing hierarchy...')
@@ -37,7 +39,14 @@ class ReclusterCommand(Command):
         # Reload the hierarchy.
         cluster.load_hierarchy()
 
-        print('Reconstructing the hierarchy...')
         articles = Article.query.all()
+
+        # Reset node associations.
+        print('Resetting article-node associations...')
+        for article in articles:
+            article.node_id = None
+        db.session.commit()
+
+        print('Reconstructing the hierarchy...')
         cluster.cluster(articles)
         print('Reconstruction done!')
