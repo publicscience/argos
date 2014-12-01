@@ -15,7 +15,7 @@ conf = APP['CLUSTERING']
 
 def load_hierarchy():
     global h
-    PATH = conf['hierarchy_path']
+    PATH = os.path.expanduser(conf['hierarchy_path'])
     if os.path.exists(PATH):
         h = Hierarchy.load(PATH)
     else:
