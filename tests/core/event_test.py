@@ -86,14 +86,6 @@ class EventTest(RequiresDatabase):
         self.assertEqual(concepts, ['Clinton'])
         self.assertEqual(mentions, ['Clinton'])
 
-    def test_titleize(self):
-        members = [Article(
-            title='Robots',
-            text='dinosaurs are cool, Reagan'
-        )] + self.prepare_articles(type='duplicate')
-        self.event = Event(members)
-        self.assertEqual(self.event.title, 'Dinosaurs')
-
     def test_summarize(self):
         self.event = Event(self.prepare_articles())
         self.assertTrue(self.event.summary)

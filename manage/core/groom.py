@@ -17,7 +17,7 @@ from flask.ext.script import Command
 
 from argos.datastore import db
 from argos.core.brain import cluster
-from argos.core.models import Article
+from argos.core.models import Article, Event
 from argos.conf import APP
 
 class ReclusterCommand(Command):
@@ -35,6 +35,9 @@ class ReclusterCommand(Command):
         if os.path.exists(path):
             print('Backing up existing hierarchy...')
             shutil.move(path, path + '.bk')
+
+        # Delete existing events.
+        events = Event.query.delete()
 
         # Reload the hierarchy.
         cluster.load_hierarchy()

@@ -89,7 +89,7 @@ class Cluster(Clusterable):
     can cluster clusters :)
     """
     __abstract__ = True
-    title       = db.Column(db.Unicode)
+    title       = db.Column(db.Unicode, default='')
     summary     = db.Column(db.UnicodeText)
     image       = db.Column(db.String())
 
@@ -142,32 +142,6 @@ class Cluster(Clusterable):
             self.summary = ' '.join(multisummarize([m.text for m in self.members]))
         return self.summary
 
-    def titleize(self):
-        """
-        Generate a title for this cluster.
-        Also selects a representative image.
-
-        Looks for the cluster member that is most similar to the others,
-        and then uses the title of that member.
-        """
-        # TO DO
-        # the title gets set at the end of the clustering process by getting the most representative
-        # node of a cluster.
-        max_member = (None, 0)
-        max_member_w_image = (None, 0)
-        for member in self.members:
-            #avg_sim = self.similarity(member)
-            avg_sim = 0.5
-            if avg_sim >= max_member[1]:
-                max_member = (member, avg_sim)
-            if avg_sim >= max_member_w_image[1] and member.image is not None:
-                max_member_w_image = (member, avg_sim)
-
-        self.title = max_member[0].title
-
-        if max_member_w_image[0] is not None:
-            self.image = max_member_w_image[0].image
-
     def conceptize(self):
         """
         Update concepts (and mentions) for this cluster.
@@ -205,7 +179,7 @@ class Cluster(Clusterable):
         """
         self.updated_at = datetime.utcnow()
         self.created_at = datetime.utcnow()
-        self.titleize()
+
         self.summarize()
         self.conceptize()
 

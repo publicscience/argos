@@ -73,12 +73,22 @@ def process_events(clusters):
     for a_ids in to_create:
         articles = [Article.query.filter_by(node_id=id.item()).first() for id in a_ids]
         e = Event(articles)
+
+        rep_article = representative_article(a_ids, articles)
+        e.title = rep_article.title
+        e.image = rep_article.image
+
         db.session.add(e)
 
     for e_id, a_ids in to_update.items():
         e = event_map[e_id]
         articles = [Article.query.filter_by(node_id=id.item()).first() for id in a_ids]
         e.members = articles
+
+        rep_article = representative_article(a_ids, articles)
+        e.title = rep_article.title
+        e.image = rep_article.image
+
         e.update()
 
     # Freeze expiring events and clean up their articles from the hierarchy.
@@ -97,6 +107,15 @@ def process_events(clusters):
         # i think the assumption is that a deleted event's articles have all migrated elsewhere.
 
     db.session.commit()
+
+def representative_article(node_iids, articles):
+    """
+    Returns the most representative article for a set of (internal) node ids.
+    """
+    rep_iid  = h.most_representative(node_iids)
+    rep_uuid = h.ids[rep_iid][0]
+    rep_article = next(a for a in articles if a.node_id==rep_uuid)
+    return rep_article
 
 def triage(existing, new):
     """

@@ -40,7 +40,7 @@ def collect():
             feed.updating = False
             db.session.commit()
 
-        notify('Collecting for feed {0} is complete.'.format(feed.ext_url))
+        #notify('Collecting for feed {0} is complete.'.format(feed.ext_url))
 
 @celery.task
 def cluster_articles():
@@ -50,4 +50,4 @@ def cluster_articles():
     articles = Article.query.filter(Article.node_id == None).all()
     if articles:
         cluster.cluster(articles)
-        notify('Clustering articles successful.')
+        #notify('Clustering articles successful.')
