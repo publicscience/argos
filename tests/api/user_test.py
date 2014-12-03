@@ -122,7 +122,7 @@ class UserAPITest(RequiresAPI):
                 'id': story.id,
                 'url': '/stories/{0}'.format(story.id),
                 'title': story.title,
-                'summary': story.summary,
+                'summary': story.summary_sentences,
                 'image': story.image,
                 'images': [],
                 'updated_at': story.updated_at.isoformat(),
@@ -213,7 +213,7 @@ class UserAPITest(RequiresAPI):
                 'id': event.id,
                 'url': '/events/{0}'.format(event.id),
                 'title': event.title,
-                'summary': event.summary,
+                'summary': event.summary_sentences,
                 'image': event.image,
                 'images': [],
                 'score': '1.0', # json returns floats as strings.

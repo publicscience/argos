@@ -59,7 +59,7 @@ class APITest(RequiresAPI):
                 'id': event.id,
                 'url': '/events/{0}'.format(event.id),
                 'title': event.title,
-                'summary': event.summary,
+                'summary': event.summary_sentences,
                 'image': event.image,
                 'images': ['http://foo.jpg', 'http://foo2.jpg'],
                 'score': '1.0', # json returns floats as strings.
@@ -106,7 +106,7 @@ class APITest(RequiresAPI):
                 'id': story.id,
                 'url': '/stories/{0}'.format(story.id),
                 'title': story.title,
-                'summary': story.summary,
+                'summary': story.summary_sentences,
                 'image': story.image,
                 'images': ['http://foo2.jpg', 'http://foo.jpg'],
                 'updated_at': story.updated_at.isoformat(),
