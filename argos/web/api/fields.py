@@ -28,6 +28,9 @@ event = {
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
     'concepts': fields.Nested({
+        'name': fields.String,
+        'summary': fields.String,
+        'image': fields.String,
         'url': fields.Url('concept'),
         'slug': fields.String,
         'score': fields.Float
@@ -39,7 +42,12 @@ event = {
     }),
     'articles': fields.Nested({
         'id': fields.Integer,
-        'url': fields.Url('article')
+        'title': fields.String,
+        'ext_url': fields.String,
+        'url': fields.Url('article'),
+        'source': fields.Nested({
+            'name': fields.String
+        })
     }),
     'stories': fields.Nested({
         'id': fields.Integer,
