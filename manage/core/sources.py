@@ -2,7 +2,7 @@ from argos.core.membrane import feed
 
 import json
 
-from flask.ext.script import Command
+from flask.ext.script import Command, Option
 
 from argos.util.logger import logger
 logger = logger(__name__)
@@ -11,10 +11,13 @@ class CreateSourcesCommand(Command):
     """
     Creates the default set of Sources.
     """
-    def run(self):
-        create_sources()
+    option_list = (
+        Option(dest='filepath', type=str, default='manage/core/data/sources.json'),
+    )
+    def run(self, filepath):
+        create_sources(filepath=filepath)
 
-def create_sources(filepath='manage/core/data/sources.json'):
+def create_sources(filepath):
     """
     Load feeds from a JSON file.
     It should consist of an dict of source name => list of feeds like so::

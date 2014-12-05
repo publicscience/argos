@@ -1,0 +1,27 @@
+{
+    "The Atlantic": [
+        "http://feeds.feedburner.com/AtlanticBusinessChannel",
+        "http://feeds.feedburner.com/AtlanticScienceAndTechnology"
+    ],
+    "The New York Times": [
+        "http://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
+        "http://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+        "http://rss.nytimes.com/services/xml/rss/nyt/Science.xml"
+    ],
+    "The Guardian": [
+        "http://www.theguardian.com/us/technology/rss",
+        "http://www.theguardian.com/us/business/rss"
+    ],
+    "The Washington Post": [
+        "http://feeds.washingtonpost.com/rss/business"
+    ],
+    "The Economist": [
+        "http://www.economist.com/sections/business-finance/rss.xml",
+        "http://www.economist.com/sections/science-technology/rss.xml"
+    ],
+    "Reuters": [
+        "http://feeds.reuters.com/reuters/businessNews",
+        "http://feeds.reuters.com/reuters/scienceNews",
+        "http://feeds.reuters.com/reuters/technologyNews"
+    ]
+}
