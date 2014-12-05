@@ -74,10 +74,10 @@ class EventTest(RequiresDatabase):
         self.assertEqual(concepts, {'Clinton', 'Reagan'})
         self.assertEqual(mentions, {'Clinton', 'Reagan'})
 
-        # Expect each concept's score to be 0.5, since
-        # each article only has one unique concept.
+        # Each concept's score won't be 0.5, since
+        # they are weighed down by the commonness.
         for concept in self.event.concepts:
-            self.assertEqual(concept.score, 0.5)
+            self.assertEqual(concept.score, 0.005)
 
     def test_conceptize_no_duplicates(self):
         self.event = Event(self.prepare_articles())

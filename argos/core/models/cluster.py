@@ -148,7 +148,7 @@ class Cluster(Clusterable):
         """
         self.mentions = list(set(chain.from_iterable([member.mentions for member in self.members])))
 
-        # Calculate importance scores for the members' concepts.
+        # Get all concept associations for this cluster's members.
         assocs = chain.from_iterable([member.concept_associations for member in self.members])
 
         # Group associations by their concept.
@@ -160,14 +160,15 @@ class Cluster(Clusterable):
         # Calculate the raw scores of each concept.
         raw_scores = {}
         for assoc_group in grouped_assocs:
+            # Each group points to the same concept, so just grab the first.
             concept = assoc_group[0].concept
-            raw_scores[concept] = sum(assoc.score for assoc in assoc_group) - concept.commonness
+            raw_scores[concept] = sum(assoc.score for assoc in assoc_group)
         total = sum(raw_scores.values())
 
         # Calculate the final scores and create the associations.
         assocs = []
         for concept, raw_score in raw_scores.items():
-            score = raw_score/total
+            score = (raw_score/total)/concept.commonness
             assoc = self.__class__.__concepts__['association_model'](concept, score) # this is nuts
             assocs.append(assoc)
         self.concept_associations = assocs
