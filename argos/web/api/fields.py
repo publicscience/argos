@@ -38,7 +38,7 @@ event = {
         'url': fields.Url('concept'),
         'slug': fields.String,
         'score': fields.Float
-    }),
+    }, attribute='top_concepts'),
     'mentions': fields.Nested({
         'id': fields.Integer,
         'name': fields.String,
@@ -72,7 +72,7 @@ story = {
         'url': fields.Url('concept'),
         'slug': fields.String,
         'score': fields.Float
-    }),
+    }, attribute='top_concepts'),
     'mentions': fields.Nested({
         'id': fields.Integer,
         'name': fields.String,
@@ -80,6 +80,11 @@ story = {
     }),
     'events': fields.Nested({
         'id': fields.Integer,
+        'title': fields.String,
+        'score': fields.Float,
+        'updated_at': DateTimeField,
+        'created_at': DateTimeField,
+        'num_articles': fields.Integer,
         'url': fields.Url('event')
     }),
     'watchers': fields.Nested({
@@ -101,8 +106,12 @@ concept = {
     'sources': fields.List(fields.String),
     'stories': fields.Nested({
         'id': fields.Integer,
+        'title': fields.String,
+        'updated_at': DateTimeField,
+        'created_at': DateTimeField,
         'url': fields.Url('story'),
-        'relatedness': fields.Float
+        'relatedness': fields.Float,
+        'num_events': fields.Integer
     })
 }
 

@@ -37,6 +37,10 @@ class Story(Cluster):
         """
         return self.members.order_by(Event.created_at.desc()).all()
 
+    @property
+    def num_events(self):
+        return self.members.count()
+
     @events.setter
     def events(self, value):
         self.members = value
@@ -75,6 +79,10 @@ class Story(Cluster):
         Gets images from its members.
         """
         return [member.image for member in self.members if member.image is not None]
+
+    @property
+    def top_concepts(self):
+        return self.concepts[:20]
 
     @property
     def summary_sentences(self):

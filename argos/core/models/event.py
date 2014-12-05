@@ -41,6 +41,10 @@ class Event(Cluster):
         """
         return self.members.all()
 
+    @property
+    def num_articles(self):
+        return self.members.count()
+
     @articles.setter
     def articles(self, value):
         self.members = value
@@ -68,6 +72,10 @@ class Event(Cluster):
                 d['source'] = None
                 d['url']    = None
         return data
+
+    @property
+    def top_concepts(self):
+        return self.concepts[:10]
 
     @property
     def score(self):
