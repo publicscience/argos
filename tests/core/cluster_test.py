@@ -2,7 +2,7 @@ from tests import RequiresDatabase
 from datetime import datetime, timedelta
 
 from argos.core.brain import cluster
-from argos.core.models import Article, Event
+from argos.core.models import Article, Event, Story
 
 class ClusterTest(RequiresDatabase):
     patch_knowledge = True
@@ -18,6 +18,8 @@ class ClusterTest(RequiresDatabase):
         a = {'title':'Dinosaurs', 'text':'dinosaurs are cool, Clinton', 'score':100}
         b = {'title':'Robots', 'text':'robots are nice, Clinton', 'score':100}
         c = {'title':'Robots', 'text':'papa was a rodeo, Reagan', 'score':100}
+        d = {'title':'Turtle', 'text':'teenage mutant ninja turtles', 'score':100}
+        e = {'title':'Parrot', 'text':'yo lots of parrots in here', 'score':100}
 
         if type == 'standard':
             articles = [Article(**a), Article(**b)]
@@ -25,6 +27,12 @@ class ClusterTest(RequiresDatabase):
             articles = [Article(**a), Article(**a)]
         elif type == 'different':
             articles = [Article(**a), Article(**c)]
+        elif type == 'variety':
+            articles = [Article(**a), Article(**a),
+                        Article(**b), Article(**b),
+                        Article(**c), Article(**c),
+                        Article(**d), Article(**d),
+                        Article(**e), Article(**e)]
 
         # Need to save these articles to persist concepts,
         # so that their overlaps are calculated properly when clustering!
@@ -142,3 +150,29 @@ class ClusterTest(RequiresDatabase):
         # One event should have been deleted.
         self.assertEqual(Event.query.count(), 1)
         self.assertEqual(Event.query.first().members.all(), [articles[0], articles[2], new_articles[0]])
+
+    def test_cluster_creates_stories(self):
+        self.assertEqual(Story.query.count(), 0)
+
+        articles = self.prepare_articles(type='variety')
+        cluster.cluster(articles, min_articles=1, min_events=1)
+
+        self.assertTrue(Story.query.count() > 0)
+
+    def test_cluster_updates_stories(self):
+        raw_articles = self.prepare_articles(type='variety')
+        articles     = raw_articles[:4]
+        new_articles = raw_articles[4:]
+        cluster.cluster(articles, min_articles=1, min_events=1)
+
+        self.assertEqual(Story.query.count(), 1)
+        for story in Story.query.all():
+            self.assertEqual(story.members.count(), 1)
+
+        cluster.cluster(new_articles, min_articles=1, min_events=1)
+
+        # The number of events should not have changed.
+        self.assertEqual(Story.query.count(), 1)
+
+        for story in Story.query.all():
+            self.assertEqual(story.members.count(), 4)

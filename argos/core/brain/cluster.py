@@ -1,4 +1,5 @@
 import os
+from itertools import chain
 from difflib import SequenceMatcher
 from datetime import datetime
 
@@ -10,7 +11,7 @@ from galaxy.cluster.ihac import Hierarchy
 
 from argos.conf import APP
 from argos.datastore import db
-from argos.core.models import Event, Article
+from argos.core.models import Article, Event, Story
 conf = APP['CLUSTERING']
 
 def load_hierarchy():
@@ -24,7 +25,7 @@ def load_hierarchy():
                       upper_limit_scale=conf['upper_limit_scale'])
 load_hierarchy()
 
-def cluster(new_articles, min_articles=3):
+def cluster(new_articles, min_articles=3, min_events=3):
     """
     Clusters a list of Articles into Events.
 
@@ -43,15 +44,99 @@ def cluster(new_articles, min_articles=3):
         a.node_id = int(node_ids[i])
     db.session.commit()
 
-    # Get the (event) clusters.
-    clusters = h.clusters(distance_threshold=conf['threshold'], with_labels=False)
+    # Get the clusters.
+    event_clusters = h.clusters(distance_threshold=conf['event_threshold'], with_labels=False)
+    story_clusters = h.clusters(distance_threshold=conf['story_threshold'], with_labels=False)
 
     # Filter out events that do not meet the minimum articles requirement.
-    clusters = [clus for clus in clusters if len(clus) >= min_articles]
+    event_clusters = [clus for clus in event_clusters if len(clus) >= min_articles]
 
-    process_events(clusters)
+    process_events(event_clusters)
+
+
+    # Format `clusters` so that lists of articles are flattened to a list of their event ids.
+    # e.g. [[1,2,3,4,5],[6,7,8,9]] => [[1,2],[3,4]]
+    # the new list's sublists' members are now event ids.
+    story_clusters_ = []
+    for clus in story_clusters:
+        events = []
+        processed_articles = []
+        for a_id in clus:
+            a_id = a_id.item()
+            if a_id not in processed_articles:
+                a = Article.query.filter_by(node_id=a_id).first()
+                if a.events:
+                    # TODO In their current design, articles could belong to multiple events.
+                    # For simplification we will just take the first one, but eventually this needs to be reconsidered.
+                    e = Article.query.filter_by(node_id=a_id).first().events[0]
+                    processed_articles += [a.node_id for a in e.articles]
+                    events.append(e.id)
+                else:
+                    processed_articles.append(a_id)
+        story_clusters_.append(events)
+
+    # Filter out clusters which are below the minimum.
+    story_clusters = [clus for clus in story_clusters_ if len(clus) >= min_events]
+
+    process_stories(story_clusters)
 
     h.save(os.path.expanduser(conf['hierarchy_path']))
+
+
+def process_stories(clusters):
+    """
+    Takes clusters of node uuids and
+    builds, modifies, and deletes stories out of them.
+
+    `clusters` comes in as a list of lists, where sublists' members are article node ids.
+
+    e.g::
+
+        [[1,2,3,4,5],[6,7,8,9]]
+    """
+    story_map = {}
+    existing = {}
+
+    # Yikes this might be too much
+    # TODO Should probably preserve existing story node id composition separately.
+    for s in Story.query.all():
+        story_map[s.id] = s
+        existing[s.id] = [e.id for e in s.events]
+
+    # Figure out which stories to update, delete, and create.
+    to_update, to_create, to_delete, unchanged = triage(existing, clusters)
+
+    for e_ids in to_create:
+        events = Event.query.filter(Event.id.in_(e_ids)).order_by(Event.created_at.desc()).all()
+        story = Story(events)
+
+        # TODO need a better way of coming up with a story title.
+        # Perhaps the easiest way if stories just don't have titles and are just groupings of events.
+        # For now, just using the latest event title and image.
+        story.title = events[0].title
+        story.image = events[0].image
+
+        db.session.add(story)
+
+    for s_id, e_ids in to_update.items():
+        s = story_map[s_id]
+        events = Event.query.filter(Event.id.in_(e_ids)).order_by(Event.created_at.desc()).all()
+        s.members = events
+
+        s.title = events[0].title
+        s.image = events[0].image
+
+        s.update()
+
+    for s_id in to_delete:
+        db.session.delete(story_map[s_id])
+
+    db.session.commit()
+
+    # Delete any stories that no longer have events.
+    # http://stackoverflow.com/a/7954618/1097920
+    Story.query.filter(~Story.members.any()).delete(synchronize_session='fetch')
+
 
 def process_events(clusters):
     """
@@ -64,14 +149,17 @@ def process_events(clusters):
     event_map = {}
     existing  = {}
     for e in Event.all_active():
+        # Map event ids to their event, for lookup later.
         event_map[e.id] = e
+
+        # Map event ids to a list of their member node ids.
         existing[e.id]  = [a.node_id for a in e.articles]
 
     # Figure out which events to update, delete, and create.
     to_update, to_create, to_delete, unchanged = triage(existing, clusters)
 
     for a_ids in to_create:
-        articles = [Article.query.filter_by(node_id=id.item()).first() for id in a_ids]
+        articles = Article.query.filter(Article.node_id.in_([id.item() for id in a_ids])).all()
         e = Event(articles)
 
         rep_article = representative_article(a_ids, articles)
@@ -82,7 +170,7 @@ def process_events(clusters):
 
     for e_id, a_ids in to_update.items():
         e = event_map[e_id]
-        articles = [Article.query.filter_by(node_id=id.item()).first() for id in a_ids]
+        articles = Article.query.filter(Article.node_id.in_([id.item() for id in a_ids])).all()
         e.members = articles
 
         rep_article = representative_article(a_ids, articles)
@@ -108,10 +196,12 @@ def process_events(clusters):
 
     db.session.commit()
 
-def representative_article(node_iids, articles):
+
+def representative_article(node_uuids, articles):
     """
-    Returns the most representative article for a set of (internal) node ids.
+    Returns the most representative article for a set of node ids.
     """
+    node_iids = [h.to_iid(uuid) for uuid in node_uuids]
     rep_iid  = h.most_representative(node_iids)
     rep_uuid = h.ids[rep_iid][0]
     rep_article = next(a for a in articles if a.node_id==rep_uuid)
