@@ -1,7 +1,7 @@
 from tests import RequiresDatabase
 from datetime import datetime, timedelta
 
-from argos.core.models import Article, Event
+from argos.core.models import Article, Event, Source
 
 class EventTest(RequiresDatabase):
     """
@@ -102,13 +102,26 @@ class EventTest(RequiresDatabase):
         title = 'Syria Misses New Deadline as It Works to Purge Arms'
         text = 'Syria missed a revised deadline on Sunday for completing the export or destruction of chemicals in its weapons arsenal, but the government of the war-ravaged country may be only days away from finishing the job, according to international experts overseeing the process. The Syrian government had agreed to complete the export or destruction of about 1,200 tons of chemical agents by April 27 after missing a February deadline, but by Sunday, it had shipped out or destroyed 92.5 percent of the arsenal, said Sigrid Kaag, the coordinator of the joint mission by the United Nations and the watchdog agency the Organization for the Prohibition of Chemical Weapons.'
         expected_sents = summarizer.summarize(title, text)
+
+        source = Source()
+        source.name = 'Super Cool Times'
+
         article = Article(
                         title=title,
                         text=text,
                         score=100)
+        article.source = source
+        article.ext_url = 'http://foo.com'
+
         self.event=Event([article])
 
-        self.assertEqual(self.event.summary_sentences, expected_sents)
+        expected = [{
+            'sentence': sent,
+            'source': 'Super Cool Times',
+            'url': 'http://foo.com'
+        } for sent in expected_sents]
+
+        self.assertEqual(self.event.summary_sentences, expected)
 
     def test_timespan(self):
         text = 'the worldly philosophers today cautious optimism is based to a large extent on technological breakthroughs'

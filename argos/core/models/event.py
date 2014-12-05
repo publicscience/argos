@@ -58,7 +58,16 @@ class Event(Cluster):
         Breaks up a summary back into its
         original sentences (as a list).
         """
-        return sent_tokenize(self.summary)
+        data = [{'sentence': sent} for sent in sent_tokenize(self.summary)]
+        for d in data:
+            article = next((a for a in self.members if d['sentence'] in ' '.join([a.title, a.text])), None)
+            if article is not None:
+                d['source'] = article.source.name
+                d['url']    = article.ext_url
+            else:
+                d['source'] = None
+                d['url']    = None
+        return data
 
     @property
     def score(self):
@@ -127,9 +136,11 @@ class Event(Cluster):
         """
         if self.members.count() == 1:
             member = self.members[0]
-            self.summary = ' '.join(summarizer.summarize(member.title, member.text))
+            summary_sentences = summarizer.summarize(member.title, member.text)
+            self.summary = ' '.join(summary_sentences)
         else:
-            self.summary = ' '.join(summarizer.multisummarize([m.text for m in self.members]))
+            summary_sentences = summarizer.multisummarize([m.text for m in self.members])
+            self.summary = ' '.join(summary_sentences)
         return self.summary
 
 @event.listens_for(Event, 'before_update')

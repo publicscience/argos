@@ -23,7 +23,11 @@ event = {
     'title': fields.String,
     'image': fields.String,
     'images': fields.List(fields.String),
-    'summary': fields.List(fields.String, attribute='summary_sentences'),
+    'summary': fields.List(fields.Nested({
+        'sentence': fields.String,
+        'source':   fields.String,
+        'url':      fields.String
+    }), attribute='summary_sentences'),
     'score': fields.Float,
     'updated_at': DateTimeField,
     'created_at': DateTimeField,
