@@ -57,7 +57,8 @@ class Clusterable(Model):
         def with_score(assoc):
             assoc.concept.score = assoc.score
             return assoc.concept
-        return list(map(with_score, self.concept_associations))
+        # Only show concepts which have a name (some are extracted but don't map to known entities, so are not given a name).
+        return list(map(with_score, [assoc for assoc in self.concept_associations if assoc.concept.name is not None]))
 
     @property
     def concept_slugs(self):
@@ -144,7 +145,7 @@ class Cluster(Clusterable):
 
     def conceptize(self):
         """
-        Update concepts (and mentions) for this cluster.
+        Update concepts (and mentions) for this cluster and score them.
         """
         self.mentions = list(set(chain.from_iterable([member.mentions for member in self.members])))
 
@@ -168,7 +169,7 @@ class Cluster(Clusterable):
         # Calculate the final scores and create the associations.
         assocs = []
         for concept, raw_score in raw_scores.items():
-            score = (raw_score/total)/concept.commonness
+            score = (raw_score/total)/(concept.commonness + 1) # +1 to avoid division by zero
             assoc = self.__class__.__concepts__['association_model'](concept, score) # this is nuts
             assocs.append(assoc)
         self.concept_associations = assocs
