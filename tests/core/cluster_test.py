@@ -160,6 +160,7 @@ class ClusterTest(RequiresDatabase):
         self.assertTrue(Story.query.count() > 0)
 
     def test_cluster_updates_stories(self):
+        cluster.conf['story_threshold'] = 80.0
         raw_articles = self.prepare_articles(type='variety')
         articles     = raw_articles[:4]
         new_articles = raw_articles[4:]

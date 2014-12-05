@@ -77,7 +77,7 @@ class EventTest(RequiresDatabase):
         # Each concept's score won't be 0.5, since
         # they are weighed down by the commonness.
         for concept in self.event.concepts:
-            self.assertEqual(concept.score, 0.005)
+            self.assertAlmostEqual(concept.score, 0.005, places=3)
 
     def test_conceptize_no_duplicates(self):
         self.event = Event(self.prepare_articles())
