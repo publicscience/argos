@@ -13,6 +13,7 @@ from argos.core.membrane import evaluator, extractor
 from dateutil.parser import parse
 from urllib import error
 import feedparser
+from ftfy import fix_text_segment
 
 from xml.sax._exceptions import SAXException
 from http.client import BadStatusLine
@@ -126,10 +127,10 @@ def get_articles(feed, fn):
             source=feed.source,
             feed=feed,
             html=html,
-            text=full_text,
+            text=fix_text_segment(full_text),
             authors=extractor.extract_authors(entry),
             tags=extractor.extract_tags(entry, known_tags=entry_data.tags),
-            title=title,
+            title=fix_text_segment(title),
             created_at=published,
             updated_at=updated,
             image=image_url,
