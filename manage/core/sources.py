@@ -17,14 +17,17 @@ class CreateSourcesCommand(Command):
 def create_sources(filepath='manage/core/data/sources.json'):
     """
     Load feeds from a JSON file.
-    It should consist of an array of arrays like so::
+    It should consist of an dict of source name => list of feeds like so::
 
-        [
-            ["The Atlantic", "http://feeds.feedburner.com/AtlanticNational"],
-            ["The New York Times", "http://www.nytimes.com/services/xml/rss/nyt/World.xml"]
-        ]
+        {
+            'The New York Times': [
+                'http//www.nytimes.com/services/xml/rss/nyt/World.xml',
+                'http//www.nytimes.com/services/xml/rss/nyt/politics.xml'
+            ]
+        }
     """
     logger.info('Loading sources from file. This may take awhile...')
     sources = open(filepath, 'r')
     raw_sources = json.load(sources)
     feed.add_sources(raw_sources)
+

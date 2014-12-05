@@ -14,3 +14,4 @@ config.py
 bower/
 index.css
 reports/
+*.sql
