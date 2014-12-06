@@ -13,7 +13,7 @@ are temporary fixes.
 
 import os
 import shutil
-from flask.ext.script import Command
+from flask.ext.script import Command, Option
 
 from argos.datastore import db
 from argos.core.brain import cluster
@@ -129,9 +129,12 @@ class BackClusterCommand(Command):
         print('Done!')
 
 
-class EventsCommand(Command):
-    def run(self):
-        for e in Event.query.all():
+class PreviewEventsCommand(Command):
+    option_list = (
+        Option(dest='num_events', type=int),
+    )
+    def run(self, num_events):
+        for e in Event.query.limit(num_events).all():
             print(e.title)
             for m in e.members:
                 print('\t{0}'.format(m.title))
