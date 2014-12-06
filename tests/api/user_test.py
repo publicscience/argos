@@ -115,6 +115,11 @@ class UserAPITest(RequiresAPI):
         for member in story.members:
             expected_members.append({
                 'id': member.id,
+                'title': member.title,
+                'score': str(member.score),
+                'updated_at': member.updated_at.isoformat(),
+                'created_at': member.created_at.isoformat(),
+                'num_articles': member.num_articles,
                 'url': '/events/{0}'.format(member.id)
             })
 
@@ -200,13 +205,21 @@ class UserAPITest(RequiresAPI):
         expected_concepts = [{
             'slug': concept.slug,
             'url': '/concepts/{0}'.format(concept.slug),
-            'score': str(concept.score)
+            'score': str(concept.score),
+            'name': concept.name,
+            'summary': concept.summary,
+            'image': concept.image
         } for concept in event.concepts]
         expected_mentions = [{'name': alias.name, 'slug': alias.concept.slug, 'id': alias.id} for alias in event.mentions]
         for member in event.members:
             expected_members.append({
                 'id': member.id,
-                'url': '/articles/{0}'.format(member.id)
+                'url': '/articles/{0}'.format(member.id),
+                'title': member.title,
+                'ext_url': member.ext_url,
+                'source': {
+                    'name': None
+                }
             })
 
         expected = {
@@ -224,10 +237,6 @@ class UserAPITest(RequiresAPI):
                 'mentions': expected_mentions,
                 'stories': []
         }
-
-        print(self.json(r))
-        print('\n\n\n')
-        print([expected])
 
         self.assertEqual(self.json(r), [expected])
 
