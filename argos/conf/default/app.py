@@ -28,8 +28,8 @@ CLUSTERING = {
     'lower_limit_scale': 0.7,
     'upper_limit_scale': 1.3,
     'metric': 'euclidean',
-    'event_threshold': 50.0,
-    'story_threshold': 60.0, # this has to be greater than `event_threshold`.
+    'event_threshold': 42.0,
+    'story_threshold': 50.0, # this has to be greater than `event_threshold`.
     'weights': [1., 90., 30.]
 }
 
