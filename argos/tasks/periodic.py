@@ -53,8 +53,10 @@ def cluster_articles():
     # https://ask.github.io/celery/cookbook/tasks.html#ensuring-a-task-is-only-executed-one-at-a-time
     lock_file = '/tmp/argos_cluster.lock'
     if not os.path.exists(lock_file):
+        # Create the lock file.
+        open(lock_file, 'a').close()
         articles = Article.query.filter(Article.node_id == None).all()
         if articles:
             cluster.cluster(articles)
-            os.remove(lock_file)
             #notify('Clustering articles successful.')
+        os.remove(lock_file)
