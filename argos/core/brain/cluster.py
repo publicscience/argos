@@ -14,16 +14,19 @@ from argos.datastore import db
 from argos.core.models import Article, Event, Story
 conf = APP['CLUSTERING']
 
+LOCK = '/tmp/hierarchy.lock'
+
+class LockException(Exception):
+    pass
+
 def load_hierarchy():
-    global h
     PATH = os.path.expanduser(conf['hierarchy_path'])
     if os.path.exists(PATH):
-        h = Hierarchy.load(PATH)
+        return Hierarchy.load(PATH)
     else:
-        h = Hierarchy(metric=conf['metric'],
+        return Hierarchy(metric=conf['metric'],
                       lower_limit_scale=conf['lower_limit_scale'],
                       upper_limit_scale=conf['upper_limit_scale'])
-load_hierarchy()
 
 def cluster(new_articles, min_articles=3, min_events=3):
     """
@@ -33,6 +36,18 @@ def cluster(new_articles, min_articles=3, min_events=3):
     to create or preserve an event. If an existing event comes to have less than this
     minimum, it is deleted.
     """
+
+    # Simple locking mechanism, later a better one can be implemented:
+    # https://ask.github.io/celery/cookbook/tasks.html#ensuring-a-task-is-only-executed-one-at-a-time
+    if os.path.exists(LOCK):
+        raise LockException('The hierarchy is locked.')
+
+    # Create the lock file.
+    open(LOCK, 'a').close()
+
+    # Load the hierarchy.
+    h = load_hierarchy()
+
     # Build the article vectors.
     vecs = build_vectors(new_articles, conf['weights'])
 
@@ -80,7 +95,11 @@ def cluster(new_articles, min_articles=3, min_events=3):
 
     process_stories(story_clusters)
 
+    # Save the hierarchy.
     h.save(os.path.expanduser(conf['hierarchy_path']))
+
+    # Remove the lock file, we're good to go
+    os.remove(LOCK)
 
 
 def process_stories(clusters):
