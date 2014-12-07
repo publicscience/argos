@@ -138,7 +138,11 @@ The environment runs:
 * DBpedia spotlight (2222)
 * RabbitMQ (5672)
 * Apache Jena Fuseki (3030)
-* Celery workers
+
+By default it does not start the celery workers. You can start those separately using
+the command in the `go` script, or you can specify `celery` as an argument:
+
+    $ ./go celery &
 
 *Note: If you're running this on Ubuntu, some of these processes may
 fail, but it is because they are already running as services. Don't

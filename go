@@ -35,9 +35,12 @@ java -jar -Xmx16g dbpedia-spotlight-0.7.jar en_2+2 http://localhost:2222/rest &
 SPOTL_PID=$!
 cd $DIR
 
-source $ARGOS_ENV/bin/activate
-celery multi start 2 --loglevel=DEBUG --app=argos.tasks.celery -Q:1 clustering -Q:2 broadcast_tasks -c:1 1 --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n.log
-WORKR_PID=$!
+RUN_WORKERS=${1:-false}
+if [ "$RUN_WORKERS" = true ] ; then
+    source $ARGOS_ENV/bin/activate
+    celery multi start 2 --loglevel=DEBUG --app=argos.tasks.celery -Q:1 clustering -Q:2 broadcast_tasks -c:1 1 --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n.log
+    WORKR_PID=$!
+fi
 
 wait
 
@@ -55,6 +58,9 @@ then
     kill $NERSV_PID
     kill $KNOSV_PID
     kill $SPOTL_PID
-    kill $WORKR_PID
-    ps auxww | grep 'celery worker' | awk '{print $2}' | xargs kill
+
+    if [ "$RUN_WORKERS" = true ] ; then
+        kill $WORKR_PID
+        ps auxww | grep 'celery worker' | awk '{print $2}' | xargs kill
+    fi
 fi
