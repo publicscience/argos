@@ -140,9 +140,9 @@ The environment runs:
 * Apache Jena Fuseki (3030)
 
 By default it does not start the celery workers. You can start those separately using
-the command in the `go` script, or you can specify `celery` as an argument:
+the command in the `go` script, or you can specify `true` as an argument:
 
-    $ ./go celery &
+    $ ./go true &
 
 *Note: If you're running this on Ubuntu, some of these processes may
 fail, but it is because they are already running as services. Don't
