@@ -1,3 +1,4 @@
+import os
 from tests import RequiresDatabase
 from datetime import datetime, timedelta
 
@@ -9,10 +10,17 @@ class ClusterTest(RequiresDatabase):
     patch_concepts = True
 
     def setUp(self):
-        cluster.PATH = '/tmp/argos_test_hierarchy'
-        cluster.h = cluster.Hierarchy(metric='euclidean',
-                                      lower_limit_scale=0.9,
-                                      upper_limit_scale=1.1)
+        cluster.conf['hierarchy_path']      = '/tmp/argos_test_hierarchy'
+        cluster.conf['metric']              = 'euclidean'
+        cluster.conf['lower_limit_scale']   = 0.9
+        cluster.conf['upper_limit_scale']   = 1.1
+        cluster.LOCK = '/tmp/argos_test_hierarchy.lock'
+
+        if os.path.exists(cluster.LOCK):
+            os.remove(cluster.LOCK)
+
+        if os.path.exists('/tmp/argos_test_hierarchy'):
+            os.remove('/tmp/argos_test_hierarchy')
 
     def prepare_articles(self, type='standard'):
         a = {'title':'Dinosaurs', 'text':'dinosaurs are cool, Clinton', 'score':100}

@@ -66,7 +66,7 @@ def cluster(new_articles, min_articles=3, min_events=3):
     # Filter out events that do not meet the minimum articles requirement.
     event_clusters = [clus for clus in event_clusters if len(clus) >= min_articles]
 
-    process_events(event_clusters)
+    process_events(h, event_clusters)
 
 
     # Format `clusters` so that lists of articles are flattened to a list of their event ids.
@@ -160,7 +160,7 @@ def process_stories(clusters):
     Story.query.filter(~Story.members.any()).delete(synchronize_session='fetch')
 
 
-def process_events(clusters):
+def process_events(h, clusters):
     """
     Takes clusters of node uuids and
     builds, modifies, and deletes events out of them.
@@ -181,12 +181,14 @@ def process_events(clusters):
     to_update, to_create, to_delete, unchanged = triage(existing, clusters)
 
     for a_ids in to_create:
+        print([id.item() for id in a_ids])
         articles = Article.query.filter(Article.node_id.in_([id.item() for id in a_ids])).order_by(Article.created_at.desc()).all()
         e = Event(articles)
+
         e.created_at = articles[0].created_at
         e.updated_at = articles[-1].updated_at
 
-        rep_article = representative_article(a_ids, articles)
+        rep_article = representative_article(h, a_ids, articles)
         e.title = rep_article.title
         e.image = rep_article.image
 
@@ -197,7 +199,7 @@ def process_events(clusters):
         articles = Article.query.filter(Article.node_id.in_([id.item() for id in a_ids])).all()
         e.members = articles
 
-        rep_article = representative_article(a_ids, articles)
+        rep_article = representative_article(h, a_ids, articles)
         e.title = rep_article.title
         e.image = rep_article.image
 
@@ -221,13 +223,14 @@ def process_events(clusters):
     db.session.commit()
 
 
-def representative_article(node_uuids, articles):
+def representative_article(h, node_uuids, articles):
     """
     Returns the most representative article for a set of node ids.
     """
     node_iids = [h.to_iid(uuid) for uuid in node_uuids]
     rep_iid  = h.most_representative(node_iids)
     rep_uuid = h.ids[rep_iid][0]
+
     rep_article = next(a for a in articles if a.node_id==rep_uuid)
     return rep_article
 
