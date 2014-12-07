@@ -57,11 +57,6 @@ CELERYBEAT_SCHEDULE = {
     'cluster-articles': {
         'task': 'argos.tasks.periodic.cluster_articles',
         'schedule': crontab(minute='*/10')
-    },
-    'test-task': {
-        'task': 'argos.tasks.notify',
-        'schedule': crontab(minute=30, hour='*'),
-        'args': ('this is a beat test', )
     }
 }
 
@@ -70,8 +65,8 @@ from kombu.common import Broadcast, Queue
 # Create a broadcast queue so the tasks are sent to
 # *all* workers (that are listening to that queue).
 CELERY_DEFAULT_QUEUE = 'default'
-CELERY_QUEUES = (Queue('default'), Broadcast('broadcast_tasks'), )
+CELERY_QUEUES = (Queue('default'), Broadcast('broadcast_tasks'), Queue('clustering'))
 CELERY_ROUTES = {
         'argos.tasks.periodic.collect': {'queue': 'broadcast_tasks'},
-        'argos.tasks.periodic.cluster_articles': {'queue': 'default'}
+        'argos.tasks.periodic.cluster_articles': {'queue': 'clustering'}
 }

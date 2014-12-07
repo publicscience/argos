@@ -5,6 +5,7 @@ from argos.core.models import Feed, Article, Event, Story
 from argos.core.membrane import collector
 from argos.datastore import db
 
+import os
 from datetime import datetime, timedelta
 
 # Logging.
@@ -47,7 +48,13 @@ def cluster_articles():
     """
     Clusters articles which have not yet been incorporated into the clustering hierarchy.
     """
-    articles = Article.query.filter(Article.node_id == None).all()
-    if articles:
-        cluster.cluster(articles)
-        #notify('Clustering articles successful.')
+
+    # Simple locking mechanism, later a better one can be implemented:
+    # https://ask.github.io/celery/cookbook/tasks.html#ensuring-a-task-is-only-executed-one-at-a-time
+    lock_file = '/tmp/argos_cluster.lock'
+    if not os.path.exists(lock_file):
+        articles = Article.query.filter(Article.node_id == None).all()
+        if articles:
+            cluster.cluster(articles)
+            os.remove(lock_file)
+            #notify('Clustering articles successful.')

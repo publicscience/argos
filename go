@@ -36,7 +36,7 @@ SPOTL_PID=$!
 cd $DIR
 
 source $ARGOS_ENV/bin/activate
-celery worker --loglevel=DEBUG --app=argos.tasks.celery
+celery multi start 2 --loglevel=DEBUG --app=argos.tasks.celery -Q:1 clustering -Q:2 broadcast_tasks -c:1 1 --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n.log
 WORKR_PID=$!
 
 wait
@@ -56,4 +56,5 @@ then
     kill $KNOSV_PID
     kill $SPOTL_PID
     kill $WORKR_PID
+    ps auxww | grep 'celery worker' | awk '{print $2}' | xargs kill
 fi

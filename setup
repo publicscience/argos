@@ -160,10 +160,12 @@ setup_knowledge
 setup_nltk
 setup_spotlight
 
-# Create databases.
 ./run db:create
-
 ./run doc
+
+# Make some folders.
+sudo mkdir -p /var/{run,log}/celery
+sudo chown -R $USER /var/{run,log}/celery
 
 echo -e "\n\n\n\n\n"
 echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
