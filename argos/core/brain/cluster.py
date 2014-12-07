@@ -110,6 +110,9 @@ def process_stories(clusters):
         events = Event.query.filter(Event.id.in_(e_ids)).order_by(Event.created_at.desc()).all()
         story = Story(events)
 
+        story.created_at = events[0].created_at
+        story.updated_at = events[-1].created_at
+
         # TODO need a better way of coming up with a story title.
         # Perhaps the easiest way if stories just don't have titles and are just groupings of events.
         # For now, just using the latest event title and image.
@@ -159,8 +162,10 @@ def process_events(clusters):
     to_update, to_create, to_delete, unchanged = triage(existing, clusters)
 
     for a_ids in to_create:
-        articles = Article.query.filter(Article.node_id.in_([id.item() for id in a_ids])).all()
+        articles = Article.query.filter(Article.node_id.in_([id.item() for id in a_ids])).order_by(Article.created_at.desc()).all()
         e = Event(articles)
+        e.created_at = articles[0].created_at
+        e.updated_at = articles[-1].updated_at
 
         rep_article = representative_article(a_ids, articles)
         e.title = rep_article.title
