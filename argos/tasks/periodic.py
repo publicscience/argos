@@ -6,6 +6,7 @@ from argos.core.membrane import collector
 from argos.datastore import db
 
 import os
+import random
 from datetime import datetime, timedelta
 
 # Logging.
@@ -21,9 +22,10 @@ def collect():
     """
     # Get a feed which has not yet been updated
     # and is not currently being updated.
-    feed = Feed.query.filter(Feed.updated_at < datetime.utcnow() - timedelta(hours=1), ~Feed.updating).first()
+    feeds = Feed.query.filter(Feed.updated_at < datetime.utcnow() - timedelta(hours=1), ~Feed.updating).all()
+    if feeds:
+        feed = random.choice(feeds)
 
-    if feed:
         # "Claim" this feed,
         # so other workers won't pick it.
         feed.updating = True
@@ -50,5 +52,8 @@ def cluster_articles():
     """
     articles = Article.query.filter(Article.node_id == None).all()
     if articles:
-        cluster.cluster(articles)
+        try:
+            cluster.cluster(articles)
+        except cluster.LockException as e:
+            pass
         #notify('Clustering articles successful.')
