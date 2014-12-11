@@ -139,3 +139,45 @@ class PreviewEventsCommand(Command):
             print(e.title)
             for m in e.members:
                 print('\t{0}'.format(m.title))
+
+from datetime import timedelta
+class CheckTimeGapsCommand(Command):
+    """
+    Prints what gaps there are in a set of articles.
+    """
+    def run(self):
+        gaps = []
+        with open('/Users/ftseng/Downloads/argos_corpora/articles.json', 'r') as f:
+            articles = json.load(f)
+            dates = [datetime.fromtimestamp(a['created_at']['$date']/1000) for a in articles]
+            dates.sort()
+
+        # Starting from 2013-05-02
+        # (this is about when collecting started, although some older articles were somehow collected as well)
+        start_date = datetime.strptime('2013-05-02', '%Y-%m-%d')
+        dates = [d for d in dates if d > start_date]
+
+        # Calculate timedeltas and only keep those >= than a day.
+        last_date = dates[0]
+        for date in dates[1:]:
+            td = date - last_date
+            if td >= timedelta(days=1):
+                gaps.append((last_date, date, td))
+            last_date = date
+
+
+        # Sort gaps by size
+        gaps.sort(key=lambda x: x[2], reverse=True)
+
+        print('Gaps:')
+        days = []
+        for gap in gaps:
+            print('From {0} to {1}, {2}'.format(gap[0], gap[1], gap[2]))
+            # For each day in the gap:
+            for d in daterange(gap[0], gap[1]):
+                days.append(d)
+        print('Missing days: {0}'.format(len(days)))
+
+def daterange(start_date, end_date):
+    for n in range(int ((end_date - start_date).days)):
+        yield start_date + timedelta(n)
