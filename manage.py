@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
     # TEMP
     manager.add_command('backcluster', core.BackClusterCommand())
+    manager.add_command('load:corpora', core.LoadCorporaCommand())
 
     # Evaluation
     manager.add_command('profile', core.ProfileCommand())

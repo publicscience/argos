@@ -13,6 +13,7 @@ are temporary fixes.
 
 import os
 import shutil
+
 from flask.ext.script import Command, Option
 
 from argos.datastore import db
