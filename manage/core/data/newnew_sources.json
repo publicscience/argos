@@ -1,0 +1,19 @@
+{
+    "Los Angeles Times": [
+        "http://www.latimes.com/science/rss2.0.xml",
+        "http://www.latimes.com/nation/politics/rss2.0.xml",
+        "http://www.latimes.com/world/rss2.0.xml"
+    ],
+    "The Wall Street Journal": [
+        "http://online.wsj.com/xml/rss/3_7014.xml",
+        "http://online.wsj.com/xml/rss/3_7455.xml"
+    ],
+    "The Boston Globe": [
+        "http://feeds.boston.com/boston/news/politics",
+        "http://feeds.boston.com/boston/news/world",
+        "http://feeds.boston.com/boston/news/nation"
+    ],
+    "Vox": [
+        "http://www.vox.com/rss/index.xml"
+    ]
+}
