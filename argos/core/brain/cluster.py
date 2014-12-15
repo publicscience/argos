@@ -28,13 +28,9 @@ def load_hierarchy():
                       lower_limit_scale=conf['lower_limit_scale'],
                       upper_limit_scale=conf['upper_limit_scale'])
 
-def cluster(new_articles, min_articles=3, min_events=3):
+def cluster(new_articles):
     """
     Clusters a list of Articles into Events.
-
-    The `min_articles` param specifies the minimum amount of member articles required
-    to create or preserve an event. If an existing event comes to have less than this
-    minimum, it is deleted.
     """
 
     # Simple locking mechanism, later a better one can be implemented:
@@ -60,48 +56,59 @@ def cluster(new_articles, min_articles=3, min_events=3):
             a.node_id = int(node_ids[i])
         db.session.commit()
 
-        # Get the clusters.
-        event_clusters = h.clusters(distance_threshold=conf['event_threshold'], with_labels=False)
-        story_clusters = h.clusters(distance_threshold=conf['story_threshold'], with_labels=False)
-
-        # Filter out events that do not meet the minimum articles requirement.
-        event_clusters = [clus for clus in event_clusters if len(clus) >= min_articles]
-
-        process_events(h, event_clusters)
-
-
-        # Format `clusters` so that lists of articles are flattened to a list of their event ids.
-        # e.g. [[1,2,3,4,5],[6,7,8,9]] => [[1,2],[3,4]]
-        # the new list's sublists' members are now event ids.
-        story_clusters_ = []
-        for clus in story_clusters:
-            events = []
-            processed_articles = []
-            for a_id in clus:
-                a_id = a_id.item()
-                if a_id not in processed_articles:
-                    a = Article.query.filter_by(node_id=a_id).first()
-                    if a.events:
-                        # TODO In their current design, articles could belong to multiple events.
-                        # For simplification we will just take the first one, but eventually this needs to be reconsidered.
-                        e = Article.query.filter_by(node_id=a_id).first().events[0]
-                        processed_articles += [a.node_id for a in e.articles]
-                        events.append(e.id)
-                    else:
-                        processed_articles.append(a_id)
-            story_clusters_.append(events)
-
-        # Filter out clusters which are below the minimum.
-        story_clusters = [clus for clus in story_clusters_ if len(clus) >= min_events]
-
-        process_stories(story_clusters)
-
         # Save the hierarchy.
         h.save(os.path.expanduser(conf['hierarchy_path']))
+
+        snip_hierarchy(h)
 
     finally:
         # Remove the lock file, we're good to go
         os.remove(LOCK)
+
+def snip_hierarchy(hierarchy):
+    """
+    Snip the hierarchy at the event and story thresholds to build the events and stories.
+
+    The `min_articles` param specifies the minimum amount of member articles required
+    to create or preserve an event. If an existing event comes to have less than this
+    minimum, it is deleted. Same for `min_events`, but with events=>stories.
+    """
+    h = hierarchy
+
+    # Get the clusters.
+    event_clusters = h.clusters(distance_threshold=conf['event_threshold'], with_labels=False)
+    story_clusters = h.clusters(distance_threshold=conf['story_threshold'], with_labels=False)
+
+    # Filter out events that do not meet the minimum articles requirement.
+    event_clusters = [clus for clus in event_clusters if len(clus) >= conf['min_articles']]
+
+    process_events(h, event_clusters)
+
+    # Format `clusters` so that lists of articles are flattened to a list of their event ids.
+    # e.g. [[1,2,3,4,5],[6,7,8,9]] => [[1,2],[3,4]]
+    # the new list's sublists' members are now event ids.
+    story_clusters_ = []
+    for clus in story_clusters:
+        events = []
+        processed_articles = []
+        for a_id in clus:
+            a_id = a_id.item()
+            if a_id not in processed_articles:
+                a = Article.query.filter_by(node_id=a_id).first()
+                if a.events:
+                    # TODO In their current design, articles could belong to multiple events.
+                    # For simplification we will just take the first one, but eventually this needs to be reconsidered.
+                    e = Article.query.filter_by(node_id=a_id).first().events[0]
+                    processed_articles += [a.node_id for a in e.articles]
+                    events.append(e.id)
+                else:
+                    processed_articles.append(a_id)
+        story_clusters_.append(events)
+
+    # Filter out clusters which are below the minimum.
+    story_clusters = [clus for clus in story_clusters_ if len(clus) >= conf['min_events']]
+
+    process_stories(story_clusters)
 
 
 def process_stories(clusters):

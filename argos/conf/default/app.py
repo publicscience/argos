@@ -30,7 +30,9 @@ CLUSTERING = {
     'metric': 'euclidean',
     'event_threshold': 41.0,
     'story_threshold': 50.0, # this has to be greater than `event_threshold`.
-    'weights': [200., 90., 30.]
+    'weights': [200., 90., 30.],
+    'min_articles': 3,
+    'min_events': 3,
 }
 
 from galaxy import conf as galaxy_conf
