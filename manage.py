@@ -37,9 +37,6 @@ if __name__ == '__main__':
     manager.add_command('train', core.TrainVectorizerCommand())
     manager.add_command('stats', core.GutcheckCommand())
     manager.add_command('preview:events', core.PreviewEventsCommand())
-
-    # TEMP
-    manager.add_command('backcluster', core.BackClusterCommand())
     manager.add_command('load:corpora', core.LoadCorporaCommand())
 
     # Evaluation

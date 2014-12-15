@@ -13,6 +13,7 @@ are temporary fixes.
 
 import os
 import shutil
+from time import time
 
 from flask.ext.script import Command, Option
 
@@ -20,6 +21,7 @@ from argos.datastore import db
 from argos.core.brain import cluster
 from argos.core.models import Article, Event
 from argos.conf import APP
+from argos.util.progress import Progress
 
 class ReclusterCommand(Command):
     """
@@ -40,10 +42,7 @@ class ReclusterCommand(Command):
         # Delete existing events.
         events = Event.query.delete()
 
-        # Reload the hierarchy.
-        cluster.load_hierarchy()
-
-        articles = Article.query.all()
+        articles = Article.query.filter(Article.node_id != None).all()
 
         # Reset node associations.
         print('Resetting article-node associations...')
@@ -52,83 +51,29 @@ class ReclusterCommand(Command):
         db.session.commit()
 
         print('Reconstructing the hierarchy...')
-        cluster.cluster(articles)
+        start_time = time()
+
+        total = Article.query.count()
+
+        p = Progress()
+
+        # Cluster articles in batches of 1000, for memory's sake.
+        batch_size = 100
+        articles, remaining = get_unclustered_articles(batch_size)
+        p.print_progress((total-remaining)/(total - 1))
+        while articles:
+            cluster.cluster(articles)
+            articles, remaining = get_unclustered_articles(batch_size)
+            p.print_progress((total-remaining)/(total - 1))
+
+        elapsed_time = time() - start_time
+        print('Clustered {0} articles in {1}.'.format(len(articles), elapsed_time))
         print('Reconstruction done!')
 
-import json
-from datetime import datetime
-from unittest.mock import patch
-from argos.util.progress import progress_bar
-
-class BackClusterCommand(Command):
-    def run(self):
-        # Patch out saving images to S3.
-        patcher = patch('argos.util.storage.save_from_url', autospec=True, return_value='https://i.imgur.com/Zf9mXlj.jpg')
-        patcher.start()
-
-        path = APP['CLUSTERING']['hierarchy_path']
-        path = os.path.expanduser(path)
-
-        if os.path.exists(path):
-            print('Backing up existing hierarchy...')
-            shutil.move(path, path + '.bk')
-
-        print('Resetting the database...')
-        db.reflect()
-        db.drop_all()
-        db.create_all()
-
-        with open('/Users/ftseng/all_feeds.json', 'r') as f:
-            feeds = json.load(f)
-
-        with open('manage/core/data/sources.json', 'r') as f:
-            valid_feeds = []
-            for source, fs in json.load(f).items():
-                valid_feeds += fs
-
-        feeds = [f['_id']['$oid'] for f in feeds if f['ext_url'] in valid_feeds]
-
-        with open('/Users/ftseng/all_articles_cleaned.json', 'r') as f:
-            all_articles = json.load(f)
-
-        filtered_articles = [a for a in all_articles if a['feed']['$oid'] in feeds]
-
-        print('Using {0} articles...'.format(len(filtered_articles)))
-
-        filtered_articles = filtered_articles[:2000]
-
-        print('Building articles...')
-        articles = []
-        for i, a in enumerate(filtered_articles):
-            article = Article(
-                ext_url=a['ext_url'],
-                source=None,  # tmp
-                feed=None,    # tmp
-                html=None,    # not saved
-                text=a['text'],
-                authors=[], # tmp
-                tags=[],    # not saved
-                title=a['title'],
-                created_at=datetime.fromtimestamp(a['created_at']['$date']/1000),
-                updated_at=datetime.fromtimestamp(a['updated_at']['$date']/1000),
-                image=a['image'],
-                score=0       # don't bother calculating
-            )
-            articles.append(article)
-            db.session.add(article)
-            progress_bar(i/len(filtered_articles) * 100)
-
-        articles.sort(key=lambda x: x.created_at)
-
-        db.session.commit()
-        patcher.stop()
-
-        print(len(articles))
-
-        print('Clustering articles...')
-        cluster.cluster(articles)
-        print('Done!')
-
+def get_unclustered_articles(batch_size):
+    articles = Article.query.filter(Article.node_id == None).order_by(Article.created_at.asc()).limit(batch_size).all()
+    remaining = Article.query.filter(Article.node_id == None).count()
+    return articles, remaining
 
 class PreviewEventsCommand(Command):
     option_list = (

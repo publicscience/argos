@@ -21,10 +21,12 @@ class LoadCorporaCommand(Command):
         Option('-p', '--patch', dest='use_patch', action='store_true', required=False)
     )
     def run(self, dumppath, use_patch):
-        if patch:
-            # Patch out saving images to S3.
+        if use_patch:
+            print('Patching out saving images to S3...')
             patcher = patch('argos.util.storage.save_from_url', autospec=True, return_value='https://i.imgur.com/Zf9mXlj.jpg')
             patcher.start()
+        else:
+            patcher = None
 
         print('Loading sources...')
         sources_map = {}
@@ -87,12 +89,11 @@ class LoadCorporaCommand(Command):
                         image=a['image'],
                         score=evaluator.score(a['ext_url'])
                     )
-                    articles.append(article)
                     db.session.add(article)
                 progress_bar(i/(len(articles) - 1) * 100)
 
-        print('Loaded {0} sources, {1} feeds, and {2} articles.'.format(len(sources, len(feeds), len(articles))))
+        print('Loaded {0} sources, {1} feeds, and {2} articles.'.format(len(sources), len(feeds), len(articles)))
         print('Done!')
 
-        if patcher:
+        if patcher is not None:
             patcher.stop()
