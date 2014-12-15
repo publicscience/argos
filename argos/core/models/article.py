@@ -9,6 +9,7 @@ import pytz
 from sqlalchemy import event
 from slugify import slugify
 
+import re
 from collections import Counter
 from datetime import datetime
 
@@ -16,6 +17,7 @@ epoch = datetime.utcfromtimestamp(0).replace(tzinfo=pytz.UTC)
 
 articles_authors = join_table('articles_authors', 'article', 'author')
 articles_mentions = join_table('articles_mentions', 'article', 'alias')
+
 
 class ArticleConceptAssociation(BaseConceptAssociation):
     __backref__ = 'article_associations'
@@ -33,6 +35,7 @@ class Article(Clusterable):
     html        = db.Column(db.UnicodeText)
     ext_url     = db.Column(db.Unicode)
     image       = db.Column(db.String)
+    ignore      = db.Column(db.Boolean, default=False)
     score       = db.Column(db.Float, default=0.0)
     source_id   = db.Column(db.Integer, db.ForeignKey('source.id'))
     feed_id     = db.Column(db.Integer, db.ForeignKey('feed.id'))
@@ -40,6 +43,12 @@ class Article(Clusterable):
     authors     = db.relationship('Author',
                     secondary=articles_authors,
                     backref=db.backref('articles', lazy='dynamic'))
+
+    # There are some articles which are just noise, and we want to ignore them using regexes for their titles.
+    ignore_patterns = [
+        # NYT country profiles
+        re.compile(r'[A-Z].+\sprofile( - Overview)?')
+    ]
 
     def __str__(self):
         return self.title
@@ -56,6 +65,17 @@ class Article(Clusterable):
 
         if self.score is None:
             self.score = 0.0
+
+        self.check_ignored()
+
+    def check_ignored(self):
+        for pattern in self.ignore_patterns:
+            if pattern.match(self.title):
+                self.ignore = True
+                break
+        else:
+            self.ignore = False
+        return self.ignore
 
     def conceptize(self):
         """

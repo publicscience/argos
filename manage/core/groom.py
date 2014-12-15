@@ -62,7 +62,7 @@ class ReclusterCommand(Command):
         articles, remaining = get_unclustered_articles(batch_size)
         p.print_progress((total-remaining)/(total - 1))
         while articles:
-            cluster.cluster(articles)
+            cluster.cluster(articles, snip=False)
             articles, remaining = get_unclustered_articles(batch_size)
             p.print_progress((total-remaining)/(total - 1))
 

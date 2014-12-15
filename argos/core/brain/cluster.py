@@ -28,9 +28,11 @@ def load_hierarchy():
                       lower_limit_scale=conf['lower_limit_scale'],
                       upper_limit_scale=conf['upper_limit_scale'])
 
-def cluster(new_articles):
+def cluster(new_articles, snip=True):
     """
     Clusters a list of Articles into Events.
+
+    Set `snip=False` if you do not want the events and stories generated.
     """
 
     # Simple locking mechanism, later a better one can be implemented:
@@ -59,7 +61,8 @@ def cluster(new_articles):
         # Save the hierarchy.
         h.save(os.path.expanduser(conf['hierarchy_path']))
 
-        snip_hierarchy(h)
+        if snip:
+            snip_hierarchy(h)
 
     finally:
         # Remove the lock file, we're good to go
