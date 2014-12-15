@@ -14,6 +14,8 @@ class ClusterTest(RequiresDatabase):
         cluster.conf['metric']              = 'euclidean'
         cluster.conf['lower_limit_scale']   = 0.9
         cluster.conf['upper_limit_scale']   = 1.1
+        cluster.conf['event_threshold']     = 42.0
+        cluster.conf['story_threshold']     = 50.0
         cluster.LOCK = '/tmp/argos_test_hierarchy.lock'
 
         if os.path.exists(cluster.LOCK):
@@ -133,7 +135,7 @@ class ClusterTest(RequiresDatabase):
 
     def test_cluster_minimum_articles(self):
         # Create articles and slice such that we expect one cluster of 2 articles and one of 1 article.
-        cluster.conf['min_articles'] = 1
+        cluster.conf['min_articles'] = 2
         articles = self.prepare_articles(type='different') + self.prepare_articles(type='different')
         articles = articles[:3]
 
