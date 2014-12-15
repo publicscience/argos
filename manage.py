@@ -38,6 +38,7 @@ if __name__ == '__main__':
     manager.add_command('stats', core.GutcheckCommand())
     manager.add_command('preview:events', core.PreviewEventsCommand())
     manager.add_command('load:corpora', core.LoadCorporaCommand())
+    manager.add_command('check:gaps', core.CheckTimeGapsCommand())
 
     # Evaluation
     manager.add_command('profile', core.ProfileCommand())
